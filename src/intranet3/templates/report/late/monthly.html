@@ -1,0 +1,63 @@
+{% extends "templates/_base.html" %}
+
+{% block tail_script %}
+    <script>
+        $(function(){
+            $('#datepicker').datepicker({
+                onChangeMonthYear: function(year, month, inst) {
+                    window.location = '{{ request.url_for("/report/late/monthly", user_id=user.id) }}&month=' + month + '.' + year;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans user_name=user.name, date='%s' % month_start.strftime('%m.%Y') %}Late report for {{ user_name }} {{ date }}{% endtrans %}</li>
+        </ul>
+    </div>
+    <ul class="pager">
+        <li><a href="{{ request.url_for('/report/late/monthly', month=prev_month.strftime('%m.%Y'), user_id=user.id) }}">Previous month</a></li>
+        <li><input type="hidden" id="datepicker" value="{{ month_start.strftime('%m/%d/%Y') }}"/></li>
+        <li><a href="{{ request.url_for('/report/late/monthly', month=next_month.strftime('%m.%Y'), user_id=user.id) }}">Next month</a></li>
+    </ul>
+    <table id="time_report" class="table table-bordered table-hover monthly_time_report">
+        <thead>
+            <tr>
+                <th class="date">{% trans %}Date{% endtrans %}</th>
+                <th class="from">{% trans %}From{% endtrans %}</th>
+                <th class="to">{% trans %}To{% endtrans %}</th>
+                <th class="late">{% trans %}Late{% endtrans %}</th>
+                <th class="desc">{% trans %}Description{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in range(1,month_end.day+1) %}
+                <tr class="{{ loop.cycle('odd', 'even') }} {% if is_holiday(datetime.date(month_start.year, month_start.month, day)) %}holiday_date {% endif %}">
+                    <td>{{ datetime.date(month_start.year, month_start.month, day).strftime('%Y-%m-%d') }}</td>
+                    {% if day in data %}
+                        <td>{{ data[day][0] }}</td>
+                        <td>{{ data[day][1] }}</td>
+                        {% if data[day][2][0] != deltazero %}
+                            <td class="{% if data[day][2][1] == '-' %}late{% endif %}">{{ data[day][2][0] | timedelta_to_minutes}}</td>
+                            <td>{{ data[day][2][1] }}</td>
+                        {% else %}
+                            <td>-</td>
+                            <td>-</td>
+                        {% endif %}
+                    {% else %}
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <ul class="agenda">
+        <li class="late">{% trans %}Spóźnienie (min){% endtrans %}</li>
+    </ul>
+{% endblock %}

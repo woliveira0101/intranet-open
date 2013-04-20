@@ -1,0 +1,72 @@
+{% extends "templates/_base.html" %}
+
+{% block tail_script %}
+    <script>
+        $(function(){
+            $('#datepicker').datepicker({
+                onChangeMonthYear: function(year, month, inst) {
+                    window.location = '{{ request.url_for("/report/wrongtime/annually") }}?year='+year;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans date='%s' % year_start.strftime('%Y') %}Wrong time record for {{ date }}{% endtrans %}</li>
+        </ul>
+    </div>
+    <ul class="pager">
+        <li><a href="{{ request.url_for('/report/wrongtime/annually', year=year_start.year -1 )}}">{% trans %}Previous year{% endtrans %}</a></li>
+        <li><a href="{{ request.url_for('/report/wrongtime/annually', year=year_start.year +1) }}">{% trans %}Next year{% endtrans %}</a></li>
+    </ul>
+    <table id="time_report" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th class="index"></th>
+                <th class="username">{% trans %}User{% endtrans %}</th>
+                <th class="border_right">{% trans %}Sum{% endtrans %}</th>
+                {% for month in range(0,12) %}
+                    <th>{{ month+1 }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr class="{{ loop.cycle('odd', 'even') }}{% if user == request.user %} current_user{% endif%}{% if user.freelancer %} freelancer{% endif %}">
+                <td class="index">{{ loop.index }}</td>
+                <td class="username">
+                    <a href="{{ request.url_for('/user/view', user_id=user.id) }}">
+                        {{ user.name }}
+                        {% if user.freelancer %}
+                        ({% if user.is_programmer %}P{% endif %}{% if user.is_frontend_developer %}F{% endif %}{% if user.is_graphic_designer %}G{% endif %})
+                        {% endif %}
+                    </a>
+                </td>
+                {% set user_entry = entries.get(user.id) %}
+                {% set user_stats = stats.get(user.id) %}
+                {% if not user_entry %}
+                    {% set user_entry = [0]*12 %}
+                    {% set user_stats = [0] %}
+                {% endif %}
+
+                <td class="border_right {% if user_stats[0] > limit*12 %}late {% endif %}">
+                {% if user_stats[0] %}{{ user_stats[0] }}{% else %}-{% endif %}
+                </td>
+                {% for entry in user_entry %}
+                <td class="{% if entry > limit %}late {% endif %}">
+                    <a href="{{ request.url_for('/report/wrongtime/monthly', month='%s.%s' % (loop.index, year_start.year), user_id=user.id) }}">
+                    {% if entry %}{{ entry }}{% else %}-{% endif %}
+                    </a>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <ul class="agenda">
+        <li class="late">{% trans limit=limit %}Limit ({{ limit }} razy){% endtrans %}</li>
+    </ul>
+{% endblock %}

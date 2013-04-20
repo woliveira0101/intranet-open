@@ -1,0 +1,68 @@
+{% extends "templates/_base.html" %}
+
+{% block tail_script %}
+    <script>
+        $(function(){
+            $('#datepicker').datepicker({
+                onSelect: function(dateText, inst) {
+                    window.location = '/presence/list?date='+ inst.selectedDay +'.'+ (inst.selectedMonth + 1) +'.'+ inst.selectedYear;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans date='%s' % date.strftime('%d.%m.%Y') %}Presence for {{ date }}{% endtrans %}</li>
+            {% if 'full' in request.path %}
+                <li><a href="{{ request.url_for('/presence/list', date=date.strftime('%d.%m.%Y')) }}">{% trans %}Normal{% endtrans %}</a></li>
+                <li class="active"><a>{% trans %}Full list{% endtrans %}</a></li>
+            {% else %}
+                <li class="active"><a>{% trans %}Normal{% endtrans %}</a></li>
+                <li><a href="{{ request.url_for('/presence/full', date=date.strftime('%d.%m.%Y')) }}">{% trans %}Full list{% endtrans %}</a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <ul class="pager">
+        <li><a href="{{ request.url_for('/presence/list', date=prev_date.strftime('%d.%m.%Y')) }}">{% trans %}Previous day{% endtrans %}</a></li>
+        <li><input type="hidden" id="datepicker" value="{{ date.strftime('%m/%d/%Y') }}"/></li>
+        <li><a href="{{ request.url_for('/presence/list', date=next_date.strftime('%d.%m.%Y')) }}">{% trans %}Next day{% endtrans %}</a></li>
+    </ul>
+    
+    <table class="table table-bordered" id="presence">
+        <thead>
+            <tr>
+                <th>{% trans %}User{% endtrans %}</th>
+                <th>{% trans %}From{% endtrans %}</th>
+                <th>{% trans %}To{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user_id, name, min, max, late in entries %}
+            <tr class="{% if user_id == request.user.id %}current_user {% endif %}{% if late %}{% if excuses[user_id].get(date.strftime('%Y-%m-%d'))%}late-light{% else %}late{% endif %}{% endif %}">
+                <td class="{% if user_id != request.user.id %}x-user-tooltip-{{ user_id }}{% endif %}">
+                    <span class="name">{{ name }}</span>
+                    {% if user_id == request.user.id %}
+                        <div class="justification-info">
+                            {% if justification == None and late %}
+                                <a class="button a_popup btn btn-small btn_justifaction btn-warning" href="{{ request.url_for('/employees/form/late_justification') }}?popup_date={{ date.strftime('%d/%m/%Y') }}">{% trans %}Explain this{% endtrans %}</a>
+                            {% elif justification == 0 %}
+                                <span class="label">{% trans %}Waits for verification{% endtrans %}</span>
+                            {% elif justification == 1 %}
+                                <span class="label label-success">{% trans %}Explained{% endtrans %}</span>
+                            {% elif justification == -1 %}
+                                <span class="label label-important">{% trans %}Not explained{% endtrans %}</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </td>
+                <td>{{ min.strftime('%H:%M:%S') }}</td>
+                <td>{{ max.strftime('%H:%M:%S') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

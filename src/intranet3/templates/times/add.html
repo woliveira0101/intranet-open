@@ -1,0 +1,8 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <h2 class="content-header">{% trans date=date.strftime('%d.%m.%Y') %}Add time entry for {{ date }}{% endtrans %}</h2>
+    {% with form_field=form_field %}
+    {% include "templates/times/_addform.html" %}
+    {% endwith %}
+{% endblock %}

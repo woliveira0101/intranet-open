@@ -1,0 +1,15 @@
+<div class="row-fluid list_projects">
+<ul class="span3">
+    {% for client, project in projects %}
+        {% if loop.index0 != 0 and loop.index0 % 35 == 0 %}
+	</ul>
+        <ul class="span3">
+        {% endif %}
+        <li>
+            <a href="{{ request.url_for('/bugs/everyones_project', project_id=project.id, resolved=resolved) }} ">{{client.name }} / {{ project.name }}</a>
+        </li>
+	{% if loop.last == true %}
+	</ul>
+	{% endif %}
+    {% endfor %}
+</div>

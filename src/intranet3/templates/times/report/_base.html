@@ -1,0 +1,26 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+<div class="tabs">
+    <ul class="nav nav-tabs">
+        <li class="title">{{ title }}</li>
+        {% if current_page == 'pivot' %}
+            <li class="active"><a>{% trans %}Pivot{% endtrans %}</a></li>
+        {% else %}
+            <li><a href="{{ request.url_for('/times/report/current_pivot') }}">{% trans %}Pivot{% endtrans %}</a></li>
+        {% endif %}
+
+        {% if request.has_perm('admin') %}
+            {% if current_page == 'monthly' %}
+            <li class="active"><a>{% trans %}Monthly{% endtrans %}</a></li>
+            {% else %}
+            <li><a href="{{ request.url_for('/times/report/monthly') }}">{% trans %}Monthly{% endtrans %}</a></li>
+            {% endif %}
+        {% endif %}
+    </ul>
+</div>
+<div class="appjust">
+    {% block body %}
+    {% endblock body %}
+</div>
+{% endblock content %}

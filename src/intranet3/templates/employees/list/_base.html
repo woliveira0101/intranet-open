@@ -1,0 +1,101 @@
+{% extends "templates/_base.html" %}
+
+{% macro select(boolean) -%}
+{% if request.has_perm('admin') %}
+<select>
+    {% if boolean == None %}
+    <option selected value="-1"></option>
+    {% endif %}
+    <option {% if boolean == True %}selected{% endif %} value="1">{% trans %}Tak{% endtrans %}</option>
+    <option {% if boolean == False %}selected{% endif %} value="0">{% trans %}Nie{% endtrans %}</option>
+</select>
+{% else %}
+    {% if boolean == None %}
+    {% elif boolean == True %}
+        {% trans %}Tak{% endtrans %}
+    {% elif boolean == False %}
+        {% trans %}Nie{% endtrans %}
+    {% endif %}
+{% endif %}
+{%- endmacro %}
+
+{% macro review(text) -%}
+<div class="review">
+{% if request.has_perm('admin') %}
+<input class="text" type="text" value="{{ text }}">
+<input class="button btn btn-primary" type="button" value="{% trans %}Save{% endtrans %}">
+{% else %}
+    {{ text }}
+{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro filters_form(form, action=None) -%}
+<div class="filters form_late">
+    <form method="GET" {% if action %} action="{{ action }}"{% endif %}>
+        {{ form_field(form.user_id, _('Pracownik'), class='datepicker') }}
+        {{ form_field(form.date_start, _('format dd-mm-yyyy'), class='datepicker-GET') }}
+        {{ form_field(form.date_end, _('format dd-mm-yyyy'), class='datepicker-GET') }}
+        {{ form_field(form.limit, _('Limit')) }}
+        <div class="buttons">
+            <input type="submit" value="{% trans %}Filter{% endtrans %}" class="button btn btn-primary" />
+        </div>
+    </form>
+</div>
+{%- endmacro %}
+
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="{% if current_page == 'late' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/late') }}">{% trans %}Spóźnienia{% endtrans %}</a></li>
+            <li class="{% if current_page == 'wrongtime' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/wrong_time') }}">{% trans %}Notowania czasu{% endtrans %}</a></li>
+            <li class="{% if current_page == 'absence' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/absence') }}">{% trans %}Nieobecności{% endtrans %}</a></li>
+        </ul>
+    </div>
+    <div class="appjust">
+    {% block body %}
+    {% endblock body %}
+    </div>
+{% endblock content %}
+
+{% block tail_script %}
+    <script>
+        $('select').change(function(){
+            var $this = $(this);
+            var row = $this.parent().parent();
+            var id = row.attr('data-id');
+            var name = row.attr('data-name');
+            var val = $this.val();
+            if (val == '-1'){ return }
+            $.post('{{ request.url_for("/employees/list/justify") }}', { name: name, id: id, val: val }, function(data){
+                var $option = $this.find('option[value="-1"]');
+                $option.remove();
+            });
+        });
+        $('input[type="button"]').click(function(){
+            var $this = $(this);
+            var $tr = $this.closest('tr');
+            var $input = $this.siblings('input')
+            var id = $tr.attr('data-id');
+            var name = $tr.attr('data-name');
+            var val = $input.val();
+            $.post('{{ request.url_for("/employees/list/review") }}', { name: name, id: id, val: val }, function(data){
+            });
+        })
+        $('a.delete').click(function(){
+            var $this = $(this);
+            var $tr = $this.closest('tr');
+            var id = $tr.attr('data-id');
+            var name = $tr.attr('data-name');
+            if(confirm('Na pewno ?')){
+                $.post('{{ request.url_for("/employees/list/delete") }}', { name: name, id: id }, function(data){
+                    $tr.remove();
+                });
+            }
+        })
+    </script>
+    {% block sub_tailscript %}
+    {% endblock sub_tailscript %}
+{% endblock tail_script %}
+

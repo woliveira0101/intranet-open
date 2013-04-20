@@ -1,0 +1,37 @@
+{% extends "templates/scrum/sprint/_base_sprint.html" %}
+
+{% set page = 'bugs' %}
+
+{% block body %}
+        <table class="table table-bordered table-hover table_sprint sort-sprint-table">
+            <thead>
+            <tr>
+                <th>{% trans %}ID{% endtrans %}</th>
+                <th>{% trans %}Project{% endtrans %}</th>
+                <th>{% trans %}Component{% endtrans %}</th>
+                <th>{% trans %}Priority{% endtrans %}</th>
+                <th>{% trans %}Title{% endtrans %}</th>
+                <th>{% trans %}Assignee{% endtrans %}</th>
+                <th>{% trans %}Points{% endtrans %}</th>
+                <th>{% trans %}Hours{% endtrans %}</th>
+                <th>{% trans %}Status{% endtrans %}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for bug in bugs %}
+            <tr class="{{ loop.cycle('odd', 'even') }} {{ bug.status | lower }} {% if bug.is_unassigned() %} unassigned{% endif %}">
+                <td><a href="{{bug.get_url()}}" class="external">{{ bug.id }}</a></td>
+                <td>{{ bug.project_name }}</td>
+                <td>{{ bug.component_name }}</td>
+                <td data-sort="{{bug.priority_number}}"><span class="priority priority_{{ bug.priority_number }}">{{ bug.priority }}</span></td>
+                <td>{{ bug.desc }}</td>
+                <td>{{ bug.owner.name }}</td>
+                <td>{{ bug.whiteboard['p'] }}</td>
+                <td>{{ '%.2f' % bug.time }}</td>
+                <td>{{ bug.status }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+{% endblock %}
+

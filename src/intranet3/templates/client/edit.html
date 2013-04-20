@@ -1,0 +1,46 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans %}Edit client{% endtrans %}</li>
+        </ul>
+    </div>
+    <form class="box box_edit_client" action="{{ request.url_for('/client/edit', client_id=client_id) }}" method="post" accept-charset="utf-8">
+        {{ csrf_field }}
+        {{ form_field(form.name, _('Client friendly name')) }}
+        {{ form_field(form.coordinator_id, '') }}
+        {{ form_field(form.selector, '') }}
+        {{ form_field(form.emails, _('Clients emails, newline separated'), rows=6, cols=50, style="height: 100px;") }}
+        {{ form_field(form.color, _('Color'), class='colorpicker') }}
+        {{ form_field(form.google_card, _('Link to project card in google docs')) }}
+        {{ form_field(form.google_wiki, _('Link to project wiki in google sites')) }}
+        
+        {{ form_field(form.mailing_url, _('Link to mailing list')) }}
+        {{ form_field(form.wiki_url, _('Link to client wiki')) }}
+        {{ form_field(form.street, _('Street')) }}
+        {{ form_field(form.city, _('City')) }}
+        {{ form_field(form.postcode, _('Post Code')) }}
+        {{ form_field(form.nip, _('NIP')) }}
+        {{ form_field(form.note, _('Some extra information'),rows=6, cols=50, style="height: 100px;") }}
+
+        <div class="buttons">
+            <input class="btn btn-primary" type="submit" value="Save"/>
+        </div>
+    </form>
+    
+{% endblock %}
+
+{% block style_block %}
+    <link rel="stylesheet" type="text/css" href="{{ request.static_path('intranet3:static/css/spectrum.css') }}">
+{% endblock %}
+
+{% block tail_script  %}
+    <script src="{{ request.static_path('intranet3:static/js/vendor/spectrum.js') }}"></script>
+    <script type="text/javascript">
+    $(".colorpicker").spectrum({
+        showInput: true,
+        preferredFormat: "hex",
+    });
+    </script>
+{% endblock tail_script %}

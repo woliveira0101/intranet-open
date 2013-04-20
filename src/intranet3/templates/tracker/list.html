@@ -1,0 +1,52 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+<div>
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans %}Tracker list{% endtrans %}</li>
+            {% if request.has_perm('admin') %}
+            <li>
+                <a href="{{ request.url_for('/tracker/add') }}">{% trans %}Add tracker{% endtrans %}</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <th>{% trans %}Tracker Name{% endtrans %}</th>
+            <th>{% trans %}Credentials Actions{% endtrans %}</th>
+            {% if request.has_perm('admin') %}
+            <th>{% trans %}Tracker Actions{% endtrans %}</th>
+            {% endif %}
+        </thead>
+        <tbody>
+            {% for tracker in trackers %}
+            <tr>
+                <td>
+                    <a href="{{ request.url_for('/tracker/view', tracker_id=tracker['tracker'].id) }}">{{ tracker['tracker'].name }}</a>
+                </td>
+                <td>
+                    <a href="{{ request.url_for('/tracker/login', tracker_id=tracker['tracker'].id) }}" class="button btn {% if tracker['has_creds'] %}btn-success{% else %}btn-primary{% endif %}">
+                        {% if tracker['has_creds'] %}
+                            {% trans %}Edit credentials{% endtrans %}
+                        {% else %}
+                            {% trans %}Add credentials{% endtrans %}
+                        {% endif %}
+                    </a>
+                    {% if tracker['has_creds'] %}
+                        <a href="{{ request.url_for('/tracker/delete_login', tracker_id=tracker['tracker'].id) }}" class="button btn btn-danger">{% trans %}Delete credentials{% endtrans %}</a>
+                    {% endif %}
+                </td>
+                {% if request.has_perm('admin') %}
+                <td>
+                    <a href="{{ request.url_for('/tracker/edit', tracker_id=tracker['tracker'].id) }}" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
+                    <a href="{{ request.url_for('/tracker/delete', tracker_id=tracker['tracker'].id) }}" class="button btn btn-danger">{% trans %}Delete{% endtrans %}</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

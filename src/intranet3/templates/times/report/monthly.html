@@ -1,0 +1,90 @@
+{% extends "templates/times/report/_base.html" %}
+
+{% set current_page = 'monthly' %}
+{% set title = 'Worked hours' %}
+
+{% block body %}
+    <div class="row-fluid">
+        <div class="time_report span4 box">
+            <form method="post" accept-charset="utf-8">
+            {{ csrf_field }}
+            {{ form_field(form.date_range, _('Choose period')) }}
+            {{ form_field(form.start_date, _('From date (format dd/mm/yyyy)'), class='datepicker') }}
+            {{ form_field(form.end_date, _('To date (format dd/mm/yyyy)'), class='datepicker') }}
+            <div class="selectors">
+                {{ form_field(form.user_id, 'Pracownicy') }}
+            </div>
+            {% if type == 'normal' %}
+            {{ form_field(form.group_by_month, _('Group by month')) }}
+            {% else %}
+            {{ form_field(form.only_red, _('Only negative')) }}
+            {% endif %}
+            {{ form_field(form.only_fully_employed, _('Show only full time employed')) }}
+            <div class="buttons">
+                <input type="submit" value="{% trans %}Filter{% endtrans %}" class="button btn btn-primary" />
+            </div>
+            </form>
+        </div>    
+        <div class="span8">
+            <table id="time_report" class="table table-bordered table-hover hours_worked_report" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th class="date">{% trans %}Date{% endtrans %}</th>
+                        <th class="desc">{% trans %}User{% endtrans %}</th>
+                        <th class="desc">{% trans %}Worked{% endtrans %}</th>
+                        <th class="desc">{% trans %}Expected{% endtrans %}</th>
+                        <th class="desc">{% trans %}Diff{% endtrans %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                        <tr class="{{ loop.cycle('odd', 'even') }}">
+                            <td>{{ row[5] }}</td>
+                            <td>{{ row[4] }}</td>
+                            <td>
+                                {% if not group_by_month %}
+                                    <a href="{{ request.url_for('/times/list_user', date=row[5].strftime('%d.%m.%Y'), user_id=row[2]) }}">
+                                    {{ row[0] }}
+                                    </a>
+                                {% else %}
+                                    {{ row[0] }}
+                                {% endif %}
+                            </td>
+                            <td>
+                            {% if group_by_month %}
+                                {{ row[-1] }}
+                            {% else %}
+                                8
+                            {% endif %}
+                            </td>
+                            <td>{{ row[1] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block tail_script %}
+<script>
+    (function($) {
+        //$("#results-tabs").organicTabs();
+        function changeDateRange(value) {
+            if (value != 0) {
+                $('#start_date').parent().parent().hide();
+                $('#end_date').parent().parent().hide();
+            } else {
+                $('#start_date').parent().parent().show();
+                $('#end_date').parent().parent().show();
+            }
+        }
+
+        $('#date_range').change(function() {
+            changeDateRange($(this).val());
+        });
+        changeDateRange($('#date_range').val());
+        //});
+    })(jQuery);
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+<table class="table table-bordered table-hover sprint-table">
+    <thead>
+    <th>{% trans %}Sprint name{% endtrans %}</th>
+    <th>{% trans %}Start{% endtrans %}</th>
+    <th>{% trans %}End{% endtrans %}</th>
+    <th>{% trans %}Worked hours{% endtrans %}</th>
+    <th>{% trans %}Points ( achieved / commited ){% endtrans %}</th>
+    <th>{% trans %}Velocity per hour{% endtrans %}</th>
+    {% if request.has_perm('coordinator') %}
+        <th>
+            {% trans %}Sprint Actions{% endtrans %}
+        </th>
+    {% endif %}
+    </thead>
+    <tbody>
+    {% if sprints and project %}
+    <tr class="stats">
+        <td>AVERAGE</td>
+        <td></td>
+        <td></td>
+        <td>{{ '%.0f' % stats['worked_hours'] }}</td>
+        <td>{{ '%.0f' % stats['achieved'] }} / {{ '%.0f' % stats['commited'] }}</td>
+        <td>{{ '%.2f' % stats['velocity'] }}</td>
+        <td></td>
+    </tr>
+    {% endif %}
+    {% for sprint in sprints %}
+        <tr>
+            <td><a href="{{ request.url_for('/scrum/sprint/show', sprint_id=sprint.id) }}">{{ sprint.name }}</a></td>
+            <td>{{ sprint.start }}</td>
+            <td>{{ sprint.end }}</td>
+            <td>{{ sprint.worked_hours | round | int }}</td>
+            <td>{{ sprint.achieved_points }} / {{ sprint.commited_points }}</td>
+            <td>{{ '%.2f' % sprint.velocity }}</td>
+            {% if request.has_perm('coordinator') %}
+                <td>
+                    <a href="{{ request.url_for('/scrum/sprint/edit', sprint_id=sprint.id) }}" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
+                    <a href="{{ request.url_for('/scrum/sprint/delete', sprint_id=sprint.id) }}" class="button btn btn-danger">{% trans %}Delete{% endtrans %}</a>
+                </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

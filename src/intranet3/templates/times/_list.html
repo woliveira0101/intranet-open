@@ -1,0 +1,92 @@
+
+{% if entries.count() %}
+<script type="text/javascript">
+    (function($){
+        /* DOM ready */
+        $(function(){
+            $("table.sort-time-entries-table").tablesorter();
+        });
+    })(jQuery);
+</script>
+{% endif %}
+
+<table id="time_entries" class="sort-time-entries-table table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>{% trans %}Project{% endtrans %}</th>
+            <th>{% trans %}Time{% endtrans %}</th>
+            <th>{% trans %}Ticket{% endtrans %}</th>
+            <th>{% trans %}Description{% endtrans %}</th>
+            <th>{% trans %}Added{% endtrans %}</th>
+            <th>{% trans %}Modified{% endtrans %}</th>
+            {% if can_modify %}
+            <th>SK</th>
+            <th>{% trans %}Actions{% endtrans %}</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td class="sum">{% trans %}Sum{% endtrans %}</td>
+            <td class="sum-count" colspan="7">{{ total_sum|format_time }}</td>
+        </tr>
+    </tfoot>
+    {% if entries.count() %}
+    <tbody>
+        {% for tracker, entry in entries %}
+        <tr{% if entry.deleted %} class="deleted"{% endif %}>
+            <td>{{ entry.project.client.name }} / {{ entry.project.name }}</td>
+            <td class="time">
+                {% if entry.user_id == request.user.id and not entry.deleted %}
+                    <a href="{{ request.url_for('/times/edit', timeentry_id=entry.id) }}">{{ entry.time|format_time }}</a>
+                {% else %}
+                    {{ entry.time|format_time }}
+                {% endif %}
+            </td>
+            <td>
+                {% if entry.ticket_id %}
+                    <a href="{{ tracker.get_bug_url(entry.ticket_id) }}" class="external">
+                        #{{ entry.ticket_id }}
+                    </a>
+                {% endif %}
+            </td>
+            <td>
+                {% if entry.ticket_id %}
+                <a href="{{ tracker.get_bug_url(entry.ticket_id) }}" class="fancybox">
+                    {{ entry.description }}
+                </a>
+                {% else %}
+                    {{ entry.description }}
+                {% endif %}
+            </td>
+            <td>{{ entry.added_ts.strftime('%d.%m.%Y %H:%M') }}</td>
+            <td>{{ entry.modified_ts.strftime('%d.%m.%Y %H:%M') }}</td>
+            {% if can_modify and not entry.deleted %}
+            <td class="superkurazu">
+                    {% if entry.frozen %}
+                        <form action="{{ request.url_for('/times/thaw_time_entry', timeentry_id=entry.id) }}" method="POST">
+                            {{ csrf_field }}
+                            <input type="image" src="/static/img/super_kura.png" class="superkurazu off" value="on" title="Nie chroń tego wpisu przed SuperKurazu™">
+                        </form>
+                    {% else %}
+                        <form action="{{ request.url_for('/times/freeze_time_entry', timeentry_id=entry.id) }}" method="POST">
+                            {{ csrf_field }}
+                            <input type="image" src="/static/img/super_kura.png" class="superkurazu" value="off" title="Chroń ten wpis przed SuperKurazu™">
+                        </form>
+                    {% endif %}
+            </td>
+            <td class="box_times_buttons">
+                    <a href="{{ request.url_for('/times/edit', timeentry_id=entry.id, next=request.here) }}" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
+                    <a href="{{ request.url_for('/times/delete', timeentry_id=entry.id, next=request.here) }}" class="button btn btn-danger">{% trans %}Delete{% endtrans %}</a>
+                    {% if not entry.timer_ts %}
+                        <a href="#" id="start-timer" class="btn button start" title="{{ entry.id }}">{% trans %}Start Timer{% endtrans %}</a>
+                    {% else %}
+                        <a href="#" id="start-timer" class="btn button stop btn-primary" title="{{ entry.id }}" date="{{ entry.timer_ts|parse_datetime_to_miliseconds }}">{% trans %}Stop Timer{% endtrans %}</a>
+                    {% endif %}
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+    {% endif %}
+</table>

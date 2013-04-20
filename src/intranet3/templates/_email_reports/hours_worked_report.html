@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Przepracowane godziny</title>
+</head>
+<body>
+<h1 style="font-size: 1.6em;font-weight: bold;border-bottom: 1px solid #CCC;color: #444;padding: 0 0 5px;margin: 15px 0 10px;">
+    Przepracowane godziny
+</h1>
+    <table id="time_report" class="hours_worked_report" style="width: 100%">
+        <thead>
+            <tr style="border-bottom: 1px solid #EEE;">
+                <th style="background-color: #C4C5C6 !important;">Date</th>
+                <th style="background-color: #C4C5C6 !important;">User</th>
+                <th style="background-color: #C4C5C6 !important;">Przepracowane</th>
+                <th style="background-color: #C4C5C6 !important;">Oczekiwane</th>
+                <th style="background-color: #C4C5C6 !important;">Różnica</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+                <tr style="{{ loop.cycle('background: #FFF;', 'background: #F6F6F6;') }}border-bottom: 1px solid #EEE;">
+                    <td>{{ row[5] }}</td>
+                    <td>{{ row[4] }}</td>
+                    <td>
+                        {{ row[0] }}
+                    </td>
+                    <td>
+                    {% if group_by_month %}
+                        {{ row[-1] }}
+                    {% else %}
+                        8
+                    {% endif %}
+                    </td>
+                    <td>{{ row[1] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>    

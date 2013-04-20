@@ -1,0 +1,131 @@
+{% macro form_field(field, description) -%}
+<div>
+    <dl>
+        <dt>{{ field.label }}</dt>
+        <dd>
+            {% if field.errors %}
+            <ul class="errors">
+                {% for error in field.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <div class="description">{{ description }}</div>
+            {{ field(**kwargs)|safe }}
+        </dd>
+    </dl>
+</div>
+{%- endmacro %}
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>{% block title %}Intranet{% endblock %}</title>
+    <link rel="shortcut icon" href="{{ request.static_path('intranet3:static/img/favicon.ico') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ request.static_path('intranet3:static/css/jquery.fancybox-1.3.4.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ request.static_path('intranet3:static/css/style.css', v=11) }}" />
+    <link rel="stylesheet" type="text/css" href="{{ request.static_path('intranet3:static/css/ui-lightness/jquery-ui-1.8.13.custom.css', v=1) }}" />
+    <link rel="stylesheet" type="text/css" href="{{ request.static_path('intranet3:static/css/cssreset-context-min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ request.static_path('intranet3:static/css/responsive.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ request.static_path('intranet3:static/css/daterangepicker.css') }}" />
+    {% block style_block %}<!-- Page-level CSS block -->{% endblock %}
+
+    <script src="{{ request.static_path('intranet3:static/js/vendor/jquery-1.8.3.min.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/vendor/bootstrap.min.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/vendor/jquery.cookie.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/vendor/jquery.tablesorter.min.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/vendor/jquery.fancybox-1.3.4.pack.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/vendor/jquery-ui-1.8.13.custom.min.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/vendor/date.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/vendor/daterangepicker.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/vendor/modernizr-1.7.min.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/vendor/underscore-min.js') }}"></script>
+
+    <script src="{{ request.static_path('intranet3:static/js/main.js') }}"></script>
+
+    {% block head_script %}<!-- Defer-incapable JavaScript block -->{% endblock %}
+  </head>
+  <!--[if lt IE 7 ]><body class="ie6"><![endif]-->
+    <!--[if IE 7 ]><body class="ie7"><![endif]-->
+      <!--[if IE 8 ]><body class="ie8"><![endif]-->
+        <!--[if IE 9 ]><body class="ie9"><![endif]-->
+          <!--[if (gt IE 9)|!(IE)]><!--><!--<![endif]-->
+          <body id="">
+            <div class="navbar navbar-inverse navbar-fixed-top" id="bar_head">
+              <div class="navbar-inner">
+                <div class="container-fluid">
+                  {% block header %}
+                  <ul class="nav-collapse collapse">
+                    <li>
+                    <a class="brand" href="{{ request.url_for('/') }}">Intranet</a>
+                    </li>
+                    {% if request.has_perm('view') %}
+                    <li class="fast-access">
+                    <ul class="nav">
+                      <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">{% trans %}Quick links{% endtrans %}<b class="caret"></b></a>
+                      <ul class="dropdown-menu">
+                        <li><a class="a_popup" href="{{ request.url_for('/employees/form/late_justification') }}">{% trans %}Excuse lateness{% endtrans %}</a></li>
+                        <li><a class="a_popup" href="{{ request.url_for('/employees/form/late_application') }}">{% trans %}Lateness request{% endtrans %}</a></li>
+                        <li><a class="a_popup" href="{{ request.url_for('/employees/form/wrong_time_justification') }}">{% trans %}Excuse wrong time entry{% endtrans %}</a></li>
+                        <li><a class="a_popup" href="{{ request.url_for('/employees/form/absence_application') }}">{% trans %}Submit absence/holiday{% endtrans %}</a></li>
+                      </ul>
+                      </li>
+                    </ul>
+                    </li>
+                    {% endif %}
+                  {% if request.user %}
+                      <li class="user-area">
+                      {% trans %}Logged in as{% endtrans %}
+                      {% if request.is_user_in_group('freelancer') %}
+                          <em>Freelancer</em> <a id="username" href="{{ request.url_for('/user/edit') }}">{{ request.user.name }}</a>
+                      {% elif request.is_user_in_group('client') %}
+                          <em>Client</em> <a id="username">{{ request.user.name }}</a>
+                      {% else %}
+                          <a id="username" href="{{ request.url_for('/user/edit') }}">{{ request.user.name }}</a>
+                      {% endif %}
+                      {% if presence_tracking.arrival %}
+                          {% trans time1='%s' % presence_tracking.arrival.strftime('%H:%M:%S'),
+                                   time2='%.2f' % presence_tracking.present,
+                                   time3='%.2f' % presence_tracking.noted,
+                                   time4='%.2f' % presence_tracking.remaining
+                                  %}
+                              today from <em>{{ time1 }}</em>
+                              till now <em>{{ time2 }}</em> h
+                              time added <em>{{ time3 }}</em> h
+                              time to add <em>{{ time4 }}</em> h
+                          {% endtrans %}
+                      {% endif %}
+                      <a href="{{ request.url_for('/auth/logout') }}">({% trans %}logout{% endtrans %})</a>
+                      </li>
+                  {% endif %}
+                </ul>
+                  {% endblock %}
+                </div>
+              </div>
+            </div>
+            <div id="content">
+                <div class="container-fluid">
+                    {% block container %}
+                    <div class="row-fluid">
+                        <div class="span12" id="one_column">
+                            {% block content %}<!-- main content area -->{% endblock %}
+                        </div>
+                    </div>
+                    {% endblock container %}
+                </div>
+            </div>
+
+            {% if footer %}
+            <footer>
+            <div id="ft">
+              {% block footer %}<!-- footer -->{% endblock %}
+            </div>
+            </footer>
+            {% endif %}
+
+            {% block tail_script %}<!-- Defer-capable JavaScript block -->{% endblock %}
+          </body>
+        </html>

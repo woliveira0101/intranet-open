@@ -1,0 +1,234 @@
+{% extends "templates/times/client/_base.html" %}
+{% block tail_script %}
+    <script>
+        (function($) {
+            $(function(){
+                $('#yearoption-{{year_start.year}}').attr("selected", "selected");
+                $('#yearselect').change(function (){
+                    var year = $(this).val();
+                    window.location = '{{ request.url_for("/times/client/pivot")}}?year='+year;
+                    console.log(year);
+                });
+
+            });
+        })(jQuery);
+    </script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load('visualization', '1.0', {'packages':['corechart']});
+        google.setOnLoadCallback(drawChart);
+
+
+        function drawChart() {
+                var barChart = new google.visualization.BarChart(document.getElementById('bar_chart_div'));
+                var pieChart = new google.visualization.PieChart(document.getElementById('pie_chart_div'));
+                var barData = undefined;
+                var pieData = undefined;
+                var yearData = undefined;
+                var preventHover = false;
+                var barOptions = {
+                    legend: {position: 'none'},
+                    chartArea: {left: 0, width: '100%', height: {{ (pivot | length)*26 }}, top: 0},
+                    animation: { duration: 200 },
+                    bar: { groupWidth: '100%' },
+                    hAxis: {
+                        maxValue: 3000,
+                        viewWindow: { max:3200 },
+                        gridlines: { count: 8},
+                        format: '####',
+                    }
+                };
+                var pieOptions = {
+                };
+
+                function draw(){
+                    barChart.draw(barData, barOptions);
+                    pieChart.draw(pieData, pieOptions);
+                }
+                function getData(name, param){
+                    var clients = [];
+                    var times = [];
+                    var timeMax = 0;
+
+                    $('.client_row').each(function(index){
+                        var client = $(this).children().eq(0).text();
+                        var time = 0;
+                        var $this = $(this);
+                        if (name === 'year'){
+                            time = $this.children().eq(1).attr('data-value');
+                        } else if (name === 'month'){
+                            time = $this.children().eq(5+param).attr('data-value');
+                        } else if (name === 'quarter'){
+                            time = $this.children().eq(1+param).attr('data-value');
+                        }
+                        time = parseInt(time);
+                        if(time > timeMax){
+                            timeMax = time
+                        }
+                        clients.push(client);
+                        times.push(time);
+                    });
+                    barOptions.hAxis.maxValue = timeMax;
+                    barOptions.hAxis.viewWindow.max = timeMax*1.1;
+                    var sumValues = _.reduce(times, function(memo, time) { return memo + time}, 0);
+                    var values = [['Klient'].concat(clients), [''].concat(times)];
+                    barData = google.visualization.arrayToDataTable(values);
+                    var values = _.zip(clients, times)
+                    values.sort(function(a,b){return b[1] - a[1]});
+                    pieOptions.sliceVisibilityThreshold = (values[5][1] / sumValues) - 0.00001;
+                    console.log(values[6]);
+                    console.log(values);
+                    pieData = google.visualization.arrayToDataTable([['Client', '']].concat(values));
+                    draw();
+                }
+                getData('year');
+                $('.month').hover(function(){
+                    if(preventHover===true){return}
+                    var $this = $(this);
+                    var month = $this.attr('data-chart');
+                    month = parseInt(month);
+                    getData('month', month);
+                });
+                $('.quarter').hover(function(){
+                    if(preventHover===true){return}
+                    var $this = $(this);
+                    var quarter = $this.attr('data-chart');
+                    quarter = parseInt(quarter);
+                    getData('quarter', quarter);
+                });
+                $('.annually_hours').hover(function(){
+                    if(preventHover===true){return}
+                    getData('year');
+                });
+                $("table").delegate('td','mouseover mouseleave', function(e) {
+                    if(preventHover===true){return}
+                    var $this = $(this);
+                    if (e.type == 'mouseover') {
+                        $("colgroup").eq($this.index()).addClass("hover");
+                        $this.parent().addClass('hover');
+                    }
+                    else {
+                        $("colgroup").eq($this.index()).removeClass("hover");
+                        $this.parent().removeClass('hover');
+                    }
+                });
+                $('tbody').dblclick(function(){
+                    preventHover = !preventHover;
+                    return false;
+                });
+
+        }
+    </script>
+
+{% endblock %}
+
+{% set current_page = 'pivot' %}
+
+{% block body %}
+    <div id="clients_pivot">
+        <div class="year_select">
+            <label>{% trans %}Year{% endtrans %}</label>
+            <select id="yearselect">
+                {% for year in stats.iterkeys() %}
+                    <option id="yearoption-{{ year }}">{{ year }}</option>
+                {% endfor %}
+            </select>
+
+        </div>
+        <div class="clear"></div>
+        <div class="row-fluid">
+            <div class="span6 table_pivot">
+                <table class="table table-bordered table-hover">
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <colgroup class=""></colgroup>
+                <thead class="first">
+                <tr>
+                    <th class="client">{% trans %}Client{% endtrans %}</th>
+                    <th class="worked annually_hours ">{% trans %}Hours{% endtrans %}</th>
+                    {% for i in range(4) %}
+                        <th class="quarter">Q{{ i+1 }}</th>
+                    {% endfor %}
+                    {% for i in range(12) %}
+                        <th class="month {% if loop.last %}last_month{% endif %}">{{ i+1 }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                    {% for (client_id, client_name, client_color), data in pivot | dictsort %}
+                        {% set quarters = quarters_sum(data) %}
+                        <tr class="client_row {% if loop.last %} last_client {% endif %}">
+                            <td class="client">{{ client_name }}</td>
+                            <td class="annually_hours" data-value="{{ data | sum }}">{{ data | sum }}</td>
+                            {% for q in quarters %}
+                                <td class="quarter" data-chart="{{ loop.index }}" data-value="{{ q }}">{{ q }}</td>
+                            {% endfor %}
+                            {% for month in data %}
+                                {% if today.year == year_start.year and today.month == loop.index %}
+                                    <td data-chart="{{ loop.index }}" class="month current_month" data-value="{{ month }}">{{ month }} {% if month_approx %}( {{ (month * month_approx) | round | int }} ){% endif %}</td>
+                                {% else %}
+                                    <td data-chart="{{ loop.index }}" class="month" data-value="{{ month }}">{{ month }}</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+
+                </tbody>
+                <thead class="second">
+                <tr>
+                    <th>{% trans %}Year{% endtrans %}</th>
+                    <th class="annually_hours">{% trans %}Hours{% endtrans %}</th>
+                    <th colspan="4" class="ugly_yellow">{% trans %}Hours{% endtrans %}</th>
+                    {% for i in range(12) %}
+                        <th>{{ i+1 }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for year, s in stats | dictsort %}
+                    <tr class="">
+                        {% set quarters = quarters_sum(s) %}
+                        <td class="{% if year==year_start.year %}current_year{% endif %}">{{ year }}</td>
+                        <td class="annually_hours">{{ s | sum }}</td>
+                        {% for q in quarters %}
+                            <td class="quarter">{{ q }}</td>
+                        {% endfor %}
+                        {% for month in s %}
+                            {% if year == today.year and today.month == loop.index %}
+                                <td class="month current_month ">{{ month }}{% if month_approx %} ({{ (month * month_approx) | round | int }}) {% endif %}</td>
+                            {% else %}
+                                <td class="month">{{ month }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+                </table>
+            </div>
+            <div class="span6 chart_pivot">
+                <div>
+                    <div id="bar_chart_div" style="width: 360px; height:{{ (pivot | length)*26 + 50 }}px; margin-top: 26px"></div>
+                    <div id='pie_chart_div' style="width: 360px; height: 360px"></div>
+                </div>
+            </div>
+        </div>
+    </div>    
+    <div class="clear"></div>
+{% endblock body %}

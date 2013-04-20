@@ -1,0 +1,105 @@
+{% extends "templates/employees/form/_base.html" %}
+
+{% block content %}
+    <h2 class="content-header">{% trans %}Absence / Holiday{% endtrans %}</h2>
+    <h6>{% trans %}IMPORTANT{% endtrans %} !!!!!!!<h6>
+
+    <div class="desc space">
+{% trans %}
+Jeżeli nieobecność przecina koniec miesiąca lub roku, proszą ją rozbić na dwa wnioski urlopowe tak, aby dany wniosek mieścił się w jednym miesiącu. W przypadku nieprawidłowości z wymiarem urlopu prosze się zgłosić do asystentki.
+{% endtrans %}
+
+    </div>
+    <div class="desc">{% trans %}Według tych dat zostanie dodana nieobecność do kalendarza:{% endtrans %}</div>
+    <form class="absence-form" action="{{ request.url_for('/employees/form/absence_application') }}" method="post" accept-charset="utf-8">
+        {{ csrf_field }}
+        {{ form_field(form.popup_date_start, _('Format DD/MM/RRRR'), class='datepicker') }}
+        {{ form_field(form.popup_date_end, _('Format DD/MM/RRRR'), class='datepicker') }}
+        <div class="box_one_line">
+            <div>
+                <dl>
+                    <dt><label for="popup_days">{% trans %}Liczba dni{% endtrans %}</label></dt>
+                    <dd>
+                        <div class="description">&nbsp;</div>
+                        <input id="popup_days" name="popup_days" disabled type="text" value="{{ days }}">
+                    </dd>
+                </dl>
+            </div>
+            <div>
+                <dl>
+                    <dt><label>{% trans %}Wymiar{% endtrans %}:</label></dt>
+                    <dd>
+                        <div class="description">&nbsp;</div>
+                        <input id="popup_days_mandated" style="width: 30px" disabled type="text" value="{{ mandated }}">
+                    </dd>
+                </dl>
+            </div>
+            <div>
+                <dl>
+                    <dt><label>{% trans %}Pozostało{% endtrans %}:</label></dt>
+                    <dd>
+                        <div class="description">&nbsp;</div>
+                        <input class="{% if left and left < 0 %}error{% endif %}" id="popup_days_left" style="width: 30px" disabled type="text" value="{{ left }}">
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        <div class="clear"></div>
+        <div class="desc">
+            {% trans %}<b>Liczba dni</b>: Tyle dni urlopu zostanie dodane do przepracowanych godzin{% endtrans %}
+        </div>
+        <div class="desc">
+            {% trans %}W przypadku brania urlopu za okres choroby należy wybrać urlop <b>planowany</b>{% endtrans %}
+        </div>
+        <div class="desc">
+            {% trans %}<b>L4</b> jest tylko dla osób na umowę o pracę (godziny dopisują się do intranetu){% endtrans %}
+        </div>
+        <div class="desc">
+            {% trans %}<b>Okolicznościowy</b> - tylko dla osób na umowę o pracę, opis należy dodać w uwagach.{% endtrans %}
+        </div>
+        <div class="desc space">
+            {% trans %}<b>Nieobecność</b> - dodaje sie tylko do kalendarza a nie do godzin przepracowanych.{% endtrans %}
+        </div>
+        {{ form_field(form.popup_type, _('Rodzaj') ) }}
+        <div class="desc space">
+            {% trans %}Proszę o wpisanie, czy będzie się dostępnym pod telefonem i czy będzie się miało dostęp do Internetu.{% endtrans %}
+        </div>
+        {{ form_field(form.popup_remarks, _('Uwagi')) }}
+        <div class="buttons">
+            <input type="submit" value="{% trans %}Submit{% endtrans %}" class="button btn"/>
+            <img class="ajax-loader" src="/static/img/ajax.gif"/>
+        </div>
+    </form>
+{% endblock content %}
+
+{% block tail_script %}
+    <script>
+        $('.datepicker, #popup_type').change(function(){
+            var date_start = $('#popup_date_start').val();
+            var date_end = $('#popup_date_end').val();
+            var type = $('#popup_type').val();
+            var $days = $('#popup_days');
+            var $left = $('#popup_days_left');
+            var $mandated = $('#popup_days_mandated');
+            if(date_start !== ''){
+                $.get('{{ request.url_for("/employees/form/absence_days") }}', {date_start: date_start, date_end: date_end, type: type}, function(data){
+                    if(data.status == 'ok'){
+                        $days.attr('value', data.days);
+                        $left.attr('value', data.left);
+                        $mandated.attr('value', data.mandated);
+                        if(data.left < 0){
+                            $left.addClass('error');
+                        } else {
+                            $left.removeClass('error');
+                        }
+                    } else{
+                        if(data.reason != undefined){
+                            alert(data.reason);
+                        }
+                    }
+                })
+            }
+        });
+    </script>
+{% endblock %}
+

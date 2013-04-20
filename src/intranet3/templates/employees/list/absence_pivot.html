@@ -1,0 +1,112 @@
+{% extends "templates/employees/list/_absence_base.html" %}
+
+{% set current_subpage = 'pivot' %}
+
+{% block subbody %}
+    <ul class="pager">
+        <li><a href="{{ request.url_for('/employees/list/absence_pivot') }}?year={{ year-1 }}">{% trans %}Previous year{% endtrans %}</a></li>
+        <li>{{ year }}</li>
+        <li><a href="{{ request.url_for('/employees/list/absence_pivot') }}?year={{ year+1 }}">{% trans %}Next year{% endtrans %}</a></li>
+    </ul>
+    <div class="row">
+        <div class="span8">
+            <table class="table table-bordered table-hover project_times absence_pivot">
+                <thead>
+                <tr>
+                    <th class="lp">{% trans %}No.{% endtrans %}</th>
+                    <th class="user">{% trans %}Employee{% endtrans %}</th>
+                    <th class="mandated">{% trans %}Entitlement{% endtrans %}</th>
+                    <th class="used">{% trans %}Used{% endtrans %}</th>
+                    <th title="Planowane + Na żądanie + Okolicznościowe + Inne" class="application">{% trans %}Requests{% endtrans %}</th>
+                    <th class="diff1">{% trans %}Missed requests{% endtrans %}</th>
+                    <th title="Wymiar - Wykorzystane + Wnioski Okolicznosciowe + Wnioski inne" class="diff2">{% trans %}Requests left{% endtrans %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users | sort(attribute='name')%}
+                {% set user_used = (used[user.id] | int) %}
+                {% set user_mandated = mandated[user.id] %}
+                {% set user_application = applications[(user.id, 'planowany')] +
+                                          applications[(user.id, 'zadanie')] +
+                                          applications[(user.id, 'okolicznosciowy')] +
+                                          applications[(user.id, 'inne')]
+                %}
+                {% set diff1 = user_application - user_used %}
+                {% set diff2 = (user_mandated - user_used + applications[(user.id, 'okolicznosciowy')] ) | int  %}
+                <tr data-user_id="{{ user.id }}">
+                    <td>{{ loop.index }}</td>
+                    <td><a href="{{ request.url_for('/employees/list/absence')+serialize_url('?', user_id=str(user.id), date_start='01-01-'+str(year), date_end='31-12-'+str(year), limit=str(200) ) }}" >{{ user.name }}</a></td>
+                    <td class="mandated">{{ user_mandated }}</td>
+                    <td class="used">{{ user_used }}</td>
+                    <td class="application">{{ user_application }}</td>
+                    <td class="diff1 {% if diff1 < 0 %}red{% endif %}">{{ diff1 }}</td>
+                    <td class="diff2 {% if diff2 < 0 %}red{% endif %}">{{ diff2 }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="span4">
+            {% if request.has_perm('admin') %}
+            <div class="floating-menu box_buttons_absence_pivot">
+                <a id="edit" class="button btn btn-success" href="#">{% trans %}Edit{% endtrans %}</a>
+                <a style="display: none" id="ok" class="button btn btn-primary" href="#">{% trans %}OK{% endtrans %}</a>
+                <a style="display: none" id="abort" class="button btn btn-danger" href="#">{% trans %}Cancel{% endtrans %}</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock subbody %}
+
+
+{% block sub_tailscript  %}
+    {% if request.has_perm('admin') %}
+    <script>
+        $edit = $('#edit');
+        $ok = $('#ok');
+        $abort = $('#abort');
+        $form = $('form');
+
+        $abort.click(function(){
+            window.location.reload();
+            return false;
+        });
+        $ok.click(function(){
+            var args = { year:{{ year }} };
+
+            $('input.editmandated').each(function(index){
+                var $this = $(this);
+                args[$this.attr('name')] = $this.attr('value');
+            });
+
+            $.post('{{ request.url_for("/employees/list/mandated_leave_change") }}', args, function(data){
+                if(data.status == 'ok'){
+                    window.location.reload();
+                } else {
+                    alert(data.reason);
+                }
+            });
+            return false;
+        });
+        $edit.click(function(){
+            $edit.hide();
+            $ok.show();
+            $abort.show();
+            $('td.mandated').each(function(index){
+                var $this = $(this);
+                var $tr = $this.closest('tr');
+                console.log();
+                var input = $('<input>',{
+                    class: 'editmandated',
+                    type: 'text',
+                    name: $tr.attr('data-user_id'),
+                    value: $this.text(),
+                });
+                $this.html(input);
+            });
+            return false;
+        });
+    </script>
+    {% endif %}
+{% endblock sub_tailscript  %}
+

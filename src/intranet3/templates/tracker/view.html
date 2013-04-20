@@ -1,0 +1,23 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans %}View tracker{% endtrans %}</li>
+        </ul>
+    </div>
+    <table class="table table-bordered table-hover width_auto">
+        <tr>
+            <td>{% trans %}Name{% endtrans %}: </td> <td>{{ tracker.name }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Type{% endtrans %}: </td> <td>{{ TRACKER_TYPES.get(tracker.type, tracker.type) }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}URL{% endtrans %}: </td> <td>{{ tracker.url }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Mailer{% endtrans %}: </td> <td>{{ tracker.mailer }}</td>
+        </tr>
+    </table>
+{% endblock %}

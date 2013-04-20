@@ -1,0 +1,63 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans bug_id=bug_id, client_name=project.client.name, project_name=project.name%}Timesheet for bug #{{ bug_id }} from project {{ client_name }} / {{ project_name }}{% endtrans %}</li>
+        </ul>
+    </div>
+
+    <table id="time_entries" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>{% trans %}Project{% endtrans %}</th>
+                <th>{% trans %}Time{% endtrans %}</th>
+                <th>{% trans %}Ticket{% endtrans %}</th>
+                <th>{% trans %}Description{% endtrans %}</th>
+                <th>{% trans %}User{% endtrans %}</th>
+                <th>{% trans %}Date{% endtrans %}</th>
+                <th>{% trans %}Added{% endtrans %}</th>
+                <th>{% trans %}Modified{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user, entry in entries %}
+            <tr{% if entry.deleted %} class="deleted"{% endif %}>
+                <td>{{ entry.project.client.name }} / {{ entry.project.name }}</td>
+                <td class="time">
+                    {% if entry.user_id == request.user.id and not entry.deleted %}
+                        <a href="{{ request.url_for('/times/edit', timeentry_id=entry.id) }}">{{ '%.2f' % entry.time }}</a>
+                    {% else %}
+                        {{ '%.2f' % entry.time }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if entry.ticket_id %}
+                        <a href="{{ tracker.get_bug_url(entry.ticket_id) }}" class="external">
+                            #{{ entry.ticket_id}}
+                        </a>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if entry.ticket_id %}
+                    <a href="{{ tracker.get_bug_url(entry.ticket_id) }}" class="fancybox">
+                        {{ entry.description }}
+                    </a>
+                    {% else %}
+                        {{ entry.description }}
+                    {% endif %}
+                </td>
+                <td>{{ user.name }}</td>
+                <td>{{ entry.date.strftime('%d.%m.%Y') }}</td>
+                <td>{{ entry.added_ts.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td>{{ entry.modified_ts.strftime('%d.%m.%Y %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td class="sum">{% trans %}Sum{% endtrans %}</td>
+                <td colspan="7">{{ '%.2f' % total_sum }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+{% endblock %}

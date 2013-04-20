@@ -1,0 +1,15 @@
+{% extends "templates/employees/form/_base.html" %}
+
+{% block content %}
+    <h2 class="content-header">Wrong time entry</h2>
+    <form action="{{ request.url_for('/employees/form/wrong_time_justification') }}" method="post" accept-charset="utf-8">
+        {{ csrf_field }}
+        {{ form_field(form.popup_date, 'Format DD/MM/RRRR', class='datepicker') }}
+        {{ form_field(form.popup_explanation, 'Wyjaśnienie') }}
+        <div class="buttons">
+            <input type="submit" value="Submit" class="button btn"/>
+            <img class="ajax-loader" title="Bug titles loading" src="/static/img/ajax.gif"/>
+        </div>
+    </form>
+{% endblock content %}
+

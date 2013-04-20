@@ -1,0 +1,33 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans %}All clients{% endtrans %}</li>
+            {% if request.has_perm('admin') %}
+            <li>
+                <a href="{{ request.url_for('/client/map') }}">{% trans %}Map clients{% endtrans %}</a>
+            </li>
+            <li>
+                <a href="{{ request.url_for('/client/add') }}">{% trans %}Add client{% endtrans %}</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>{% trans %}Client name{% endtrans %}</th>
+                <th>{% trans %}Actions{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td><a href="{{ request.url_for('/client/view', client_id=client.id) }}">{{ client.name }}</a></td>
+                <td><a href="{{ request.url_for('/client/delete', client_id=client.id) }}" class="button">{% trans %}Delete{% endtrans %}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

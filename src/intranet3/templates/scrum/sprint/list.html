@@ -1,0 +1,33 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+<div id='sprint-list'>
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans %}Sprint list<{% endtrans %}/li>
+            {% if request.has_perm('coordinator') %}
+            <li>
+                <a href="{{ request.url_for('/scrum/sprint/add') }}">{% trans %}Add sprint{% endtrans %}</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div class="filters form_late">
+        <form method="GET" action="{{ request.url_for('/scrum/sprint/list') }}">
+        {{ form_field(form.project_id, _('Projects')) }}
+        {{ form_field(form.active_only, _('Show active sprints only')) }}
+        {{ form_field(form.limit, _('Limit')) }}
+        <div class="buttons">
+            <input type="submit" value="{% trans %}Filter{% endtrans %}" class="button btn btn-primary" />
+        </div>
+        </form>
+    </div>
+
+    {% include "templates/scrum/sprint/_list.html" %}
+    {% if velocity_chart_data %}
+        {% include "templates/scrum/sprint/_velocity_chart.html" %}
+    {% endif %}
+
+</div>
+{% endblock %}

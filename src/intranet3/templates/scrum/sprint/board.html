@@ -1,0 +1,105 @@
+{% extends "templates/scrum/sprint/_base_sprint.html" %}
+
+{% set page = 'board' %}
+
+{% macro yellow_card(bug) -%}
+<div class="yellow_card">
+    <div class="number_ticket"><a target="_blank" href="{{ bug.get_url() }}">{{ bug.id }}</a></div>
+    <div class="desc_ticket">{{ bug.desc }}</div>
+    <div class="assignee">{{ bug.owner.name }}</div>
+    <div class="points priority_{{ bug.priority_number }}">{{ bug.whiteboard['p'] }}</div>
+</div>
+{%- endmacro %}
+
+{% block body %}
+<div class="btn go_fullscreen">{% trans %}Fullscreen{% endtrans %}</div>
+<table class="table table-bordered task_board">
+    <thead>
+        <tr>
+            <td><a href="{{ bug_list_url(board['todo']['bugs']) }}">{% trans %}TODO{% endtrans %}</a>  <span class="badge badge-info">{{ board['todo']['points'] }}</span></td>
+            <td><a href="{{ bug_list_url(board['inprocess']['bugs']) }}">{% trans %}IN PROCESS{% endtrans %}</a>  <span class="badge badge-info">{{ board['inprocess']['points'] }}</span></td>
+            <td><a href="{{ bug_list_url(board['toverify']['bugs']) }}">{% trans %}TO VERIFY{% endtrans %}</a>  <span class="badge badge-info">{{ board['toverify']['points'] }}</span></td>
+            <td><a href="{{ bug_list_url(board['completed']['bugs']) }}">{% trans %}COMPLETED{% endtrans %}</a>  <span class="badge badge-info">{{ board['completed']['points'] }}</span></td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                {% for bug in board['todo']['bugs'] %}
+                    {{ yellow_card(bug) }}
+                {% endfor %}
+            </td>
+            <td>
+                {% for bug in board['inprocess']['bugs'] %}
+                    {{ yellow_card(bug) }}
+                {% endfor %}
+            </td>
+            <td>
+                {% for bug in board['toverify']['bugs'] %}
+                    {{ yellow_card(bug) }}
+                {% endfor %}
+            </td>
+            <td>
+                {% for bug in board['completed']['bugs'] %}
+                    {{ yellow_card(bug) }}
+                {% endfor %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var $go_fullscreen_btn = $('.go_fullscreen');
+        var is_fullscreen = function(){
+            return $.cookie('fullscreen') == "1";
+        };
+
+        var go_fullscreen = function(cond){
+            if(cond){
+                $.cookie('fullscreen', 1);
+                $go_fullscreen_btn.addClass('fullscreen');
+                $('.go_fullscreen').addClass('active');
+                $('#content').addClass('no_space');
+                $('.navbar').addClass('fullscreen');
+                $('#sprint-nav').addClass('fullscreen');
+                $('#left_column').addClass('fullscreen');
+                $('#right_column').addClass('full');
+                $('.stats-container').addClass('fullscreen');
+            } else {
+                $.cookie('fullscreen', 0);
+                $go_fullscreen_btn.removeClass('fullscreen');
+                $('.go_fullscreen').removeClass('active');
+                $('#content').removeClass('no_space');
+                $('.navbar').removeClass('fullscreen');
+                $('#sprint-nav').removeClass('fullscreen');
+                $('#left_column').removeClass('fullscreen');
+                $('#right_column').removeClass('full');
+                $('#right_column').removeClass('full');
+                $('.stats-container').removeClass('fullscreen');
+            }
+        };
+        go_fullscreen(is_fullscreen());
+
+        $go_fullscreen_btn.click(function() {
+            go_fullscreen(!is_fullscreen());
+        });
+        IH.inloop(5*60*1000, function(){
+            if(is_fullscreen()){
+                window.location.reload()
+            }
+        });
+
+        // hiding fullscreen button:
+        $('body').mousemove(function(e){
+            if(is_fullscreen()){
+                $go_fullscreen_btn.removeClass('fullscreen');
+            }
+        });
+        IH.inloop(10*1000, function(){
+            if($go_fullscreen_btn.hasClass('active')){
+                $go_fullscreen_btn.addClass('fullscreen');
+            }
+        })
+    });
+</script>
+{% endblock body %}

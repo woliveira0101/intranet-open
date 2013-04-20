@@ -1,0 +1,44 @@
+{% extends "templates/employees/list/_base.html" %}
+
+{% set current_page = 'wrongtime' %}
+
+{% block body %}
+    {{ filters_form(form) }}
+    <table class="table table-bordered table-hover project_times table_late">
+    <thead>
+        <tr>
+            <th class="lp">{% trans %}No.{% endtrans %}</th>
+            <th class="added">{% trans %}Added{% endtrans %}</th>
+            <th class="user">{% trans %}Employee{% endtrans %}</th>
+            <th class="date">{% trans %}Date{% endtrans %}</th>
+            <th class="explanation">{% trans %}Explanation{% endtrans %}</th>
+            <th class="justified">{% trans %}Excused?{% endtrans %}</th>
+            <th class="review">{% trans %}Review{% endtrans %}</th>
+            {% if request.has_perm('admin') %}
+                <th class="options"></th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+    {% if wrongtimes %}
+        {% for wrongtime in wrongtimes %}
+            <tr data-id="{{ wrongtime.id }}" data-name="wrongtime" class="{{ loop.cycle('odd', 'even') }}">
+                <td>{{ loop.index }}</td>
+                <td title="{{ wrongtime.modified_ts.strftime('%d.%m.%Y %H:%M') }}"> {{ wrongtime.added_ts.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td> {{ wrongtime.user.email }}</td>
+                <td> {{ wrongtime.date }}</td>
+                <td> {{ wrongtime.explanation }}</td>
+                <td class="select"> {{ select(wrongtime.justified) }}</td>
+                <td class="review_td"> {{ review(wrongtime.review or '') }}</td>
+                {% if request.has_perm('admin') %}
+                    <td><a title="{% trans %}Delete{% endtrans %}" class="button delete btn btn-danger" href="#">x</a></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    {% else %}
+        <tr><td colspan="8">{% trans %}No results{% endtrans %}</td></tr>
+    {% endif %}
+    </tbody>
+    </table>
+{% endblock body %}
+

@@ -1,0 +1,69 @@
+<table class="table table-bordered table-hover bug-list">
+    <thead>
+    <tr>
+        <th></th>
+        <th>ID</th>
+        <th>{% trans %}Title{% endtrans %}</th>
+        <th>{% trans %}Reporter{% endtrans %}</th>
+        <th>{% trans %}Assignee{% endtrans %}</th>
+        <th>{% trans %}Project{% endtrans %}</th>
+        <th>{% trans %}Component{% endtrans %}</th>
+        <th>{% trans %}Priority / status{% endtrans %}</th>
+        <th class="depends-on">{% trans %}Depends on{% endtrans %}</th>
+        <th>{% trans %}Blocks{% endtrans %}</th>
+        <th>{% trans %}Reported date{% endtrans %}</th>
+        <th>{% trans %}Modified date{% endtrans %}</th>
+        <th>{% trans %}Deadline{% endtrans %}</th>
+        <th>{% trans %}Project{% endtrans %}</th>
+        <th>{% trans %}Hours{% endtrans %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for bug in bugs %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+        <td>{{ loop.index }}</td>
+        <td><a href="{{bug.get_url()}}" class="external">{{ bug.id }}</a></td>
+        <td>{{ bug.desc }}</td>
+        <td>{{ bug.reporter.name }}</td>
+        <td>{{ bug.owner.name }}</td>
+        <td>{{ bug.project_name }}</td>
+        <td>{{ bug.component_name }}</td>
+        <td data-sort="{{bug.severity_number}}">
+            <span class="priority priority_{{ bug.severity_number }}">{{ bug.severity }}</span>
+            <div style="clear: both;">({{ bug.status|lower }})</div>
+        </td>
+        <td>
+            {% for bug_id, value in bug.dependson.iteritems() %}
+            <a href="{{bug.get_url(bug_id)}}" class="external {% if value.resolved %}closed{% endif %}" title="{{ value.desc }}">
+                {{ bug_id }}
+            </a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </td>
+        <td>
+            {% for bug_id, value in bug.blocked.iteritems() %}
+            <a href="{{bug.get_url(bug_id)}}" class="external {% if value.resolved %}closed{% endif %}" title="{{ value.desc }}">
+                {{ bug_id }}
+            </a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </td>
+        <td>{{ bug.opendate.strftime('%Y-%m-%d') }}</td>
+        <td>{{ bug.changeddate.strftime('%Y-%m-%d') }}</td>
+        <td>{{ bug.deadline }}</td>
+        <td>
+            {% if bug.project %}
+            {{ bug.project.client.name }} / {{ bug.project.name }}
+            {% endif %}
+        </td>
+        <td>
+            {% if bug.project %}
+            <a href="{{ request.url_for('/times/list_bug', project_id=bug.project.id, bug_id=bug.id) }}">
+                {{ '%.2f' % bug.time }}
+            </a>
+            {% else %}
+            {{ '%.2f' % bug.time }}
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>

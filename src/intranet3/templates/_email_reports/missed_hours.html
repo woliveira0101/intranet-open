@@ -1,0 +1,70 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+{% macro cell(v, e) -%}
+    {{ v if e else '' }}
+    {% if e > v %}
+    <span style="color: red"> -{{ e - v }}</span>
+    {% elif e < v %}
+    <span style="color: green"> +{{ v - e }}</span>
+    {% endif %}
+{%- endmacro %}
+<html>
+<head>
+    <title>Brakujące godziny</title>
+</head>
+<body>
+<h1 style="font-size: 1.6em;font-weight: bold;border-bottom: 1px solid #CCC;color: #444;padding: 0 0 5px;margin: 15px 0 10px;">
+    Brakujące godziny
+</h1>
+    <table style="width: 100%">
+        <thead>
+            <tr style="border-bottom: 1px solid #EEE;">
+                <th style="width:100px; background-color: #C4C5C6 !important;">User</th>
+                {% for i in range(1, 5) %}
+                <th style="background-color: #C4C5C6 !important;">Q{{ i }}</th>
+                {% endfor %}
+                {% for i in range(1, last_month+1) %}
+                <th style="background-color: #C4C5C6 !important;">{{ i }}</th>
+                {% endfor %}
+                <th style="background-color: #C4C5C6 !important;">Year</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user_id, user in users %}
+                <tr style="{{ loop.cycle('background: #FFF;', 'background: #F6F6F6;') }}border-bottom: 1px solid #EEE;">
+                    <td><a href="{{request.registry.settings['FRONTEND_PREFIX'] }}{{ request.url_for('/user/edit', user_id=user_id) }}">{{ user[:-11] }}</a></td>
+                    {% for i in range(4) %}
+                        {% set v = data[user][0][i] | int %}
+                        {% set e = expected[user][0][i] %}
+                        <td style="background: #FFFECD !important;">
+                            {{ cell(v, e) }}
+                        </td>
+                    {% endfor %}
+                    {% for i in range(last_month) %}
+                        {% set v = data[user][1][i] | int %}
+                        {% set e = expected[user][1][i] %}
+                        <td>
+                            {{ cell(v, e) }}
+                        </td>
+                    {% endfor %}
+                        <td>
+                            {% set v = data[user][2] | int %}
+                            {% set e = expected[user][2] %}
+                            {{ cell(v, e) }}
+                        </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+<br><br>
+<span>
+Po kliknięciu na pracownika możesz zmienić date rozpoczęcia pracy na pełen etat,<br>
+jeżeli ustawisz na datę w przyszłości (np. rok 2050) to nie będzie on wyświetlany w tym raporcie.<br>
+Pracownicy nie na pełen etat:<br>
+</span>
+{% for user in not_full_time_users %}
+    <a href="{{request.registry.settings['FRONTEND_PREFIX'] }}{{ request.url_for('/user/edit', user_id=user.id) }}">{{ user.name }}</a><br>
+{% endfor %}
+</html>

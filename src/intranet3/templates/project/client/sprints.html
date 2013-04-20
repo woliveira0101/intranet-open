@@ -1,0 +1,24 @@
+{% extends "templates/project/client/_base.html" %}
+
+{% set current_page = 'sprints' %}
+
+{% block body %}
+<div id='sprint-list'>
+    <div class="filters form_late">
+        <form method="GET" action="{{ request.url_for('/project/client/sprints') }}">
+            <input type="hidden" name="project_id" value="{{ project.id }}">
+            {{ form_field(form.active_only, _('Show active sprints only')) }}
+            {{ form_field(form.limit, _('Limit')) }}
+            <div class="buttons">
+                <input type="submit" value="{% trans %}Filter{% endtrans %}" class="button btn btn-primary" />
+            </div>
+        </form>
+    </div>
+
+    {% include "templates/scrum/sprint/_list.html" %}
+    {% if velocity_chart_data %}
+        {% include "templates/scrum/sprint/_velocity_chart.html" %}
+    {% endif %}
+</div>
+
+{% endblock body %}

@@ -1,0 +1,16 @@
+{% extends "templates/_base_one_column.html" %}
+
+{% block content %}
+<div class="logged-out">
+    <div class="page-header">
+        <h1>{% trans %}Logged out, please log in as:{% endtrans %}</h1>
+    </div>  
+    <div class="box_btn_login">
+        <a class="button btn" href="{{ users_link }}">{% trans %}Employee{% endtrans %}</a>
+        <a class="button btn" href="{{ clients_link }}">{% trans %}Client{% endtrans %}</a>
+        <a class="button btn" href="{{ freelancers_link }}">{% trans %}Freelancer{% endtrans %}</a>
+        <div>{% trans %}Only difference is in OAuth2 permission scope.{% endtrans %}</div>
+    </div>
+</div>
+{% endblock content %}
+

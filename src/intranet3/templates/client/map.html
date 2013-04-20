@@ -1,0 +1,51 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <ul class="nav nav-tabs">
+        <li class="active"><a>A{% trans %}ll clients{% endtrans %}</a></li>
+        <li>
+            <a href="{{ request.url_for('/client/add') }}">{% trans %}Add client{% endtrans %}</a>
+        </li>
+        {% if all %}
+            <li>
+                <a href="{{ request.url_for('/client/map') }}">{% trans %}Active projects{% endtrans %}</a>
+            </li>
+        {% else %}
+            <li>
+                <a href="{{ request.url_for('/client/map', all=1) }}">{% trans %}All projects{% endtrans %}</a>
+            </li>
+        {% endif %}
+    </ul>
+    
+    <table class="table table-bordered table-hover clients-map">
+        <thead>
+            <tr>
+                <th class="lp">&nbsp;</th>
+                <th>{% trans %}Client{% endtrans %}</th>
+                <th>{% trans %}Project{% endtrans %}</th>
+                <th>{% trans %}Coordinator{% endtrans %}</th>
+                <th>{% trans %}Tracker{% endtrans %}</th>
+                <th>{% trans %}Active{% endtrans %}</th>
+               <th>{% trans %}Selector{% endtrans %}</th>
+
+            </tr>
+        </thead>
+        <tbody>
+    {% for client in clients %}
+            {% for project in client.projects %}
+                {% if project.active or all %}
+                <tr>
+                    <td class="lp">{{counter}}</td>
+                    <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client.id) }}">{{ client.name }}</a></td>
+                    <td><a title="Edit project" href="{{ request.url_for('/project/edit', project_id=project.id) }}">{{ project.name }}</a></td>
+                    <td>{% if project.coordinator %}{{ project.coordinator.email }}{% else %}{% trans %}Not set{% endtrans %}{% endif %}</td>
+                    <td><a title="Edit tracker" href="{{ request.url_for('/tracker/edit', tracker_id=project.tracker_id) }}">{{ project.tracker.name }}</a></td>
+                    <td>{% if project.active %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+                    <td>{{ project.format_selector() }}</td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+    {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

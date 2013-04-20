@@ -1,0 +1,87 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">View user</li>
+        </ul>
+    </div>
+    <div class="pic_user">
+        <img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" />
+        <div class="buttons btn_user">
+            <a href="{{ request.url_for('/user/edit', user_id=user.id) }}" class="button btn btn-success">Edit</a>
+        </div>
+    </div>
+    <div class="box_content_user">
+        <table class="table table-bordered">
+            <tr>
+                <td>{% trans %}Employee's name{% endtrans %}:</td>
+                <td>{{ user.name }}</td>
+            </tr>
+            <tr>
+                <td>Email:</td>
+                <td>{{ user.email }}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Admin{% endtrans %}:</td>
+                <td>{% if 'admin' in user.groups %}✔{% endif %}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Freelancer{% endtrans %}:</td>
+                <td>{% if user.freelancer %}✔{% endif %}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Programmer{% endtrans %}:</td>
+                <td>{% if user.is_programmer %}✔{% endif %}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Frontend developer{% endtrans %}:</td>
+                <td>{% if user.is_frontend_developer %}✔{% endif %}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Graphic designer{% endtrans %}:</td>
+                <td>{% if user.is_graphic_designer%}✔{% endif %}</td>
+            </tr>
+            <tr>
+                <td>A{% trans %}vailability calendar{% endtrans %}:</td>
+                <td>{% if user.availability_link %}<a href="{{ user.availability_link }}">{{ user.availability_link }}</a>{% endif %}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Booked tasks calendar{% endtrans %}:</td>
+                <td>{% if user.tasks_link %}<a href="{{ user.tasks_link }}">{{ user.tasks_link }}</a>{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Skype:</td>
+                <td>{{ user.skype or ''}}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Phone{% endtrans %}:</td>
+                <td>{{ user.phone or ''}}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Phone on desk{% endtrans %}:</td>
+                <td>{{ user.phone_on_desk or ''}}</td>
+            </tr>
+            <tr>
+                <td>IRC:</td>
+                <td>{{ user.irc or ''}}</td>
+            </tr>
+            <tr>
+                <td>Office location:</td>
+                <td>{{ user.get_location() }}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Start wor{% endtrans %}k:</td>
+                <td>{% if user.start_work %}{{ user.start_work.strftime('%d/%m/%Y') or ''}}{% else %}{% endif %}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Levels{% endtrans %}:</td>
+                <td>{{ user.levels_html}}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Description{% endtrans %}:</td>
+                <td>{{ user.description or ''}}</td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}

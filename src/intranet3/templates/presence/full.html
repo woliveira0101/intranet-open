@@ -1,0 +1,52 @@
+{% extends "templates/_base.html" %}
+
+{% block tail_script %}
+    <script>
+        $(function(){
+            $('#datepicker').datepicker({
+                onSelect: function(dateText, inst) {
+                    window.location = '/presence/full?date='+ inst.selectedDay +'.'+ (inst.selectedMonth + 1) +'.'+ inst.selectedYear;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans date='%s' % date.strftime('%d.%m.%Y') %}Presence for {{ date }}{% endtrans %}</li>
+            {% if 'full' in request.path %}
+            <li><a href="{{ request.url_for('/presence/list', date=date.strftime('%d.%m.%Y')) }}">{% trans %}Normal{% endtrans %}</a></li>
+            <li class="active"><a>{% trans %}Full list{% endtrans %}</a></li>
+            {% else %}
+            <li class="active"><a>{% trans %}Normal{% endtrans %}</a></li>
+            <li><a href="{{ request.url_for('/presence/full', date=date.strftime('%d.%m.%Y')) }}">{% trans %}Full list{% endtrans %}</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    <ul class="pager">
+        <li><a href="{{ request.url_for('/presence/full', date=prev_date.strftime('%d.%m.%Y')) }}">{% trans %}Previous day{% endtrans %}</a></li>
+        <li><input type="hidden" id="datepicker" value="{{ date.strftime('%m/%d/%Y') }}"/></li>
+        <li><a href="{{ request.url_for('/presence/full', date=next_date.strftime('%d.%m.%Y')) }}">{% trans %}Next day{% endtrans %}</a></li>
+    </ul>
+    
+    <table class="table table-bordered table-hover" id="presence">
+        <thead>
+            <tr>
+                <th>{% trans %}Employee{% endtrans %}</th>
+                <th>{% trans %}Time{% endtrans %}</th>
+                <th>{% trans %}URL{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user, entry in entries %}
+            <tr>
+                <td>{{ user.name }}</td>
+                <td>{{ entry.ts.strftime('%H:%M:%S') }}</td>
+                <td><a href="{{ entry.url }}">{{ entry.url }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

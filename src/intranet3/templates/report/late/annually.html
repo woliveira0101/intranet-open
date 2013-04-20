@@ -1,0 +1,77 @@
+{% extends "templates/_base.html" %}
+
+{% block tail_script %}
+    <script>
+        $(function(){
+            $('#datepicker').datepicker({
+                onChangeMonthYear: function(year, month, inst) {
+                    window.location = '{{ request.url_for("/report/late/annually") }}?year='+year;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans date='%s' % year_start.strftime('%Y') %}Late report for {{ date }}{% endtrans %}</li>
+        </ul>
+    </div>
+    <ul class="pager">
+        <li><a href="{{ request.url_for('/report/late/annually', year=year_start.year -1 ) }}">{% trans %}Previous year{% endtrans %}</a></li>
+        <li><a href="{{ request.url_for('/report/late/annually', year=year_start.year +1 ) }}">{% trans %}Next year{% endtrans %}</a></li>
+    </ul>
+    <table id="time_report" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th class="index"></th>
+                <th class="username">{% trans %}User{% endtrans %}</th>
+                <th>{% trans %}Sum{% endtrans %}</th>
+                {% for month in range(12) %}
+                <th>{{ month + 1 }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr class="{{ loop.cycle('odd', 'even') }}{% if user == request.user %} current_user{% endif%}{% if user.freelancer %} freelancer{% endif %}">
+                <td class="index">{{ loop.index }}</td>
+                <td class="username">
+                    <a href="{{ request.url_for('/user/view', user_id=user.id) }}">{{ user.name }}</a>
+                </td>
+
+                {% set user_data = data.get(user.id) %}
+                {% set user_stats = stats.get(user.id) %}
+
+                {% if not user_stats %}
+                    <td class="{% if user == request.user %}current_user {% endif%}border_right">-</td>
+                {% else %}
+                    <td class="{% if user == request.user %}current_user {% endif%}border_right {% if user_stats[0] | timedelta_to_minutes > late_limit*12 %}late {% endif %}">
+                        {{ user_stats[0] | timedelta_to_minutes }}
+                    </td>
+                {% endif %}
+
+                {% if not user_data %}
+                    {% for period in range(12) %}
+                    <td class="{% if user == request.user %}current_user {% endif%}">-</td>
+                    {% endfor %}
+                {% else %}
+                {% for late in user_data %}
+                <td class="{% if late | timedelta_to_minutes > late_limit %}late {% endif %}">
+                    {% if late != deltazero %}
+                        <a href="{{ request.url_for('/report/late/monthly', month='%s.%s' % (loop.index, year_start.year), user_id=user.id) }}"">{{ late | timedelta_to_minutes }}</a>
+                    {% else %}
+                        <a href="{{ request.url_for('/report/late/monthly', month='%s.%s' % (loop.index, year_start.year), user_id=user.id) }}"">-</a>
+                    {% endif %}
+                </td>
+                {% endfor %}
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <ul class="agenda">
+        <li class="late">{% trans late_limit=late_limit %}Ponad limit ({{ late_limit }} min){% endtrans %}</li>
+    </ul>
+{% endblock %}

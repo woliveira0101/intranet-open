@@ -1,0 +1,103 @@
+<form class="add-time-form"
+      action="{{ request.url_for(
+                        '/times/add',
+                        date=date.strftime('%d.%m.%Y'),
+                        user_id=user.id if request.has_perm('admin') else None,
+                        next=next or request.herel) }}"
+      method="post"
+      accept-charset="utf-8">
+    {{ csrf_field }}
+    <div class="project-selector">
+        {{ form_field(form.project_id, _('Project')) }}
+        <div id="add-to-harvest">
+            <div class="description">{{ form.add_to_harvest.label }}</div>
+            {{ form.add_to_harvest()|safe }}
+        </div>
+    </div>
+    {{ form_field(form.time, _('Time as a float value or hh:mm'), class='time_entry_time') }}
+    {% with field = form.ticket_id %}
+    <div>
+        <dl>
+            <dt>{{ field.label }}</dt>
+            <dd>
+                {% if field.errors %}
+                <ul class="errors">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="description">{% trans %}Ticket identifier on the tracker or predefined one{% endtrans %}</div>
+                {{ field()|safe }}
+                <select id="ticket-type">
+                    <option value="M0">{% trans %}Ticket id{% endtrans %}</option>
+                </select>
+            </dd>
+        </dl>
+    </div>
+    {% endwith %}
+    {{ form_field(form.description, _('Time entry description'), class='time_entry_description') }}
+    <div class="buttons">
+        <input type="submit" value="{% trans %}Add{% endtrans %}" class="button btn btn-primary"/>
+        <input type="submit" value="{% trans %}Start Timer{% endtrans %}" name="start_timer" class="button btn" />
+    </div>
+</form>
+<script type="text/javascript">
+    (function(){
+        (function(){
+            // when user choose Edition1 project, we show him checbox button to add times to harvest application.
+            var $project_id = $('#project_id');
+            var check_checkbox = function(){
+                var $add_to_harvest = $('#add-to-harvest');
+                var id = $project_id.val();
+                var project_name = $project_id.find('option[value="'+id+'"]').text();
+                if(project_name.indexOf('Edition1') !== -1){
+                    $add_to_harvest.show()
+                } else {
+                    $add_to_harvest.hide()
+                }
+            };
+            check_checkbox();
+            $project_id.change(function(){
+                check_checkbox();
+            });
+        })();
+        (function(){
+            // add select tag Ticket type for predefined ticket ids like M0, M1, M2 etc.
+            var $ticket_desc = $('#description');
+            var $ticket_type = $('#ticket-type');
+            var $ticket_id = $('#ticket_id');
+            var types = {{ form.PREDEFINED_TICKET_IDS | tojson | safe }};
+            var add_ticket_type_options = function(){
+                _.each(types, function(type){
+                    $ticket_type.append($('<option></option>', {value: type.value, text:type.desc}))
+                })
+            };
+
+            (function(){
+                add_ticket_type_options();
+                var value = $ticket_id.val();
+                if(_.any(types, function(v){ return v.value===value})){
+                    $ticket_type.val(value);
+                    $ticket_id.prop('readonly', true);
+                } else {
+                    $ticket_id.prop('readonly', false);
+                }
+            })();
+
+            $ticket_type.change(function(){
+                var value = $ticket_type.val();
+                var text = $('#ticket-type :selected').text();
+                if(value !== 'M0'){
+                    $ticket_id.val(value);
+                    $ticket_id.prop('readonly', true);
+                    $ticket_desc.val(text);
+                } else {
+                    $ticket_id.val('');
+                    $ticket_id.prop('readonly', false);
+                    $ticket_desc.val('');
+                }
+            })
+        })();
+    })();
+</script>

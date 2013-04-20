@@ -1,0 +1,117 @@
+{% extends "templates/_base.html" %}
+
+{% block style_block %}
+    <link rel="stylesheet" type="text/css" href="{{ request.static_path('intranet3:static/css/upload.css', v=100) }}" />
+{% endblock %}
+{% block head_script %}
+    <script src="{{ request.static_path('intranet3:static/js/upload.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div id="useredit">
+        <div class="tabs">
+            <ul class="nav nav-tabs">
+                <li class="title">{% trans name=user.name, email=user.email %}Edit user {{ name }} ({{ email }}){% endtrans %}</li>
+            </ul>
+        </div>
+        <div id="user_edit_form">
+            <form class="user_profile box box_edit_user" method="post" accept-charset="utf-8">
+                {{ csrf_field }}
+                {% if request.has_perm('admin') %}
+                    {{ form_field(form.is_active, _('Uncheck if no longer works here')) }}
+                    {{ form_field(form.groups, _('Privilages for views, by default new employees get user and freelancers')) }}
+                {% endif %}
+                {{ form_field(form.is_programmer, _('Check if freelancer is a programmer')) }}
+                {{ form_field(form.is_frontend_developer, _('Check if freelancer is a frontend developer')) }}
+                {{ form_field(form.is_graphic_designer, _('Check if freelancer is a graphic designer')) }}
+                {{ form_field(form.level, 'Role') }}
+
+                {{ form_field(form.availability_link, _('Link to Google Calendar with working hours')) }}
+                {{ form_field(form.tasks_link, _('Link to Google calendar with booked tasks')) }}
+                {{ form_field(form.skype, _('Skype identifier')) }}
+                {{ form_field(form.phone, _('Phone number')) }}
+                {{ form_field(form.phone_on_desk, _('Phone on desk number')) }}
+                {{ form_field(form.irc, 'IRC') }}
+                {{ form_field(form.location, 'Office location') }}
+                {{ form_field(form.start_work, _('Start work'), class='datepicker') }}
+                {% if request.has_perm('admin') %}
+                    {% with field=form.start_full_time_work %}
+                    <div>
+                        <dl>
+                            <dt>{{ field.label }}</dt>
+                            <dd>
+                                {% if field.errors %}
+                                    <ul class="errors">
+                                        {% for error in field.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                                <div class="description">{% trans %}Start full time work{% endtrans %}</div>
+                                <input type="checkbox" id="if_full_time_work">
+                                {{ field(class='datepicker')|safe }}
+                            </dd>
+                        </dl>
+                    </div>
+                    {% endwith %}
+                {% endif %}
+                {{ form_field(form.description, _('Any additional description')) }}
+                {{ form.avatar }}
+
+                <div>
+                    <dl>
+                        <dt>{% trans %}Image{% endtrans %}:</dt>
+                        <dd id="my-avatar">
+                            <img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" />
+                            <a href="#" data-href="{{ request.url_for('/user/upload_avatar', user_id=user.id) }}" id="upload-btn" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
+                            <div id="upload-progress"></div>
+                        </dd>
+                    </dl>
+                </div>
+
+                <div class="buttons">
+                    <input class="btn btn-primary" type="submit" value="{% trans %}Save{% endtrans %}">
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block tail_script %}
+    <script type="text/javascript">
+    $(document).ready(function(){
+        var $if_full_time_work = $('#if_full_time_work'),
+            $full_time_work = $('#start_full_time_work');
+        var today = Date.today(), full_time_start_date = Date.parseExact($full_time_work.val(), 'dd/MM/yyyy');
+
+        if(today.compareTo(full_time_start_date) < 0){
+            // not working full time
+            $if_full_time_work.prop('checked', false);
+            $full_time_work.css('visibility', 'hidden');
+        } else {
+            // working full time
+            $if_full_time_work.prop('checked', true);
+            $full_time_work.css('visibility', 'visible');
+        }
+
+        full_time_start_date = Date.today();
+
+        $if_full_time_work.change(function(){
+            var $this = $(this);
+            if($this.prop('checked')){
+                $full_time_work.val(full_time_start_date.toString('dd/MM/yyyy'));
+                $full_time_work.css('visibility', 'visible');
+            } else {
+                var date_in_future = Date.today().add({years: 30});
+                $full_time_work.val(date_in_future.toString('dd/MM/yyyy'));
+                $full_time_work.css('visibility', 'hidden');
+            }
+        });
+
+        $full_time_work.change(function(){
+            var $this = $(this);
+            full_time_start_date = Date.parseExact($this.val(), 'dd/MM/yyyy')
+        });
+    });
+    </script>
+{% endblock tail_script %}

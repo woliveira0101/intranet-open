@@ -1,0 +1,66 @@
+{% extends "templates/_base.html" %}
+
+{% block tail_script %}
+    <script>
+        $(function(){
+            $('#datepicker').datepicker({
+                onSelect: function(dateText, inst) {
+                    window.location = '{{ request.url_for("/times/list") }}?date=' + inst.selectedDay + '.' + (inst.selectedMonth + 1) + '.' + inst.selectedYear;
+                }
+            });
+            var $add_entry_to_one_of_your_own_bugs = $('#add-entry-to-one-of-your-own-bugs')
+            if($add_entry_to_one_of_your_own_bugs.length > 0){
+                $add_entry_to_one_of_your_own_bugs.load('{{ request.url_for("/times/add_entry_to_one_of_your_bugs", date=date.strftime("%d.%m.%Y")) }}');
+            }
+        });
+
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans date=date.strftime('%d.%m.%Y') %}Timesheet for {{ date }}{% endtrans %}</li>
+        </ul>
+    </div>
+    <ul class="pager float_left">
+        <li><a href="{{ request.url_for('/times/list', date=prev_date.strftime('%d.%m.%Y')) }}">{% trans %}Previous day{% endtrans %}</a></li>
+        <li><input type="hidden" id="datepicker" value="{{ date.strftime('%m/%d/%Y') }}"/></li>
+        <li><a href="{{ request.url_for('/times/list', date=next_date.strftime('%d.%m.%Y')) }}">{% trans %}Next day{% endtrans %}</a></li>
+    </ul>
+    {% if user.id == request.user.id and needs_justification %}
+    <div class="float_left btn_margin_top frame_times justification-info">
+            {% if justification_status == None %}
+                <a class="button a_popup btn btn-warning" href="{{ request.url_for('/employees/form/wrong_time_justification') }}?popup_date={{ date.strftime('%d/%m/%Y') }}">{% trans %}Explain this{% endtrans %}</a>
+            {% elif justification_status == 1 %}
+                <span class="label label-success">{% trans %}Explained{% endtrans %}</span>
+            {% elif justification_status == 0 %}
+                <span class="label">{% trans %}Waits for verification{% endtrans %}</span>
+            {% elif justification_status == -1 %}
+                <span class="label label-important">{% trans %}Not explained{% endtrans %}</span>
+            {% endif %}
+    </div>
+    {% endif %}
+    {% include "times/_list.html" %}
+
+    {% if can_modify %}
+        <div class="time-entrie-forms row-fluid">
+            <div class="box span4">
+                <h2 class="content-header">{% trans %}Add time entry{% endtrans %}</h2>
+                <div class="content_box">
+                    {% with form_field=form_field %}
+                    {% include "times/_addform.html" %}
+                    {% endwith %}
+                </div>
+            </div>
+            <div class="box span8">
+                <h2 class="content-header">{% trans %}Add entry to one of your own bugs{% endtrans %}</h2>
+                <div class="content_box">
+                    <div id="add-entry-to-one-of-your-own-bugs">
+                        <img src="/static/img/ajax.gif"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

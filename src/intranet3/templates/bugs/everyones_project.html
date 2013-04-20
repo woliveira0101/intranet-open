@@ -1,0 +1,26 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <ul class="nav nav-tabs">
+        <li class="title">{% trans %}Everyone's bugs in project{% endtrans %} <strong>{{ project.name }}</strong></li>
+        {% if resolved %}
+            <li class="active"><a>{% trans %}Show resolved{% endtrans %}</a></li>
+            <li><a href="{{ request.url_for('/bugs/everyones_project', project_id=project.id, resolved=0) }}">{% trans %}Show unresolved{% endtrans %}</a></li>
+        {% endif %}        
+        {% if not resolved %}
+           <li><a href="{{ request.url_for('/bugs/everyones_project', project_id=project.id, resolved=1) }}">{% trans %}Show resolved{% endtrans %}</a></li>
+           <li class="active"><a>{% trans %}Show unresolved{% endtrans %}</a></li>
+        {% endif %}
+    </ul>    
+    {% if unable %}
+        <div class="alert alert-error">
+            {% trans %}You don't have credentials configured for this project's tracker.{% endtrans %}
+            <a href="{{ request.url_for('/tracker/login', tracker_id=tracker.id) }}">{% trans name=tracker.name %}Configure credentials for tracker {{ name }}{% endtrans %}</a>
+        </div>
+    {% else %}
+        {% include "templates/bugs/_list.html" %}
+    {% endif %}    
+    {% include "templates/bugs/_projects.html" %}
+    
+
+{% endblock %}

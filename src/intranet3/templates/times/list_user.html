@@ -1,0 +1,41 @@
+{% extends "templates/_base.html" %}
+
+{% block tail_script %}
+    <script xmlns="http://www.w3.org/1999/html">
+        $(function(){
+            $('#datepicker').datepicker({
+                onSelect: function(dateText, inst) {
+                    window.location = '{{ request.url_for("/times/list_user", user_id=user.id) }}&date='+inst.selectedDay +'.'+ (inst.selectedMonth + 1) +'.'+ inst.selectedYear
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans date=date.strftime('%d.%m.%Y'), name=user.name %}Timesheet for {{ date }} for user {{ name }}{% endtrans %}</li>
+        </ul>
+    </div>
+    <ul class="pager">
+        <li><a href="{{ request.url_for('/times/list_user', date=prev_date.strftime('%d.%m.%Y'), user_id=user.id) }}">{% trans %}Previous day{% endtrans %}</a></li>
+        <li><input type="hidden" id="datepicker" value="{{ date.strftime('%m/%d/%Y') }}"/></li>
+        <li><a href="{{ request.url_for('/times/list_user', date=next_date.strftime('%d.%m.%Y'), user_id=user.id) }}">{% trans %}Next day{% endtrans %}</a></li>
+    </ul>
+    {% include "templates/times/_list.html" %}
+
+    {% if can_modify %}
+        <div class="time-entrie-forms row-fluid">
+            <div class="box span4">
+                <h2 class="content-header">{% trans %}Add time entry{% endtrans %}</h2>
+                <div class="content_box">
+                    {% with form_field=form_field %}
+                        {% include "times/_addform.html" %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "templates/times/report/_base.html" %}
+
+{% set current_page = 'pivot' %}
+{% set title = _('Time report for %s') % month_start.strftime('%m.%Y') %}
+
+{% block body %}
+    <ul class="pager">
+        <li><a href="{{ request.url_for('/times/report/pivot', month=prev_date.strftime('%m.%Y')) }}">{% trans %}Previous month{% endtrans %}</a></li>
+        <li><input type="hidden" id="datepicker" value="{{ month_start.strftime('%m/%d/%Y') }}"/></li>
+        <li><a href="{{ request.url_for('/times/report/pivot', month=next_date.strftime('%m.%Y')) }}">{% trans %}Next month{% endtrans %}</a></li>
+    </ul>
+    <table class="table table-bordered table-hover" id="time-report">
+        <thead>
+            <tr>
+                <th class="index"></th>
+                <th class="username">{% trans %}User\date{% endtrans %}</th>
+                {% for date in dates %}
+                <th class="{% if date == today %}current_date {% endif %}{% if is_holiday(date) %}holiday_date{% endif %}">{{ date.day }}</th>
+                {% endfor %}
+                <th class="wrk">{% trans %}Wrk (diff){% endtrans %}</th>
+                <th>{% trans %}Exp.{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="stats">
+                <td class="index"></td><td class="username">{% trans %}Daily sum{% endtrans %}</td>
+                {% for date in dates %}
+                <td class="{% if date == today %}current_date {% endif %}{% if is_holiday(date) %}holiday_date{% endif %}">{{ '%.0f' % daily_sums[date] if daily_sums[date] else '.' }}</td>
+                {% endfor %}
+                <td>{{ '%.0f' % monthly_sum }}</td><td></td>
+            </tr>
+            {% for user in users %}
+            <tr class="{{ loop.cycle('odd', 'even') }}{% if user == request.user %} current_user{% endif%}{% if user.freelancer %} freelancer{% endif %}">
+                <td class="index">{{ loop.index }}</td>
+                <td class="username">
+                    <a class="x-user-tooltip-{{user.id}}" href="{{ request.url_for('/user/view', user_id=user.id) }}">
+                        {{ user.name }}
+                        {% if user.freelancer %}
+                        ({% if user.is_programmer %}P{% endif %}{% if user.is_frontend_developer %}F{% endif %}{% if user.is_graphic_designer %}G{% endif %})
+                        {% endif %}
+                    </a>
+                </td>
+                {% for date in dates %}
+                <td class="{% if date == today %}current_date {% endif %}{% if late[user.id][date] %}{% if excuses[user.id][date.strftime('%Y-%m-%d')] %}late-light {% else %}late {% endif %}{% endif %}">
+                    {% if user == request.user %}
+                    <a href="{{ request.url_for('/times/list', date=date.strftime('%d.%m.%Y')) }}"
+                       title="{{ user.name }} / {{ date }}">{{ '%.2f' % entries[user.id][date] if entries[user.id][date] else '.' }}
+                    </a>
+                    {% else %}
+                    <a href="{{ request.url_for('/times/list_user', date=date.strftime('%d.%m.%Y'), user_id=user.id) }}"
+                       title="{{ user.name }} / {{ date }}">{{ '%.2f' % entries[user.id][date] if entries[user.id][date] else '.' }}
+                    </a>
+                    {% endif %}
+                </td>
+                {% endfor %}
+                <td class="{% if count_of_required_month_hours[user.id] == 0 %}{% elif (sums[user.id] - count_of_required_hours_to_today[user.id] > 0) %}enough{% else %}too-small{% endif %}">
+                    {{ '%.2f' % sums[user.id] }}{% if (count_of_required_month_hours[user.id]) > 0 %} ({{ '%.2f' % (sums[user.id] - count_of_required_hours_to_today[user.id]) }}) {% endif %}
+                </td>
+                <td>{{ count_of_required_month_hours[user.id] or ''}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <ul class="agenda">
+        <li class="late">{% trans %}Changed{% endtrans %}</li>
+    </ul>
+{% endblock %}
+
+{% block tail_script %}
+<script>
+    $(function(){
+        $('#datepicker').datepicker({
+            onChangeMonthYear: function(year, month, inst) {
+                window.location = "{{ request.url_for('/times/report/pivot') }}?month="+ month + "." + year;
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "templates/employees/list/_absence_base.html" %}
+
+{% set current_subpage = 'absence' %}
+
+{% block subbody %}
+    {% if request.has_perm('admin') %}
+    <div class="form_late">
+        <a class="a_popup btn" href="{{ request.url_for('/employees/form/create_absence') }}">Add application for employee</a>
+    </div>
+    {% endif %}
+    {{ filters_form(form) }}
+    <table class="table table-bordered table-hover project_times table_late">
+    <thead>
+        <tr>
+            <th class="added">{% trans %}Added{% endtrans %}</th>
+            <th class="added">{% trans %}Type{% endtrans %}</th>
+            <th class="user">{% trans %}Employee{% endtrans %}</th>
+            <th class="date">{% trans %}Start date{% endtrans %}</th>
+            <th class="date">{% trans %}End date{% endtrans %}</th>
+            <th class="days">{% trans %}Days number{% endtrans %}</th>
+            <th class="explanation">{% trans %}Remarks{% endtrans %}</th>
+            <th class="review">{% trans %}Review{% endtrans %}</th>
+            {% if request.has_perm('admin') %}
+                <th class="options"></th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+    {% if absences %}
+        {% for absence in absences %}
+            <tr data-id="{{ absence.id }}" data-name="absence" class="{{ loop.cycle('odd', 'even') }}">
+                <td title="{{ absence.modified_ts.strftime('%d.%m.%Y %H:%M') }}"> {{ absence.added_ts.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td> {{ absence.pretty_type }}</td>
+                <td> {{ absence.user.name }}</td>
+                <td> {{ absence.date_start }}</td>
+                <td> {{ absence.date_end }}</td>
+                <td> {{ absence.days }}</td>
+                <td> {{ absence.remarks }}</td>
+                <td class="review_td"> {{ review(absence.review or '') }}</td>
+                {% if request.has_perm('admin') %}
+                    <td><a title="{% trans %}Delete{% endtrans %}" class="button delete btn btn-danger" href="#">x</a></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    {% else %}
+        <tr><td colspan="8">{% trans %}No results{% endtrans %}</td></tr>
+    {% endif %}
+    </tbody>
+    </table>
+{% endblock subbody %}
+

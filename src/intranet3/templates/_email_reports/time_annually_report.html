@@ -1,0 +1,44 @@
+{% if excuses_error %}
+    <ul style="background-color: red"">
+        <li>Can't fetch excuses from spreadsheet:</li>
+        <li>{{ excuses_error }}</li>
+    </ul>
+{% endif %}
+<a href="{{ config['FRONTEND_PREFIX'] }}{{ request.url_for('/report/wrongtime/annually', year=year_start.year) }}">Raport w intranecie</a>
+<table style="border: 0px; padding: 0px">
+    <thead>
+        <tr>
+            <th style="width:200px">User</th>
+            <th style="width: 60px;">Sum</th>
+            {% for month in range(12) %}
+                <th style="width:40px">{{ month + 1 }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+            {% if loop.index % 2 == 0 %}
+                <tr style="background-color: #f2f2f2">
+            {% else %}
+                <tr style="background-color: #f9f9f9">
+            {% endif %}
+            <td>
+                {{ user.name }}
+            </td>
+            {% set user_entry = entries.get(user.id) %}
+            {% set user_stats = stats.get(user.id) %}
+            {% if not user_entry %}
+                {% set user_entry = [0]*12 %}
+                {% set user_stats = [0] %}
+            {% endif %}
+
+            <td style="border-right: 1px solid black; {% if user_stats[0] > limit*12 %}color: red; {% endif %}">
+            {% if user_stats[0] %}{{ user_stats[0] }}{% else %}{% endif %}
+            </td>
+            {% for entry in user_entry %}
+                <td style="{% if entry > limit %}color: red;{% endif %}">{% if entry %}{{ entry }}{% else %}{% endif %}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

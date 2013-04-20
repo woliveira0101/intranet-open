@@ -1,0 +1,28 @@
+{% extends "templates/project/client/_base.html" %}
+
+{% set current_page = 'times' %}
+
+{% block head_script %}
+    <script src="{{ request.static_path('intranet3:static/js/vendor/organictabs.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+    <div class="tickets_report">
+        <form action="{{ request.url_for('/project/client/times', project_id=project.id) }}" data-alt_action="{{ request.url_for("/times/tickets/excel") }}" data-alt_method="GET" method="GET" accept-charset="utf-8">
+            {{ form_field(form.date_range, _('format dd-mm-yyyy - dd-mm-yyyy'), class='daterange') }}
+            <input type="hidden" name="projects" value="{{ project.id }}">
+            <div class="selectors" id="ticket-grouping">
+                {{ form_field(form.group_by_bugs, _('Group by bugs')) }}
+                {{ form_field(form.group_by_user, _('Group by employee')) }}
+            </div>
+            {{ form_field(form.without_bug_only, _('Without bug only')) }}
+            <div class="buttons">
+                <input type="submit" value="{% trans %}Filter{% endtrans %}" class="button btn btn-primary" />
+                <a class="button btn btn-success alt-submit" href="#">{% trans %}Download{% endtrans %}</a>
+                <img class="ajax-loader" title="{% trans %}Bug titles loading{% endtrans %}" src="/static/img/ajax.gif"/>
+            </div>
+        </form>
+    </div>
+
+    {% include 'templates/times/tickets/_time_list.html' %}
+{% endblock body %}

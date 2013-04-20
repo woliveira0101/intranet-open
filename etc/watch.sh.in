@@ -1,0 +1,2 @@
+#!/bin/bash
+${buildout:bin-directory}/less-monitor -f -x -d src/intranet3/static/less -o ${relative_output_dir}

@@ -1,0 +1,34 @@
+{% extends "templates/_base_one_column.html" %}
+{% block container %}
+<div id="left_column">
+    <ul class="nav nav-tabs nav-stacked left_ul">
+        {% if request.is_user_in_group('admin') %}
+            {% include "_menu_left/admin.html" %}
+        {% elif request.user.is_coordinator %}
+            {% include "_menu_left/coordinator.html" %}
+        {% elif request.is_user_in_group('user') %}
+            {% include "_menu_left/user.html" %}
+        {% elif request.is_user_in_group('client') %}
+            {% include "_menu_left/client.html" %}
+        {% elif request.is_user_in_group('freelancer') %}
+            {% include "_menu_left/freelancer.html" %}
+        {% endif %}
+    </ul>
+</div>
+
+<div id="right_column">
+  <div id="right_column_content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert {{category}}">
+      <a href="#" class="close" data-dismiss="alert">&times;</a>
+      {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    {% block content %}<!-- main content area -->{% endblock %}
+  </div>
+</div>
+{% endblock container %}

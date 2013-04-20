@@ -1,0 +1,48 @@
+{% if excuses_error %}
+    <ul style="background-color: red">
+        <li>Can't fetch excuses from spreadsheet:</li>
+        <li>{{ excuses_error }}</li>
+    </ul>
+{% endif %}
+<a href="{{ config['FRONTEND_PREFIX'] }}{{ request.url_for('/report/late/annually', year=year_start.year) }}">Raport w intranecie</a>
+<table style="border: 0px">
+    <thead>
+    <tr>
+        <th style="width:200px">User</th>
+        <th style="width: 60px;">Sum</th>
+        {% for month in range(12) %}
+            <th style="width:40px">{{ month + 1 }}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+            {% if loop.index % 2 == 0 %}
+                <tr style="background-color: #f2f2f2">
+            {% else %}
+                <tr style="background-color: #f9f9f9">
+            {% endif %}
+                <td>{{ user.name }}{% if user.freelancer %}({% if user.is_programmer %}P{% endif %}{% if user.is_frontend_developer %}F{% endif %}{% if user.is_graphic_designer %}G{% endif %}){% endif %}</td>
+
+                {% set user_data = data.get(user.id) %}
+                {% set user_stats = stats.get(user.id) %}
+
+                {% if not user_stats %}
+                    <td style="border-right: 1px solid black;"></td>
+                {% else %}
+                    <td style="text-align: right; border-right: 1px solid black;{% if user_stats[0] | timedelta_to_minutes > late_limit*12 %}color: red; {% endif %}">{{ user_stats[0] | timedelta_to_minutes }}</td>
+                {% endif %}
+
+                {% if not user_data %}
+                    {% for period in range(12) %}
+                        <td></td>
+                    {% endfor %}
+                {% else %}
+                    {% for late in user_data %}
+                        <td style="text-align: right; {% if late | timedelta_to_minutes > late_limit %}color: red;{% endif %}">{% if late != deltazero %}{{ late | timedelta_to_minutes }}{% endif %}</td>
+                    {% endfor %}
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

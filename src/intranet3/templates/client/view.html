@@ -1,0 +1,91 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans %}View client{% endtrans %}</li>
+        </ul>
+    </div>
+    <table class="table table-bordered table-hover">
+        <tr>
+            <td>{% trans %}Client name{% endtrans %}: </td> <td>{{ client.name }}</td>
+        </tr>
+        <tr class="x-user-tooltip-{{client.coordinator_id}}">
+            <td>{% trans %}Coordinator{% endtrans %}: </td> <td>{% if client.coordinator %}{{ client.coordinator.email }}{% else %}Not set{% endif %}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Selector{% endtrans %}: </td> <td>{{ client.selector or '' }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Emails{% endtrans %}: </td> <td>{{ client.emails }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Link to google docs{% endtrans %}: </td> <td>{{ client.google_card or '' }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Link to google wiki{% endtrans %}: </td> <td>{{ client.google_wiki or '' }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Link to mailing{% endtrans %}: </td> <td>{{ client.mailing_url or '' }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Link to wiki{% endtrans %}: </td> <td>{{ client.wiki_url or '' }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Active{% endtrans %}: </td> <td>{% if client.active == True %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Street{% endtrans %}: </td> <td>{{ client.street or '' }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}City{% endtrans %}: </td> <td>{{ client.city or '' }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Post Code{% endtrans %}: </td> <td>{{ client.postcode or '' }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}NIP{% endtrans %}: </td> <td>{{ client.nip or '' }}</td>
+        </tr>
+        <tr>
+            <td>{% trans %}Note{% endtrans %}: </td> <td>{{ client.note or '' }}</td>
+        </tr>
+        
+    </table>
+    <div class="buttons">
+        <a href="{{ request.url_for('/client/edit', client_id=client.id) }}" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
+    </div>
+
+    <div class="tabs head_project">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans %}Projects{% endtrans %}</li>
+            {% if request.has_perm('coordinator') %}
+            <li>
+                <a href="{{ request.url_for('/project/add', client_id=client.id) }}">{% trans %}Add{% endtrans %}</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <th>{% trans %}Project name{% endtrans %}</th>
+            <th>{% trans %}Active{% endtrans %}</th>
+            <th>{% trans %}Actions{% endtrans %}</th>
+        </thead>
+        <tbody>
+        {% for project in client.projects %}
+        <tr>
+            <td>
+                <a href="{{ request.url_for('/project/edit', project_id=project.id) }}">{{ project.name }}</a>
+            </td>
+            <td>
+                {% if project.active == True %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}
+            </td>
+            <td>
+                <a href="{{ request.url_for('/project/delete', project_id=project.id) }}" class="button btn btn-danger">{% trans %}Delete{% endtrans %}</a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    
+{% endblock %}

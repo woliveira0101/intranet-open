@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+<h1 style="font-size: 1.6em;font-weight: bold;border-bottom: 1px solid #CCC;color: #444;padding: 0 0 5px;margin: 15px 0 10px;">
+    {{ title }}
+</h1>
+<table style="border: 1px solid #EEE; width: auto;">
+    <thead>
+        <tr style="border-bottom: 1px solid #EEE;">
+            <th style="background-color: #C4C5C6 !important;">
+                ID
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Tytuł
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Zgłaszający
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Assignee
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Projekt
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Komponent
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Priority / status
+            </th>
+            <th  style="background-color: #C4C5C6 !important;">
+                Depends on
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Blocks
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Data zgloszenia
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Data modyfikacji
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Deadline
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Projekt
+            </th>
+            <th style="background-color: #C4C5C6 !important;">
+                Godziny
+            </th>            
+        </tr>
+    </thead>
+    <tbody>
+        {% for bug in bugs %}
+        <tr style="{{ loop.cycle('background: #FFF;', 'background: #F6F6F6;') }}border-bottom: 1px solid #EEE;">
+            <td>
+                <a href="{{bug.get_url()}}" class="external">{{ bug.id }}</a>
+            </td>
+            <td>
+                <a href="{{bug.get_url()}}" class="fancybox">{{ bug.desc }}</a>
+            </td>
+            <td>
+                {{ bug.reporter.name }}
+            </td>
+            <td>
+                {{ bug.owner.name }}
+            </td>
+            <td>
+                {{ bug.project_name }}
+            </td>
+            <td>
+                {{ bug.component_name }}
+            </td>
+            <td>
+                <span class="priority priority_{{ bug.severity_number }}">{{ bug.severity }}</span>
+                <div style="clear: both;">({{ bug.status|lower }})</div>
+            </td>
+            <td>
+                {% for bug_id, value in bug.dependson.iteritems() %}
+                    <a href="{{bug.get_url(bug_id)}}" class="external {% if value.resolved %}closed{% endif %}" title="{{ value.desc }}">
+                        {{ bug_id }}
+                    </a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td>
+                {% for bug_id, value in bug.blocked.iteritems() %}
+                    <a href="{{bug.get_url(bug_id)}}" class="external {% if value.resolved %}closed{% endif %}" title="{{ value.desc }}">
+                        {{ bug_id }}
+                    </a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td>
+                {{ bug.opendate.strftime('%Y-%m-%d') }}
+            </td>
+            <td>
+                {{ bug.changeddate.strftime('%Y-%m-%d') }}
+            </td>
+            <td>
+                {{ bug.deadline }}
+            </td>
+            <td>
+                {% if bug.project %}
+                    {{ bug.project.client.name }} / {{ bug.project.name }}
+                {% endif %}
+            </td>
+            <td>
+                {% if bug.project %}
+                <a href="{{ request.url_for('/times/list_bug', project_id=bug.project.id, bug_id=bug.id) }}">
+                    {{ '%.2f' % bug.time }}
+                </a>
+                {% else %}
+                    {{ '%.2f' % bug.time }}
+                {% endif %}
+            </td>            
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

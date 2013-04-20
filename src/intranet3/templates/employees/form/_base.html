@@ -1,0 +1,52 @@
+{% macro form_field(field, description) -%}
+<div>
+    <dl>
+        <dt>{{ field.label }}</dt>
+        <dd>
+            {% if field.errors %}
+                <ul class="errors">
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div class="description">{{ description }}</div>
+            {{ field(**kwargs)|safe }}
+        </dd>
+    </dl>
+</div>
+{%- endmacro %}
+
+
+<div class="popup">
+    {% block content %}
+    {% endblock content %}
+</div>
+
+
+<script>
+    $('form').submit(function(){
+        var $this = $(this);
+        var href = $(this).attr('action');
+        $.post(href, $this.serialize(), function(data){
+            $('.popup').parent().html(data);
+        });
+        return false;
+
+    });
+
+    $('.datepicker').datepicker({
+        dateFormat: 'dd/mm/yy',
+        showOn: 'focus'
+    });
+
+    $('input[type="submit"]').ajaxStart(function(){
+        $(this).prop('disabled', true);
+    }).ajaxStop(function(){
+        $(this).prop('disabled', false);
+    });
+
+</script>
+
+{% block tail_script %}<!-- Defer-capable JavaScript block -->{% endblock %}
+

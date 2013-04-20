@@ -1,0 +1,56 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+<ul id="sprint-nav" class="nav nav-tabs" xmlns="http://www.w3.org/1999/html">
+    <li class="title">{% trans sprint_name=sprint.name%}Sprint {{ sprint_name }}{% endtrans %}</li>
+    {% if page == 'bugs' %}
+        <li class="active"><a>{% trans %}Tasks{% endtrans %}</a></li>
+    {% else %}
+        <li><a href="{{ request.url_for('/scrum/sprint/show', sprint_id=sprint.id) }}">{% trans %}Tasks{% endtrans %}</a></li>
+    {% endif %}
+    {% if page == 'charts' %}
+        <li class="active"><a>{% trans %}Burndown chart{% endtrans %}</a></li>
+    {% else %}
+        <li><a href="{{ request.url_for('/scrum/sprint/charts', sprint_id=sprint.id) }}">{% trans %}Burndown chart{% endtrans %}</a></li>
+    {% endif %}
+    {% if page == 'board' %}
+        <li class="active"><a>{% trans %}Board{% endtrans %}</a></li>
+    {% else %}
+        <li><a href="{{ request.url_for('/scrum/sprint/board', sprint_id=sprint.id) }}">{% trans %}Board{% endtrans %}</a></li>
+    {% endif %}
+</ul>
+<div class="stats-container row-fluid">
+    <div class="span12">
+        <div class="row-fluid">
+            <div class="well well-small">
+                <div class="row-fluid">
+                    <div class="span2">
+                        <ul class="number_box">
+                            <li><span>{% trans %}Start date{% endtrans %}</span> {{ info['start'] }}</li>
+                            <li><span>{% trans %}End date{% endtrans %}</span>{{ info['end'] }}</li>
+                            <li><span>{% trans %}Days left{% endtrans %}</span>{{ info['days_remaining'] }}</li>
+                            <li><span>{% trans %}Total tasks{% endtrans %}</span>{{ info['total_bugs'] }}</li>
+                        </ul>
+                    </div>
+                    <div class="span2">
+                        <ul class="number_box">
+                            <li><span>{% trans %}Points achieved{% endtrans %}</span>{{ sprint.achieved_points }}</li>
+                            <li><span>{% trans %}Points commited{% endtrans %}</span> {{ sprint.commited_points }}</li>
+                            <li><span>{% trans %}Total hours{% endtrans %}</span>{{ sprint.worked_hours | round | int }}</li>
+                            <li><span>{% trans %}Velocity per hour{% endtrans %}</span>{{ '%.2f' % sprint.velocity }}</li>
+                        </ul>
+                    </div>
+                    <div class="span8">
+                        <h6>Goal</h6>
+                        <pre class="goal">{{ sprint.goal }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block body %}
+{% endblock body %}
+
+{% endblock content %}

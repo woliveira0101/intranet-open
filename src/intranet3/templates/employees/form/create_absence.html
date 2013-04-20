@@ -1,0 +1,17 @@
+{% extends "templates/employees/form/_base.html" %}
+
+{% block content %}
+    <h2 class="content-header">{% trans %}Absence / Holiday{% endtrans %}</h2>
+    <form class="absence-form" action="{{ request.url_for('/employees/form/create_absence') }}" method="post" accept-charset="utf-8">
+        {{ csrf_field }}
+        {{ form_field(form.popup_user_id, _('Employee')) }}
+        {{ form_field(form.popup_date_start, _('Format DD/MM/RRRR'), class='datepicker') }}
+        {{ form_field(form.popup_date_end, _('Format DD/MM/RRRR'), class='datepicker') }}
+        {{ form_field(form.popup_type, _('Rodzaj') ) }}
+        {{ form_field(form.popup_remarks, _('Uwagi')) }}
+        <div class="buttons">
+            <input type="submit" value="{% trans %}Submit{% endtrans %}" class="button btn"/>
+            <img class="ajax-loader" src="/static/img/ajax.gif"/>
+        </div>
+    </form>
+{% endblock content %}

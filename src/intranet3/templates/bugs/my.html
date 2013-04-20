@@ -1,0 +1,70 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+<div class="my-bugs">
+    <ul class="nav nav-tabs">
+        <li class="title">{% trans %}My bugs{% endtrans %}</li>
+        {% if resolved %}
+            <li class="active"><a>{% trans %}Show resolved{% endtrans %}</a></li>
+            <li><a href="{{ request.url_for('/bugs/my') }}">{% trans %}Show unresolved{% endtrans %}</a></li>
+        {% endif %}
+        {% if not resolved %}
+            <li><a href="{{ request.url_for('/bugs/my', resolved=1) }}">{% trans %}Show resolved{% endtrans %}</a></li>
+            <li class="active"><a>{% trans %}Show unresolved{% endtrans %}</a></li>
+        {% endif %}
+        <li><img class="ajax-loader" title="Loading new bugs" src="/static/img/ajax.gif"/></li>
+    </ul>
+    <div id="bug_table">
+        {% include "bugs/_list.html" %}
+
+    </div>
+</div>
+{% endblock %}
+
+{% block tail_script %}
+<script type="text/javascript">
+    $(function(){
+        var DS = (function() {
+            var uid = new Date,
+                    storage,
+                    result;
+            try {
+                (storage = window.localStorage).setItem(uid, uid);
+                result = storage.getItem(uid) == uid;
+                storage.removeItem(uid);
+                return result && storage;
+            } catch(e) {}
+        }());
+
+        var url = '{{ url }}';
+
+        var $bug_table = $('#bug_table');
+        if(DS){
+            var data = localStorage.getItem(url);
+            if(data){
+                $bug_table.html(data);
+                $bug_table.find('table').tablesorter({
+                    headers: {
+                        7: {
+                            sorter:'priority'
+                        }
+                    }
+                });
+            }
+        }
+        $.get(url, function(data){
+            $bug_table.html(data);
+            $bug_table.find('table').tablesorter({
+                headers: {
+                    7: {
+                        sorter:'priority'
+                    }
+                }
+            });
+            if(DS){
+                localStorage.setItem(url, data);
+            }
+        });
+    });
+</script>
+{% endblock %}

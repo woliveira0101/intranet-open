@@ -1,0 +1,15 @@
+{% extends "templates/employees/list/_base.html" %}
+
+{% set current_page = 'absence' %}
+
+{% block body %}
+    <div class="tabs subtabs">
+        <ul class="nav nav-tabs">
+            <li class="{% if current_subpage == 'absence' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/absence') }}">{% trans %}Nieobecność{% endtrans %}</a></li>
+            <li class="{% if current_subpage == 'pivot' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/absence_pivot') }}">{% trans %}Pivot{% endtrans %}</a></li>
+        </ul>
+    </div>
+  {% block subbody %}
+  {% endblock subbody %}
+{% endblock body %}
+

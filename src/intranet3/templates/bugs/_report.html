@@ -1,0 +1,76 @@
+{% macro project_quick_links(project) -%}
+<div class="projects-quick-links" xmlns="http://www.w3.org/1999/html">
+    <a class="external btn" href="{{ project.get_new_bug_url() }}" target="_blank"><i class="icon-plus-sign"></i> {% trans %}New Bu{% endtrans %}g</a>
+    <a class="btn" href="{{ request.url_for('/scrum/sprint/list', project_id=project.id) }}"><img src='/static/img/sprint.png'> {% trans %}Sprints{% endtrans %}</a>
+    <a class="btn" href="{{ request.url_for('/times/tickets/report', projects=project.id, group_by_project='y', group_by_client='y', group_by_user='y') }}"><i class="icon-time"></i> {% trans %}Times{% endtrans %}</a>
+    {% if project.google_wiki %}
+    <a class="external btn" href="{{ project.google_wiki }}"><i class="icon-file"></i>Wiki</a>
+    {% endif %}
+</div>
+{%- endmacro %}
+
+<table class="table table-bordered table-hover bugs-list report">
+    <thead>
+        <tr>
+            <th class="name_client">{% trans %}Client{% endtrans %}</th>
+            <th class="name_project">{% trans %}Project{% endtrans %}</th>
+            <th class="number_all">&nbsp;</th>
+            {% for user in people %}
+            <th class="x-user-tooltip-{{user.id}} username{% if user.freelancer %} freelancer{% endif %} name_user"><a href="{{ request.url_for('/user/view', user_id=user.id) }}" title="{% if user.freelancer %}freelancer {% endif %}{{ user.email }}">{{ user.name.replace(' ', '&nbsp;')|safe }}{% if user.freelancer %}&nbsp;({% if user.is_programmer %}P{% endif %}{% if user.is_frontend_developer %}F{% endif %}{% if user.is_graphic_designer %}G{% endif %}){% endif %}</a></th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="result">
+                <a href="{{ url_constructor(all_bugs=1, resolved=resolved, all_projects=show_all_projects, sort_by_date=sort_by_date) }}">{{ total }}</a>
+            </td>
+            {% for user in people %}
+                <td class="result">
+                    <a href="{{ request.url_for('/bugs/user', user_id=user.id, resolved=resolved, all_projects=show_all_projects, sort_by_date=sort_by_date) }}">{{ people_sums[user.id] }}</a>
+                </td>
+            {% endfor %}
+        </tr>
+        {% for client, projects in clients | dictsort2(attribute='name') %}
+            {% for project in projects | sort(attribute='name') %}
+            
+                {% if loop.first %}
+                    <tr class="client-start">
+                    <td class="client-name" rowspan="{{ projects | length }}">
+                        <div>{{ client.name }}</div>
+                        <div>(<a href="{{ request.url_for('/bugs/client', client_id=client.id, resolved=resolved, all_projects=show_all_projects, sort_by_date=sort_by_date) }}" class="result">{{ client_sums[client.id] }}</a>)</div>
+                    </td>
+                {% else %}
+                    <tr class="client-continue">
+                {% endif %}
+                
+
+                <td class="project-name">
+                    <div class="name-and-ico"><a href="{{ request.url_for('/project/client/backlog', project_id=project.id) }}">{{ project.name }}</a><i class="icon-wrench project-menu"></i></div>
+                    <div class="popover-content" style="display:none">
+                        {{ project_quick_links(project) }}
+                    </div>
+                </td>
+                <td class="result">
+                    <a href="{{ request.url_for('/bugs/project', project_id=project.id, resolved=resolved, all_projects=show_all_projects, sort_by_date=sort_by_date) }}">{{ project_sums[project.id] }}</a>
+                </td>
+                {% for user in people %}
+                    <td class="user-name"><a href="{{ request.url_for('/bugs/project_user', project_id=project.id, user_id=user.id, resolved=resolved, all_projects=show_all_projects, sort_by_date=sort_by_date) }}" title="{{ project.name }} / {{ user.name }}">{{ bugs[project.id][user.id]|default('.', true) }}</a></td>
+                {% endfor %}
+                
+            </tr>
+            {% endfor %}
+        {% endfor %}
+        <tr class="other-projects">
+            <td class="project-name" colspan=2>{% trans %}Other projects{% endtrans %}</td>
+            <td class="result">
+                <a href="{{ request.url_for('/bugs/other_projects') }}">{{ project_sums[None] }}</a>
+            </td>
+            {% for user in people %}
+                <td><a href="{{ request.url_for('/bugs/other_projects_user', user_id=user.id, resolved=resolved, sort_by_date=sort_by_date) }}" title="{% trans %}Other projects{% endtrans %} / {{ user.name }}">{{ bugs[None][user.id]|default('.', true) }}</a></td>
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>

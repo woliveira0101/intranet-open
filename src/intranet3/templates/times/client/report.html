@@ -1,0 +1,84 @@
+{% extends "templates/times/client/_base.html" %}
+
+{% set current_page = 'client_project' %}
+
+{% block body %}
+    <form action="{{ request.url_for('/times/client/report') }}" method="post" accept-charset="utf-8" class="client_form">
+        {{ csrf_field }}
+        {{ form_field(form.date, _('Month (format dd/mm/yyyy)'), class='datepicker') }}
+        {{ form_field(form.clients, _('Clients')) }}
+        {{ form_field(form.groupby, _('Group by')) }}
+        <div class="buttons">
+            <input type="submit" value="{% trans %}Filter{% endtrans %}" class="button btn btn-primary" />
+        </div>
+    </form>
+
+        <table class="table table-bordered table-hover project_times project_client">
+        {% if groupby == 'client' %}
+            <thead>
+            <tr>
+                <th class="client">{% trans %}Client{% endtrans %}</th>
+                <th class="hours">{% trans %}Hours{% endtrans %}</th>
+                <th class="percentage">{% trans %}% in all hours{% endtrans %}</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% if data %}
+                    {% for d in data %}
+                        <tr class="{{ loop.cycle('odd', 'even') }}">
+                            <td>{{ d[0] }}</td>
+                            <td class="number">{{ d[1] | comma_number }}</td>
+                            {% if d[0] != 'STX Next' %}
+                                <td class="number">{{ ((d[1]/our_monthly_hours)*100) | comma_number }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td>SUM:</td>
+                        <td class="number">{{ whole_sum | comma_number }}</td>
+                        <td class="number">{{ ((whole_sum_without_us/our_monthly_hours)*100) | comma_number  }}</td>
+                    </tr>
+                {% else %}
+                <tr><td colspan="3">{% trans %}No results{% endtrans %}</td></tr>
+                {% endif %}
+            </tbody>
+        {% elif groupby == 'project' %}
+            <thead>
+            <tr>
+            <tr>
+                <th class="client">{% trans %}Client{% endtrans %}</th>
+                <th class="project">{% trans %}Project{% endtrans %}</th>
+                <th class="hours">{% trans %}Hours{% endtrans %}</th>
+                <th class="percentage">{% trans %}% in all hours{% endtrans %}</th>
+            </tr>
+            </tr>
+            </thead>
+            <tbody>
+                {% if data %}
+                    {% for d in data %}
+                        <tr class="{{ loop.cycle('odd', 'even') }}">
+                            <td>{{ d[0] }}</td>
+                            <td>{{ d[1] }}</td>
+                            <td class="number">{{ d[2] | comma_number }}</td>
+                            {% if d[0] != 'STX Next' %}
+                                <td class="number">{{ ((d[2]/our_monthly_hours)*100) | comma_number }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td></td>
+                        <td>{% trans %}Sum{% endtrans %}:</td>
+                        <td class="number">{{ whole_sum | comma_number }}</td>
+                        <td class="number">{{ ((whole_sum_without_us/our_monthly_hours)*100) | comma_number  }}</td>
+                    </tr>
+                {% else %}
+                <tr><td colspan="4">{% trans %}No results{% endtrans %}</td></tr>
+                {% endif %}
+            </tbody>
+        {% endif %}
+        </table>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="title">{% trans %}View project{% endtrans %}</li>
+        </ul>
+    </div>
+    <div>
+        <p>
+            <b>{% trans %}Project name{% endtrans %}: </b> {{ project.name }}
+        </p>
+        <p class="x-user-tooltip-{{ project.coordinator_id}}">
+            <b>{% trans %}Coordinator{% endtrans %}: </b> {% if project.coordinator %}{{ project.coordinator.email }}{% else %}{% trans %}Not set{% endtrans %}{% endif %}
+        </p>
+        <p>
+            <b>{% trans %}Tracker{% endtrans %}: </b> {{ project.tracker.name }}
+        </p>
+        <p>
+            <b>{% trans %}Status{% endtrans %}: </b> {{ project.status_name }}
+        </p>
+        <p>
+            <b>{% trans %}Link to mailing{% endtrans %}: </b> {{ client.mailing_url or '' }}
+        </p>
+        <p>
+            <b>{% trans %}Link to wiki{% endtrans %}: </b> {{ client.wiki_url or '' }}
+        </p>
+        <p>
+            <b>{% trans %}Active{% endtrans %}: </b> {% if client.active == True %}Yes{% else %}No{% endif %}
+        </p>
+        <p>
+            <b>{% trans %}Street{% endtrans %}: </b> {{ client.street or '' }}
+        </p>
+        <p>
+            <b>{% trans %}City{% endtrans %}: </b> {{ client.city or '' }}
+        </p>
+        <p>
+            <b>{% trans %}Post Code{% endtrans %}: </b> {{ client.postcode or '' }}
+        </p>
+        <p>
+            <b>{% trans %}NIP{% endtrans %}: </b> {{ client.nip or '' }}
+        </p>
+        <p>
+            <b>{% trans %}Note{% endtrans %}: </b> {{ client.note or '' }}
+        </p>
+        
+    </div>
+    <div style="height: 30px;" class="buttons">
+        <a href="{{ request.url_for('/project/edit', project_id=project.id) }}" class="button btn">{% trans %}Edit{% endtrans %}</a>
+    </div>
+    
+{% endblock %}

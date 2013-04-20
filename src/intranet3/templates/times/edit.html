@@ -1,0 +1,15 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <h2 class="content-header">{% trans date=date.strftime('%d.%m.%Y') %}Edit time entry for {{ date }}{% endtrans %}</h2>
+    <form action="{{ request.url_for('/times/edit', timeentry_id=timeentry_id, next=next) }}" method="post" accept-charset="utf-8">
+        {{ csrf_field }}
+        {{ form_field(form.project_id, 'Project') }}
+        {{ form_field(form.time, 'Time as a float value', class='time_entry_time') }}
+        {{ form_field(form.ticket_id, 'Ticket identifier on the tracker') }}
+        {{ form_field(form.description, 'Time entry description', class='time_entry_description') }}
+        <div class="buttons">
+            <input class="btn" type="submit" value="{% trans %}Save{% endtrans %}"/>
+        </div>
+    </form> 
+{% endblock %}

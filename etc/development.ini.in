@@ -1,0 +1,140 @@
+###
+# app configuration
+# http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/environment.html
+###
+
+[app:main]
+use = egg:intranet3
+
+# reloading is not working because we are using twisted !
+pyramid.reload_templates = false
+pyramid.debug_authorization = false
+pyramid.debug_notfound = false
+pyramid.debug_routematch = false
+pyramid.default_locale_name = en
+pyramid.includes =
+    pyramid_debugtoolbar
+    pyramid_tm
+	pyramid_beaker
+	pyramid_jinja2
+	pyramid_exclog
+
+pyramid.autoroute.root_module = intranet3.views
+sqlalchemy.url = postgresql://postgres:postgres@localhost:5432/intranet2
+sqlalchemy.pool_size = 20
+sqlalchemy.pool_timeout = 60
+sqlalchemy.pool_recycle = 3600
+jinja2.extensions = jinja2.ext.with_
+jinja2.directories = intranet3:templates
+venusian.ignore = intranet3.loader
+
+session.type = ext:memcached
+session.url = 127.0.0.1:11211
+session.lock_dir = ${buildout:directory}/var/beaker/sessions
+session.secret = /AqcOMcps/3NEE7oEOayDn53A25iEFFl
+session.cookie_on_exception = true
+session.auto = True
+
+
+DEBUG = True
+CRON_DISABLE = True
+CRON_URL = http://localhost:5000
+CRON_SECRET_KEY = 8ubMb4p3mEm3hHaAc7aSa6k6vOJf2brZ
+MEMCACHE_URI = 127.0.0.1:11211
+REPEATER_FILE = ${buildout:directory}/var/repeater.pickle
+FRONTEND_PREFIX = http://localhost:5000
+DATASTORE_SYMMETRIC_PASSWORD = ItzxcWGXj78jjCSUaTGc4csEbC3axyinBK69JJlahDJb9ON16u08AFcIBheob2KDkbbczEjF4qD9
+AVATAR_PATH = ${buildout:directory}/var/thumbs/
+SESSION_KEY = s0ecret
+# gogole credentials for localhost:5000 !
+GOOGLE_CLIENT_ID = 317757513490-7jdrej7gk02l97va89vbfi10qbg78qet.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET = wVhyUuQjKH6xgYlM4RcTymaR
+GOOGLE_DEVELOPERS_KEY = AIzaSyCuzRrhRTNYmppML9EIxbCVCKXWc6HhUXU
+MANAGER_EMAIL = example@example.com
+COMPANY_DOMAIN = example.com
+COMPANY_MAILING_LIST = group@example.com
+ACCOUNTANT_EMAIL = accountant@example.com
+# ldap or google
+AUTH_TYPE = ldap
+
+# By default, the toolbar only appears for clients from IP addresses
+# '127.0.0.1' and '::1'.
+# debugtoolbar.hosts = 127.0.0.1 ::1
+
+###
+# wsgi server configuration
+###
+
+[server:main]
+use = egg:waitress#main
+host = 127.0.0.1
+port = 5000
+
+###
+# logging configuration
+# http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/logging.html
+###
+
+[loggers]
+keys = root, intranet3, twisted, sql
+
+[handlers]
+keys = console, mainfile, twistedfile, sqlfile, intranet3file
+
+[formatters]
+keys = generic
+
+[formatter_generic]
+format = %(asctime)s %(levelname)s [%(name)s] %(message)s
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = DEBUG
+formatter = generic
+
+[handler_twistedfile]
+class = handlers.TimedRotatingFileHandler
+args = (os.path.join(r'${buildout:directory}', 'var', 'log', 'twisted.log'), 'MIDNIGHT')
+level = DEBUG
+formatter = generic
+
+[handler_intranet3file]
+class = handlers.TimedRotatingFileHandler
+args = (os.path.join(r'${buildout:directory}', 'var', 'log', 'intranet.log'), 'MIDNIGHT')
+level = DEBUG
+formatter = generic
+
+[handler_sqlfile]
+class = handlers.TimedRotatingFileHandler
+args = (os.path.join(r'${buildout:directory}', 'var', 'log', 'sqlalchemy.log'), 'MIDNIGHT')
+level = DEBUG
+formatter = generic
+
+[handler_mainfile]
+class = handlers.TimedRotatingFileHandler
+args = (os.path.join(r'${buildout:directory}', 'var', 'log', 'main.log'), 'MIDNIGHT')
+level = DEBUG
+formatter = generic
+
+[logger_root]
+level = DEBUG
+handlers = console, mainfile
+
+[logger_twisted]
+level = DEBUG
+handlers = twistedfile
+qualname = twisted
+propagate = 0
+
+[logger_sql]
+level = DEBUG
+handlers = sqlfile
+qualname = sqlalchemy
+propagate = 0
+
+[logger_intranet3]
+level = DEBUG
+handlers = console, intranet3file
+qualname = intranet3
+propagate = 0
