@@ -16,7 +16,7 @@ from intranet3.forms.employees import (LateJustificationForm,
                                        AbsenceCreateForm,
                                        ABSENCE_TYPES)
 from intranet3.lib.employee import user_leave
-from intranet3.models import Late, WrongTime, Absence, Holiday, TimeEntry, Leave
+from intranet3.models import Late, WrongTime, Absence, Holiday, TimeEntry
 from intranet3.log import INFO_LOG
 
 LOG = INFO_LOG(__name__)

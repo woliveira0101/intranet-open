@@ -136,7 +136,7 @@ class cached_bug_fetcher(object):
 
 class BaseFetcher(object):
     
-    USER_AGENT = 'Intranet 2 Bug Fetcher'
+    USER_AGENT = 'Intranet Bug Fetcher'
     contextFactory = WebClientContextFactory()
     client = Agent(reactor, contextFactory)
     SLEEP_PERIOD = 0.1
@@ -315,6 +315,7 @@ class CSVParserMixin(object):
     
     def parse(self, data):
         converter = self.get_converter()
+
         if codecs.BOM_UTF8 == data[:3]:
             data = data.decode('utf-8-sig')
 

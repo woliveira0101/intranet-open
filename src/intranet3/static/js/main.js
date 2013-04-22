@@ -344,6 +344,8 @@
             showOn: 'focus'
         });
 
+        $('.bootstrap-tooltip').tooltip();
+
         $('.daterange').daterangepicker(
             {
                 ranges: {

@@ -16,7 +16,7 @@ WARN= WARN_LOG(__name__)
 
 class URLCronTask(object):
 
-    USER_AGENT = 'Intranet 2 Cron task'
+    USER_AGENT = 'STXNext Intranet 2 Cron task'
     contextFactory = WebClientContextFactory()
     client = Agent(reactor, contextFactory)
 

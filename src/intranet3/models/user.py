@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from pyramid.decorator import reify
 from sqlalchemy import Column, ForeignKey, orm, or_
-from sqlalchemy.types import String, Boolean, Integer, Date, Enum
+from sqlalchemy.types import String, Boolean, Integer, Date, Enum, Text
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql.expression import exists
@@ -36,10 +36,9 @@ levels = [
 ]
 
 
-
 class User(Base):
     __tablename__ = 'user'
-    LOCATIONS = {'poznan': u'Poznań', 'wroclaw': u'Wrocław'}
+    LOCATIONS = {'poznan': (u'Poznań', 'P'), 'wroclaw': (u'Wrocław', 'W')}
 
     id = Column(Integer, primary_key=True, nullable=False, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
@@ -60,11 +59,8 @@ class User(Base):
     phone = Column(String, nullable=True, default=None)
     phone_on_desk = Column(String, nullable=True, default=None)
     location = Column(
-        Enum(*LOCATIONS.keys(),
-             name='user_location_enum'
-        ),
-        nullable=False,
-        default=LOCATIONS.keys()[0],
+        Enum(*LOCATIONS.keys(), name='user_location_enum'), nullable=True,
+        default='poznan',
     )
 
     start_work = Column(
@@ -86,7 +82,7 @@ class User(Base):
 
     groups = Column(postgresql.ARRAY(String))
 
-    refresh_token = Column(String, nullable=True, default=None)
+    refresh_token = Column(String, nullable=False)
     _access_token = None
 
     @reify
@@ -147,9 +143,12 @@ class User(Base):
     def avatar_url(self):
         return '/user/avatar?user_id=%s' % self.id
 
-    def get_location(self):
-        return self.LOCATIONS[self.location]
-
+    def get_location(self, short=False):
+        if short:
+            return self.LOCATIONS[self.location][1]
+        else:
+            return self.LOCATIONS[self.location][0]
+    
     @property
     def levels_list(self):
         l = []
@@ -200,13 +199,14 @@ class Leave(Base):
     user_id = Column(Integer, ForeignKey(User.id), nullable=False, index=True)
     year = Column(Integer, nullable=False)
     number = Column(Integer, nullable=False)
+    remarks = Column(Text, nullable=False, index=False)
 
     __table_args__ = (UniqueConstraint('user_id', 'year', name='_user_year_uc'), {})
 
     @classmethod
     def get_for_year(cls, year):
         leaves = Leave.query.filter(Leave.year==year).all()
-        result = defaultdict(lambda:0)
+        result = defaultdict(lambda: (0, u''))
         for leave in leaves:
-            result[leave.user_id] = leave.number
+            result[leave.user_id] = (leave.number, leave.remarks)
         return result

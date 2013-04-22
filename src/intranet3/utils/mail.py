@@ -421,7 +421,6 @@ class MailerPOP3Client(POP3Client):
                 entry.modified_ts = date # TODO: this might remove an already existing lateness
                 session.add(entry)
                 LOG(u'Updating existing entry')
-                # TODO: for now we send notifications as new time instead of time modification
             else:
                 LOG(u'Omission of an existing entry because it is frozen')
         transaction.commit()

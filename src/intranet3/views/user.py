@@ -74,7 +74,7 @@ class Edit(BaseView):
             user.phone = form.phone.data or None
             user.phone_on_desk = form.phone_on_desk.data or None
             user.irc = form.irc.data or None
-            user.location = form.location.data
+            user.location = form.location.data or None
             user.start_work = form.start_work.data or None
             user.description = form.description.data or None
             if form.level.data:

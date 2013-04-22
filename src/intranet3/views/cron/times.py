@@ -13,6 +13,7 @@ from pyramid.renderers import render
 
 from intranet3 import config
 from intranet3 import helpers as h
+from intranet3.utils import idate
 from intranet3.utils import gdocs
 from intranet3.utils.views import CronView
 from intranet3.views.report.wrongtime import AnnuallyReportMixin
@@ -395,15 +396,37 @@ class ClientHours(CronView):
 class MissedHours(CronView):
 
     def action(self):
-        today = datetime.date.today()
-        self.last_day_of_prev_month = datetime.date(today.year, today.month, 1) - oneday
-        self.year_start = datetime.date(self.last_day_of_prev_month.year, 1, 1)
-        self.quarter_of_prev_month = int(self.last_day_of_prev_month.month / 4) + 1
-        self._send_email()
+        date = self.request.GET.get('date')
+        if date:
+            date = datetime.datetime.strptime(date, '%d.%m.%Y')
+        else:
+            date = datetime.date.today()
+        self.start, self.end = self._period(date)
+        self.months = idate.months_between(self.start, self.end)
         return Response('ok')
+
+    @classmethod
+    def _period(cls, date):
+        first_day_of_month = datetime.date(date.year, date.month, 1)
+        # last day of previous month
+        end = first_day_of_month - oneday
+
+        if date.month in (1, 4, 7, 10):
+            # two last quarters
+            start = first_day_of_month - relativedelta(months=6)
+        else:
+            # current quarter and previous quarter
+            start = idate.first_day_of_quarter(
+                idate.first_day_of_quarter(date) - oneday
+            )
+
+        return start, end
 
     def _send_email(self):
         data = self._get_data()
+        data['not_full_time_users'] = self._get_not_full_time_employees()
+        data['quarters'] = 'Q%s' % idate.quarter_number(self.start), 'Q%s' % idate.quarter_number(self.end)
+        data['months'] = self.months
         response = render(
             'intranet3:templates/_email_reports/missed_hours.html',
             data,
@@ -435,39 +458,38 @@ class MissedHours(CronView):
                 NOT ( 'freelancer' = ANY(u.groups) ) AND
                 t.user_id = u.id AND
                 u.is_active = true AND (
-                   (u.start_full_time_work IS NOT NULL AND t.date >= u.start_full_time_work AND t.date >= :year_start) OR
-                   (u.start_full_time_work IS NULL AND t.date >= :year_start)
+                   (u.start_full_time_work IS NOT NULL AND t.date >= u.start_full_time_work AND t.date >= :date_start) OR
+                   (u.start_full_time_work IS NULL AND t.date >= :date_start)
                 )
             GROUP BY
                 u.email
-        """).params(year_start=self.year_start)
-        result = h.groupby(entries, lambda row: row[0], lambda row: row[1])
-        return result
-
-    def _last_day_of_month(self, date):
-        next_month = h.next_month(date)
-        return datetime.date(next_month.year, next_month.month, 1) - oneday
-
-    def _first_day_of_next_month(self, date):
-        next_month = h.next_month(date)
-        return datetime.date(next_month.year, next_month.month, 1)
+        """).params(date_start=self.start)
+        return dict(entries.all())
 
     def _get_expected(self, first_day_of_work):
-        result = []
-        day = copy.copy(first_day_of_work)
-        while day < self.last_day_of_prev_month:
-            month_expected = h.get_working_days(day, self._last_day_of_month(day))
-            result.append(month_expected * 8)
-            day = self._first_day_of_next_month(day)
+        def first_day_of_next_month(date):
+            next_month = h.next_month(date)
+            return datetime.date(next_month.year, next_month.month, 1)
 
-        months = [0]* (self.last_day_of_prev_month.month - len(result)) + result
-        year = sum(months)
-        quarters = [ sum(months[0:3]), sum(months[3:6]), sum(months[6:9]), sum(months[9:12]) ]
+        months = []
+        day = first_day_of_work
+        while day < self.end:
+            month_expected = h.get_working_days(day, idate.last_day_of_month(day))
+            months.append(month_expected * 8)
+            day = first_day_of_next_month(day)
 
-        return quarters, months, year
+        empty_months = len(self.months) - len(months)
+        months = [0] * empty_months + months
+
+        quarters = sum(months[0:3]), sum(months[3:])
+
+        return quarters, months
 
     def _get_not_full_time_employees(self):
-        users = User.query.filter(User.start_full_time_work>datetime.date.today()).all()
+        users = User.query\
+                    .filter(User.start_full_time_work>datetime.date.today())\
+                    .order_by(User.name)\
+                    .all()
         return users
 
     def _get_data(self):
@@ -485,8 +507,8 @@ class MissedHours(CronView):
                 t.deleted = FALSE AND
                 NOT ( 'freelancer' = ANY(u.groups) ) AND
                 u.is_active = true AND (
-                  (u.start_full_time_work IS NOT NULL AND t.date >= u.start_full_time_work AND t.date >= :year_start) OR
-                  (u.start_full_time_work IS NULL AND t.date >= :year_start)
+                  (u.start_full_time_work IS NOT NULL AND t.date >= u.start_full_time_work AND t.date >= :date_start) OR
+                  (u.start_full_time_work IS NULL AND t.date >= :date_start)
                 ) AND
                 t.date <= :date_end
             GROUP BY
@@ -496,8 +518,14 @@ class MissedHours(CronView):
             ORDER BY
                 "month",
                 "email"
-        """).params(year_start=self.year_start, date_end=self.last_day_of_prev_month)
-        entries = h.groupby(entries, lambda row: (row[0], row[1]), lambda row: (row[2], row[3]))
+        """).params(date_start=self.start, date_end=self.end)
+        # entries:
+        # (user_id, user_email) -> [(month, hours_worked), (month, hours_worked), (month, hours), ...]
+        entries = h.groupby(
+            entries,
+            lambda row: (row[0], row[1]),
+            lambda row: (row[2], row[3]),
+        )
 
         first_day_of_work = self._get_first_day_of_work()
 
@@ -505,24 +533,24 @@ class MissedHours(CronView):
         expected_users = {}
         users = []
         for (user_id, user), hours in entries.iteritems():
-            months = [0]* (self.last_day_of_prev_month.month - len(hours)) + [ time for month, time in hours ]
-            year = sum(months)
-            quarters = [ sum(months[0:3]), sum(months[3:6]), sum(months[6:9]), sum(months[9:12]) ]
-            user_expected = self._get_expected(first_day_of_work[user][0])
-            if user_expected[0][self.quarter_of_prev_month] > quarters[self.quarter_of_prev_month]:
-                if user not in ('', config['MANAGER_EMAIL']):
+            months = [ time for month, time in hours ]
+            empty_months = len(self.months) - len(months)
+            months = [0] * empty_months + months
+            quarters = sum(months[0:3]), sum(months[3:])
+
+            expected_q, expected_m = self._get_expected(first_day_of_work[user])
+            if expected_q[0] > quarters[0] or expected_q[1] > quarters[1]:
+                if user not in (config['MANAGER_EMAIL'],):
                     users.append((user_id, user))
-                    undertime_users[user] = quarters, months, year
-                    expected_users[user] = user_expected
+                    undertime_users[user] = quarters, months
+                    expected_users[user] = expected_q, expected_m
 
         users = sorted(users, key=lambda u: u[1])
-        not_full_time_users = self._get_not_full_time_employees()
+
         return dict(
             users=users,
             data=undertime_users,
             expected=expected_users,
-            last_month=self.last_day_of_prev_month.month,
-            not_full_time_users=not_full_time_users,
         )
 
 

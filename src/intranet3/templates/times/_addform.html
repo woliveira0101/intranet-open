@@ -3,7 +3,7 @@
                         '/times/add',
                         date=date.strftime('%d.%m.%Y'),
                         user_id=user.id if request.has_perm('admin') else None,
-                        next=next or request.herel) }}"
+                        next=next or request.here) }}"
       method="post"
       accept-charset="utf-8">
     {{ csrf_field }}

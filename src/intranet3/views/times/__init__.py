@@ -284,7 +284,7 @@ class Edit(ProtectTimeEntriesMixin, BaseView):
                 timeentry.modified_ts = datetime.datetime.now()
                 time = TimeEntry(
                     date=date,
-                    user_id = self.request.user.id,
+                    user_id = timeentry.user_id,
                     time = form.time.data,
                     description = form.description.data,
                     ticket_id = form.ticket_id.data,

@@ -105,14 +105,14 @@ class AbsencePivot(BaseView):
 @view_config(route_name='employee_list_mandated_leave_change', renderer='json')
 class MandatedLeaveChange(BaseView):
     def post(self):
-        args = dict([a for a in self.request.POST.iteritems()])
+        args = self.request.json
         year = int(args.pop('year'))
         if 1999 > year > 2099:
             return dict(status='nok', reason='Zły rok %s' % year)
 
         leaves = Leave.query.filter(Leave.year==year).all()
         leaves = groupby(leaves, lambda l: l.user_id)
-        for user_id, mandated in args.iteritems():
+        for user_id, (mandated, remarks) in args.iteritems():
             user_id = int(user_id)
             try:
                 mandated = int(mandated)
@@ -136,6 +136,7 @@ class MandatedLeaveChange(BaseView):
             else:
                 leave_obj = leave_obj[0]
             leave_obj.number = mandated
+            leave_obj.remarks = remarks
             self.session.add(leave_obj)
         return dict(status='ok')
 

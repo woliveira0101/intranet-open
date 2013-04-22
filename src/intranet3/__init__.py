@@ -1,9 +1,8 @@
 import sys
 import os
-import inspect
 import ConfigParser
+import inspect
 
-import ldap
 import pyramid_jinja2
 from zope.interface import implementer
 from sqlalchemy import engine_from_config
@@ -94,20 +93,6 @@ def main(global_config, **settings):
     pyramid_config.add_renderer(None, 'intranet3.utils.renderer.renderer_factory')
     pyramid_config.add_translation_dirs('intranet3:locale/')
 
-    if config['AUTH_TYPE'] == 'ldap':
-        pyramid_config.include('pyramid_ldap')
-
-        pyramid_config.ldap_setup(
-            'ldap://ldap.stxnext.local',
-            passwd='unnecessary_password',
-        )
-
-        pyramid_config.ldap_set_login_query(
-            base_dn='ou=people,dc=stxnext,dc=local',
-            filter_tmpl='(uid=%(login)s)',
-            scope=ldap.SCOPE_SUBTREE,
-        )
-
     jinja2_env = pyramid_jinja2.get_jinja2_environment(pyramid_config)
     from intranet3.utils import filters
 
@@ -119,6 +104,7 @@ def main(global_config, **settings):
     jinja2_env.filters['dictsort2'] = filters.do_dictsort
     jinja2_env.filters['tojson'] = filters.tojson
     jinja2_env.filters['comma_number'] = filters.comma_number
+    jinja2_env.globals.update(zip=zip)
 
 
     pyramid_config.include('pyramid_autoroute')
@@ -127,6 +113,7 @@ def main(global_config, **settings):
     else:
         venusian_ingore = None
     pyramid_config.scan(ignore=venusian_ingore)
+
 
     app = pyramid_config.make_wsgi_app()
     return app
@@ -141,6 +128,10 @@ def run():
         caller_file = os.path.realpath(caller_file)
         buildout_dir = os.path.dirname(os.path.dirname(caller_file))
         config_file_path = os.path.join(buildout_dir, 'parts', 'etc', 'config.ini')
+
+    if not os.path.isfile(config_file_path):
+        print u'Path to config file must be given as a single parameter, for example "bin/run parts/etc/config.ini"'
+        return
 
     paster.setup_logging(config_file_path)
     settings = paster.get_appsettings(config_file_path)

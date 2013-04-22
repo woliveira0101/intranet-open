@@ -29,7 +29,10 @@ class UserEditForm(wtf.Form):
     start_work  = wtf.DateField(_(u"Start work"), format='%d/%m/%Y', validators=[])
     start_full_time_work  = wtf.DateField(_(u"Start full time work"), format='%d/%m/%Y', validators=[validators.Optional()])
     description = wtf.TextField(_(u"Description"), validators=[validators.Optional()])
-    location = wtf.SelectField(_(u"Office location"), choices=User.LOCATIONS.items())
+    location = wtf.SelectField(
+        _(u"Office location"),
+        choices=[('', u'--None--')] + [(k, v[0]) for k, v in User.LOCATIONS.items()]
+    )
 
     availability_link = wtf.TextField(_(u"Availability calendar link"), validators=[validators.Optional(), validators.URL()])
     tasks_link = wtf.TextField(_(u"Tasks calendar link"), validators=[validators.Optional(), validators.URL()])

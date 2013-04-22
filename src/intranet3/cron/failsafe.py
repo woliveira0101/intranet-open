@@ -31,7 +31,7 @@ class RequiredAction(object):
 
 class Repeater(object):
     
-    USER_AGENT = 'Intranet 2 Cron task'
+    USER_AGENT = 'STXNext Intranet 2 Cron task'
     contextFactory = WebClientContextFactory()
     client = Agent(reactor, contextFactory)
         

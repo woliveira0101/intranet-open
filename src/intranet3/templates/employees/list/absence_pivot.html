@@ -9,7 +9,7 @@
         <li><a href="{{ request.url_for('/employees/list/absence_pivot') }}?year={{ year+1 }}">{% trans %}Next year{% endtrans %}</a></li>
     </ul>
     <div class="row">
-        <div class="span8">
+        <div class="span12">
             <table class="table table-bordered table-hover project_times absence_pivot">
                 <thead>
                 <tr>
@@ -20,12 +20,13 @@
                     <th title="Planowane + Na żądanie + Okolicznościowe + Inne" class="application">{% trans %}Requests{% endtrans %}</th>
                     <th class="diff1">{% trans %}Missed requests{% endtrans %}</th>
                     <th title="Wymiar - Wykorzystane + Wnioski Okolicznosciowe + Wnioski inne" class="diff2">{% trans %}Requests left{% endtrans %}</th>
+                    <th class="remarks">{% trans %}Remarks{% endtrans %}</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for user in users | sort(attribute='name')%}
                 {% set user_used = (used[user.id] | int) %}
-                {% set user_mandated = mandated[user.id] %}
+                {% set user_mandated, user_remarks = mandated[user.id] %}
                 {% set user_application = applications[(user.id, 'planowany')] +
                                           applications[(user.id, 'zadanie')] +
                                           applications[(user.id, 'okolicznosciowy')] +
@@ -41,6 +42,7 @@
                     <td class="application">{{ user_application }}</td>
                     <td class="diff1 {% if diff1 < 0 %}red{% endif %}">{{ diff1 }}</td>
                     <td class="diff2 {% if diff2 < 0 %}red{% endif %}">{{ diff2 }}</td>
+                    <td class="remarks">{{ user_remarks }}</td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -74,16 +76,23 @@
         $ok.click(function(){
             var args = { year:{{ year }} };
 
-            $('input.editmandated').each(function(index){
-                var $this = $(this);
-                args[$this.attr('name')] = $this.attr('value');
+            $('.absence_pivot tbody tr').each(function(index){
+                var $tr = $(this);
+                var $mandated = $tr.find('input.editmandated');
+                var $remarks = $tr.find('input.editremarks');
+                args[$tr.attr('data-user_id')] = [$mandated.attr('value'), $remarks.attr('value')];
             });
 
-            $.post('{{ request.url_for("/employees/list/mandated_leave_change") }}', args, function(data){
-                if(data.status == 'ok'){
-                    window.location.reload();
-                } else {
-                    alert(data.reason);
+            $.ajax('{{ request.url_for("/employees/list/mandated_leave_change") }}', {
+                data : JSON.stringify(args),
+                contentType : 'application/json',
+                type : 'POST',
+                success: function(data){
+                    if(data.status == 'ok'){
+                        window.location.reload();
+                    } else {
+                        alert(data.reason);
+                    }
                 }
             });
             return false;
@@ -95,12 +104,20 @@
             $('td.mandated').each(function(index){
                 var $this = $(this);
                 var $tr = $this.closest('tr');
-                console.log();
                 var input = $('<input>',{
                     class: 'editmandated',
                     type: 'text',
-                    name: $tr.attr('data-user_id'),
-                    value: $this.text(),
+                    value: $this.text()
+                });
+                $this.html(input);
+            });
+            $('td.remarks').each(function(index){
+                var $this = $(this);
+                var $tr = $this.closest('tr');
+                var input = $('<input>',{
+                    class: 'editremarks',
+                    type: 'text',
+                    value: $this.text()
                 });
                 $this.html(input);
             });
