@@ -16,6 +16,11 @@
     </dl>
 </div>
 {%- endmacro %}
+{% macro location(user) -%}
+    {% if user.location %}
+    <a href="#" class="bootstrap-tooltip" title="{{ user.get_location(short=False) }}">{{ user.get_location(short=True) }}</a>
+    {% endif %}
+{%- endmacro %}
 <!DOCTYPE html>
 <html lang="en" class="no-js">
   <head>
