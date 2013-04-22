@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import csv
+import codecs
 from base64 import b64encode
 from twisted.internet import reactor
 from twisted.web.client import Agent, WebClientContextFactory
@@ -314,10 +315,8 @@ class CSVParserMixin(object):
     
     def parse(self, data):
         converter = self.get_converter()
-        try:
+        if codecs.BOM_UTF8 == data[:3]:
             data = data.decode('utf-8-sig')
-        except Exception:
-            pass
 
         if '\r\n' in data:
             data = data.split('\r\n')

@@ -43,7 +43,6 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
-    login = Column(String, unique=True, nullable=False, index=True)
     name = Column(String, nullable=False)
     admin = Column(Boolean, default=False, nullable=False)
     freelancer = Column(Boolean, default=False, nullable=False)

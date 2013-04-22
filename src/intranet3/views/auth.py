@@ -1,13 +1,8 @@
-import binascii
-
 import requests
-import transaction
 from oauth2client.client import FlowExchangeError
 from pyramid.view import view_config
 from pyramid.security import authenticated_userid, remember, forget, NO_PERMISSION_REQUIRED
-from pyramid.httpexceptions import HTTPForbidden, HTTPFound, HTTPUnauthorized, HTTPNotFound
-from paste.httpheaders import AUTHORIZATION
-from pyramid_ldap import get_ldap_connector
+from pyramid.httpexceptions import HTTPForbidden, HTTPFound
 
 from intranet3 import config
 from intranet3.ext.oauth2 import OAuth2WebServerFlow
@@ -43,74 +38,16 @@ clients_flow = OAuth2WebServerFlow(
 flow = users_flow
 freelancers_flow = clients_flow
 
-def _get_basicauth_credentials(request):
-    authorization = AUTHORIZATION(request.environ)
-    try:
-        authmeth, auth = authorization.split(' ', 1)
-    except ValueError: # not enough values to unpack
-        return None
-    if authmeth.lower() == 'basic':
-        try:
-            auth = auth.strip().decode('base64')
-        except binascii.Error: # can't decode
-            return None
-        try:
-            login, password = auth.split(':', 1)
-        except ValueError: # not enough values to unpack
-            return None
-        return {'login':login, 'password':password}
-
-    return None
-
 
 def forbidden_view(request):
     if authenticated_userid(request):
         return HTTPForbidden()
-    if request.registry.settings['AUTH_TYPE'] == 'ldap':
-        auth = _get_basicauth_credentials(request)
-        if auth:
-            login = auth['login']
-            password = auth['password']
-            connector = get_ldap_connector(request)
-            data = connector.authenticate(login, password)
-
-            if data:
-                data = data[1]
-                name = data['cn'][0]
-                login = data['uid'][0]
-
-                session = request.db_session
-                user = session.query(User).filter(User.login==login).first()
-                if not user:
-                    user = User(
-                        name=name,
-                        login=login,
-                        email='',
-                        groups=['user'],
-                    )
-                    session.add(user)
-                    session.flush()
-                    # pyramid_tm is not working in forbidden_view :/
-                    transaction.commit()
-
-                headers = remember(request, user.id)
-                return HTTPFound(
-                    location=request.url_for('/'),
-                    headers=headers
-                )
-
-        resp = HTTPUnauthorized()
-        resp.www_authenticate = 'Basic realm="Secure Area"'
-        return resp
     else:
         return HTTPFound(location=request.url_for('/auth/logout_view'))
 
 
-
 @view_config(route_name='auth_callback', permission=NO_PERMISSION_REQUIRED)
 def callback(request):
-    if request.registry.settings['AUTH_TYPE'] != 'google':
-        return HTTPNotFound()
     code = request.params.get('code', '')
     try:
         credentials = flow.step2_exchange(code)
@@ -177,8 +114,6 @@ def logout(request):
 
 @view_config(route_name='logout_view', permission=NO_PERMISSION_REQUIRED)
 def logout_view(request):
-    if request.registry.settings['AUTH_TYPE'] != 'google':
-        return HTTPNotFound()
     users_link = users_flow.step1_get_authorize_url()
     clients_link = clients_flow.step1_get_authorize_url()
     freelancers_link = freelancers_flow.step1_get_authorize_url()
