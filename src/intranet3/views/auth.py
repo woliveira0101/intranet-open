@@ -57,7 +57,7 @@ def callback(request):
     google_profile = data.json
 
     email = google_profile['email']
-    EXTRA_EMAILS = request.registry.settings['GOOGLE_EXTRA_EMAILS'].split('\n')
+    EXTRA_EMAILS = request.registry.settings.get('GOOGLE_EXTRA_EMAILS', '').split('\n')
     config = ApplicationConfig.get_current_config(allow_empty=True)
     freelancers = config.get_freelancers()
     clients_emails = Client.get_emails()
