@@ -59,7 +59,9 @@ class Pivot(MonthMixin, BaseView):
         if not self.request.has_perm('view'):
             users = [self.request.user] # TODO do we need to constrain entries also?
         else:
-            users = User.query.filter(User.is_not_client()).filter(User.is_active==True).order_by(User.freelancer, User.name)
+            users = User.query.filter(User.is_not_client())\
+                              .filter(User.is_active==True)\
+                              .order_by(User.freelancer, User.name).all()
 
         today = datetime.date.today()
         grouped = defaultdict(lambda: defaultdict(lambda: 0.0))
@@ -79,10 +81,26 @@ class Pivot(MonthMixin, BaseView):
 
         for user in users:
             sftw = user.start_full_time_work or datetime.date(1970, 1, 1)
-            start_work = datetime.date(today.year+10, 1, 1) if sftw > month_start else month_start
+
+            if sftw > month_end:
+                start_work = datetime.date(today.year+10, 1, 1)
+            elif sftw < month_start:
+                start_work = month_start
+            else:
+                start_work = sftw
 
             count_of_required_month_hours[user.id] = h.get_working_days(start_work, month_end) * 8
             count_of_required_hours_to_today[user.id] = h.get_working_days(start_work, today if today < month_end else month_end) * 8
+
+        # move current user to the front of the list
+        current_user_index = None
+        for i, user in enumerate(users):
+            if user.id == self.request.user.id:
+                current_user_index = i
+
+        users.insert(0, users.pop(current_user_index))
+
+
 
         return dict(
             entries=grouped, users=users, sums=sums, late=late, excuses=excuses.wrongtime(),
