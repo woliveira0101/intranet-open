@@ -19,7 +19,7 @@
             </thead>
             <tbody>
             {% for bug in bugs %}
-            <tr class="{{ loop.cycle('odd', 'even') }} {{ bug.status | lower }} {% if bug.is_unassigned() %} unassigned{% endif %}">
+            <tr class="{{ loop.cycle('odd', 'even') }} {{ bug.status | lower }} {% if bug.is_blocked %} blocked{% elif bug.is_unassigned() %} unassigned{% endif %}">
                 <td><a href="{{bug.get_url()}}" class="external">{{ bug.id }}</a></td>
                 <td>{{ bug.project_name }}</td>
                 <td>{{ bug.component_name }}</td>

@@ -2,7 +2,7 @@ PRIORITIES = {
     'blocker': 1,
     'blocker a': 1,
     'highest': 1,
-    'very hight': 1,
+    'very high': 1,
     'critical': 1,
     'major': 2,
     'major b': 2,

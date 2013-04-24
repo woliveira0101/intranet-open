@@ -1200,8 +1200,19 @@ form.box_edit_user dl dt {
             background-color: @successBackground;
         }
     }
+    tbody > tr.blocked td{
+        border-top: 1px solid black;
+    }
+    /* explanation ALL BUT NOT FIRST */
+    tbody > tr.blocked ~ tr.blocked td {
+        border-top: 0px;
+    }
+
     tbody > tr.unassigned td{
         background-color: @errorBackground;
+    }
+    tbody > tr.blocked{
+        opacity: 0.4;
     }
 }
 #tooltip {

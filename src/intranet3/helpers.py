@@ -22,6 +22,12 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 FATAL = FATAL_LOG(__name__)
 
 
+positive_values = (True, 1, 1.0, '1', 'True', 'true', 't')
+
+
+negative_values = (False, None, 0, 0.0, '0', 'False', 'false', 'f', 'None')
+
+
 def dates_between(start, end):
     delta = datetime.timedelta(days=1)
     while start <= end:
@@ -253,4 +259,3 @@ def get_working_days(date_start, date_end):
                 days += 1
             date += diff
         return days
-

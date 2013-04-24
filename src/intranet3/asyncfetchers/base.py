@@ -59,6 +59,10 @@ class Bug(object):
     def is_unassigned(self):
         raise NotImplementedError()
 
+    @property
+    def is_blocked(self):
+        return False
+
     def get_status(self):
         """
         Convert tracker specific status to one of these:

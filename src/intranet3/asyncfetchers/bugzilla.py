@@ -2,10 +2,12 @@ from functools import partial
 from dateutil.parser import parse
 from xml.etree import ElementTree as ET
 
+from pyramid.decorator import reify
+
 from intranet3.asyncfetchers.base import ( BaseFetcher, CSVParserMixin,
     SimpleProtocol, BasicAuthMixin,
     FetchException, Bug, cached_bug_fetcher )
-from intranet3.helpers import Converter, serialize_url
+from intranet3 import helpers as h
 from intranet3.log import EXCEPTION_LOG, INFO_LOG
 
 LOG = INFO_LOG(__name__)
@@ -20,6 +22,19 @@ class BugzillaBug(Bug):
     def is_unassigned(self):
         return True if self.owner and self.owner.email == 'nobody@example.com' else False
 
+    @reify
+    def is_blocked(self):
+        wb_blocked = self.whiteboard.get('blocked')
+        if wb_blocked in h.positive_values:
+            return True
+
+        if wb_blocked is None: # blocked param is not set
+            for bug_data in self.dependson.values():
+                if bug_data.get('resolved', True) is False:
+                    return True
+
+        return False
+
     def get_status(self):
         return self.status
 
@@ -27,7 +42,7 @@ class BugzillaBug(Bug):
         return self.resolution
 
 
-bugzilla_converter = Converter(
+bugzilla_converter = h.Converter(
         id='bug_id',
         desc='short_desc',
         reporter='reporter',
@@ -50,7 +65,7 @@ def _fetcher_function(resolved, single):
     def fetcher(self):
         params = self.resolved_common_url_params() if resolved else self.common_url_params()
         params.update(self.single_user_params() if single else self.all_users_params())
-        url = serialize_url(self.tracker.url + '/buglist.cgi?', **params)
+        url = h.serialize_url(self.tracker.url + '/buglist.cgi?', **params)
         self.fetch(url)
     return fetcher
 
@@ -67,7 +82,7 @@ def _query_fetcher_function(**conditions):
                 params.update(product=project_selector)
                 if component_selector:
                     params.update(component=component_selector)
-        url = serialize_url(self.tracker.url + '/buglist.cgi?', **params)
+        url = h.serialize_url(self.tracker.url + '/buglist.cgi?', **params)
         self.fetch(url)
     return fetcher
     
@@ -148,7 +163,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             status_whiteboard='s=%s' % sprint_name,
             bug_status=['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED', 'WAITING', 'RESOLVED', 'VERIFIED', 'CLOSED'],
         )
-        url = serialize_url(self.tracker.url + '/buglist.cgi?', **params)
+        url = h.serialize_url(self.tracker.url + '/buglist.cgi?', **params)
         self.fetch(url)
 
     def fetch_bug_titles_and_depends_on(self, ticket_ids):
@@ -158,7 +173,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             id=[str(id) for id in ticket_ids],
             #bug_status=['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'RESOLVED', 'VERIFIED']
         )
-        url = serialize_url(self.tracker.url + '/show_bug.cgi?', **params)
+        url = h.serialize_url(self.tracker.url + '/show_bug.cgi?', **params)
         headers = self.get_headers()
         self.request(url, headers, partial(self.xml_response, self.parse_response_of_bug_titles_and_depends_on))
     
@@ -175,7 +190,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             params.update(id=ids)
         if not ids:
             return self.fail(FetchException(u'Ticket ids list is empty'))
-        url = serialize_url(self.tracker.url + '/show_bug.cgi?', **params)
+        url = h.serialize_url(self.tracker.url + '/show_bug.cgi?', **params)
         headers = self.get_headers()
         self.request(url, headers, partial(self.xml_response, self.parse_response_of_dependons_for_ticket_ids))
     
@@ -260,7 +275,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
     def get_status_of_dependson_and_blocked_bugs(self):
         bug_ids = self.dependson_and_blocked_status.keys()
         if bug_ids:
-            url = serialize_url('%s/show_bug.cgi?' % self.tracker.url,
+            url = h.serialize_url('%s/show_bug.cgi?' % self.tracker.url,
                                 ctype='xml',
                                 id=bug_ids,
                                 field=['bug_status', 'bug_id', 'short_desc'])
@@ -302,7 +317,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             self.fail(FetchException(u'Received xml response %s' % (resp.code, )))
 
     def get_dependson_and_blocked_by(self):
-        url = serialize_url('%s/show_bug.cgi?' % self.tracker.url,
+        url = h.serialize_url('%s/show_bug.cgi?' % self.tracker.url,
                             ctype='xml',
                             id=self.bugs.keys(),
                             field=['blocked', 'dependson', 'bug_id'])

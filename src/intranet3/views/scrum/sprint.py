@@ -92,6 +92,12 @@ class ClientProtectionMixin(object):
         if client.id != sprint.client_id:
             raise HTTPForbidden()
 
+def _move_blocked_to_the_end(bugs):
+    """Move blocked bugs to the end of the list"""
+    blocked_bugs = [bug for bug in bugs if bug.is_blocked]
+    bugs = [bug for bug in bugs if not bug.is_blocked]
+    bugs.extend(blocked_bugs)
+    return bugs
 
 @view_config(route_name='scrum_sprint_show', permission='client')
 class Show(ClientProtectionMixin, FetchBugsMixin, BaseView):
@@ -100,6 +106,8 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseView):
         sprint = Sprint.query.get(sprint_id)
         bugs = self._fetch_bugs(sprint)
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
+        bugs = _move_blocked_to_the_end(bugs)
+
         tracker = Tracker.query.get(sprint.project.tracker_id)
         sw = SprintWrapper(sprint, bugs, self.request)
 
@@ -117,6 +125,7 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseView):
         sprint_id = self.request.GET.get('sprint_id')
         sprint = Sprint.query.get(sprint_id)
         bugs = self._fetch_bugs(sprint)
+
         sw = SprintWrapper(sprint, bugs, self.request)
         board = sw.get_board()
 
