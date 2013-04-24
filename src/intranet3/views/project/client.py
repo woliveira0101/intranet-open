@@ -2,8 +2,10 @@ from __future__ import with_statement
 import copy
 import datetime
 
+import markdown
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden
+from pyramid.response import Response
+from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden, HTTPNotFound
 
 from intranet3.models import Project, Sprint
 from intranet3.utils.views import BaseView
@@ -139,3 +141,39 @@ class Backlog(EveryonesProject):
             project = Project.query.get(project_id)
             if client.id != project.client_id:
                 raise HTTPForbidden
+
+
+@view_config(route_name='project_client_field', permission='client')
+class ProjectField(BaseView):
+    def protect(self):
+        project_id = self.request.GET.get('project_id')
+        if not project_id or not project_id.isdigit():
+            raise HTTPBadRequest
+
+        client = self.request.user.get_client()
+        project = Project.query.get(project_id)
+        if client:
+            if client.id != project.client_id:
+                raise HTTPForbidden
+
+        self.v['client'] = client
+        self.v['project'] = project
+
+    def get(self):
+        project_field = self.request.GET.get('field')
+        if project_field == 'definition_of_done':
+            result = self.v['project'].definition_of_done
+            header = 'Definition of Done'
+        elif project_field == 'working_agreement':
+            result = self.v['project'].working_agreement
+            header = 'Working agreement'
+        else:
+            raise HTTPNotFound
+
+        md = markdown.Markdown()
+        result = md.convert(result)
+        result = '<h2 class="content-header">%s</h2>%s' % (header, result)
+        return Response(result)
+
+
+

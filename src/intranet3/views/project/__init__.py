@@ -42,8 +42,11 @@ class Add(BaseView):
                 active=form.active.data,
                 google_card=form.google_card.data,
                 google_wiki=form.google_wiki.data,
-                mailing_url = form.mailing_url.data,
-                status = form.status.data
+                mailing_url=form.mailing_url.data,
+                working_agreement=form.working_agreement.data,
+                definition_of_done=form.definition_of_done.data,
+                continuous_integration_url=form.continuous_integration_url.data,
+                status = form.status.data,
             )
             self.session.add(project)
             self.session.flush()
@@ -75,6 +78,9 @@ class Edit(BaseView):
             project.google_card = form.google_card.data
             project.google_wiki = form.google_wiki.data
             project.mailing_url = form.mailing_url.data
+            project.working_agreement = form.working_agreement.data
+            project.definition_of_done = form.definition_of_done.data
+            project.continuous_integration_url = form.continuous_integration_url.data
             project.status = form.status.data
 
             self.flash(self._(u"Project saved"))

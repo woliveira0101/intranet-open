@@ -24,7 +24,11 @@ class ProjectForm(wtf.Form):
     google_card = wtf.TextField(_(u"Link to project card in google docs"), validators=[])
     google_wiki = wtf.TextField(_(u"Link to project wiki in google sites"), validators=[])
     mailing_url = wtf.TextField(_(u"Link to mailing group"), validators=[])
-    
+
+    working_agreement = wtf.TextAreaField(_("Working agreement"))
+    definition_of_done = wtf.TextAreaField(_("Definition of done"))
+    continuous_integration_url = wtf.StringField(_("Continuous integration link"))
+
     def validate_component_selector(self, field):
         if field.data and not self.project_selector.data:
             raise validators.ValidationError(_(u"Cannot define component without a project"))

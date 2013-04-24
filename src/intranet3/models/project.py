@@ -1,6 +1,6 @@
 from pprint import pformat
 from sqlalchemy import Column, ForeignKey, orm
-from sqlalchemy.types import String, Integer, Boolean
+from sqlalchemy.types import String, Integer, Boolean, Text
 from sqlalchemy.schema import UniqueConstraint
 
 from intranet3 import memcache
@@ -51,7 +51,7 @@ class Project(Base):
     }
 
     id = Column(Integer, primary_key=True, index=True)
-    
+
     name = Column(String, nullable=False)
     coordinator_id = Column(Integer, ForeignKey('user.id'), nullable=True, index=True)
     client_id = Column(Integer, ForeignKey('client.id'), nullable=False, index=True)
@@ -64,7 +64,7 @@ class Project(Base):
     version_selector = Column(String, nullable=True)
 
     active = Column(Boolean, nullable=False)
-    
+
     time_entries = orm.relationship('TimeEntry', backref='project', lazy='dynamic')
     sprints = orm.relationship('Sprint', backref='project', lazy='dynamic')
 
@@ -73,8 +73,12 @@ class Project(Base):
     status = Column(Integer, nullable=True)
     mailing_url = Column(String, nullable=True)
 
+    working_agreement = Column(Text, nullable=False, default='')
+    definition_of_done = Column(Text, nullable=False, default='')
+    continuous_integration_url = Column(String, nullable=False, default='')
+
     __table_args__ = (UniqueConstraint('name', 'client_id', name='project_name_client_id_unique'), {})
-    
+
     def format_selector(self):
         if self.turn_off_selectors:
             return u'Turned off'
@@ -86,7 +90,7 @@ class Project(Base):
                 self.component_selector or u'*',
                 self.version_selector or u'*',
             )
-            
+
     def get_selector_tuple(self):
         """
         Returns selector tuple

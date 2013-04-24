@@ -9,6 +9,65 @@
             <li class="{% if current_page == 'times' %}active{% endif %}"><a href="{{ request.url_for('/project/client/times', projects=project.id) }}">{% trans %}Time reports{% endtrans %}</a></li>
         </ul>
     </div>
+    <div class="stats-container row-fluid">
+        <div class="span12">
+            <div class="row-fluid">
+                <div class="well well-small">
+                    <div class="row-fluid">
+                        {% set project_edit_url = request.url_for('/project/edit', project_id=project.id if request.has_perm('coordinator') else '#') %}
+                        <div class="span3">
+                            <ul class="number_box">
+                                <li>
+                                    <span>{% trans %}Wiki page{% endtrans %}</span>
+                                    {% if project.google_wiki %}
+                                        <a href="{{ project.google_wiki }}">link</a>
+                                    {% else %}
+                                        <a href="{{ project_edit_url }}">Not set</a>
+                                    {% endif %}
+                                </li>
+                                <li>
+                                    <span>{% trans %}Mailing list{% endtrans %}</span>
+                                    {% if project.mailing_url %}
+                                        <a href="mailto:{{ project.mailing_url }}">{{ project.mailing_url[:25] }}{% if (project.mailing_url | length) > 25 %}...{% endif %}</a>
+                                    {% else %}
+                                        <a href="{{ project_edit_url }}">Not set</a>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="span3">
+                            <ul class="number_box">
+                                <li>
+                                    <span>{% trans %}Working agreement{% endtrans %}</span>
+                                    {% if project.working_agreement %}
+                                        <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='working_agreement') }}">show</a>
+                                    {% else %}
+                                        <a href="{{ project_edit_url }}">Not set</a>
+                                    {% endif %}
+                                </li>
+                                <li>
+                                    <span>{% trans %}Definition of done{% endtrans %}</span>
+                                    {% if project.definition_of_done %}
+                                        <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='definition_of_done') }}">show</a>
+                                    {% else %}
+                                        <a href="{{ project_edit_url }}">Not set</a>
+                                    {% endif %}
+                                </li>
+                                <li>
+                                    <span>{% trans %}Continuous integration{% endtrans %}</span>
+                                    {% if project.continuous_integration_url %}
+                                        <a target="_blank" href="{{ project.continuous_integration_url }}">link</a>
+                                    {% else %}
+                                        <a href="{{ project_edit_url }}">Not set</a>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="appjust">
         {% block body %}
         {% endblock body %}

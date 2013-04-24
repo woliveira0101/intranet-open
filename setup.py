@@ -63,6 +63,7 @@ setup(
         'nose',
         'webtest',
         'Mock',
+        'markdown',
 
     ],
     message_extractors = { 'src/intranet3': [
