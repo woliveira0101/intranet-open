@@ -5,3 +5,4 @@
 - current user always should be at the top of list in /times/report/pivot
 - add Definition of Done, Working agreement and Continuous Integration Url to project.
 - add support for blocked bugs in sprints (bugzilla only)
+- support for fractions as scrum points

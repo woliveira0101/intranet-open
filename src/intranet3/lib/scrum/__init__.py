@@ -42,7 +42,7 @@ class SprintWrapper(object):
         self.session = request.db_session
 
     def _get_points(self, bug):
-        return int(bug.whiteboard.get('p', 0))
+        return float(bug.whiteboard.get('p', 0.0))
 
     def _date_to_js(self, date):
         """Return unix epoc timestamp in miliseconds (in UTC)"""
