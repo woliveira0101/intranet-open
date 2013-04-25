@@ -24,7 +24,7 @@ class BugUglyAdapter(object):
         if self._bug.project.client_id == 20:
             return self._bug.get_status() == 'VERIFIED' and self._bug.get_resolution() == 'DEPLOYED'
         else:
-            return self._bug.get_status() == 'CLOSED'
+            return self._bug.get_status() == 'CLOSED' or self._bug.get_status() == 'VERIFIED'
 
 
 def parse_whiteboard(wb):
