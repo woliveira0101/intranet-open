@@ -11,7 +11,7 @@ from intranet3.models import Sprint, ApplicationConfig, Tracker, User, Project
 from intranet3 import helpers as h
 
 from intranet3.log import INFO_LOG, ERROR_LOG
-from intranet3.lib.scrum import SprintWrapper, get_velocity_chart_data
+from intranet3.lib.scrum import SprintWrapper, get_velocity_chart_data, move_blocked_to_the_end
 from intranet3.lib.bugs import Bugs
 from intranet3.forms.scrum import SprintListFilterForm
 
@@ -92,12 +92,6 @@ class ClientProtectionMixin(object):
         if client.id != sprint.client_id:
             raise HTTPForbidden()
 
-def _move_blocked_to_the_end(bugs):
-    """Move blocked bugs to the end of the list"""
-    blocked_bugs = [bug for bug in bugs if bug.is_blocked]
-    bugs = [bug for bug in bugs if not bug.is_blocked]
-    bugs.extend(blocked_bugs)
-    return bugs
 
 @view_config(route_name='scrum_sprint_show', permission='client')
 class Show(ClientProtectionMixin, FetchBugsMixin, BaseView):
@@ -106,7 +100,7 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseView):
         sprint = Sprint.query.get(sprint_id)
         bugs = self._fetch_bugs(sprint)
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
-        bugs = _move_blocked_to_the_end(bugs)
+        bugs = move_blocked_to_the_end(bugs)
 
         tracker = Tracker.query.get(sprint.project.tracker_id)
         sw = SprintWrapper(sprint, bugs, self.request)

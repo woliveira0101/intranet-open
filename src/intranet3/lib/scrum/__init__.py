@@ -34,6 +34,14 @@ def parse_whiteboard(wb):
     return {}
 
 
+def move_blocked_to_the_end(bugs):
+    """Move blocked bugs to the end of the list"""
+    blocked_bugs = [bug for bug in bugs if bug.is_blocked]
+    bugs = [bug for bug in bugs if not bug.is_blocked]
+    bugs.extend(blocked_bugs)
+    return bugs
+
+
 class SprintWrapper(object):
     def __init__(self, sprint, bugs, request):
         self.sprint = sprint
@@ -131,7 +139,9 @@ class SprintWrapper(object):
                 todo['points'] += points
 
         for col in todo, inprocess, toverify, completed:
-            col['bugs'] = sorted(col['bugs'], cmp=h.sorting_by_priority)
+            col['bugs'] = move_blocked_to_the_end(
+                sorted(col['bugs'], cmp=h.sorting_by_priority)
+            )
 
         return dict(
             bugs=self.bugs,
