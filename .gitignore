@@ -21,4 +21,4 @@ twistd.pid
 *.css
 *.DS_Store
 
-venv/*
+venv
