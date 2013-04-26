@@ -1,8 +1,9 @@
-Changes
-=======
+New release
+===========
+
 - add absence pivot link
 - tab /employees/list/late translated to english
-- remove some spreadsheets field
+- remove some spreadsheets field (new.sql to db migrate)
 
 
 
