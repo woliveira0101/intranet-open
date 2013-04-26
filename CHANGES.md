@@ -1,3 +1,11 @@
+Changes
+=======
+- add absence pivot link
+- tab /employees/list/late translated to english
+- remove some spreadsheets field
+
+
+
 0.8 (23-04-2013)
 ===============
 

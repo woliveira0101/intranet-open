@@ -79,13 +79,8 @@ def create_config(env):
         office_ip='',
         google_user_email='',
         google_user_password='',
-        lateness_spreadsheet='',
         holidays_spreadsheet='',
-        projects_spreadsheet='',
-        hours_worked_spreadsheet='',
-        hours_lateness_spreadsheet='',
         hours_employee_project='',
-        hours_ticket_spreadsheet='', 
     )
     DBSession.add(config)
     transaction.commit()

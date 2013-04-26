@@ -26,11 +26,9 @@ class ApplicationConfig(Base):
     
     google_user_email = Column(String, nullable=False)
     google_user_password = Column(String, nullable=False)
-    lateness_spreadsheet = Column(String, nullable=False)
     holidays_spreadsheet = Column(String, nullable=False)
-    projects_spreadsheet = Column(String, nullable=False)
-    hours_worked_spreadsheet = Column(String, nullable=False)
-    hours_lateness_spreadsheet = Column(String, nullable=False)
+
+
     hours_employee_project = Column(String, nullable=False)
     absence_project_id = Column(Integer, ForeignKey(Project.id), nullable=True)
     reports_project_ids = Column(postgresql.ARRAY(Integer))
@@ -38,7 +36,6 @@ class ApplicationConfig(Base):
     reports_without_ticket_project_ids = Column(postgresql.ARRAY(Integer))
     reports_without_ticket_omit_user_ids = Column(postgresql.ARRAY(Integer))
     freelancers = Column(String, nullable=True)
-    hours_ticket_spreadsheet = Column(String, nullable=False)
     hours_ticket_user_id = Column(Integer, ForeignKey(User.id), nullable=True)
     cleaning_time_presence = Column(Integer, default=7, nullable=False)
     monthly_late_limit = Column(Integer, default=3, nullable=False)
