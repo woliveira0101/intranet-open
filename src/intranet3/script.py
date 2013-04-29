@@ -67,11 +67,6 @@ def make_admin(config_path):
     transaction.commit()
 
 
-
-def ipdb(env):
-    import ipdb; ipdb.set_trace()
-
-
 def create_config(env):
     from intranet3.models import *
     import transaction
