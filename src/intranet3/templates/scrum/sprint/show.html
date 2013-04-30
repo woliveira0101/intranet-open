@@ -14,6 +14,7 @@
                 <th>{% trans %}Assignee{% endtrans %}</th>
                 <th>{% trans %}Points{% endtrans %}</th>
                 <th>{% trans %}Hours{% endtrans %}</th>
+                <th>{% trans %}Velocity{% endtrans %}</th>
                 <th>{% trans %}Status{% endtrans %}</th>
             </tr>
             </thead>
@@ -28,6 +29,7 @@
                 <td>{{ bug.owner.name }}</td>
                 <td>{{ bug.whiteboard['p'] }}</td>
                 <td>{{ '%.2f' % bug.time }}</td>
+                <td>{{ (bug.whiteboard['p']/bug.time)|round(2) if bug.time else 0.0 }}</td>
                 <td>{{ bug.status }}</td>
             </tr>
             {% endfor %}
