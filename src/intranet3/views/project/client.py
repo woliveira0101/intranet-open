@@ -169,7 +169,6 @@ class ProjectField(BaseView):
             header = 'Working agreement'
         else:
             raise HTTPNotFound
-
         md = markdown.Markdown()
         result = md.convert(result)
         result = '<h2 class="content-header">%s</h2>%s' % (header, result)

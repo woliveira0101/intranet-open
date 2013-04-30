@@ -64,7 +64,6 @@ class List(BaseView):
             )
         else:
             stats = None
-
         return dict(
             sprints=sprints,
             form=form,

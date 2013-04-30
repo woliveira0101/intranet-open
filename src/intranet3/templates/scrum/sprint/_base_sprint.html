@@ -40,16 +40,21 @@
                             <li><span>{% trans %}Velocity per hour{% endtrans %}</span>{{ '%.2f' % sprint.velocity }}</li>
                         </ul>
                     </div>
-                    <div class="span2">
+                    <div class="span6">
                         <ul class="number_box">
                             {% set project = sprint.project %}
                             {% set project_edit_url = request.url_for('/project/edit', project_id=project.id if request.has_perm('coordinator') else '#') %}
+                            <li>
+                                <span>Sprint goal</span>
+                                <pre class="goal">{{ sprint.goal }}</pre>
+                            </li>
+
                             <li>
                                 <span>{% trans %}Working agreement{% endtrans %}</span>
                                 {% if project.working_agreement %}
                                     <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='working_agreement') }}">show</a>
                                 {% else %}
-                                    <a href="{{ project_edit_url }}">Not set</a>
+                                    <a href="{{ project_edit_url }}">—</a>
                                 {% endif %}
                             </li>
                             <li>
@@ -57,7 +62,7 @@
                                 {% if project.definition_of_done %}
                                     <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='definition_of_done') }}">show</a>
                                 {% else %}
-                                    <a href="{{ project_edit_url }}">Not set</a>
+                                    <a href="{{ project_edit_url }}">—</a>
                                 {% endif %}
                             </li>
                             <li>
@@ -65,14 +70,10 @@
                                 {% if project.continuous_integration_url %}
                                     <a target="_blank" href="{{ project.continuous_integration_url }}">link</a>
                                 {% else %}
-                                    <a href="{{ project_edit_url }}">Not set</a>
+                                    <a href="{{ project_edit_url }}">—</a>
                                 {% endif %}
                             </li>
                         </ul>
-                    </div>
-                    <div class="span6">
-                        <h6>Sprint goal</h6>
-                        <pre class="goal">{{ sprint.goal }}</pre>
                     </div>
                 </div>
             </div>
