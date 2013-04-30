@@ -18,6 +18,11 @@
     {% else %}
         <li><a href="{{ request.url_for('/scrum/sprint/board', sprint_id=sprint.id) }}">{% trans %}Board{% endtrans %}</a></li>
     {% endif %}
+    {% if page == 'times' %}
+        <li class="active"><a>{% trans %}Times{% endtrans %}</a></li>
+    {% else %}
+        <li><a href="{{ request.url_for('/scrum/sprint/times', sprint_id=sprint.id) }}">{% trans %}Times{% endtrans %}</a></li>
+    {% endif %}
 </ul>
 <div class="stats-container row-fluid">
     <div class="span12">

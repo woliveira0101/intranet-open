@@ -1,3 +1,9 @@
+New release
+===========
+
+- add times tab to sprint view
+
+
 0.8 (23-04-2013)
 ===============
 

@@ -334,6 +334,20 @@
             return false;
         });
 
+        $('.excel-submit').click(function(){
+            var $form = $(this).closest('form');
+            var $input = $('<input>').attr({
+                type: 'hidden',
+                id: 'excel',
+                name: 'excel',
+                value: 'y'
+            });
+            $form.append($input);
+            $form.submit();
+            $input.remove();
+            return false;
+        });
+
         $('.datepicker-GET').datepicker({
             dateFormat: 'dd-mm-yy',
             showOn: 'focus'
