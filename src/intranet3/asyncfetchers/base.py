@@ -56,7 +56,7 @@ class Bug(object):
     @property
     def velocity(self):
         points = float(self.whiteboard.get('p', 0.0))
-        return points / self.time if self.time else 0.0
+        return (points / self.time) if self.time else 0.0
 
     def get_url(self):
         raise NotImplementedError()
