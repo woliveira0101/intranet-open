@@ -180,12 +180,6 @@ class Row(list):
     def id(self):
         return 'row%s' % self._id
 
-    @property
-    def klass(self):
-        if len(self.subrows) > 0:
-            return 'clickable'
-        return ''
-
     @classmethod
     def _to_print(cls, entries):
         result = []

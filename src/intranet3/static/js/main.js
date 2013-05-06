@@ -152,6 +152,38 @@
             type: 'numeric'
         });
         $.tablesorter.addParser({
+            id: 'float',
+            is: function(s) {
+                return false;
+            },
+            format: function(s) {
+                var number = s.match(/^<b>([^<]*)<\/b>$/);
+                if(number){
+                    number = number[1];
+                } else {
+                    number = s;
+
+                }
+                number = number.replace(',', '.');
+                return parseFloat(number);
+            },
+            type: 'numeric'
+        });
+        $.tablesorter.addParser({
+            id: 'dotdate',
+            is: function(s) {
+                return false;
+            },
+            format: function(s) {
+                var parts = s.match(/(\d+)/g);
+                if(parts){
+                    return (new Date(parts[2], parts[1]-1, parts[0])).getTime();
+                }
+                return 0;
+            },
+            type: 'numeric'
+        });
+        $.tablesorter.addParser({
             // set a unique id
             id: 'status',
             is: function(s) {
@@ -174,7 +206,19 @@
             // set type, either numeric or text
             type: 'numeric'
         });
-        $("table.sort-table").tablesorter();
+        $("table.project_times").tablesorter({
+            sortList: [[6,1]],
+            headers: {
+                5: {
+                    sorter: 'dotdate'
+                },
+                6: {
+                    sorter: 'float'
+                }
+
+            }
+        });
+        $("table.sort-table").tablesorter({});
         $("table.sort-sprint-table").tablesorter({
             headers: {
                 3: {

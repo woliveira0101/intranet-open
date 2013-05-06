@@ -2,6 +2,7 @@ New release
 ===========
 
 - add times tab to sprint view
+- tablesorter in time entries views i.e. /times/tickets/report
 
 
 0.8 (23-04-2013)

@@ -1,11 +1,8 @@
 from __future__ import with_statement
-import datetime
 from time import sleep, time
 
-import xlwt
 from pyramid.view import view_config
 from pyramid.renderers import render
-from pyramid.response import Response
 
 from intranet3.utils.views import BaseView
 from intranet3.models import User, TimeEntry, Tracker, TrackerCredentials, Project, Client, ApplicationConfig
