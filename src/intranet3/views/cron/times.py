@@ -403,6 +403,7 @@ class MissedHours(CronView):
             date = datetime.date.today()
         self.start, self.end = self._period(date)
         self.months = idate.months_between(self.start, self.end)
+        self._send_email()
         return Response('ok')
 
     @classmethod
