@@ -40,8 +40,13 @@ class Map(BaseView):
     """ Map clients/projects/selectors """
     def get(self):
         clients = Client.query.order_by(Client.name)
-        all = self.request.GET.get('all',0)
-        return dict(clients=clients,all=all,counter=Counter())
+        all = self.request.GET.get('all', 0)
+        active = self.request.GET.get('active', 0)
+        return dict(clients=clients,
+                    all=all,
+                    active=active,
+                    counter=Counter()
+                    )
 
 
 @view_config(route_name='client_add', permission='admin')

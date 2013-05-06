@@ -38,5 +38,5 @@ class ClientAddForm(ClientForm):
     def validate_name(self, field):
         name = field.data
         if DBSession.query(exists().where(Client.name==name)).scalar():
-            raise ValidationError(_(u'Client ${name} does not exist !', mapping={'name': name}))
+            raise ValidationError(_(u'Client already exists', mapping={'name': name}))
 

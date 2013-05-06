@@ -2,7 +2,10 @@
 
 {% block content %}
     <ul class="nav nav-tabs">
-        <li class="active"><a>A{% trans %}ll clients{% endtrans %}</a></li>
+        <li class="active"><a>{% trans %}All clients{% endtrans %}</a></li>
+        <li>
+            <a href="{{ request.url_for('/client/map', active=1) }}">{% trans %}Active clients{% endtrans %}</a>
+        </li>
         <li>
             <a href="{{ request.url_for('/client/add') }}">{% trans %}Add client{% endtrans %}</a>
         </li>
@@ -26,12 +29,22 @@
                 <th>{% trans %}Coordinator{% endtrans %}</th>
                 <th>{% trans %}Tracker{% endtrans %}</th>
                 <th>{% trans %}Active{% endtrans %}</th>
-               <th>{% trans %}Selector{% endtrans %}</th>
-
+                <th>{% trans %}Selector{% endtrans %}</th>
             </tr>
         </thead>
         <tbody>
     {% for client in clients %}
+        {% if client.no_project and active %}
+            <tr>
+                <td class="lp">{{counter}}</td>
+                <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client.id) }}">{{ client.name }}</a></td>
+                <td><a title="Edit project" href="{{ request.url_for('/client/view', client_id=client.id) }}">Edit client</a></td>
+                <td>-</td>
+                <td><a title="Edit tracker" href="{{ request.url_for('/client/view', client_id=client.id) }}">Edit client</a></td>
+                <td>-</td>
+                <td>-</td>
+            </tr>
+        {% endif %}
             {% for project in client.projects %}
                 {% if project.active or all %}
                 <tr>

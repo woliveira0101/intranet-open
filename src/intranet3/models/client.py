@@ -27,7 +27,7 @@ class Client(Base):
 
     @reify
     def active(self):
-        return self.has_active_project()
+        return self.has_active_project() or self.has_no_projects()
     
     def has_active_project(self):
         from intranet3.models import Project
@@ -37,6 +37,17 @@ class Client(Base):
         if result:
             return True
         return False
+
+    @reify
+    def no_project(self):
+        return self.has_no_projects()
+
+    def has_no_projects(self):
+        from intranet3.models import Project
+        result = DBSession.query(Project.id)\
+                          .filter(Project.client_id==self.id).first()
+        return not result
+
 
     @classmethod
     def get_emails(cls):
