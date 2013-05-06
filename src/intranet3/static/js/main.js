@@ -184,6 +184,17 @@
             type: 'numeric'
         });
         $.tablesorter.addParser({
+            id: 'sprint_bug_time',
+            is: function(s) {
+                return false;
+            },
+            format: function(s) {
+                var times = s.match(/(\d+\.\d+)/g);
+                return parseFloat(times[0]);
+            },
+            type: 'numeric'
+        });
+        $.tablesorter.addParser({
             // set a unique id
             id: 'status',
             is: function(s) {
@@ -223,6 +234,9 @@
             headers: {
                 3: {
                     sorter:'priority'
+                },
+                7: {
+                    sorter:'sprint_bug_time'
                 },
                 8: {
                     sorter:'status'

@@ -180,12 +180,12 @@ class Bugs(object):
         for bug in bugs:
             bug.project = projects.get(bug.project_id)
 
-        bugs = self.add_time(bugs)
+        bugs = self.add_time(bugs, sprint=sprint)
         memcache.set(SCRUM_BUG_CACHE_KEY % sprint.id, bugs, SCRUM_BUG_CACHE_TIMEOUT)
         return bugs
 
     @classmethod
-    def add_time(cls, orig_bugs):
+    def add_time(cls, orig_bugs, sprint=None):
         """
         @param orig_bugs: list of bugs
         Add times to bugs, can be used inside and outside the class.
@@ -213,5 +213,22 @@ class Bugs(object):
 
         for bug_id, project_id, time in query:
             bugs[(bug_id, project_id)].time = time
+
+        if sprint:
+            params['sprint_start'] = sprint.start
+            params['sprint_end'] = sprint.end
+            sql = """
+            SELECT t.ticket_id as "ticket_id", t.project_id as "project_id", SUM(t.time) as "time"
+            FROM time_entry t
+            WHERE t.deleted = FALSE AND (%s) AND t.date >= :sprint_start AND t.date <= :sprint_end
+            GROUP BY t.ticket_id, t.project_id
+            """ % (condition, )
+            query = DBSession.query('ticket_id', 'project_id', 'time').from_statement(sql).params(**params)
+
+            for bug in bugs.itervalues():
+                bug.sprint_time = 0.0
+
+            for bug_id, project_id, time in query:
+                bugs[(bug_id, project_id)].sprint_time = time
 
         return orig_bugs
