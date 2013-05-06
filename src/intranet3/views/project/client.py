@@ -159,6 +159,7 @@ class ProjectField(BaseView):
         self.v['client'] = client
         self.v['project'] = project
 
+
     def get(self):
         project_field = self.request.GET.get('field')
         if project_field == 'definition_of_done':

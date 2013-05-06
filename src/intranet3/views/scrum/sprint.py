@@ -103,17 +103,18 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseView):
     def get(self):
         sprint_id = self.request.GET.get('sprint_id')
         sprint = Sprint.query.get(sprint_id)
+        project = Project.query.get(sprint.project_id)
         bugs = self._fetch_bugs(sprint)
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
         bugs = _move_blocked_to_the_end(bugs)
 
         tracker = Tracker.query.get(sprint.project.tracker_id)
         sw = SprintWrapper(sprint, bugs, self.request)
-
         return dict(
-            tracker=tracker,
             sprint=sprint,
+            project=project,
             bugs=bugs,
+            tracker=tracker,
             info=sw.get_info(),
         )
 
@@ -123,6 +124,7 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseView):
     def get(self):
         sprint_id = self.request.GET.get('sprint_id')
         sprint = Sprint.query.get(sprint_id)
+        project = Project.query.get(sprint.project_id)
         bugs = self._fetch_bugs(sprint)
 
         sw = SprintWrapper(sprint, bugs, self.request)
@@ -131,6 +133,7 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseView):
         return dict(
             board=board,
             sprint=sprint,
+            project=project,
             info=sw.get_info(),
             bug_list_url=lambda bugs: sprint.project.get_bug_list_url([bug.id for bug in bugs]),
         )
@@ -140,6 +143,7 @@ class Charts(ClientProtectionMixin, FetchBugsMixin, BaseView):
     def get(self):
         sprint_id = self.request.GET.get('sprint_id')
         sprint = Sprint.query.get(sprint_id)
+        project = Project.query.get(sprint.project_id)
         bugs = self._fetch_bugs(sprint)
         sw = SprintWrapper(sprint, bugs, self.request)
         burndown = sw.get_burndown_data()
@@ -152,6 +156,7 @@ class Charts(ClientProtectionMixin, FetchBugsMixin, BaseView):
         return dict(
             tracker=tracker,
             sprint=sprint,
+            project = project,
             bugs=bugs,
             charts_data=json.dumps(burndown),
             piechart_data=piechart_data,

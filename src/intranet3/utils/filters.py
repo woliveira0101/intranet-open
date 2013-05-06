@@ -2,7 +2,7 @@ import time
 import json
 from intranet3.helpers import format_time
 from jinja2.exceptions import FilterArgumentError
-
+import re
 
 def slugify(value):
     return value.replace(' ', '-')
@@ -23,6 +23,10 @@ def comma_number(value):
     result = round(value, 2)
     return ('%.2f' % value).replace('.', ',')
 
+
+def first_words(value, amount=5):
+    words = re.findall('\w+', value)[:amount]
+    return ' '.join(words)
 
 def do_dictsort(value, case_sensitive=False, by='key', attribute=None):
     """Sort a dict and yield (key, value) pairs. Because python dicts are

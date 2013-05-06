@@ -104,6 +104,7 @@ def main(global_config, **settings):
     jinja2_env.filters['dictsort2'] = filters.do_dictsort
     jinja2_env.filters['tojson'] = filters.tojson
     jinja2_env.filters['comma_number'] = filters.comma_number
+    jinja2_env.filters['first_words'] = filters.first_words
     jinja2_env.globals.update(zip=zip)
 
 
