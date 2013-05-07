@@ -1,6 +1,10 @@
 New release
 ===========
 
+
+0.8.1 (07-05-2013)
+===============
+
 - add times tab to sprint view
 - tablesorter in time entries views i.e. /times/tickets/report
 - add bug sprint time in /scrum/sprint/show
