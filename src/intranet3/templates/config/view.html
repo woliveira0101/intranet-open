@@ -25,13 +25,8 @@
         </div>
 
         <div style="{% if subpage != 'spreadsheets' %}display: none{% endif %}">
-        {{ form_field(form.lateness_spreadsheet, _('Lateness Spreadsheet key')) }}
         {{ form_field(form.holidays_spreadsheet, _('Holidays Spreadsheet key')) }}
-        {{ form_field(form.projects_spreadsheet, _('Projects Spreadsheet key')) }}
-        {{ form_field(form.hours_worked_spreadsheet, _('Hours worked Spreadsheet key')) }}
-        {{ form_field(form.hours_lateness_spreadsheet, _('Hours lateness Spreadsheet key')) }}
         {{ form_field(form.hours_employee_project, _('Hours employee-project Spreadsheet key')) }}
-        {{ form_field(form.hours_ticket_spreadsheet,_( 'Hours/Ticket Spreadsheet key')) }}
         {{ form_field(form.hours_ticket_user_id, _('User to assume while querying trackers for data about tickets in Hours/Ticket spreadsheet')) }}
         </div>
 

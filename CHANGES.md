@@ -6,6 +6,11 @@ New release
 - add bug sprint time in /scrum/sprint/show
 - counting achieved points fix
 - add velocity per bug
+- add absence pivot link
+- tab /employees/list/late translated to english
+- remove some spreadsheets field (new.sql to db migrate)
+- Intranet logo is red when develop mode
+- removed jinja filters dependency with config file.
 
 
 0.8 (23-04-2013)

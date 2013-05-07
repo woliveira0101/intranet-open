@@ -38,11 +38,7 @@ class ConfigForm(wtf.Form):
             validators.Length(min=6, max=64)
         ]
     )
-    lateness_spreadsheet = wtf.TextField(_(u"Lateness Spreadsheet"), validators=[validators.Required()])
     holidays_spreadsheet = wtf.TextField(_(u"Holidays Spreadsheet"), validators=[validators.Required()])
-    projects_spreadsheet = wtf.TextField(_(u"Projects Spreadsheet"), validators=[validators.Required()])
-    hours_worked_spreadsheet = wtf.TextField(_(u"Hours worked Spreadsheet"), validators=[validators.Required()])
-    hours_lateness_spreadsheet = wtf.TextField(_(u"Hours lateness Spreadsheet"), validators=[validators.Required()])
     hours_employee_project = wtf.TextField(_(u"Hours employee - project Spreadsheet"), validators=[validators.Required()])
     cleaning_time_presence = wtf.IntegerField(
         _(u'Cleaning time presence'),
@@ -56,7 +52,6 @@ class ConfigForm(wtf.Form):
     reports_without_ticket_project_ids = wtf.SelectMultipleField(_(u'Daily report without ticket - include projects'), validators=[], choices=ProjectChoices())
     reports_without_ticket_omit_user_ids = wtf.SelectMultipleField(_(u'Daily report without ticket - omit user'), validators=[], choices=UserChoices())
     freelancers = wtf.TextAreaField(_(u"Freelancers"), validators=[ListValidator(validators=[validators.Email()])])
-    hours_ticket_spreadsheet = wtf.TextField(_(u"Hours per ticket spreadsheet"), validators=[validators.Required()])
     hours_ticket_user_id = wtf.SelectField(_(u'Hours per ticket synchronization user credentials'), validators=[], choices=UserChoices(empty=False))
 
     monthly_late_limit = wtf.IntegerField(
