@@ -10,8 +10,9 @@ New release
 - tab /employees/list/late translated to english
 - remove some spreadsheets field (new.sql to db migrate)
 - Intranet logo is red when develop mode
-- removed jinja filters dependency with config file.
-
+- removed jinja filters dependency with config file
+- daily presence splited into Poznan and Wroclaw
+- sprint layout slighty changed
 
 0.8 (23-04-2013)
 ===============
