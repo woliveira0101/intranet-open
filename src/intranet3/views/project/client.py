@@ -159,6 +159,7 @@ class ProjectField(BaseView):
         self.v['client'] = client
         self.v['project'] = project
 
+
     def get(self):
         project_field = self.request.GET.get('field')
         if project_field == 'definition_of_done':
@@ -169,7 +170,6 @@ class ProjectField(BaseView):
             header = 'Working agreement'
         else:
             raise HTTPNotFound
-
         md = markdown.Markdown()
         result = md.convert(result)
         result = '<h2 class="content-header">%s</h2>%s' % (header, result)
