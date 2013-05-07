@@ -40,11 +40,9 @@ class Map(BaseView):
     """ Map clients/projects/selectors """
     def get(self):
         clients = Client.query.order_by(Client.name)
-        all = self.request.GET.get('all', 0)
-        active = self.request.GET.get('active', 0)
+        tab = self.request.GET.get('tab', 'active_clients')
         return dict(clients=clients,
-                    all=all,
-                    active=active,
+                    tab=tab,
                     counter=Counter()
                     )
 

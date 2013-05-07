@@ -27,19 +27,17 @@ class Client(Base):
 
     @reify
     def active(self):
-        return self.has_active_project() or self.has_no_projects()
-    
+        return self.has_active_project()
+
     def has_active_project(self):
         from intranet3.models import Project
         result = DBSession.query(Project.id)\
                        .filter(Project.active==True)\
                        .filter(Project.client_id==self.id).limit(1).first()
-        if result:
-            return True
-        return False
+        return bool(result)
 
     @reify
-    def no_project(self):
+    def no_projects(self):
         return self.has_no_projects()
 
     def has_no_projects(self):
