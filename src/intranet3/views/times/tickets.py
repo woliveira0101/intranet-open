@@ -1,11 +1,8 @@
 from __future__ import with_statement
-import datetime
 from time import sleep, time
 
-import xlwt
 from pyramid.view import view_config
 from pyramid.renderers import render
-from pyramid.response import Response
 
 from intranet3.utils.views import BaseView
 from intranet3.models import User, TimeEntry, Tracker, TrackerCredentials, Project, Client, ApplicationConfig
@@ -13,7 +10,7 @@ from intranet3.forms.times import ProjectsTimeForm
 from intranet3.asyncfetchers import get_fetcher
 from intranet3.helpers import groupby, partition
 from intranet3.log import INFO_LOG, WARN_LOG, ERROR_LOG, DEBUG_LOG, EXCEPTION_LOG
-from intranet3.lib.times import TimesReportMixin, Row
+from intranet3.lib.times import TimesReportMixin, Row, dump_entries_to_excel
 
 LOG = INFO_LOG(__name__)
 WARN = WARN_LOG(__name__)
@@ -27,19 +24,6 @@ MAX_TICKETS_PER_REQUEST = 50 # max number of ticket ids to include in a single r
 
 @view_config(route_name='times_tickets_excel', permission='client')
 class Excel(BaseView):
-
-    def _format_row(self, a_row):
-        row = list(a_row)
-        row[0] = (row[0],)                                         #client
-        row[1] = (row[1],)                                         #project
-        row[2] = (row[2],)                                         #ticketid
-        row[3] = (row[3],)                                         #email
-        row[4] = (unicode(row[4]),)                                #desc
-        date_xf = xlwt.easyxf(num_format_str='DD/MM/YYYY')
-        row[5] = (row[5].strftime('%d/%m/%Y'), date_xf)            #date
-        row[6] = (round(row[6], 2),)                               #time
-        return row
-
     def get(self):
         client = self.request.user.get_client()
         form = ProjectsTimeForm(formdata=self.request.GET, client=client)
@@ -54,7 +38,7 @@ class Excel(BaseView):
 
         LOG(u'Tickets report %r - %r - %r' % (start_date, end_date, projects))
 
-        uber_query = query(Client.name, Project.name, TimeEntry.ticket_id, User.email, TimeEntry.description, TimeEntry.date, TimeEntry.time)
+        uber_query = query(Client, Project, TimeEntry.ticket_id, User, Tracker, TimeEntry.description, TimeEntry.date, TimeEntry.time)
         uber_query = uber_query.filter(TimeEntry.user_id==User.id)\
                                .filter(TimeEntry.project_id==Project.id)\
                                .filter(Project.tracker_id==Tracker.id)\
@@ -71,38 +55,8 @@ class Excel(BaseView):
             uber_query = uber_query.filter(User.id.in_(users))
 
         uber_query = uber_query.order_by(Client.name, Project.name, TimeEntry.ticket_id, User.name)
-        data = uber_query.all()
-        wbk = xlwt.Workbook()
-        sheet = wbk.add_sheet('Hours')
-
-        heading_xf = xlwt.easyxf('font: bold on; align: wrap on, vert centre, horiz center')
-        headings = ('Client', 'Project', 'Ticket id', 'Employee', 'Description', 'Date', 'Time')
-        headings_width = (x*256 for x in (20, 30, 10, 40, 100, 12, 10))
-        for colx, value in enumerate(headings):
-            sheet.write(0, colx, value, heading_xf)
-        for i, width in enumerate(headings_width):
-            sheet.col(i).width = width
-
-
-        sheet.set_panes_frozen(True)
-        sheet.set_horz_split_pos(1)
-        sheet.set_remove_splits(True)
-
-        for j, row in enumerate(data):
-            row = self._format_row(row)
-            for i, cell in enumerate(row):
-                sheet.write(j+1,i,*cell)
-
-        file_path = '/tmp/tmp.xls'
-        wbk.save(file_path)
-
-        f = open(file_path, 'rb')
-        response = Response(
-            content_type='application/vnd.ms-excel',
-            app_iter = f,
-        )
-        response.headers['Cache-Control'] = 'no-cache'
-        response.content_disposition = 'attachment; filename="report-%s.xls"' % datetime.datetime.now().strftime('%d-%m-%Y--%H-%M-%S')
+        entries = uber_query.all()
+        file, response = dump_entries_to_excel(entries)
 
         return response
 

@@ -1,129 +1,100 @@
-{% macro bug_iter(entries, class='', groupby='') %}
-    {% for client, project, tracker, bug_id, user, desc, date, time in entries %}
-        <tr class="{% if class %}{{ class }} {% else %}{{ loop.cycle('odd', 'even') }}{% endif %}
-                   {% if groupby == 'bug' %}bug_{{ project.id }}_{{ bug_id }}
-                   {% elif groupby == 'user' %}user_{{ project.id }}_{{ user.id }}
-                   {% elif groupby == 'userbug' %}userbug_{{ project.id }}_{{ bug_id }}_{{ user.id }}
-                   {% endif %}">
-            <td class="client_name"> {{ client.name }}</td>
-            <td class="project_name">{{ project.name }}</td>
-            <td class="bug_id">{% if bug_id %}<a title="{{ ticket_titles.get(bug_id) }}" href="{{ tracker.get_bug_url(bug_id) }}" class="external">#{{ bug_id }}</a>{% else %}{% trans %}Without ticket{% endtrans %}{% endif %}</td>
-            <td class="usernames">{{ user.name }}</td>
-            <td class="description">{{ desc }}</td>
-            <td class="date">{{ date.strftime('%d.%m.%Y') }}</td>
-            <td class="time">{{ time | comma_number }}</td>
-            {% if whole_period %}
-                <td></td>
-            {% endif %}
-        </tr>
-    {% endfor %}
-{% endmacro %}
-
 <div id="results-tabs">
     <ul class="nav nav-tabs">
         <li class="nav-one active"><a href="#report">{% trans %}Time entries{% endtrans %}</a></li>
         <li class="nav-two"><a href="#participation-of-workers">{% trans %}Breakdown by person{% endtrans %}</a></li>
     </ul>
     <div class="list-wrap">
-        <ul id="report"><li>
-            {% if rows %}
-                <table class="table table-bordered table-hover project_times">
+        <ul id="report">
+            <li>
+                {% if rows %}
+                    <table class="table table-bordered table-hover project_times">
+                        <thead>
+                        <tr>
+                            <th class="client_name">{% trans %}Client id{% endtrans %}</th>
+                            <th class="project_name">{% trans %}Project{% endtrans %}</th>
+                            <th class="bug_id">{% trans %}Bug id{% endtrans %}</th>
+                            <th class="usernames">{% trans %}Employee{% endtrans %}</th>
+                            <th class="description">{% if group_by_bugs and not group_by_user %}{% trans %}Title{% endtrans %}{% else %}{% trans %}Description{% endtrans %}{% endif %}</th>
+                            <th class="date">{% trans %}Date{% endtrans %}</th>
+                            <th class="time">{% trans %}Time{% endtrans %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in rows %}
+                            <tr id="{{ row.id }}">
+                                <td class="client_name">{{ row[0] | safe }}</td>
+                                <td class="project_name">{{ row[1] | safe }}</td>
+                                <td class="bug_id">{{ row[2] | safe }}</td>
+                                <td class="usernames">{{ row[3] | safe }}</td>
+                                <td class="description">{{ row[4] | safe }}</td>
+                                <td class="date">{{ row[5] | safe }}</td>
+                                <td class="time">{{ row[6] | safe }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>{% trans %}Sum{% endtrans %}:</th>
+                            <th class="time">{{ entries_sum | comma_number }}</th>
+                        </tr>
+
+                        </thead>
+                    </table>
+                {% else %}
+                    <b>{% trans %}No results{% endtrans %}</b>
+                {% endif %}
+            </li>
+        </ul>
+        <ul id="participation-of-workers" class="hide">
+            <li>
+                <table class="participation-of-workers table table-bordered table-hover">
                     <thead>
                     <tr>
-                        <th class="client_name">{% trans %}Client id{% endtrans %}</th>
-                        <th class="project_name">{% trans %}Project{% endtrans %}</th>
-                        <th class="bug_id">{% trans %}Bug id{% endtrans %}</th>
-                        <th class="usernames">{% trans %}Employee{% endtrans %}</th>
-                        <th class="description">{% if group_by_bugs and not group_by_user %}{% trans %}Title{% endtrans %}{% else %}{% trans %}Description{% endtrans %}{% endif %}</th>
-                        <th class="date">{% trans %}Date{% endtrans %}</th>
-                        <th class="time">{% trans %}Time{% endtrans %}</th>
+                        <th class="usernames">{% trans %}No.{% endtrans %}</th>
+                        <th class="usernames">{% trans %}User{% endtrans %}</th>
+                        <th class="time">{% trans %}Hours{% endtrans %}</th>
+                        <th class="time_percent_chart"></th>
+                        <th class="time_percent">{% trans %}Hours %{% endtrans %}</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for row in rows %}
-                        <tr id="{{ row.id }}" class="{{ loop.cycle('odd', 'even') }} {{ row.klass }}">
-                            <td class="client_name">{{ row[0] | safe }}</td>
-                            <td class="project_name">{{ row[1] | safe }}</td>
-                            <td class="bug_id">{{ row[2] | safe }}</td>
-                            <td class="usernames">{{ row[3] | safe }}</td>
-                            <td class="description">{{ row[4] | safe }}</td>
-                            <td class="date">{{ row[5] | safe }}</td>
-                            <td class="time">{{ row[6] | safe }}</td>
+                    {% for client, time, time_percent in participation_of_workers %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ client }}</td>
+                            <td>{{ time }}</td>
+                            <td class="chart-bar">
+                                <div class="progress progress-striped">
+                                    <div class="bar" style="width:{{ time_percent }}%"></div>
+                                </div>
+                            </td>
+                            <td>{{ time_percent }}%</td>
                         </tr>
-                        {% for subrow in row.subrows %}
-                            <tr class="{{ row.id }} hide">
-                                <td class="client_name">{{ subrow[0] | safe }}</td>
-                                <td class="project_name">{{ subrow[1] | safe }}</td>
-                                <td class="bug_id">{{ subrow[2] | safe }}</td>
-                                <td class="usernames">{{ subrow[3] | safe }}</td>
-                                <td class="description">{{ subrow[4] | safe }}</td>
-                                <td class="date">{{ subrow[5] | safe }}</td>
-                                <td class="time">{{ subrow[6] | safe }}</td>
-                            </tr>
-                        {% endfor %}
-
                     {% endfor %}
                     <tr>
                         <td></td>
+                        <td align="right"><strong>{% trans %}Sum{% endtrans %}:</strong></td>
+                        <td class="sum-count">{{ participation_of_workers_sum }}</td>
                         <td></td>
                         <td></td>
-                        <td></td>
-                        <td></td>
-                        <td>{% trans %}Sum{% endtrans %}:</td>
-                        <td class="time">{{ entries_sum | comma_number }}</td>
                     </tr>
                     </tbody>
                 </table>
-            {% else %}
-                <b>{% trans %}No results{% endtrans %}</b>
-            {% endif %}
-        </li></ul>
-        <ul id="participation-of-workers" class="hide"><li>
-            <table class="participation-of-workers table table-bordered table-hover">
-                <thead>
-                <tr>
-                    <th class="usernames">{% trans %}No.{% endtrans %}</th>
-                    <th class="usernames">{% trans %}User{% endtrans %}</th>
-                    <th class="time">{% trans %}Hours{% endtrans %}</th>
-                    <th class="time_percent_chart"></th>
-                    <th class="time_percent">{% trans %}Hours %{% endtrans %}</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for client, time, time_percent in participation_of_workers %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ client }}</td>
-                        <td>{{ time }}</td>
-                        <td class="chart-bar">
-                            <div class="progress progress-striped">
-                                <div class="bar" style="width:{{ time_percent }}%"></div>
-                            </div>
-                        </td>
-                        <td>{{ time_percent }}%</td>
-                    </tr>
-                {% endfor %}
-                <tr>
-                    <td></td>
-                    <td align="right"><strong>{% trans %}Sum{% endtrans %}:</strong></td>
-                    <td class="sum-count">{{ participation_of_workers_sum }}</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                </tbody>
-            </table>
-        </li></ul>
+            </li>
+        </ul>
     </div>
 </div>
 <script type="text/javascript">
     $(function(){
         $("#results-tabs").organicTabs();
-        $('tr.clickable').click(function(){
-            $('.'+this.id).toggle();
-        });
 
         {% if rows %}
-            $.post('{{ request.url_for('/times/tickets/titles') }}', {trackers_id: '{{ trackers_id}}', tickets_id: '{{ tickets_id }}' }, function(data){
+            $.post('{{ request.url_for('/times/tickets/titles') }}', {trackers_id: '{{ trackers_id }}', tickets_id: '{{ tickets_id }}' }, function(data){
                 $('.ajax_changeable').each(function(i){
                     var identifier = $(this).attr('data-id');
                     if(data[identifier]){

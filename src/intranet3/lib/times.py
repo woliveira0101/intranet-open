@@ -1,8 +1,11 @@
 import datetime
 import copy
 
+import xlwt
 from jinja2 import escape
 from pyramid.httpexceptions import HTTPForbidden, HTTPBadRequest
+from pyramid.response import Response
+from sqlalchemy.sql import or_, and_
 
 from intranet3.utils.filters import comma_number
 from intranet3.models import User, TimeEntry, Tracker, Project, Client
@@ -84,6 +87,32 @@ class ProtectTimeEntriesMixin(object):
 
 
 class TimesReportMixin(object):
+    def _prepare_uber_query_for_sprint(self, sprint, bugs):
+        query = self.session.query
+        uber_query = query(Client, Project, TimeEntry.ticket_id, User, Tracker, TimeEntry.description, TimeEntry.date, TimeEntry.time)
+        uber_query = uber_query.filter(TimeEntry.user_id==User.id) \
+                               .filter(TimeEntry.project_id==Project.id) \
+                               .filter(Project.tracker_id==Tracker.id) \
+                               .filter(Project.client_id==Client.id)
+
+        uber_query = uber_query.filter(TimeEntry.date>=sprint.start) \
+                               .filter(TimeEntry.date<=sprint.end) \
+                               .filter(TimeEntry.deleted==False)
+
+        if bugs:
+            or_list = []
+            for bug in bugs:
+                or_list.append(and_(TimeEntry.ticket_id==bug.id, TimeEntry.project_id==bug.project.id))
+
+            uber_query = uber_query.filter(or_(*or_list))
+        else:
+            uber_query = uber_query.filter(TimeEntry.ticket_id.in_([]))
+
+
+        uber_query = uber_query.order_by(Client.name, Project.name, TimeEntry.ticket_id, User.name)
+        return uber_query
+
+
     def _prepare_uber_query(self, start_date, end_date, projects, users, without_bug_only):
         query = self.session.query
         uber_query = query(Client, Project, TimeEntry.ticket_id, User, Tracker, TimeEntry.description, TimeEntry.date, TimeEntry.time)
@@ -92,8 +121,10 @@ class TimesReportMixin(object):
                                .filter(Project.tracker_id==Tracker.id)\
                                .filter(Project.client_id==Client.id)
 
-        uber_query = uber_query.filter(TimeEntry.project_id.in_(projects))\
-                               .filter(TimeEntry.date>=start_date)\
+        if projects:
+            uber_query = uber_query.filter(TimeEntry.project_id.in_(projects))
+
+        uber_query = uber_query.filter(TimeEntry.date>=start_date)\
                                .filter(TimeEntry.date<=end_date)\
                                .filter(TimeEntry.deleted==False)
         if without_bug_only:
@@ -148,12 +179,6 @@ class Row(list):
     @property
     def id(self):
         return 'row%s' % self._id
-
-    @property
-    def klass(self):
-        if len(self.subrows) > 0:
-            return 'clickable'
-        return ''
 
     @classmethod
     def _to_print(cls, entries):
@@ -228,3 +253,51 @@ class Row(list):
             row = cls.create_row(entry, groupby)
             rows.append(row)
         return rows
+
+
+def dump_entries_to_excel(entries):
+    def _format_row(a_row):
+        row = list(a_row)
+        row[0] = (row[0].name,)                                    #client
+        row[1] = (row[1].name,)                                    #project
+        row[2] = (row[2],)                                         #ticketid
+        row[3] = (row[3].email,)                                   #email
+        row[4] = (unicode(row[5]),)                                #desc
+        date_xf = xlwt.easyxf(num_format_str='DD/MM/YYYY')
+        row[5] = (row[6].strftime('%d/%m/%Y'), date_xf)            #date
+        row[6] = (round(row[7], 2),)                               #time
+        return row[:6]
+
+    wbk = xlwt.Workbook()
+    sheet = wbk.add_sheet('Hours')
+
+    heading_xf = xlwt.easyxf('font: bold on; align: wrap on, vert centre, horiz center')
+    headings = ('Client', 'Project', 'Ticket id', 'Employee', 'Description', 'Date', 'Time')
+    headings_width = (x*256 for x in (20, 30, 10, 40, 100, 12, 10))
+    for colx, value in enumerate(headings):
+        sheet.write(0, colx, value, heading_xf)
+    for i, width in enumerate(headings_width):
+        sheet.col(i).width = width
+
+
+    sheet.set_panes_frozen(True)
+    sheet.set_horz_split_pos(1)
+    sheet.set_remove_splits(True)
+
+    for j, row in enumerate(entries):
+        row = _format_row(row)
+        for i, cell in enumerate(row):
+            sheet.write(j+1, i, *cell)
+
+    file_path = '/tmp/tmp.xls'
+    wbk.save(file_path)
+
+    file = open(file_path, 'rb')
+    response = Response(
+        content_type='application/vnd.ms-excel',
+        app_iter = file,
+        )
+    response.headers['Cache-Control'] = 'no-cache'
+    response.content_disposition = 'attachment; filename="report-%s.xls"' % datetime.datetime.now().strftime('%d-%m-%Y--%H-%M-%S')
+
+    return file, response

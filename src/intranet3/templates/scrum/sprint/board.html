@@ -3,7 +3,7 @@
 {% set page = 'board' %}
 
 {% macro yellow_card(bug) -%}
-<div class="yellow_card">
+<div class="yellow_card {% if bug.is_blocked %}blocked {% endif %}">
     <div class="number_ticket"><a target="_blank" href="{{ bug.get_url() }}">{{ bug.id }}</a></div>
     <div class="desc_ticket">{{ bug.desc }}</div>
     <div class="assignee">{{ bug.owner.name }}</div>

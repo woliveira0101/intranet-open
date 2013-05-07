@@ -20,3 +20,4 @@ twistd.pid
 *.tar.gz
 *.css
 *.DS_Store
+venv

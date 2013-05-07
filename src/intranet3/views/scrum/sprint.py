@@ -2,7 +2,7 @@ import json
 import datetime
 
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPFound, HTTPForbidden
+from pyramid.httpexceptions import HTTPFound, HTTPForbidden, HTTPBadRequest
 
 from intranet3.utils.views import BaseView
 from intranet3.forms.scrum import SprintForm
@@ -11,8 +11,10 @@ from intranet3.models import Sprint, ApplicationConfig, Tracker, User, Project
 from intranet3 import helpers as h
 
 from intranet3.log import INFO_LOG, ERROR_LOG
-from intranet3.lib.scrum import SprintWrapper, get_velocity_chart_data
+from intranet3.lib.scrum import SprintWrapper, get_velocity_chart_data, move_blocked_to_the_end
+from intranet3.lib.times import TimesReportMixin, Row
 from intranet3.lib.bugs import Bugs
+from intranet3.forms.times import ProjectTimeForm
 from intranet3.forms.scrum import SprintListFilterForm
 
 LOG = INFO_LOG(__name__)
@@ -92,12 +94,6 @@ class ClientProtectionMixin(object):
         if client.id != sprint.client_id:
             raise HTTPForbidden()
 
-def _move_blocked_to_the_end(bugs):
-    """Move blocked bugs to the end of the list"""
-    blocked_bugs = [bug for bug in bugs if bug.is_blocked]
-    bugs = [bug for bug in bugs if not bug.is_blocked]
-    bugs.extend(blocked_bugs)
-    return bugs
 
 @view_config(route_name='scrum_sprint_show', permission='client')
 class Show(ClientProtectionMixin, FetchBugsMixin, BaseView):
@@ -106,7 +102,7 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseView):
         sprint = Sprint.query.get(sprint_id)
         bugs = self._fetch_bugs(sprint)
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
-        bugs = _move_blocked_to_the_end(bugs)
+        bugs = move_blocked_to_the_end(bugs)
 
         tracker = Tracker.query.get(sprint.project.tracker_id)
         sw = SprintWrapper(sprint, bugs, self.request)
@@ -134,6 +130,56 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseView):
             sprint=sprint,
             info=sw.get_info(),
             bug_list_url=lambda bugs: sprint.project.get_bug_list_url([bug.id for bug in bugs]),
+        )
+
+
+@view_config(route_name='scrum_sprint_times', permission='client')
+class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseView):
+    def dispatch(self):
+        sprint_id = self.request.GET.get('sprint_id')
+        sprint = Sprint.query.get(sprint_id)
+        bugs = self._fetch_bugs(sprint)
+        sw = SprintWrapper(sprint, bugs, self.request)
+
+        client = self.request.user.get_client()
+        form = ProjectTimeForm(self.request.GET, client=client)
+
+        if not self.request.GET.get('submited'):
+            # ugly hack
+            form.group_by_bugs.data = True
+            form.group_by_user.data = True
+
+        if not form.validate():
+            return dict(form=form, sprint=sprint)
+
+        group_by = True, True, form.group_by_bugs.data, form.group_by_user.data
+
+        uber_query = self._prepare_uber_query_for_sprint(sprint, bugs)
+        entries = uber_query.all()
+
+        if self.request.GET.get('excel'):
+            from intranet3.lib.times import dump_entries_to_excel
+            file, response = dump_entries_to_excel(entries)
+            return response
+
+        entries_sum = sum([e[-1] for e in entries])
+
+        participation_of_workers = self._get_participation_of_workers(entries)
+
+        tickets_id = ','.join([str(e[2]) for e in entries])
+        trackers_id = ','.join([str(e[4].id) for e in entries])
+
+        rows = Row.from_ordered_data(entries, group_by)
+
+        return dict(
+            rows=rows,
+            entries_sum=entries_sum,
+            form=form,
+            info=sw.get_info(),
+            sprint=sprint,
+            participation_of_workers=participation_of_workers,
+            participation_of_workers_sum=sum([time[1] for time in participation_of_workers]),
+            trackers_id=trackers_id, tickets_id=tickets_id,
         )
 
 @view_config(route_name='scrum_sprint_charts', permission='client')
