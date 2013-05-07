@@ -5,6 +5,7 @@ New release
 - tablesorter in time entries views i.e. /times/tickets/report
 - add bug sprint time in /scrum/sprint/show
 - counting achieved points fix
+- add velocity per bug
 
 
 0.8 (23-04-2013)
