@@ -13,6 +13,8 @@ New release
 - removed jinja filters dependency with config file
 - daily presence splited into Poznan and Wroclaw
 - sprint layout slighty changed
+- fixed client add bug
+- modify client map columns
 
 0.8 (23-04-2013)
 ===============
