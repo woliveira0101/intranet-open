@@ -3,7 +3,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 from intranet3.utils.views import BaseView
-from intranet3.models import Client
+from intranet3.models import Client, Project
 from intranet3.log import INFO_LOG, WARN_LOG
 from intranet3.forms.client import ClientForm, ClientAddForm
 from intranet3.forms.common import DeleteForm
@@ -39,12 +39,16 @@ class Counter():
 class Map(BaseView):
     """ Map clients/projects/selectors """
     def get(self):
-        clients = Client.query.order_by(Client.name)
-        tab = self.request.GET.get('tab', 'active_clients')
-        return dict(clients=clients,
-                    tab=tab,
-                    counter=Counter()
-                    )
+        active_only = self.request.GET.get('active_only', '1')
+        clients = self.session.query(Client).order_by(Client.name)
+        if active_only=='1':
+             clients = clients.outerjoin(Project)\
+                              .filter((Project.active==True) | (Project.client_id==None))
+        return dict(
+            clients=clients,
+            active_only=active_only,
+            counter=Counter()
+        )
 
 
 @view_config(route_name='client_add', permission='admin')

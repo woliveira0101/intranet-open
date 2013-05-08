@@ -2,11 +2,11 @@
 
 {% block content %}
     <ul class="nav nav-tabs">
-        <li {{ 'class=active' if tab=='active_clients' }} >
+        <li {{ 'class=active' if active_only=='1'}} >
             <a href="{{ request.url_for('/client/map') }}" >{% trans %}Active clients{% endtrans %}</a>
         </li>
-        <li {{ 'class=active' if tab=='all_projects' }} >
-            <a href="{{ request.url_for('/client/map', tab='all_projects') }}" >{% trans %}All Projects{% endtrans %}</a>
+        <li {{ 'class=active' if active_only=='0'}} >
+            <a href="{{ request.url_for('/client/map', active_only=0) }}" >{% trans %}All clients{% endtrans %}</a>
         </li>
         <li class="button">
             <a href="{{ request.url_for('/client/add') }}" class="btn btn-small">{% trans %}Add client{% endtrans %}</a>
@@ -26,45 +26,27 @@
         </thead>
         <tbody>
         {% for client in clients %}
-            {% if tab=='active_clients' %}
-                {% if client.no_projects %}
-                <tr>
-                    <td class="lp">{{counter}}</td>
-                    <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client.id) }}">{{ client.name }}</a></td>
-                    <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client.id) }}">(No projects)</a></td>
-                    <td>-</td>
-                    <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client.id) }}">(No projects)</a></td>
-                    <td>-</td>
-                    <td>-</td>
-                </tr>
-                {% elif client.active %}
-                    {% for project in client.projects %}
-                        {% if project.active %}
-                        <tr>
-                            <td class="lp">{{counter}}</td>
-                            <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client.id) }}">{{ client.name }}</a></td>
-                            <td><a title="Edit project" href="{{ request.url_for('/project/edit', project_id=project.id) }}">{{ project.name }}</a></td>
-                            <td>{% if project.coordinator %}{{ project.coordinator.email }}{% else %}{% trans %}Not set{% endtrans %}{% endif %}</td>
-                            <td><a title="Edit tracker" href="{{ request.url_for('/tracker/edit', tracker_id=project.tracker_id) }}">{{ project.tracker.name }}</a></td>
-                            <td>{% if project.active %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
-                            <td>{{ project.format_selector() }}</td>
-                        </tr>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-            {% elif tab=='all_projects' %}
-                {% for project in client.projects %}
-                    <tr>
-                        <td class="lp">{{counter}}</td>
-                        <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client.id) }}">{{ client.name }}</a></td>
-                        <td><a title="Edit project" href="{{ request.url_for('/project/edit', project_id=project.id) }}">{{ project.name }}</a></td>
-                        <td>{% if project.coordinator %}{{ project.coordinator.email }}{% else %}{% trans %}Not set{% endtrans %}{% endif %}</td>
-                        <td><a title="Edit tracker" href="{{ request.url_for('/tracker/edit', tracker_id=project.tracker_id) }}">{{ project.tracker.name }}</a></td>
-                        <td>{% if project.active %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
-                        <td>{{ project.format_selector() }}</td>
-                    </tr>
-                {% endfor %}
-            {% endif %}
+        {% for project in client.projects %}
+            <tr>
+            <td class="lp">{{counter}}</td>
+            <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client.id) }}">{{ client.name }}</a></td>
+            <td><a title="Edit project" href="{{ request.url_for('/project/edit', project_id=project.id) }}">{{ project.name }}</a></td>
+            <td>{% if project.coordinator %}{{ project.coordinator.email }}{% else %}{% trans %}Not set{% endtrans %}{% endif %}</td>
+            <td><a title="Edit tracker" href="{{ request.url_for('/tracker/edit', tracker_id=project.tracker_id) }}">{{ project.tracker.name }}</a></td>
+            <td>{% if project.active %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}</td>
+            <td>{{ project.format_selector() }}</td>
+            </tr>
+        {% else %}
+            <tr>
+            <td class="lp">{{counter}}</td>
+            <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client.id) }}">{{ client.name }}</a></td>
+            <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client.id) }}">(No projects)</a></td>
+            <td>-</td>
+            <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client.id) }}">(No projects)</a></td>
+            <td>-</td>
+            <td>-</td>
+            </tr>
+        {% endfor %}
         {% endfor %}
         </tbody>
     </table>
