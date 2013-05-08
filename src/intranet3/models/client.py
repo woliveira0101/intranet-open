@@ -17,26 +17,24 @@ class Client(Base):
     google_card = Column(String, nullable=True)
     google_wiki = Column(String, nullable=True)
     selector    = Column(String, nullable=True) 
-    street      = Column(String,nullable=True)
-    city        = Column(String,nullable=True)
-    postcode    = Column(String,nullable=True)
-    nip         = Column(String,nullable=True)
-    mailing_url = Column(String,nullable=True)
-    wiki_url    = Column(String,nullable=True)
-    note        = Column(String,nullable=True)
+    street      = Column(String, nullable=True)
+    city        = Column(String, nullable=True)
+    postcode    = Column(String, nullable=True)
+    nip         = Column(String, nullable=True)
+    mailing_url = Column(String, nullable=True)
+    wiki_url    = Column(String, nullable=True)
+    note        = Column(String, nullable=True)
 
     @reify
     def active(self):
         return self.has_active_project()
-    
+
     def has_active_project(self):
         from intranet3.models import Project
         result = DBSession.query(Project.id)\
                        .filter(Project.active==True)\
                        .filter(Project.client_id==self.id).limit(1).first()
-        if result:
-            return True
-        return False
+        return bool(result)
 
     @classmethod
     def get_emails(cls):

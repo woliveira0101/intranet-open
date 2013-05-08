@@ -76,7 +76,7 @@ class User(Base):
     presences = orm.relationship('PresenceEntry', backref='user', lazy='dynamic')
     credentials = orm.relationship('TrackerCredentials', backref='user', lazy='dynamic')
     time_entries = orm.relationship('TimeEntry', backref='user', lazy='dynamic')
-    projects = orm.relationship('Client', backref='coordinator', lazy='dynamic')
+    coordinated_projects = orm.relationship('Project', backref='coordinator', lazy='dynamic')
     leaves = orm.relationship('Leave', backref='user', lazy='dynamic')
     lates = orm.relationship('Late', backref='user', lazy='dynamic')
 
