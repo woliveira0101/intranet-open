@@ -53,11 +53,6 @@ class Bug(object):
         self.whiteboard = parse_whiteboard(whiteboard)
         self.version = version
 
-    @property
-    def velocity(self):
-        points = float(self.whiteboard.get('p', 0.0))
-        return (points / self.time) if self.time else 0.0
-
     def get_url(self):
         raise NotImplementedError()
 

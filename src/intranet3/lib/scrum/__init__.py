@@ -30,6 +30,11 @@ class BugUglyAdapter(object):
     def points(self):
         return float(self.whiteboard.get('p', 0.0))
 
+    @property
+    def velocity(self):
+        points = float(self.whiteboard.get('p', 0.0))
+        return (points / self.sprint_time) if self.sprint_time else 0.0
+
 
 def parse_whiteboard(wb):
     wb = wb.strip().replace('[', ' ').replace(']', ' ')
