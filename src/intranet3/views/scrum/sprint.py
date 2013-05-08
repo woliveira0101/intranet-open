@@ -103,14 +103,12 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseView):
         bugs = self._fetch_bugs(sprint)
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
         bugs = move_blocked_to_the_end(bugs)
-
         tracker = Tracker.query.get(sprint.project.tracker_id)
         sw = SprintWrapper(sprint, bugs, self.request)
         return dict(
             sprint=sprint,
-            project=project,
-            bugs=bugs,
             tracker=tracker,
+            bugs=sw.bugs,
             info=sw.get_info(),
         )
 
