@@ -12,7 +12,6 @@ from mockups import MockUpsMixin
 from intranet3 import models
 
 
-
 class BaseTestCase(MockUpsMixin, unittest.TestCase):
 
     @classmethod

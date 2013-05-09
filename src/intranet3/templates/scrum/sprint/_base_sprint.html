@@ -1,8 +1,15 @@
 {% extends "templates/_base.html" %}
 
 {% block content %}
+
 <ul id="sprint-nav" class="nav nav-tabs" xmlns="http://www.w3.org/1999/html">
-    <li class="title">{% trans sprint_name=sprint.name%}Sprint {{ sprint_name }}{% endtrans %}</li>
+    <li class="dropdown">
+        <a class="title dropdown-toggle" data-toggle="dropdown" href="">{% trans sprint_name=sprint.name%}Sprint {{ sprint_name }}{% endtrans %}<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+            <li><a href="{{ request.url_for('/scrum/sprint/edit', sprint_id=sprint.id) }}">Edit sprint</a></li>
+            <li><a href="{{ request.url_for('/project/client/backlog', project_id=project.id) }}">Project: {{ project.name }}</a></li>
+        </ul>
+    </li>
     {% if page == 'bugs' %}
         <li class="active"><a>{% trans %}Tasks{% endtrans %}</a></li>
     {% else %}
@@ -52,17 +59,19 @@
                             <li>
                                 <span>{% trans %}Working agreement{% endtrans %}</span>
                                 {% if project.working_agreement %}
-                                    <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='working_agreement') }}">show</a>
+                                    {{ project.working_agreement|first_words }}
+                                    <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='working_agreement') }}">... more</a>
                                 {% else %}
-                                    <a href="{{ project_edit_url }}">Not set</a>
+                                    <a href="{{ project_edit_url }}">—</a>
                                 {% endif %}
                             </li>
                             <li>
                                 <span>{% trans %}Definition of Done{% endtrans %}</span>
                                 {% if project.definition_of_done %}
-                                    <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='definition_of_done') }}">show</a>
+                                    {{ project.definition_of_done|first_words }}
+                                    <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='definition_of_done') }}">... more</a>
                                 {% else %}
-                                    <a href="{{ project_edit_url }}">Not set</a>
+                                    <a href="{{ project_edit_url }}">—</a>
                                 {% endif %}
                             </li>
                             <li>
@@ -70,14 +79,14 @@
                                 {% if project.continuous_integration_url %}
                                     <a target="_blank" href="{{ project.continuous_integration_url }}">link</a>
                                 {% else %}
-                                    <a href="{{ project_edit_url }}">Not set</a>
+                                    <a href="{{ project_edit_url }}">—</a>
                                 {% endif %}
                             </li>
                         </ul>
                     </div>
-                    <div class="span6">
+                    <div class="span5">
                         <h6>Sprint goal</h6>
-                        <pre class="goal">{{ sprint.goal }}</pre>
+                        <pre class="goal info">{{ sprint.goal }}</pre>
                     </div>
                 </div>
             </div>

@@ -93,7 +93,7 @@ def main(global_config, **settings):
     pyramid_config.add_renderer(None, 'intranet3.utils.renderer.renderer_factory')
     pyramid_config.add_translation_dirs('intranet3:locale/')
 
-    jinja2_env = pyramid_jinja2.get_jinja2_environment(pyramid_config)
+    jinja2_env = pyramid_config.get_jinja2_environment()
     from intranet3.utils import filters
 
     jinja2_env.filters['slugify'] = filters.slugify
@@ -104,6 +104,7 @@ def main(global_config, **settings):
     jinja2_env.filters['dictsort2'] = filters.do_dictsort
     jinja2_env.filters['tojson'] = filters.tojson
     jinja2_env.filters['comma_number'] = filters.comma_number
+    jinja2_env.filters['first_words'] = filters.first_words
     jinja2_env.globals.update(zip=zip)
 
 

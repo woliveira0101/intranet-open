@@ -28,14 +28,25 @@ class List(BaseView):
         date = datetime.datetime.strptime(self.request.GET.get('date'), '%d.%m.%Y')
         start_date = datetime.datetime.combine(date, day_start)
         end_date = datetime.datetime.combine(date, day_end)
-        entries = self.session.query(User.id, User.name, func.min(PresenceEntry.ts), func.max(PresenceEntry.ts))\
+        entries_p = self.session.query(User.id, User.name, func.min(PresenceEntry.ts), func.max(PresenceEntry.ts))\
                               .filter(User.id==PresenceEntry.user_id)\
+                              .filter((User.location=="poznan") | (User.location==None))\
                               .filter(PresenceEntry.ts>=start_date)\
                               .filter(PresenceEntry.ts<=end_date)\
                               .group_by(User.id, User.name)\
                               .order_by(User.name)
+
+        entries_w = self.session.query(User.id, User.name, func.min(PresenceEntry.ts), func.max(PresenceEntry.ts))\
+                              .filter(User.id==PresenceEntry.user_id)\
+                              .filter(User.location=="wroclaw")\
+                              .filter(PresenceEntry.ts>=start_date)\
+                              .filter(PresenceEntry.ts<=end_date)\
+                              .group_by(User.id, User.name)\
+                              .order_by(User.name)
+
         return dict(
-            entries=((user_id, user_name, start, stop, start.time() > hour_9) for (user_id, user_name, start, stop) in entries),
+            entries_p=((user_id, user_name, start, stop, start.time() > hour_9) for (user_id, user_name, start, stop) in entries_p),
+            entries_w=((user_id, user_name, start, stop, start.time() > hour_9) for (user_id, user_name, start, stop) in entries_w),
             date=date,
             prev_date=previous_day(date),
             next_date=next_day(date),

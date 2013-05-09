@@ -13,6 +13,7 @@
 <li class="nav-head">Scrum:</li>
 <li class="space_li"><a href="{{ request.url_for('/scrum/sprint/list') }}"><i class="icon-chevron-right"></i>{% trans %}Sprints{% endtrans %}</a></li>
 
+<li><a href="{{ request.url_for('/employees/list/absence_pivot') }}"><i class="icon-chevron-right"></i>{% trans %}Leave entitlements{% endtrans %}</a></li>
 <li><a href="{{ request.url_for('/employees/list/late') }}"><i class="icon-chevron-right"></i>{% trans %}Excuses{% endtrans %}</a></li>
 
 <li><a href="{{ request.url_for('/tracker/list') }}"><i class="icon-chevron-right"></i>{% trans %}Trackers{% endtrans %}</a></li>

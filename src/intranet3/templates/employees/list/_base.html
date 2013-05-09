@@ -48,9 +48,9 @@
 {% block content %}
     <div class="tabs">
         <ul class="nav nav-tabs">
-            <li class="{% if current_page == 'late' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/late') }}">{% trans %}Spóźnienia{% endtrans %}</a></li>
-            <li class="{% if current_page == 'wrongtime' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/wrong_time') }}">{% trans %}Notowania czasu{% endtrans %}</a></li>
-            <li class="{% if current_page == 'absence' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/absence') }}">{% trans %}Nieobecności{% endtrans %}</a></li>
+            <li class="{% if current_page == 'late' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/late') }}">{% trans %}Lates{% endtrans %}</a></li>
+            <li class="{% if current_page == 'wrongtime' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/wrong_time') }}">{% trans %}Wrong times{% endtrans %}</a></li>
+            <li class="{% if current_page == 'absence' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/absence') }}">{% trans %}Absences{% endtrans %}</a></li>
         </ul>
     </div>
     <div class="appjust">

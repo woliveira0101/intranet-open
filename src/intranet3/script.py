@@ -46,7 +46,7 @@ def make_admin(config_path):
 
     session = DBSession()
 
-    user = session.query(User).filter(User.login==user_login).first()
+    user = session.query(User).filter(User.email==user_login).first()
 
     if not user:
         print u"No such user: %s" % user_login
@@ -67,11 +67,6 @@ def make_admin(config_path):
     transaction.commit()
 
 
-
-def ipdb(env):
-    import ipdb; ipdb.set_trace()
-
-
 def create_config(env):
     from intranet3.models import *
     import transaction
@@ -79,13 +74,8 @@ def create_config(env):
         office_ip='',
         google_user_email='',
         google_user_password='',
-        lateness_spreadsheet='',
         holidays_spreadsheet='',
-        projects_spreadsheet='',
-        hours_worked_spreadsheet='',
-        hours_lateness_spreadsheet='',
         hours_employee_project='',
-        hours_ticket_spreadsheet='', 
     )
     DBSession.add(config)
     transaction.commit()
