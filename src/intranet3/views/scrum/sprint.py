@@ -107,6 +107,7 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseView):
         sw = SprintWrapper(sprint, bugs, self.request)
         return dict(
             sprint=sprint,
+            project=project,
             tracker=tracker,
             bugs=sw.bugs,
             info=sw.get_info(),
@@ -200,7 +201,7 @@ class Charts(ClientProtectionMixin, FetchBugsMixin, BaseView):
         return dict(
             tracker=tracker,
             sprint=sprint,
-            project = project,
+            project=project,
             bugs=bugs,
             charts_data=json.dumps(burndown),
             piechart_data=piechart_data,

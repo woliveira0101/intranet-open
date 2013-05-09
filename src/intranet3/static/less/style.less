@@ -109,7 +109,7 @@ form ul {
             margin-right: 0;
         }
         .dropdown > a {
-            
+
             padding-right: 0;
             color: @grayLighter2;
             .caret {
@@ -515,7 +515,10 @@ table.bugs-list tbody tr.other-projects td {
       }
   }
 /* Presence */
-#presence {
+.presence {
+    caption {
+        margin-bottom: 1px;
+    }
     td {
         background: #fff;
     }
@@ -542,19 +545,17 @@ table.bugs-list tbody tr.other-projects td {
             display: inline-block;
             line-height: 20px;
         }
+    }
+    .current_user {
         .justification-info {
             position: relative;
             top: 1px;
+            float: right;
+            display: inline;
         }
-    }
-    .btn_justifaction, .justification-info {
-        float: right;
     }
     .current_user.late-light td {
         background: #FEE;
-    }
-    .justification-info {
-        
     }
     tr:hover td {
         background: #ddd !important;
@@ -680,7 +681,7 @@ table.bugs-list tbody tr.other-projects td {
     }
     td {
         border-color: #eee;
-    }        
+    }
     .holiday_date, .holiday_date td {
         background-color: #d6d6d6 !important;
         opacity: .5;
@@ -970,7 +971,7 @@ select#clients {
     .review_td {
         width: 260px;
     }
-    .select { 
+    .select {
         text-align: center;
         select {
             width: 60px;
@@ -1103,7 +1104,7 @@ form.box_edit_user dl dt {
         -moz-box-sizing:border-box;
         -webkit-box-sizing:border-box;
         text-align:left;
-        float: left; 
+        float: left;
     }
     .yellow_card.blocked {
         background-color: #faa1a1;
@@ -1296,7 +1297,7 @@ form.absence-form {
         .chart_pivot {
             width: 360px;
         }
-    }    
+    }
     #clients_pivot td, #clients_pivot th {
         padding: 2px;
         font-size: 11px;

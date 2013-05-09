@@ -13,7 +13,6 @@ def parse_user_email(value):
     #return '<br />'.join([i for i in value])
 
 def parse_datetime_to_miliseconds(value):
-    import ipdb;ipdb.set_trace()
     return int(time.mktime(value.timetuple()) * 1000)
 
 def timedelta_to_minutes(value):
@@ -25,9 +24,11 @@ def comma_number(value):
     return ('%.2f' % value).replace('.', ',')
 
 
-def first_words(value, amount=5):
-    words = re.findall('\w+', value)[:amount]
-    return ' '.join(words)
+def first_words(value, characters=20):
+    words = re.findall('\w+', value)
+    result = ' '.join(words)[:characters]
+    result = '%s ...' % result
+    return result
 
 def do_dictsort(value, case_sensitive=False, by='key', attribute=None):
     """Sort a dict and yield (key, value) pairs. Because python dicts are
