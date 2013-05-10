@@ -16,7 +16,7 @@ setup(
     name=name,
     version=version,
     description="New Intranet version",
-    long_description=read('README'),
+    long_description=read('README.md'),
     # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[],
     keywords="",
