@@ -18,6 +18,7 @@ New release
 - sprint layout slighty changed
 - fixed client add bug
 - modify client map columns
+- modify velocity per bug - count when closed or verified
 
 0.8 (23-04-2013)
 ===============
