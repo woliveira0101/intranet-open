@@ -105,8 +105,11 @@ def main(global_config, **settings):
     jinja2_env.filters['tojson'] = filters.tojson
     jinja2_env.filters['comma_number'] = filters.comma_number
     jinja2_env.filters['first_words'] = filters.first_words
-    jinja2_env.globals.update(zip=zip)
+    jinja2_env.filters['first_words'] = filters.first_words
 
+    jinja2_env.filters['is_true'] = filters.is_true
+    jinja2_env.filters['is_false'] = filters.is_false
+    jinja2_env.globals.update(zip=zip)
 
     pyramid_config.include('pyramid_autoroute')
     if 'venusian.ignore' in settings:

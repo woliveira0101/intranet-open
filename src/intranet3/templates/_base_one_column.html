@@ -64,7 +64,7 @@
                   {% block header %}
                   <ul class="nav-collapse collapse">
                     <li>
-                        <a class="brand" {{ 'style=color:red' if request.registry.settings['DEBUG'] }} href="{{ request.url_for('/') }}">Intranet</a>
+                        <a class="brand" {{ 'style=color:red' if request.registry.settings['DEBUG'] | is_true }} href="{{ request.url_for('/') }}">Intranet</a>
                     </li>
                     {% if request.has_perm('view') %}
                     <li class="fast-access">

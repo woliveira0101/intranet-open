@@ -24,7 +24,6 @@ FATAL = FATAL_LOG(__name__)
 
 positive_values = (True, 1, 1.0, '1', 'True', 'true', 't')
 
-
 negative_values = (False, None, 0, 0.0, '0', 'False', 'false', 'f', 'None')
 
 

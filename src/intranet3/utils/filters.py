@@ -1,8 +1,12 @@
+import re
 import time
 import json
-from intranet3.helpers import format_time
+
 from jinja2.exceptions import FilterArgumentError
-import re
+
+from intranet3 import helpers as h
+
+format_time = h.format_time
 
 def slugify(value):
     return value.replace(' ', '-')
@@ -66,3 +70,10 @@ def do_dictsort(value, case_sensitive=False, by='key', attribute=None):
 
 def tojson(dict_):
     return json.dumps(dict_)
+
+
+def is_true(value):
+    return value in h.positive_values
+
+def is_false(value):
+    return value not in h.positive_values
