@@ -29,6 +29,8 @@ class Sprint(Base):
     achieved_points = Column(Integer, nullable=False, default=0)
     worked_hours = Column(Float, nullable=False, default=0.0)
 
+    retrospective_note = Column(Text, nullable=False, default='')
+
     @property
     def velocity(self):
         return (self.achieved_points / self.worked_hours) if self.worked_hours else 0.0

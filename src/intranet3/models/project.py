@@ -75,7 +75,9 @@ class Project(Base):
 
     working_agreement = Column(Text, nullable=False, default='')
     definition_of_done = Column(Text, nullable=False, default='')
+    definition_of_ready = Column(Text, nullable=False, default='')
     continuous_integration_url = Column(String, nullable=False, default='')
+    backlog_url = Column(String, nullable=False, default='')
 
     __table_args__ = (UniqueConstraint('name', 'client_id', name='project_name_client_id_unique'), {})
 

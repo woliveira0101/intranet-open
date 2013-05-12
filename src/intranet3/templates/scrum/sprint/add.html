@@ -11,6 +11,7 @@
         {{ form_field(form.start, _('Start date'), class='datepicker') }}
         {{ form_field(form.end, _('End date'), class='datepicker') }}
         {{ form_field(form.goal, _('Goal'), cols='80', rows='8') }}
+        {{ form_field(form.retrospective_note, _('Markdown'), class="span8", rows="10") }}
         <div class="buttons">
             <input class="btn btn-primary" type="submit" value="{% trans %}Add{% endtrans %}">
         </div>

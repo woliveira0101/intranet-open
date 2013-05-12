@@ -1,0 +1,26 @@
+{% extends "templates/scrum/sprint/_base_sprint.html" %}
+
+{% set page = 'retros' %}
+
+
+{% block body %}
+    <div class="span12">
+    <table class="table table-bordered retro-table">
+        <thead>
+            <tr>
+                <th class="sprint">Sprint</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for sprint in sprints %}
+            <tr>
+                <td class="sprint">{{ sprint.name }}</td>
+                <td>{{  sprint.retrospective_note | markdown}}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+{% endblock body %}
+

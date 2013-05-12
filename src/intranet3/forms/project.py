@@ -27,7 +27,9 @@ class ProjectForm(wtf.Form):
 
     working_agreement = wtf.TextAreaField(_("Working agreement"))
     definition_of_done = wtf.TextAreaField(_("Definition of done"))
+    definition_of_ready = wtf.TextAreaField(_("Definition of ready"))
     continuous_integration_url = wtf.StringField(_("Continuous integration link"))
+    backlog_url = wtf.StringField(_("Backlog link"))
 
     def validate_component_selector(self, field):
         if field.data and not self.project_selector.data:

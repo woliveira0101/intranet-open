@@ -45,7 +45,9 @@ class Add(BaseView):
                 mailing_url=form.mailing_url.data,
                 working_agreement=form.working_agreement.data,
                 definition_of_done=form.definition_of_done.data,
+                definition_of_ready=form.definition_of_ready.data,
                 continuous_integration_url=form.continuous_integration_url.data,
+                backlog_url=form.backlog_url.data,
                 status = form.status.data,
             )
             self.session.add(project)
@@ -80,7 +82,9 @@ class Edit(BaseView):
             project.mailing_url = form.mailing_url.data
             project.working_agreement = form.working_agreement.data
             project.definition_of_done = form.definition_of_done.data
+            project.definition_of_ready = form.definition_of_done.data
             project.continuous_integration_url = form.continuous_integration_url.data
+            project.backlog_url = form.backlog_url.data
             project.status = form.status.data
 
             self.flash(self._(u"Project saved"))

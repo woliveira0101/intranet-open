@@ -28,4 +28,4 @@ class SprintForm(wtf.Form):
     start  = wtf.DateField(_(u"Start date"), format='%d/%m/%Y', validators=[])
     end  = wtf.DateField(_(u"End date"), format='%d/%m/%Y', validators=[])
     goal = wtf.TextAreaField(_(u'Goal'), validators=[])
-
+    retrospective_note = wtf.TextAreaField(_(u'Retrospective note'), validators=[])

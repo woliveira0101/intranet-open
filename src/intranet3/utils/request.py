@@ -11,6 +11,8 @@ from intranet3 import models
 class Request(request.Request):
     def __init__(self, *args, **kwargs):
         self.db_session = DBSession()
+        #those will be added to templates context, see subscribers.py
+        self.tmpl_ctx = {}
         super(Request, self).__init__(*args, **kwargs)
 
     @reify

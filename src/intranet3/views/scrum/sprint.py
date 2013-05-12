@@ -1,8 +1,10 @@
 import json
 import datetime
 
+import markdown
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPFound, HTTPForbidden, HTTPBadRequest
+from pyramid.httpexceptions import HTTPFound, HTTPForbidden, HTTPNotFound
+from pyramid.response import Response
 
 from intranet3.utils.views import BaseView
 from intranet3.forms.scrum import SprintForm
@@ -93,21 +95,52 @@ class ClientProtectionMixin(object):
         if client.id != sprint.client_id:
             raise HTTPForbidden()
 
-
-@view_config(route_name='scrum_sprint_show', permission='client')
-class Show(ClientProtectionMixin, FetchBugsMixin, BaseView):
+@view_config(route_name='scrum_sprint_field', permission='client')
+class Field(ClientProtectionMixin, BaseView):
     def get(self):
+        field = self.request.GET.get('field')
+        sprint_id = self.request.GET.get('sprint_id')
+        sprint = Sprint.query.get(sprint_id)
+
+        if field == 'retrospective_note':
+            result = sprint.retrospective_note
+            header = 'Retrospective note'
+        else:
+            raise HTTPNotFound
+
+        md = markdown.Markdown()
+        result = md.convert(result)
+        result = '<h2 class="content-header">%s</h2>%s' % (header, result)
+        return Response(result)
+
+class BaseSprintView(BaseView):
+    def tmpl_ctx(self):
+        session = self.session
         sprint_id = self.request.GET.get('sprint_id')
         sprint = Sprint.query.get(sprint_id)
         project = Project.query.get(sprint.project_id)
+
+        last_sprint = session.query(Sprint)\
+                                 .filter(Sprint.project_id==sprint.project_id)\
+                                 .filter(Sprint.start<sprint.start)\
+                                 .order_by(Sprint.start.desc()).first()
+        return dict(
+            project=project,
+            sprint=sprint,
+            last_sprint=last_sprint,
+        )
+
+
+@view_config(route_name='scrum_sprint_show', permission='client')
+class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
+    def get(self):
+        sprint = self.request.tmpl_ctx['sprint']
         bugs = self._fetch_bugs(sprint)
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
         bugs = move_blocked_to_the_end(bugs)
         tracker = Tracker.query.get(sprint.project.tracker_id)
         sw = SprintWrapper(sprint, bugs, self.request)
         return dict(
-            sprint=sprint,
-            project=project,
             tracker=tracker,
             bugs=sw.bugs,
             info=sw.get_info(),
@@ -115,11 +148,9 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseView):
 
 
 @view_config(route_name='scrum_sprint_board', permission='client')
-class Board(ClientProtectionMixin, FetchBugsMixin, BaseView):
+class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
-        sprint_id = self.request.GET.get('sprint_id')
-        sprint = Sprint.query.get(sprint_id)
-        project = Project.query.get(sprint.project_id)
+        sprint = self.request.tmpl_ctx['sprint']
         bugs = self._fetch_bugs(sprint)
 
         sw = SprintWrapper(sprint, bugs, self.request)
@@ -127,8 +158,6 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseView):
 
         return dict(
             board=board,
-            sprint=sprint,
-            project=project,
             info=sw.get_info(),
             bug_list_url=lambda bugs_list: sprint.project.get_bug_list_url(
                 [bug.id for bugs in bugs_list.values() for bug in bugs]
@@ -137,10 +166,9 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseView):
 
 
 @view_config(route_name='scrum_sprint_times', permission='client')
-class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseView):
+class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseSprintView):
     def dispatch(self):
-        sprint_id = self.request.GET.get('sprint_id')
-        sprint = Sprint.query.get(sprint_id)
+        sprint = self.request.tmpl_ctx['sprint']
         bugs = self._fetch_bugs(sprint)
         sw = SprintWrapper(sprint, bugs, self.request)
 
@@ -179,18 +207,15 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseView):
             entries_sum=entries_sum,
             form=form,
             info=sw.get_info(),
-            sprint=sprint,
             participation_of_workers=participation_of_workers,
             participation_of_workers_sum=sum([time[1] for time in participation_of_workers]),
             trackers_id=trackers_id, tickets_id=tickets_id,
         )
 
 @view_config(route_name='scrum_sprint_charts', permission='client')
-class Charts(ClientProtectionMixin, FetchBugsMixin, BaseView):
+class Charts(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
-        sprint_id = self.request.GET.get('sprint_id')
-        sprint = Sprint.query.get(sprint_id)
-        project = Project.query.get(sprint.project_id)
+        sprint = self.request.tmpl_ctx['sprint']
         bugs = self._fetch_bugs(sprint)
         sw = SprintWrapper(sprint, bugs, self.request)
         burndown = sw.get_burndown_data()
@@ -202,12 +227,29 @@ class Charts(ClientProtectionMixin, FetchBugsMixin, BaseView):
 
         return dict(
             tracker=tracker,
-            sprint=sprint,
-            project=project,
             bugs=bugs,
             charts_data=json.dumps(burndown),
             piechart_data=piechart_data,
             info=sw.get_info(),
+        )
+
+
+@view_config(route_name='scrum_sprint_retros', permission='client')
+class Retros(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
+    def get(self):
+        session = self.session
+        sprint = self.request.tmpl_ctx['sprint']
+        bugs = self._fetch_bugs(sprint)
+        sw = SprintWrapper(sprint, bugs, self.request)
+
+        sprints = session.query(Sprint) \
+                             .filter(Sprint.project_id==sprint.project_id) \
+                             .order_by(Sprint.start.desc())
+
+        return dict(
+            bugs=bugs,
+            info=sw.get_info(),
+            sprints=sprints,
         )
 
 
@@ -226,6 +268,7 @@ class Edit(BaseView):
             sprint.start = form.start.data
             sprint.end = form.end.data
             sprint.goal = form.goal.data
+            sprint.retrospective_note = form.retrospective_note.data
             self.session.add(sprint)
             self.flash(self._(u"Sprint edited"))
             LOG(u"Sprint edited")
@@ -251,6 +294,7 @@ class Add(BaseView):
                 start=form.start.data,
                 end=form.end.data,
                 goal=form.goal.data,
+                retrospective_note = form.retrospective_note.data,
             )
             self.session.add(sprint)
             self.session.flush()

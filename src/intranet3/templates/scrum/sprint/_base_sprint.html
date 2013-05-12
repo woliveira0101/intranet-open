@@ -30,6 +30,11 @@
     {% else %}
         <li><a href="{{ request.url_for('/scrum/sprint/times', sprint_id=sprint.id) }}">{% trans %}Times{% endtrans %}</a></li>
     {% endif %}
+    {% if page == 'retros' %}
+        <li class="active"><a>{% trans %}Retrospective notes{% endtrans %}</a></li>
+    {% else %}
+        <li><a href="{{ request.url_for('/scrum/sprint/retros', sprint_id=sprint.id) }}">{% trans %}Retrospective notes{% endtrans %}</a></li>
+    {% endif %}
     {% if page == 'board' %}
         <li class="btn_fullscreen">
             <div class="btn go_fullscreen">Fullscreen</div>
@@ -64,7 +69,7 @@
                             <li>
                                 <span>{% trans %}Working agreement{% endtrans %}</span>
                                 {% if project.working_agreement %}
-                                    <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='working_agreement') }}">{{ project.working_agreement|first_words }}</a>
+                                    <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='working_agreement') }}">{{ project.working_agreement | first_words }}</a>
                                 {% else %}
                                     <a href="{{ project_edit_url }}">—</a>
                                 {% endif %}
@@ -72,9 +77,24 @@
                             <li>
                                 <span>{% trans %}Definition of Done{% endtrans %}</span>
                                 {% if project.definition_of_done %}
-                                    <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='definition_of_done') }}">{{ project.definition_of_done|first_words }}</a>
+                                    <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='definition_of_done') }}">{{ project.definition_of_done | first_words }}</a>
                                 {% else %}
                                     <a href="{{ project_edit_url }}">—</a>
+                                {% endif %}
+                            </li>
+                            <li>
+                                <span>{% trans %}Definition of Ready{% endtrans %}</span>
+                                {% if project.definition_of_ready %}
+                                    <a class="a_popup" href="{{ request.url_for('/project/client/project_field', project_id=project.id, field='definition_of_ready') }}">{{ project.definition_of_ready | first_words }}</a>
+                                {% else %}
+                                    <a href="{{ project_edit_url }}">—</a>
+                                {% endif %}
+                            </li>
+                            <li>
+                                <span>{% trans %}Retrospective notes{% endtrans %}</span>
+                                    <a class="a_popup" href="{{ request.url_for('/scrum/sprint/field', sprint_id=sprint.id, field='retrospective_note') }}">current</a>
+                                {% if last_sprint %}
+                                    / <a class="a_popup" href="{{ request.url_for('/scrum/sprint/field', sprint_id=last_sprint.id, field='retrospective_note') }}">last</a>
                                 {% endif %}
                             </li>
                             <li>
@@ -85,10 +105,18 @@
                                     <a href="{{ project_edit_url }}">—</a>
                                 {% endif %}
                             </li>
+                            <li>
+                                <span>{% trans %}Backlog url{% endtrans %}</span>
+                                {% if project.backlog_url %}
+                                    <a target="_blank" href="{{ project.backlog_url }}">link</a>
+                                {% else %}
+                                    <a href="{{ project_edit_url }}">—</a>
+                                {% endif %}
+                            </li>
                         </ul>
                     </div>
                     <div class="span4">
-                        <h6>Sprint goal</h6>
+                        <h6>Sprint goal {{ abc }}</h6>
                         <pre class="goal info">{{ sprint.goal }}</pre>
                     </div>
                 </div>

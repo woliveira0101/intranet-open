@@ -24,9 +24,11 @@
         {{ form_field(form.google_wiki, _('Link to project wiki in google sites')) }}
         {{ form_field(form.mailing_url, _('Mailing group')) }}
 
-        {{ form_field(form.continuous_integration_url, _('Markdown')) }}
+        {{ form_field(form.continuous_integration_url, _('Continuous integration url')) }}
+        {{ form_field(form.backlog_url, _('Backlog url')) }}
         {{ form_field(form.working_agreement, _('Markdown'), class="span8", rows="10")}}
-        {{ form_field(form.definition_of_done, _('Definition of done'), class="span8", rows="10") }}
+        {{ form_field(form.definition_of_done, _('Markdown'), class="span8", rows="10") }}
+        {{ form_field(form.definition_of_ready, _('Markdown'), class="span8", rows="10") }}
         <div class="buttons">
             <input class="btn btn-primary" type="submit" value="{% trans %}Save{% endtrans %}"/>
         </div>

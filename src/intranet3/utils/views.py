@@ -56,6 +56,9 @@ class BaseView(View):
         Override this method to check condtition and rise HTTPForbidden or not
         """
 
+    def tmpl_ctx(self):
+        return {}
+
     def dispatch(self):
         if self.request.method == 'GET':
             return self.get()
@@ -67,6 +70,7 @@ class BaseView(View):
     def __call__(self):
         self.protect()
         self._note_presence()
+        self.request.tmpl_ctx.update(self.tmpl_ctx())
         return self.dispatch()
 
     def get(self):

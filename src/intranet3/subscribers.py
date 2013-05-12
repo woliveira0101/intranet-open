@@ -57,6 +57,8 @@ def add_global(event):
     event['presence_tracking'] = PresenceTracking(event)
     event['get_flashed_messages'] = get_flashed_messages(event['request'])
     event['csrf_field'] = Markup('<input type="hidden" name="csrf_token" value="%s">' % request.session.get_csrf_token())
+    for key, value in request.tmpl_ctx.iteritems():
+        event[key] = value
 
 
 @subscriber(ContextFound)

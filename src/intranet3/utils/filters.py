@@ -2,6 +2,8 @@ import re
 import time
 import json
 
+import markdown
+from jinja2 import Markup
 from jinja2.exceptions import FilterArgumentError
 
 from intranet3 import helpers as h
@@ -88,3 +90,8 @@ def int_or_float(value):
         return '%.1f' % value
     else:
         return '%d' % value
+
+def markdown_filter(value):
+    md = markdown.Markdown()
+    result = md.convert(value)
+    return Markup(result)
