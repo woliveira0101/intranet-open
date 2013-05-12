@@ -82,7 +82,7 @@ class Edit(BaseView):
             project.mailing_url = form.mailing_url.data
             project.working_agreement = form.working_agreement.data
             project.definition_of_done = form.definition_of_done.data
-            project.definition_of_ready = form.definition_of_done.data
+            project.definition_of_ready = form.definition_of_ready.data
             project.continuous_integration_url = form.continuous_integration_url.data
             project.backlog_url = form.backlog_url.data
             project.status = form.status.data

@@ -165,6 +165,9 @@ class ProjectField(BaseView):
         if project_field == 'definition_of_done':
             result = self.v['project'].definition_of_done
             header = 'Definition of Done'
+        elif project_field == 'definition_of_ready':
+            result = self.v['project'].definition_of_ready
+            header = 'Definition of Ready'
         elif project_field == 'working_agreement':
             result = self.v['project'].working_agreement
             header = 'Working agreement'
