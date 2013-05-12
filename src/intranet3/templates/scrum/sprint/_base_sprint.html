@@ -30,6 +30,11 @@
     {% else %}
         <li><a href="{{ request.url_for('/scrum/sprint/times', sprint_id=sprint.id) }}">{% trans %}Times{% endtrans %}</a></li>
     {% endif %}
+    {% if page == 'board' %}
+        <li class="btn_fullscreen">
+            <div class="btn go_fullscreen">Fullscreen</div>
+        </li>
+    {% endif %}
 </ul>
 <div class="stats-container row-fluid">
     <div class="span12">

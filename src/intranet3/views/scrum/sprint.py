@@ -130,7 +130,9 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseView):
             sprint=sprint,
             project=project,
             info=sw.get_info(),
-            bug_list_url=lambda bugs: sprint.project.get_bug_list_url([bug.id for bug in bugs]),
+            bug_list_url=lambda bugs_list: sprint.project.get_bug_list_url(
+                [bug.id for bugs in bugs_list.values() for bug in bugs]
+            ),
         )
 
 

@@ -171,9 +171,9 @@ form ul {
     .title {
         font-weight: bold;
         font-size: 18px;
-        padding: 6px 10px 8px 0;
+        padding: 6px 10px 0 0;
+        margin-bottom: 8px;
     }
-
 }
 .container_full {
     width: auto;
@@ -735,7 +735,7 @@ table.bugs-list tbody tr.other-projects td {
         text-align: left;
     }
     tr.stats td {
-        background: #d2d2d2 !important;;
+        background: #d2d2d2 !important;
     }
 }
 .agenda {
@@ -1064,28 +1064,37 @@ form.box_edit_user dl dt {
     }
 }
 /* task board */
+.nav-tabs .btn_fullscreen {
+    float: right;
+    position: relative;
+    top: -5px;
+}
 .task_board {
-    margin-top: 15px;
+    border-top: 1px solid #dbd4d4;
     thead td {
         font-weight: bold;
-        padding: 8px 0px;
+        padding: 5px;
         background: #f7f7f7;
-        font-size: 15px;
+        font-size: 11px;
+        vertical-align: middle;
     }
     td {
         text-align: center;
         vertical-align: top;
-        width: 25%;
-        padding: 5px 0;
+        padding: 5px 5px 10px 5px;
         margin: 0;
+        border-color: #dbd4d4;
     }
     tbody td:first-child {
         text-align: left;
     }
+    .head_card {
+        font-size: 12px;
+    }
     .yellow_card {
         background-color:#faefa1;
-        padding:2%;
-        margin:2%;
+        padding: 3px;
+        margin: 5px 3px;
         color:#000;
         font-size:13px;
         text-decoration:none;
@@ -1093,20 +1102,60 @@ form.box_edit_user dl dt {
         box-shadow:0 1px 1px rgba(0, 0, 0, 0.2);
         border-bottom:2px solid rgba(0, 0, 0, 0.2);
         cursor:pointer;
-        position:relative;
-        width:46%;
+        position: relative;
+        width: 46%;
         box-sizing:border-box;
         -moz-box-sizing:border-box;
         -webkit-box-sizing:border-box;
         text-align:left;
         float: left;
+        min-width: 97px;
+        &:hover { 
+            .desc_ticket {
+                height: auto;
+            }
+        }
     }
     .yellow_card.blocked {
         background-color: #faa1a1;
     }
+    .container_card_blocked {
+        position: relative;
+        float: left;
+        min-width: 103px;
+        .yellow_card.blocked {
+            float: none;
+            margin-top: -5px;
+            border-top: 1px solid #a66464;
+        }
+        .yellow_card:first-child {
+            z-index: 10;
+            margin-top: 5px;
+            border: none;
+        }
+    }
+    .frame_blocked {
+        float: none;
+        clear: both;
+        padding-bottom: 5px;
+    }
+    .frame_no_points,
+    .frame_normal {
+        float: none;
+        clear: both;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #dbd4d4;
+        margin-bottom: 5px;
+    }
+    .frame_normal {
+        padding-bottom: 10px;
+    }
+    .frame_no_points:last-child {
+        border: none;
+    }
     .number_ticket {
         background: #fefceb;
-        padding: 1px 4px;
+        padding: 1px 2px;
         border-radius: 3px;
         font-size: 11px;
         font-weight: bold;
@@ -1116,14 +1165,12 @@ form.box_edit_user dl dt {
     }
     .desc_ticket {
         height: 28px;
+        min-height: 28px;
         overflow: hidden;
         line-height: 14px;
         font-size: 11px;
         word-wrap: break-word;
         max-width: 200px;
-    }
-    .yellow_card:hover .desc_ticket {
-        height: auto;
     }
     .points {
         border-radius: 5px;
@@ -1137,18 +1184,21 @@ form.box_edit_user dl dt {
         min-width: 6px;
     }
     .assignee {
-        background: #ececec;
-        border-radius: 5px;
-        padding: 0px 10px;
-        margin-top: 2px;
+        display: inline-block;
         font-size: 10px;
+        font-weight: bold;
         box-sizing: border-box;
         overflow: hidden;
         height: 15px;
+        width: 33px;
     }
 }
 .fullscreen {
     display: none !important;
+}
+.go_normalscreen {
+    float: right;
+    margin-bottom: 13px;
 }
 .full {
     width: 100% !important;
@@ -1179,9 +1229,7 @@ form.box_edit_user dl dt {
     .filters {
         background-color: @wellBackground;
     }
-
 }
-
 .stats-container {
     padding-bottom: 20px;
     pre.goal {

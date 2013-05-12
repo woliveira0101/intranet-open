@@ -77,3 +77,14 @@ def is_true(value):
 
 def is_false(value):
     return value not in h.positive_values
+
+def initials(name, letters=1):
+    name = name.split(' ')
+    first, last = name[0], name[-1]
+    return '%s.%s' % (first[0], last[:letters])
+
+def int_or_float(value):
+    if value % 1:
+        return '%.1f' % value
+    else:
+        return '%d' % value

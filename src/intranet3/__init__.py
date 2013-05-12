@@ -109,6 +109,8 @@ def main(global_config, **settings):
 
     jinja2_env.filters['is_true'] = filters.is_true
     jinja2_env.filters['is_false'] = filters.is_false
+    jinja2_env.filters['initials'] = filters.initials
+    jinja2_env.filters['int_or_float'] = filters.int_or_float
     jinja2_env.globals.update(zip=zip)
 
     pyramid_config.include('pyramid_autoroute')

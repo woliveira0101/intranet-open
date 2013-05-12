@@ -3,53 +3,82 @@
 {% set page = 'board' %}
 
 {% macro yellow_card(bug) -%}
-<div class="yellow_card {% if bug.is_blocked %}blocked {% endif %}">
+<div class="yellow_card {% if bug.is_blocked %}blocked{% endif %}">
     <div class="number_ticket"><a target="_blank" href="{{ bug.get_url() }}">{{ bug.id }}</a></div>
+    <div class="assignee" data-original-title="{{ bug.owner.name }}">{{ bug.owner.name | initials(3) }}</div>
     <div class="desc_ticket">{{ bug.desc }}</div>
-    <div class="assignee">{{ bug.owner.name }}</div>
-    <div class="points priority_{{ bug.priority_number }}">{{ bug.whiteboard['p'] }}</div>
+    {% if bug.points %}
+    <div class="points priority_{{ bug.priority_number }}">{{ bug.points | int_or_float }}</div>
+    {% endif %}
 </div>
 {%- endmacro %}
 
+{% macro column(bugs) -%}
+    {%  set with_points = bugs['with_points'] %}
+    {%  set without_points = bugs['without_points'] %}
+    {%  set blocked = bugs['blocked'] %}
+    {% if with_points %}
+    <div class="frame_normal">
+        <div class="head_card">User stories</div>
+        {% for bug in with_points %}
+            {{ yellow_card(bug) }}
+        {% endfor %}
+        <div class="clearfix"></div>
+    </div>
+    {% endif %}
+    {% if without_points %}
+    <div class="frame_no_points">
+        <div class="head_card">Tasks</div>
+        {% for bug in without_points %}
+            {{ yellow_card(bug) }}
+        {% endfor %}
+        <div class="clearfix"></div>
+    </div>
+    {% endif %}
+    {% if blocked %}
+    <div class="frame_blocked">
+        <div class="head_card">Blocked</div>
+        {% for bug in blocked %}
+            {{ yellow_card(bug) }}
+        {% endfor %}
+        <div class="clearfix"></div>
+    </div>
+    {% endif %}
+{%- endmacro %}
+
 {% block body %}
-<div class="btn go_fullscreen">{% trans %}Fullscreen{% endtrans %}</div>
+<div class="btn go_normalscreen active" style="display: none">Fullscreen</div>
 <table class="table table-bordered task_board">
     <thead>
         <tr>
-            <td><a href="{{ bug_list_url(board['todo']['bugs']) }}">{% trans %}TODO{% endtrans %}</a>  <span class="badge badge-info">{{ board['todo']['points'] }}</span></td>
-            <td><a href="{{ bug_list_url(board['inprocess']['bugs']) }}">{% trans %}IN PROCESS{% endtrans %}</a>  <span class="badge badge-info">{{ board['inprocess']['points'] }}</span></td>
-            <td><a href="{{ bug_list_url(board['toverify']['bugs']) }}">{% trans %}TO VERIFY{% endtrans %}</a>  <span class="badge badge-info">{{ board['toverify']['points'] }}</span></td>
-            <td><a href="{{ bug_list_url(board['completed']['bugs']) }}">{% trans %}COMPLETED{% endtrans %}</a>  <span class="badge badge-info">{{ board['completed']['points'] }}</span></td>
+            <td><a href="{{ bug_list_url(board['todo']['bugs']) }}">{% trans %}TODO{% endtrans %}</a>  <span class="badge badge-info">{{ board['todo']['points'] | int_or_float  }}</span></td>
+            <td><a href="{{ bug_list_url(board['inprocess']['bugs']) }}">{% trans %}IN PROCESS{% endtrans %}</a>  <span class="badge badge-info">{{ board['inprocess']['points'] | int_or_float  }}</span></td>
+            <td><a href="{{ bug_list_url(board['toverify']['bugs']) }}">{% trans %}TO VERIFY{% endtrans %}</a>  <span class="badge badge-info">{{ board['toverify']['points'] | int_or_float  }}</span></td>
+            <td><a href="{{ bug_list_url(board['completed']['bugs']) }}">{% trans %}COMPLETED{% endtrans %}</a>  <span class="badge badge-info">{{ board['completed']['points'] | int_or_float  }}</span></td>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td>
-                {% for bug in board['todo']['bugs'] %}
-                    {{ yellow_card(bug) }}
-                {% endfor %}
+                {{ column(board['todo']['bugs']) }}
             </td>
             <td>
-                {% for bug in board['inprocess']['bugs'] %}
-                    {{ yellow_card(bug) }}
-                {% endfor %}
+                {{ column(board['inprocess']['bugs']) }}
             </td>
             <td>
-                {% for bug in board['toverify']['bugs'] %}
-                    {{ yellow_card(bug) }}
-                {% endfor %}
+                {{ column(board['toverify']['bugs']) }}
             </td>
             <td>
-                {% for bug in board['completed']['bugs'] %}
-                    {{ yellow_card(bug) }}
-                {% endfor %}
+                {{ column(board['completed']['bugs']) }}
             </td>
         </tr>
     </tbody>
 </table>
 <script type="text/javascript">
     $(document).ready(function() {
+        $('.assignee').tooltip();
         var $go_fullscreen_btn = $('.go_fullscreen');
+        var $go_normalscreen_btn = $('.go_normalscreen');
         var is_fullscreen = function(){
             return $.cookie('fullscreen') == "1";
         };
@@ -57,8 +86,7 @@
         var go_fullscreen = function(cond){
             if(cond){
                 $.cookie('fullscreen', 1);
-                $go_fullscreen_btn.addClass('fullscreen');
-                $('.go_fullscreen').addClass('active');
+                $go_normalscreen_btn.show();
                 $('#content').addClass('no_space');
                 $('.navbar').addClass('fullscreen');
                 $('#sprint-nav').addClass('fullscreen');
@@ -67,13 +95,11 @@
                 $('.stats-container').addClass('fullscreen');
             } else {
                 $.cookie('fullscreen', 0);
-                $go_fullscreen_btn.removeClass('fullscreen');
-                $('.go_fullscreen').removeClass('active');
+                $go_normalscreen_btn.hide();
                 $('#content').removeClass('no_space');
                 $('.navbar').removeClass('fullscreen');
                 $('#sprint-nav').removeClass('fullscreen');
                 $('#left_column').removeClass('fullscreen');
-                $('#right_column').removeClass('full');
                 $('#right_column').removeClass('full');
                 $('.stats-container').removeClass('fullscreen');
             }
@@ -81,6 +107,9 @@
         go_fullscreen(is_fullscreen());
 
         $go_fullscreen_btn.click(function() {
+            go_fullscreen(!is_fullscreen());
+        });
+        $go_normalscreen_btn.click(function() {
             go_fullscreen(!is_fullscreen());
         });
         IH.inloop(5*60*1000, function(){
@@ -92,14 +121,33 @@
         // hiding fullscreen button:
         $('body').mousemove(function(e){
             if(is_fullscreen()){
-                $go_fullscreen_btn.removeClass('fullscreen');
+                $go_normalscreen_btn.show()
             }
         });
         IH.inloop(10*1000, function(){
-            if($go_fullscreen_btn.hasClass('active')){
-                $go_fullscreen_btn.addClass('fullscreen');
+            if(is_fullscreen()){
+                $go_normalscreen_btn.hide()
             }
-        })
+        });
+        var amountYellowCard = $('.yellow_card',this).length;
+        $('.task_board tbody td').each(function () {
+            var currentAmountYellowCard = $('.yellow_card',this).length,
+                percent = currentAmountYellowCard * 100/amountYellowCard + '%';
+            $(this).css('width',percent);
+            $(this).css('min-width','206px');
+            var percentCard = 100/parseInt($(this).width()/87) - 4 + '%';
+            if (currentAmountYellowCard==0) {
+                $(this).css('min-width','70px');
+            }
+            $('.yellow_card',this).each(function() {
+                $(this).css('width',percentCard);
+                if($(this).parent().hasClass('container_card_blocked')) {
+                    $(this).parent().css('width',percentCard);
+                }
+            });
+        });
+
+
     });
 </script>
 {% endblock body %}

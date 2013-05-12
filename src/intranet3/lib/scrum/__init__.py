@@ -1,5 +1,6 @@
 import datetime
 import json
+import copy
 from calendar import timegm
 
 from sqlalchemy import func
@@ -122,30 +123,34 @@ class SprintWrapper(object):
         return entries, sum([e[1] for e in entries])
 
     def get_board(self):
-        todo = dict(bugs=[], points=0)
-        inprocess = dict(bugs=[], points=0)
-        toverify = dict(bugs=[], points=0)
-        completed = dict(bugs=[], points=0)
+        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
+        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
+        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
+        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
+
+        def append_bug(d, bug):
+            if bug.is_blocked:
+                d['blocked'].append(bug)
+            elif bug.points:
+                d['with_points'].append(bug)
+            else:
+                d['without_points'].append(bug)
 
         for bug in self.bugs:
             points = bug.points
             if bug.is_closed():
-                completed['bugs'].append(bug)
+                append_bug(completed['bugs'], bug)
                 completed['points'] += points
             elif bug.get_status() == 'RESOLVED':
-                toverify['bugs'].append(bug)
+                append_bug(toverify['bugs'], bug)
                 toverify['points'] += points
             elif not bug.is_unassigned():
-                inprocess['bugs'].append(bug)
+                append_bug(inprocess['bugs'], bug)
                 inprocess['points'] += points
             else:
-                todo['bugs'].append(bug)
+                append_bug(todo['bugs'], bug)
                 todo['points'] += points
 
-        for col in todo, inprocess, toverify, completed:
-            col['bugs'] = move_blocked_to_the_end(
-                sorted(col['bugs'], cmp=h.sorting_by_priority)
-            )
         return dict(
             bugs=self.bugs,
             todo=todo,
