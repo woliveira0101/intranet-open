@@ -92,6 +92,8 @@ class ClientProtectionMixin(object):
         sprint_id = self.request.GET.get('sprint_id')
         sprint = Sprint.query.get(sprint_id)
         client = self.request.user.get_client()
+        self.v['sprint'] = sprint
+        self.v['client'] = client
         if client.id != sprint.client_id:
             raise HTTPForbidden()
 
@@ -116,9 +118,13 @@ class Field(ClientProtectionMixin, BaseView):
 class BaseSprintView(BaseView):
     def tmpl_ctx(self):
         session = self.session
-        sprint_id = self.request.GET.get('sprint_id')
-        sprint = Sprint.query.get(sprint_id)
+        sprint = self.v.get('sprint')
+        if not sprint:
+            sprint_id = self.request.GET.get('sprint_id')
+            sprint = Sprint.query.get(sprint_id)
         project = Project.query.get(sprint.project_id)
+        self.v['project'] = project
+        self.v['sprint'] = sprint
 
         last_sprint = session.query(Sprint)\
                                  .filter(Sprint.project_id==sprint.project_id)\
@@ -134,7 +140,7 @@ class BaseSprintView(BaseView):
 @view_config(route_name='scrum_sprint_show', permission='client')
 class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
-        sprint = self.request.tmpl_ctx['sprint']
+        sprint = self.v['sprint']
         bugs = self._fetch_bugs(sprint)
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
         bugs = move_blocked_to_the_end(bugs)
@@ -150,7 +156,7 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
 @view_config(route_name='scrum_sprint_board', permission='client')
 class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
-        sprint = self.request.tmpl_ctx['sprint']
+        sprint = self.v['sprint']
         bugs = self._fetch_bugs(sprint)
 
         sw = SprintWrapper(sprint, bugs, self.request)
@@ -168,7 +174,7 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
 @view_config(route_name='scrum_sprint_times', permission='client')
 class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseSprintView):
     def dispatch(self):
-        sprint = self.request.tmpl_ctx['sprint']
+        sprint = self.v['sprint']
         bugs = self._fetch_bugs(sprint)
         sw = SprintWrapper(sprint, bugs, self.request)
 
@@ -215,7 +221,7 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseSprintV
 @view_config(route_name='scrum_sprint_charts', permission='client')
 class Charts(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
-        sprint = self.request.tmpl_ctx['sprint']
+        sprint = self.v['sprint']
         bugs = self._fetch_bugs(sprint)
         sw = SprintWrapper(sprint, bugs, self.request)
         burndown = sw.get_burndown_data()
@@ -238,7 +244,7 @@ class Charts(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
 class Retros(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
         session = self.session
-        sprint = self.request.tmpl_ctx['sprint']
+        sprint = self.v['sprint']
         bugs = self._fetch_bugs(sprint)
         sw = SprintWrapper(sprint, bugs, self.request)
 

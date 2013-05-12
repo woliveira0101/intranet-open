@@ -25,8 +25,8 @@ class View(object):
             return localizer.translate(tsf(string, mapping=kwargs))
         self._ = _
 
-        # here we put objects that were necessary in validation in protect method
-        # to be avaliable in main part of view
+        # inside view cache, put here objects that will be used further in processing
+        # for example after validation client object in protect() method the same object will be used in tmpl_ctx or main part of view (get method)
         self.v = {}
 
 
