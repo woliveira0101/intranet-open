@@ -1,8 +1,11 @@
 New release
 ===========
 
+0.8.2 (13-05-2013)
+===============
+
 - minor fixes
-- scrum board redesign
+- scrum board redesign (version 1.0)
 - add retrospective notes
 
 0.8.1 (07-05-2013)
