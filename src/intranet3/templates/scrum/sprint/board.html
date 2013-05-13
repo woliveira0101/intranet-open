@@ -5,10 +5,12 @@
 {% macro yellow_card(bug) -%}
 <div class="yellow_card {% if bug.is_blocked %}blocked{% endif %}">
     <div class="number_ticket"><a target="_blank" href="{{ bug.get_url() }}">{{ bug.id }}</a></div>
-    <div class="assignee" data-original-title="{{ bug.owner.name }}">{{ bug.owner.name | initials(3) }}</div>
+    {% if not bug.is_unassigned() %}
+        <div class="assignee" data-original-title="{{ bug.owner.name }}">{{ bug.owner.name | initials(3) }}</div>
+    {% endif %}
     <div class="desc_ticket">{{ bug.desc }}</div>
     {% if bug.points %}
-    <div class="points priority_{{ bug.priority_number }}">{{ bug.points | int_or_float }}</div>
+        <div class="points priority_{{ bug.priority_number }}">{{ bug.points | int_or_float }}</div>
     {% endif %}
 </div>
 {%- endmacro %}
