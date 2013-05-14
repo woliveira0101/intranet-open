@@ -19,6 +19,7 @@
             <div class="points priority_{{ bug.priority_number }}">{{ bug.points | int_or_float }}</div>
         {% endif %}
     </div>
+    {% if bug.is_blocked %}
     {% for dbug_id, dbug_desc in bug.dependson.iteritems() %}
         {% if 'bug' in dbug_desc %}
         <div class="yellow_card">
@@ -29,6 +30,7 @@
         </div>
         {% endif %}
     {% endfor %}
+    {% endif %}
 {% if bug.dependson %}
 </div>
 {% endif %}
