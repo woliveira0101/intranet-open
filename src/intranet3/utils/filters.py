@@ -81,9 +81,22 @@ def is_false(value):
     return value not in h.positive_values
 
 def initials(name, letters=1):
-    name = name.split(' ')
-    first, last = name[0], name[-1]
-    return '%s.%s' % (first[0], last[:letters])
+    if ' ' in name:
+        name = name.split(' ')
+        first, last = name[0], name[-1]
+        return '%s.%s' % (first[0].upper(), last.capitalize())
+    else:
+        if '@' in name:
+            name = name.split('@')[0]
+        # let's assume that there is first name and last name separated by non-letter character
+        name = re.findall('[a-zA-Z]+', name)
+        if len(name) > 1:
+            first = name[0][0].upper()
+            last = name[-1][:letters].capitalize()
+            return '%s.%s' % (first, last)
+        else:
+            return name[0][:letters+1].capitalize()
+
 
 def int_or_float(value):
     if value % 1:

@@ -13,7 +13,6 @@
 table thead {
     cursor: pointer;
 }
-
 body {
     font: 0.65em/1.5em Verdana,Arial,'Bitstream Vera Sans',Helvetica,sans-serif;
     background: #eee;
@@ -1090,11 +1089,22 @@ form.box_edit_user dl dt {
     }
     .head_card {
         font-size: 12px;
+        border-top: 2px solid #dbd4d4;
+        margin-top: 10px;
+        position: relative;
+        text-align: center;
+        span {
+            background-color: #fff;
+            top: -7px;
+            position: relative;
+            padding: 0 10px;
+            font-weight: bold;
+        }
     }
     .yellow_card {
         background-color:#faefa1;
         padding: 3px;
-        margin: 5px 3px;
+        margin: 5px 0.5%;
         color:#000;
         font-size:13px;
         text-decoration:none;
@@ -1103,13 +1113,13 @@ form.box_edit_user dl dt {
         border-bottom:2px solid rgba(0, 0, 0, 0.2);
         cursor:pointer;
         position: relative;
-        width: 46%;
+        width: 49%;
         box-sizing:border-box;
         -moz-box-sizing:border-box;
         -webkit-box-sizing:border-box;
         text-align:left;
         float: left;
-        min-width: 97px;
+        min-width: 138px;
         &:hover { 
             .desc_ticket {
                 height: auto;
@@ -1122,11 +1132,13 @@ form.box_edit_user dl dt {
     .container_card_blocked {
         position: relative;
         float: left;
-        min-width: 103px;
+        min-width: 138px;
+        margin: 0 0.5%;
         .yellow_card.blocked {
             float: none;
             margin-top: -5px;
             border-top: 1px solid #a66464;
+            width: 100% !important;
         }
         .yellow_card:first-child {
             z-index: 10;
@@ -1137,24 +1149,14 @@ form.box_edit_user dl dt {
     .frame_blocked {
         float: none;
         clear: both;
-        padding-bottom: 5px;
     }
     .frame_no_points,
     .frame_normal {
         float: none;
         clear: both;
-        padding-bottom: 5px;
-        border-bottom: 2px solid #dbd4d4;
-        margin-bottom: 5px;
-    }
-    .frame_normal {
-        padding-bottom: 10px;
-    }
-    .frame_no_points:last-child {
-        border: none;
     }
     .number_ticket {
-        background: #fefceb;
+        background: #fff;
         padding: 1px 2px;
         border-radius: 3px;
         font-size: 11px;
@@ -1164,8 +1166,8 @@ form.box_edit_user dl dt {
         margin-bottom: 2px;
     }
     .desc_ticket {
-        height: 28px;
-        min-height: 28px;
+        height: 56px;
+        min-height: 56px;
         overflow: hidden;
         line-height: 14px;
         font-size: 11px;
@@ -1189,8 +1191,12 @@ form.box_edit_user dl dt {
         font-weight: bold;
         box-sizing: border-box;
         overflow: hidden;
-        height: 15px;
-        width: 33px;
+        height: 16px;
+        width: 36px;
+        background: #fff;
+        border-radius: 3px;
+        float: right;
+        padding: 0 3px;
     }
 }
 .fullscreen {
@@ -1231,7 +1237,6 @@ form.box_edit_user dl dt {
     }
 }
 .stats-container {
-    padding-bottom: 20px;
     pre.goal {
         border: 0px;
         padding: 0px;
@@ -1553,7 +1558,6 @@ form.absence-form {
         }
     }
 }
-
 .retro-table {
     thead tr {
         th.sprint {

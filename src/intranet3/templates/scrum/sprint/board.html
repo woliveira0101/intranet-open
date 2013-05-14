@@ -21,7 +21,7 @@
     {%  set blocked = bugs['blocked'] %}
     {% if with_points %}
     <div class="frame_normal">
-        <div class="head_card">User stories</div>
+        <div class="head_card"><span>User stories</span></div>
         {% for bug in with_points %}
             {{ yellow_card(bug) }}
         {% endfor %}
@@ -30,7 +30,7 @@
     {% endif %}
     {% if without_points %}
     <div class="frame_no_points">
-        <div class="head_card">Tasks</div>
+        <div class="head_card"><span>Tasks</span></div>
         {% for bug in without_points %}
             {{ yellow_card(bug) }}
         {% endfor %}
@@ -39,7 +39,7 @@
     {% endif %}
     {% if blocked %}
     <div class="frame_blocked">
-        <div class="head_card">Blocked</div>
+        <div class="head_card"><span>Blocked</span></div>
         {% for bug in blocked %}
             {{ yellow_card(bug) }}
         {% endfor %}

@@ -85,7 +85,6 @@ def callback(request):
         LOG(u'Creating new user with name %s and email %s, group: %s' % (google_profile['name'], google_profile['email'], group))
         user = User(
             name=google_profile['name'],
-            login=email,
             email=email,
             refresh_token=credentials.refresh_token or '',
             groups=[group],

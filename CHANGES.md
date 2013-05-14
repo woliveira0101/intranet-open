@@ -1,6 +1,9 @@
 New release
 ===========
 
+- scrum board enhancements
+- minor bug fixes
+
 0.8.2 (13-05-2013)
 ===============
 
