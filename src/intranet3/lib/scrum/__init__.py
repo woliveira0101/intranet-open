@@ -36,6 +36,21 @@ class BugUglyAdapter(object):
         points = float(self.whiteboard.get('p', 0.0))
         return (points / self.sprint_time) if self.sprint_time else 0.0
 
+    @classmethod
+    def produce(cls, bugs):
+        bugs_dict = dict([(bug.id, bug) for bug in bugs])
+        # add reference to bug object in dependson and blocked lists
+        for bug in bugs:
+            for dependon_bug in bug.dependson:
+                if dependon_bug in bugs_dict:
+                    bug.dependson[dependon_bug]['bug'] = bugs_dict[dependon_bug]
+            for blocked_bug in bug.blocked:
+                if blocked_bug in bugs_dict:
+                    bug.blocked[blocked_bug]['bug'] = bugs_dict[blocked_bug]
+        #wrap bugs
+        bugs = [BugUglyAdapter(bug) for bug in bugs]
+        return bugs
+
 
 def parse_whiteboard(wb):
     wb = wb.strip().replace('[', ' ').replace(']', ' ')
@@ -55,6 +70,7 @@ def move_blocked_to_the_end(bugs):
 class SprintWrapper(object):
     def __init__(self, sprint, bugs, request):
         self.sprint = sprint
+        self.bugs = BugUglyAdapter.produce(bugs)
         self.bugs = [BugUglyAdapter(bug) for bug in bugs if bug.project_id]
         self.request = request
         self.session = request.db_session
