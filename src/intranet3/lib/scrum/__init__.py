@@ -38,17 +38,29 @@ class BugUglyAdapter(object):
 
     @classmethod
     def produce(cls, bugs):
-        bugs_dict = dict([(bug.id, bug) for bug in bugs])
-        # add reference to bug object in dependson and blocked lists
-        for bug in bugs:
-            for dependon_bug in bug.dependson:
-                if dependon_bug in bugs_dict:
-                    bug.dependson[dependon_bug]['bug'] = bugs_dict[dependon_bug]
-            for blocked_bug in bug.blocked:
-                if blocked_bug in bugs_dict:
-                    bug.blocked[blocked_bug]['bug'] = bugs_dict[blocked_bug]
-        #wrap bugs
         bugs = [BugUglyAdapter(bug) for bug in bugs]
+        bugs_dict = dict([(bug.id, bug) for bug in bugs])
+
+        # remove dependson and blocked bugs that are not in this sprint
+        for bug in bugs:
+            for dependon_bug in bug.dependson.keys():
+                if dependon_bug not in bugs_dict or bug.dependson[dependon_bug]['resolved']:
+                    del bug.dependson[dependon_bug]
+
+            # when bug is closed it does block nothing
+            if bug.is_closed():
+                bug.blocked = {}
+
+            for blocked_bug in bug.blocked.keys():
+                if blocked_bug not in bugs_dict:
+                    del bug.blocked[blocked_bug]
+
+        # add bug reference to dependson and blocked dictionaries
+        for bug in bugs:
+            for dependon_bug in bug.dependson.keys():
+                bug.dependson[dependon_bug]['bug'] = bugs_dict[dependon_bug]
+            for blocked_bug in bug.blocked.keys():
+                bug.blocked[blocked_bug]['bug'] = bugs_dict[blocked_bug]
         return bugs
 
 
@@ -71,7 +83,6 @@ class SprintWrapper(object):
     def __init__(self, sprint, bugs, request):
         self.sprint = sprint
         self.bugs = BugUglyAdapter.produce(bugs)
-        self.bugs = [BugUglyAdapter(bug) for bug in bugs if bug.project_id]
         self.request = request
         self.session = request.db_session
 
