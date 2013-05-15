@@ -84,7 +84,7 @@ def initials(name, letters=1):
     if ' ' in name:
         name = name.split(' ')
         first, last = name[0], name[-1]
-        return '%s.%s' % (first[0].upper(), last.capitalize())
+        return '%s.%s' % (first[0].upper(), last[:letters].capitalize())
     else:
         if '@' in name:
             name = name.split('@')[0]
