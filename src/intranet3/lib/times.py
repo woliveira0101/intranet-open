@@ -272,7 +272,7 @@ def dump_entries_to_excel(entries):
         date_xf = xlwt.easyxf(num_format_str='DD/MM/YYYY')
         row[5] = (row[6].strftime('%d/%m/%Y'), date_xf)            #date
         row[6] = (round(row[7], 2),)                               #time
-        return row[:6]
+        return row[:7]
 
     wbk = xlwt.Workbook()
     sheet = wbk.add_sheet('Hours')
