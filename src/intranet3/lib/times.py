@@ -11,6 +11,7 @@ from intranet3.utils.filters import comma_number
 from intranet3.models import User, TimeEntry, Tracker, Project, Client
 from intranet3.log import INFO_LOG, WARN_LOG, ERROR_LOG, DEBUG_LOG, EXCEPTION_LOG
 from intranet3.helpers import previous_month
+from intranet3.forms.times import TimeEntryForm
 
 LOG = INFO_LOG(__name__)
 WARN = WARN_LOG(__name__)
@@ -113,7 +114,7 @@ class TimesReportMixin(object):
         return uber_query
 
 
-    def _prepare_uber_query(self, start_date, end_date, projects, users, without_bug_only):
+    def _prepare_uber_query(self, start_date, end_date, projects, users, ticket_choice):
         query = self.session.query
         uber_query = query(Client, Project, TimeEntry.ticket_id, User, Tracker, TimeEntry.description, TimeEntry.date, TimeEntry.time)
         uber_query = uber_query.filter(TimeEntry.user_id==User.id)\
@@ -127,8 +128,12 @@ class TimesReportMixin(object):
         uber_query = uber_query.filter(TimeEntry.date>=start_date)\
                                .filter(TimeEntry.date<=end_date)\
                                .filter(TimeEntry.deleted==False)
-        if without_bug_only:
-            uber_query = uber_query.filter(TimeEntry.ticket_id==None)
+
+        if ticket_choice == 'without_bug_only':
+            uber_query = uber_query.filter(TimeEntry.ticket_id=='')
+        elif ticket_choice == 'meetings_only':
+            meeting_ids = [t['value'] for t in TimeEntryForm.PREDEFINED_TICKET_IDS]
+            uber_query = uber_query.filter(TimeEntry.ticket_id.in_(meeting_ids))
 
         if users and users != ([],):
             uber_query = uber_query.filter(User.id.in_(users))

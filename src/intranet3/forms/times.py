@@ -198,7 +198,11 @@ class ProjectTimeForm(wtf.Form):
     group_by_project = wtf.BooleanField(_(u'Group by project'), default=True)
     group_by_bugs = wtf.BooleanField(_(u'Group by bugs'), default=True)
     group_by_user = wtf.BooleanField(_(u'Group by employee'), default=True)
-    without_bug_only = wtf.BooleanField(_(u'Without bug only'))
+    ticket_choice = wtf.RadioField(_('Tickets'), choices=[
+        ('all','All'),
+        ('without_bug_only','Without bugs only'),
+        ('meetings_only','Meetings only'),
+    ], default='all')
 
     def __init__(self, *args, **kwargs):
         super(ProjectTimeForm, self).__init__(*args, **kwargs)

@@ -6,7 +6,7 @@ from pyramid.renderers import render
 
 from intranet3.utils.views import BaseView
 from intranet3.models import User, TimeEntry, Tracker, TrackerCredentials, Project, Client, ApplicationConfig
-from intranet3.forms.times import ProjectsTimeForm
+from intranet3.forms.times import ProjectsTimeForm, TimeEntryForm
 from intranet3.asyncfetchers import get_fetcher
 from intranet3.helpers import groupby, partition
 from intranet3.log import INFO_LOG, WARN_LOG, ERROR_LOG, DEBUG_LOG, EXCEPTION_LOG
@@ -34,7 +34,7 @@ class Excel(BaseView):
         start_date, end_date = form.date_range.data
         projects = form.projects.data
         users = form.users.data
-        without_bug_only = form.without_bug_only.data
+        ticket_choice = form.ticket_choice.data
 
         LOG(u'Tickets report %r - %r - %r' % (start_date, end_date, projects))
 
@@ -48,8 +48,12 @@ class Excel(BaseView):
                                .filter(TimeEntry.date>=start_date)\
                                .filter(TimeEntry.date<=end_date)\
                                .filter(TimeEntry.deleted==False)
-        if without_bug_only:
-            uber_query = uber_query.filter(TimeEntry.ticket_id==None)
+
+        if ticket_choice == 'without_bug_only':
+            uber_query = uber_query.filter(TimeEntry.ticket_id=='')
+        elif ticket_choice == 'meetings_only':
+            meeting_ids = [t['value'] for t in TimeEntryForm.PREDEFINED_TICKET_IDS]
+            uber_query = uber_query.filter(TimeEntry.ticket_id.in_(meeting_ids))
 
         if users:
             uber_query = uber_query.filter(User.id.in_(users))
@@ -141,7 +145,7 @@ class Report(TimesReportMixin, BaseView):
             projects = [p[0] for p in form.projects.choices]
 
         users = form.users.data
-        without_bug_only = form.without_bug_only.data
+        ticket_choice = form.ticket_choice.data
         group_by = (
             form.group_by_client.data,
             form.group_by_project.data,
@@ -152,7 +156,7 @@ class Report(TimesReportMixin, BaseView):
         LOG(u'Tickets report %r - %r - %r' % (start_date, end_date, projects))
 
         uber_query = self._prepare_uber_query(
-            start_date, end_date, projects, users, without_bug_only,
+            start_date, end_date, projects, users, ticket_choice,
         )
 
         entries = uber_query.all()

@@ -49,13 +49,13 @@ class Times(TimesReportMixin, BaseView):
             return dict(form=form, project=project)
 
         start_date, end_date = form.date_range.data
-        without_bug_only = form.without_bug_only.data
+        ticket_choice = form.ticket_choice.data
         group_by = True, True, form.group_by_bugs.data, form.group_by_user.data
 
         LOG(u'Tickets project report %r - %r' % (start_date, end_date))
 
         uber_query = self._prepare_uber_query(
-            start_date, end_date, projects, [], without_bug_only,
+            start_date, end_date, projects, [], ticket_choice,
         )
 
         entries = uber_query.all()

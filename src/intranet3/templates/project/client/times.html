@@ -15,7 +15,7 @@
                 {{ form_field(form.group_by_bugs, _('Group by bugs')) }}
                 {{ form_field(form.group_by_user, _('Group by employee')) }}
             </div>
-            {{ form_field(form.without_bug_only, _('Without bug only')) }}
+            {{ form_field(form.ticket_choice) }}
             <div class="buttons">
                 <input type="submit" value="{% trans %}Filter{% endtrans %}" class="button btn btn-primary" />
                 <a class="button btn btn-success alt-submit" href="#">{% trans %}Download{% endtrans %}</a>
