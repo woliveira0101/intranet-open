@@ -195,6 +195,7 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseSprintV
             return dict(form=form, sprint=sprint)
 
         group_by = True, True, form.group_by_bugs.data, form.group_by_user.data
+        bigger_than = form.bigger_than.data
 
         uber_query = self._prepare_uber_query_for_sprint(sprint, bugs)
         entries = uber_query.all()
@@ -204,14 +205,12 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseSprintV
             file, response = dump_entries_to_excel(entries)
             return response
 
-        entries_sum = sum([e[-1] for e in entries])
-
         participation_of_workers = self._get_participation_of_workers(entries)
 
         tickets_id = ','.join([str(e[2]) for e in entries])
         trackers_id = ','.join([str(e[4].id) for e in entries])
 
-        rows = Row.from_ordered_data(entries, group_by)
+        rows, entries_sum = Row.from_ordered_data(entries, group_by, bigger_than)
 
         return dict(
             rows=rows,

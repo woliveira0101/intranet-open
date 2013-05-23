@@ -145,6 +145,7 @@ class Report(TimesReportMixin, BaseView):
             projects = [p[0] for p in form.projects.choices]
 
         users = form.users.data
+        bigger_than = form.bigger_than.data
         ticket_choice = form.ticket_choice.data
         group_by = (
             form.group_by_client.data,
@@ -160,14 +161,13 @@ class Report(TimesReportMixin, BaseView):
         )
 
         entries = uber_query.all()
-        entries_sum = sum([e[-1] for e in entries])
 
         participation_of_workers = self._get_participation_of_workers(entries)
 
         tickets_id = ','.join([str(e[2]) for e in entries])
         trackers_id = ','.join([str(e[4].id) for e in entries])
 
-        rows = Row.from_ordered_data(entries, group_by)
+        rows, entries_sum = Row.from_ordered_data(entries, group_by, bigger_than)
 
         return dict(
             rows=rows,

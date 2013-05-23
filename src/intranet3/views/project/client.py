@@ -50,6 +50,7 @@ class Times(TimesReportMixin, BaseView):
 
         start_date, end_date = form.date_range.data
         ticket_choice = form.ticket_choice.data
+        bigger_than = form.bigger_than.data
         group_by = True, True, form.group_by_bugs.data, form.group_by_user.data
 
         LOG(u'Tickets project report %r - %r' % (start_date, end_date))
@@ -59,14 +60,13 @@ class Times(TimesReportMixin, BaseView):
         )
 
         entries = uber_query.all()
-        entries_sum = sum([e[-1] for e in entries])
 
         participation_of_workers = self._get_participation_of_workers(entries)
 
         tickets_id = ','.join([str(e[2]) for e in entries])
         trackers_id = ','.join([str(e[4].id) for e in entries])
 
-        rows = Row.from_ordered_data(entries, group_by)
+        rows, entries_sum = Row.from_ordered_data(entries, group_by, bigger_than)
 
         return dict(
             rows=rows,

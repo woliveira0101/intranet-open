@@ -6,6 +6,7 @@ New release
 - add installation guide to README.md
 - add next sprint and prev sprint buttons
 - add meetings filter in Time entries report
+- add bigger than field in Time entries
 
 0.8.2 (13-05-2013)
 ===============

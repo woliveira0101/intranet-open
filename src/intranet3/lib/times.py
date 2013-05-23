@@ -216,7 +216,8 @@ class Row(list):
         printful_entries = cls._to_print(entries)
         row = printful_entries[0][:]
         if len(entries) == 1:
-            return cls(row, [])
+            entry_time = entries[0][7]
+            return cls(row, []), entry_time
 
         for i, gb in enumerate(groupby):
             if not gb:
@@ -227,8 +228,7 @@ class Row(list):
 
         asum = sum([arow[7] for arow in entries])
         row[6] = '<b>%s</b>' % comma_number(asum)
-
-        return cls(row, printful_entries)
+        return cls(row, printful_entries), asum
 
     @classmethod
     def _isthesame(cls, row1, row2, groupby):
@@ -258,12 +258,15 @@ class Row(list):
             subrow = []
 
     @classmethod
-    def from_ordered_data(cls, entries, groupby):
+    def from_ordered_data(cls, entries, groupby, bigger_than=0):
         rows = []
+        sum_all = 0
         for entry in cls._group(entries, groupby):
-            row = cls.create_row(entry, groupby)
-            rows.append(row)
-        return rows
+            row, asum = cls.create_row(entry, groupby)
+            if asum > bigger_than:
+                rows.append(row)
+                sum_all += asum
+        return rows, sum_all
 
 
 def dump_entries_to_excel(entries):

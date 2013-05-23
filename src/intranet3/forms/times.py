@@ -203,6 +203,7 @@ class ProjectTimeForm(wtf.Form):
         ('without_bug_only','Without bugs only'),
         ('meetings_only','Meetings only'),
     ], default='all')
+    bigger_than = wtf.IntegerField(_('Bigger than'), default=0)
 
     def __init__(self, *args, **kwargs):
         super(ProjectTimeForm, self).__init__(*args, **kwargs)
