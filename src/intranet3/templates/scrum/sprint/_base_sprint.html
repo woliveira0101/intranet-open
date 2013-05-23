@@ -3,6 +3,9 @@
 {% block content %}
 
 <ul id="sprint-nav" class="nav nav-tabs" xmlns="http://www.w3.org/1999/html">
+    {% if prev_sprint %}
+    <li><a href="{{ request.url_for(request.path, sprint_id=prev_sprint.id) }}"><i class="icon-arrow-left"></i></a></li>
+    {% endif %}
     <li class="dropdown">
         <a class="title dropdown-toggle" data-toggle="dropdown" href="">{% trans sprint_name=sprint.name%}Sprint {{ sprint_name }}{% endtrans %}<b class="caret"></b></a>
         <ul class="dropdown-menu">
@@ -10,6 +13,9 @@
             <li><a href="{{ request.url_for('/project/client/backlog', project_id=project.id) }}">Project: {{ project.name }}</a></li>
         </ul>
     </li>
+    {% if next_sprint %}
+    <li><a href="{{ request.url_for(request.path, sprint_id=next_sprint.id) }}"><i class="icon-arrow-right"></i></a></li>
+    {% endif %}
     {% if page == 'bugs' %}
         <li class="active"><a>{% trans %}Tasks{% endtrans %}</a></li>
     {% else %}
@@ -93,8 +99,8 @@
                             <li>
                                 <span>{% trans %}Retrospective notes{% endtrans %}</span>
                                     <a class="a_popup" href="{{ request.url_for('/scrum/sprint/field', sprint_id=sprint.id, field='retrospective_note') }}">current</a>
-                                {% if last_sprint %}
-                                    / <a class="a_popup" href="{{ request.url_for('/scrum/sprint/field', sprint_id=last_sprint.id, field='retrospective_note') }}">last</a>
+                                {% if prev_sprint %}
+                                    / <a class="a_popup" href="{{ request.url_for('/scrum/sprint/field', sprint_id=prev_sprint.id, field='retrospective_note') }}">last</a>
                                 {% endif %}
                             </li>
                             <li>

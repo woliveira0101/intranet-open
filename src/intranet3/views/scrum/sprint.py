@@ -126,14 +126,19 @@ class BaseSprintView(BaseView):
         self.v['project'] = project
         self.v['sprint'] = sprint
 
-        last_sprint = session.query(Sprint)\
+        prev_sprint = session.query(Sprint)\
                                  .filter(Sprint.project_id==sprint.project_id)\
                                  .filter(Sprint.start<sprint.start)\
                                  .order_by(Sprint.start.desc()).first()
+        next_sprint = session.query(Sprint) \
+                                 .filter(Sprint.project_id==sprint.project_id) \
+                                 .filter(Sprint.start>sprint.start) \
+                                 .order_by(Sprint.start.asc()).first()
         return dict(
             project=project,
             sprint=sprint,
-            last_sprint=last_sprint,
+            prev_sprint=prev_sprint,
+            next_sprint=next_sprint,
         )
 
 

@@ -4,6 +4,7 @@ New release
 - scrum board enhancements
 - minor bug fixes
 - add installation guide to README.md
+- add next sprint and prev sprint buttons
 
 0.8.2 (13-05-2013)
 ===============
