@@ -31,7 +31,7 @@ def comma_number(value):
 
 
 def first_words(value, characters=20):
-    words = re.findall('\w+', value)
+    words = re.findall('\w+', value, re.UNICODE)
     result = ' '.join(words)[:characters]
     result = '%s ...' % result
     return result
