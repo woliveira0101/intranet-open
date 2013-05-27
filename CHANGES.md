@@ -7,6 +7,7 @@ New release
 - add next sprint and prev sprint buttons
 - add meetings filter in Time entries report
 - add bigger than field in Time entries
+- custom twistd launcher - add daily log rotation
 
 0.8.2 (13-05-2013)
 ===============

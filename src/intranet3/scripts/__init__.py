@@ -6,7 +6,7 @@ from pyramid.paster import bootstrap
 from sqlalchemy import engine_from_config
 from pyramid.paster import get_appsettings, setup_logging
 
-from models import DBSession, Base
+from intranet3.models import DBSession, Base
 
 
 def script():

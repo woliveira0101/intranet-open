@@ -74,8 +74,8 @@ setup(
     entry_points="""\
     [console_scripts]
     run = intranet3:run
-    twistd = twisted.scripts.twistd:run
-    script = intranet3.script:script
+    twistd = intranet3.scripts.twistd:run
+    script = intranet3.scripts:script
     [paste.app_factory]
     main = intranet3:main
     """,

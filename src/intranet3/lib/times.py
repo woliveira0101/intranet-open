@@ -268,6 +268,15 @@ class Row(list):
                 sum_all += asum
         return rows, sum_all
 
+    @classmethod
+    def to_excel(cls, entries, groupby, bigger_than=0):
+        rows = []
+        for entry in cls._group(entries, groupby):
+            row, asum = cls.create_row(entry, groupby)
+            if asum > bigger_than:
+                rows.append(row)
+        return rows
+
 
 def dump_entries_to_excel(entries):
     def _format_row(a_row):
