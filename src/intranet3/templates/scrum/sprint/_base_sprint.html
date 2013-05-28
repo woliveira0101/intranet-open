@@ -16,20 +16,15 @@
     {% if next_sprint %}
     <li><a href="{{ request.url_for(request.path, sprint_id=next_sprint.id) }}"><i class="icon-arrow-right"></i></a></li>
     {% endif %}
-    {% if page == 'bugs' %}
-        <li class="active"><a>{% trans %}Tasks{% endtrans %}</a></li>
+    {% if page == 'board' %}
+        <li class="active"><a>{% trans %}Board{% endtrans %}</a></li>
     {% else %}
-        <li><a href="{{ request.url_for('/scrum/sprint/show', sprint_id=sprint.id) }}">{% trans %}Tasks{% endtrans %}</a></li>
+        <li><a href="{{ request.url_for('/scrum/sprint/board', sprint_id=sprint.id) }}">{% trans %}Board{% endtrans %}</a></li>
     {% endif %}
     {% if page == 'charts' %}
         <li class="active"><a>{% trans %}Burndown chart{% endtrans %}</a></li>
     {% else %}
         <li><a href="{{ request.url_for('/scrum/sprint/charts', sprint_id=sprint.id) }}">{% trans %}Burndown chart{% endtrans %}</a></li>
-    {% endif %}
-    {% if page == 'board' %}
-        <li class="active"><a>{% trans %}Board{% endtrans %}</a></li>
-    {% else %}
-        <li><a href="{{ request.url_for('/scrum/sprint/board', sprint_id=sprint.id) }}">{% trans %}Board{% endtrans %}</a></li>
     {% endif %}
     {% if page == 'times' %}
         <li class="active"><a>{% trans %}Times{% endtrans %}</a></li>
@@ -40,6 +35,11 @@
         <li class="active"><a>{% trans %}Retrospective notes{% endtrans %}</a></li>
     {% else %}
         <li><a href="{{ request.url_for('/scrum/sprint/retros', sprint_id=sprint.id) }}">{% trans %}Retrospective notes{% endtrans %}</a></li>
+    {% endif %}
+    {% if page == 'bugs' %}
+        <li class="active"><a>{% trans %}Tasks{% endtrans %}</a></li>
+    {% else %}
+        <li><a href="{{ request.url_for('/scrum/sprint/show', sprint_id=sprint.id) }}">{% trans %}Tasks{% endtrans %}</a></li>
     {% endif %}
     {% if page == 'board' %}
         <li class="btn_fullscreen">

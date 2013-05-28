@@ -9,6 +9,7 @@ New release
 - add bigger than field in Time entries
 - custom twistd launcher - add daily log rotation
 - grouping feature in Time entries to excel
+- scrum board as a main tab
 
 0.8.2 (13-05-2013)
 ===============
