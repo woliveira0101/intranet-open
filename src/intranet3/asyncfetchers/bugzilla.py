@@ -159,8 +159,8 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
     def fetch_scrum(self, sprint_name, project_id=None):
         params = dict(
             ctype='csv',
-            status_whiteboard_type='substring',
-            status_whiteboard='s=%s' % sprint_name,
+            status_whiteboard_type='regexp',
+            status_whiteboard='s=%s(?!\S)' % sprint_name,
             bug_status=['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED', 'WAITING', 'RESOLVED', 'VERIFIED', 'CLOSED'],
         )
         url = h.serialize_url(self.tracker.url + '/buglist.cgi?', **params)
