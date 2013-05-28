@@ -42,13 +42,13 @@
                     <tbody>
                     {% for row in rows %}
                         <tr id="{{ row.id }}" class="printable {{ row.klass }}">
-                            <td class="client_name">{{ row[0] | safe }}</td>
-                            <td class="project_name">{{ row[1] | safe }}</td>
-                            <td class="bug_id">{{ row[2] | safe }}</td>
-                            <td class="usernames">{{ row[3] | safe }}</td>
-                            <td class="description">{{ row[4] | safe }}</td>
-                            <td class="date">{{ row[5] | safe }}</td>
-                            <td class="time">{{ row[6] | safe }}</td>
+                            <td class="client_name">{{ row.row[0] | safe }}</td>
+                            <td class="project_name">{{ row.row[1] | safe }}</td>
+                            <td class="bug_id">{{ row.row[2] | safe }}</td>
+                            <td class="usernames">{{ row.row[3] | safe }}</td>
+                            <td class="description">{{ row.row[4] | safe }}</td>
+                            <td class="date">{{ row.row[5] | safe }}</td>
+                            <td class="time">{{ row.row[6] | safe }}</td>
                         </tr>
                         {% for subrow in row.subrows %}
                             <tr class="{{ row.id }} hide">

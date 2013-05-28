@@ -10,7 +10,7 @@ from intranet3.forms.times import ProjectsTimeForm, TimeEntryForm
 from intranet3.asyncfetchers import get_fetcher
 from intranet3.helpers import groupby, partition
 from intranet3.log import INFO_LOG, WARN_LOG, ERROR_LOG, DEBUG_LOG, EXCEPTION_LOG
-from intranet3.lib.times import TimesReportMixin, Row, dump_entries_to_excel
+from intranet3.lib.times import TimesReportMixin, HTMLRow, dump_entries_to_excel
 
 LOG = INFO_LOG(__name__)
 WARN = WARN_LOG(__name__)
@@ -167,7 +167,7 @@ class Report(TimesReportMixin, BaseView):
         tickets_id = ','.join([str(e[2]) for e in entries])
         trackers_id = ','.join([str(e[4].id) for e in entries])
 
-        rows, entries_sum = Row.from_ordered_data(entries, group_by, bigger_than)
+        rows, entries_sum = HTMLRow.from_ordered_data(entries, group_by, bigger_than)
 
         return dict(
             rows=rows,

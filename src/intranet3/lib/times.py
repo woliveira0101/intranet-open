@@ -158,9 +158,7 @@ class TimesReportMixin(object):
         participation_of_workers.sort(key=lambda k: k[1], reverse=True)
         return participation_of_workers
 
-
 class Row(list):
-    subrows = []
     row_counter = 0
     ##  Client, Project, TimeEntry.ticket_id, User
     ## possibilities:
@@ -175,70 +173,36 @@ class Row(list):
     ## 1 0 0 1
     ## 1 1 0 1
 
-    def __init__(self, row, subrows):
-        self.subrows = subrows
+
+    def __init__(self, row, subrows=None):
+        self._subrows = subrows or []
+        self.__printful_row = None
         self._id = Row.row_counter
         Row.row_counter += 1
         super(Row, self).__init__(row)
 
     @property
-    def id(self):
-        return 'row%s' % self._id
+    def subrows(self):
+        printful_subrows = [self._print_subrow(subrow) for subrow in self._subrows]
+        return printful_subrows
 
     @property
-    def klass(self):
-        if len(self.subrows) > 0:
-            return 'clickable'
-        return ''
+    def row(self):
+        if not self.__printful_row:
+            self.__printful_row = self._print_row()
+        return self.__printful_row
 
-    @classmethod
-    def _to_print(cls, entries):
-        result = []
-        for entry in entries:
-            identifier = '%s_%s' % (entry[4].id, entry[2])
-            ## for titles ajax fetching
-            title = '<span class="ajax_changeable" data-id="%s">%s</span>' % (identifier, escape(entry[5]))
+    def _print_subrow(self, subrow):
+        """
+        Could be override, defines how subrow will look like.
+        """
+        return subrow
 
-            row = [
-                escape(entry[0].name),
-                escape(entry[1].name),
-                entry[2],
-                escape(entry[3].name),
-                title,
-                entry[6].strftime('%d.%m.%Y'),
-                comma_number(entry[7]),
-                ]
-            result.append(row)
-        return result
-
-    @classmethod
-    def create_row(cls, entries, groupby):
-        printful_entries = cls._to_print(entries)
-        row = printful_entries[0][:]
-        if len(entries) == 1:
-            entry_time = entries[0][7]
-            return cls(row, []), entry_time
-
-        for i, gb in enumerate(groupby):
-            if not gb:
-                row[i] = '<b>Multiple entries</b>'
-        if not groupby[2]:
-            row[4] = '<b>Multiple entries</b>'
-            row[5] = '<b>Multiple entries</b>'
-
-        asum = sum([arow[7] for arow in entries])
-        row[6] = '<b>%s</b>' % comma_number(asum)
-        return cls(row, printful_entries), asum
-
-    @classmethod
-    def _isthesame(cls, row1, row2, groupby):
-        if (not groupby[0] or row1[0] == row2[0]) and\
-           (not groupby[1] or row1[1] == row2[1]) and\
-           (not groupby[2] or row1[2] == row2[2]) and\
-           (not groupby[3] or row1[3] == row2[3]):
-            return True
-
-        return False
+    def _print_row(self):
+        """
+        Could be override, defines how main Row will look like.
+        """
+        return self
 
     @classmethod
     def _group(cls, a_entries, groupby):
@@ -255,27 +219,121 @@ class Row(list):
             for i in sorted(poss, reverse=True):
                 subrow.append(entries.pop(i))
             yield subrow
-            subrow = []
+
+    @classmethod
+    def _isthesame(cls, row1, row2, groupby):
+        if (not groupby[0] or row1[0] == row2[0]) and \
+           (not groupby[1] or row1[1] == row2[1]) and \
+           (not groupby[2] or row1[2] == row2[2]) and \
+           (not groupby[3] or row1[3] == row2[3]):
+            return True
+
+        return False
+
+    @classmethod
+    def create_row(cls, entries, groupby):
+        row = list(entries[0])
+        if len(entries) == 1:
+            return cls(row, [])
+
+        def multiple_entries(i, rows):
+            """Checks if grouped rows has the same fields
+            """
+            fields = set([ row[i] for row in rows])
+            return True if len(fields) > 1 else False
+
+        for i, entry in enumerate(row):
+            if multiple_entries(i, entries):
+                row[i] = 'Multiple entries'
+
+        #for i, gb in enumerate(groupby):
+        #    if not gb:
+        #        row[i] = 'Multiple entries'
+
+        #if not groupby[2]:
+        #    row[4] = 'Multiple entries'
+        #    row[5] = 'Multiple entries'
+
+        asum = sum([arow[7] for arow in entries])
+        row[7] = asum
+        return cls(row, entries)
 
     @classmethod
     def from_ordered_data(cls, entries, groupby, bigger_than=0):
         rows = []
         sum_all = 0
         for entry in cls._group(entries, groupby):
-            row, asum = cls.create_row(entry, groupby)
+            row = cls.create_row(entry, groupby)
+            asum = row[-1]
             if asum > bigger_than:
                 rows.append(row)
                 sum_all += asum
         return rows, sum_all
 
-    @classmethod
-    def to_excel(cls, entries, groupby, bigger_than=0):
-        rows = []
-        for entry in cls._group(entries, groupby):
-            row, asum = cls.create_row(entry, groupby)
-            if asum > bigger_than:
-                rows.append(row)
-        return rows
+
+class HTMLRow(Row):
+
+    @property
+    def id(self):
+        return 'row%s' % self._id
+
+    @property
+    def klass(self):
+        if self.subrows:
+            return 'clickable'
+        return ''
+
+    def _print_subrow(self, subrow):
+        identifier = '%s_%s' % (subrow[4].id, subrow[2])
+        ## for titles ajax fetching
+        title = '<span class="ajax_changeable" data-id="%s">%s</span>' % (identifier, escape(subrow[5]))
+
+        row = [
+            escape(subrow[0].name),
+            escape(subrow[1].name),
+            subrow[2],
+            escape(subrow[3].name),
+            title,
+            subrow[6].strftime('%d.%m.%Y'),
+            comma_number(subrow[7]),
+        ]
+        return row
+
+    def _print_row(self):
+        def mos(obj, attr_or_callable):
+            if isinstance(obj, str):
+                return obj
+            elif isinstance(attr_or_callable, str):
+                attr = attr_or_callable
+                return getattr(obj, attr)
+            else:
+                acallable = attr_or_callable
+                return acallable(obj)
+
+        try:
+            identifier = '%s_%s' % (self[4].id, self[2])
+            ## for titles ajax fetching
+            title = '<span class="ajax_changeable" data-id="%s">%s</span>' % (identifier, escape(self[5]))
+        except AttributeError as e:
+            title = 'Multiple entries'
+
+        row = [
+            escape(mos(self[0], 'name')),
+            escape(mos(self[1], 'name')),
+            self[2],
+            escape(mos(self[3], 'name')),
+            title,
+            mos(self[6], lambda x : x.strftime('%d.%m.%Y')),
+            comma_number(self[7]),
+        ]
+        for i, entry in enumerate(row):
+            if entry == 'Multiple entries':
+                row[i] = '<b>Multiple entries</b>'
+
+        if self.subrows:
+            row[-1] = '<b>%s</b>' % row[-1]
+
+        return row
 
 
 def dump_entries_to_excel(entries):
