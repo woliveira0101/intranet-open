@@ -71,3 +71,9 @@ class Full(BaseView):
             date=date,
             prev_date=previous_day(date), next_date=next_day(date)
         )
+
+@view_config(route_name='presence_absences')
+class Absences(BaseView):
+    def get(self):
+        return dict(
+        )
