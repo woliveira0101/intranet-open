@@ -41,5 +41,5 @@ class UserEditForm(wtf.Form):
     phone_on_desk = wtf.TextField(_(u"Deskphone"), validators=[validators.Optional()])
     irc = wtf.TextField(_(u"IRC"), validators=[validators.Optional()])
 
-    groups = wtf.SelectMultipleField(_(u'Groups'), validators=[], choices=(('freelancer','freelancer'),('user','user'),('admin','admin'),))
+    groups = wtf.SelectMultipleField(_(u'Groups'), validators=[], choices=(('freelancer','freelancer'),('user','user'),('admin','admin'), ('scrum', 'scrum')))
 

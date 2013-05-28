@@ -10,6 +10,7 @@ New release
 - custom twistd launcher - add daily log rotation
 - grouping feature in Time entries to excel
 - scrum board as a main tab
+- add new group: scrum (ability to add/edit/delete sprints)
 
 0.8.2 (13-05-2013)
 ===============

@@ -36,7 +36,8 @@ class Root(object):
         (Allow, 'g:freelancer', ('freelancer', 'client_or_freelancer')),
         (Allow, 'g:client', ('client', 'client_or_freelancer')),
         (Allow, 'g:user', ('view', 'freelancer', 'client', 'client_or_freelancer')),
-        (Allow, 'g:coordinator', ('view', 'client', 'freelancer', 'coordinator', 'client_or_freelancer')),
+        (Allow, 'g:coordinator', ('view', 'client', 'freelancer', 'coordinator', 'client_or_freelancer', 'scrum')),
+        (Allow, 'g:scrum', ('scrum',)),
         (Allow, 'g:cron', 'cron'),
         (Allow, 'g:admin', ALL_PERMISSIONS)
     ]

@@ -263,7 +263,7 @@ class Retros(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         )
 
 
-@view_config(route_name='scrum_sprint_edit', permission='coordinator')
+@view_config(route_name='scrum_sprint_edit', permission='scrum')
 class Edit(BaseView):
     def dispatch(self):
         sprint_id = self.request.GET.get('sprint_id')
@@ -290,7 +290,7 @@ class Edit(BaseView):
         )
 
 
-@view_config(route_name='scrum_sprint_add', permission='coordinator')
+@view_config(route_name='scrum_sprint_add', permission='scrum')
 class Add(BaseView):
     def dispatch(self):
         form = SprintForm(self.request.POST)
@@ -319,7 +319,7 @@ class Add(BaseView):
 
 @view_config(route_name='scrum_sprint_delete',
     renderer='intranet3:templates/common/delete.html',
-    permission='coordinator')
+    permission='scrum')
 class Delete(BaseView):
 
     def dispatch(self):
