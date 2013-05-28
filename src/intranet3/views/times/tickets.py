@@ -35,6 +35,13 @@ class Excel(BaseView):
         projects = form.projects.data
         users = form.users.data
         ticket_choice = form.ticket_choice.data
+        group_by = (
+            form.group_by_client.data,
+            form.group_by_project.data,
+            form.group_by_bugs.data,
+            form.group_by_user.data
+        )
+        bigger_than = form.bigger_than.data
 
         LOG(u'Tickets report %r - %r - %r' % (start_date, end_date, projects))
 
@@ -60,7 +67,7 @@ class Excel(BaseView):
 
         uber_query = uber_query.order_by(Client.name, Project.name, TimeEntry.ticket_id, User.name)
         entries = uber_query.all()
-        file, response = dump_entries_to_excel(entries)
+        file, response = dump_entries_to_excel(entries, group_by, bigger_than)
 
         return response
 

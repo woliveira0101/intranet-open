@@ -34,23 +34,24 @@
                         <th class="project_name">{% trans %}Project{% endtrans %}</th>
                         <th class="bug_id">{% trans %}Bug id{% endtrans %}</th>
                         <th class="usernames">{% trans %}Employee{% endtrans %}</th>
-                        <th class="description">{% if group_by_bugs and not group_by_user %}{% trans %}Title{% endtrans %}{% else %}{% trans %}Description{% endtrans %}{% endif %}</th>
+                        <th class="description">{% if pgroup_by_bugs and not group_by_user %}{% trans %}Title{% endtrans %}{% else %}{% trans %}Description{% endtrans %}{% endif %}</th>
                         <th class="date">{% trans %}Date{% endtrans %}</th>
                         <th class="time">{% trans %}Time{% endtrans %}</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for row in rows %}
+                        {% set prow = row.pprint_row() %}
                         <tr id="{{ row.id }}" class="printable {{ row.klass }}">
-                            <td class="client_name">{{ row.row[0] | safe }}</td>
-                            <td class="project_name">{{ row.row[1] | safe }}</td>
-                            <td class="bug_id">{{ row.row[2] | safe }}</td>
-                            <td class="usernames">{{ row.row[3] | safe }}</td>
-                            <td class="description">{{ row.row[4] | safe }}</td>
-                            <td class="date">{{ row.row[5] | safe }}</td>
-                            <td class="time">{{ row.row[6] | safe }}</td>
+                            <td class="client_name">{{ prow[0] | safe }}</td>
+                            <td class="project_name">{{ prow[1] | safe }}</td>
+                            <td class="bug_id">{{ prow[2] | safe }}</td>
+                            <td class="usernames">{{ prow[3] | safe }}</td>
+                            <td class="description">{{ prow[4] | safe }}</td>
+                            <td class="date">{{ prow[5] | safe }}</td>
+                            <td class="time">{{ prow[6] | safe }}</td>
                         </tr>
-                        {% for subrow in row.subrows %}
+                        {% for subrow in row.pprint_subrows() %}
                             <tr class="{{ row.id }} hide">
                                 <td class="client_name">{{ subrow[0] | safe }}</td>
                                 <td class="project_name">{{ subrow[1] | safe }}</td>

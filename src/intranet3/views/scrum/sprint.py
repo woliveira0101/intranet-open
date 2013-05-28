@@ -202,7 +202,7 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseSprintV
 
         if self.request.GET.get('excel'):
             from intranet3.lib.times import dump_entries_to_excel
-            file, response = dump_entries_to_excel(entries)
+            file, response = dump_entries_to_excel(entries, group_by, bigger_than)
             return response
 
         participation_of_workers = self._get_participation_of_workers(entries)

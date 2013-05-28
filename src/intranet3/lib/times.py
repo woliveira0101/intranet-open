@@ -181,13 +181,11 @@ class Row(list):
         Row.row_counter += 1
         super(Row, self).__init__(row)
 
-    @property
-    def subrows(self):
+    def pprint_subrows(self):
         printful_subrows = [self._print_subrow(subrow) for subrow in self._subrows]
         return printful_subrows
 
-    @property
-    def row(self):
+    def pprint_row(self):
         if not self.__printful_row:
             self.__printful_row = self._print_row()
         return self.__printful_row
@@ -258,6 +256,20 @@ class Row(list):
         row[7] = asum
         return cls(row, entries)
 
+    @staticmethod
+    def _mos(obj, attr_or_callable):
+        """
+        Helper function to transform Model, datetime or str to str
+        """
+        if isinstance(obj, str):
+            return obj
+        elif isinstance(attr_or_callable, str):
+            attr = attr_or_callable
+            return getattr(obj, attr)
+        else:
+            acallable = attr_or_callable
+            return acallable(obj)
+
     @classmethod
     def from_ordered_data(cls, entries, groupby, bigger_than=0):
         rows = []
@@ -279,7 +291,7 @@ class HTMLRow(Row):
 
     @property
     def klass(self):
-        if self.subrows:
+        if self._subrows:
             return 'clickable'
         return ''
 
@@ -300,15 +312,6 @@ class HTMLRow(Row):
         return row
 
     def _print_row(self):
-        def mos(obj, attr_or_callable):
-            if isinstance(obj, str):
-                return obj
-            elif isinstance(attr_or_callable, str):
-                attr = attr_or_callable
-                return getattr(obj, attr)
-            else:
-                acallable = attr_or_callable
-                return acallable(obj)
 
         try:
             identifier = '%s_%s' % (self[4].id, self[2])
@@ -318,37 +321,39 @@ class HTMLRow(Row):
             title = 'Multiple entries'
 
         row = [
-            escape(mos(self[0], 'name')),
-            escape(mos(self[1], 'name')),
+            escape(self._mos(self[0], 'name')),
+            escape(self._mos(self[1], 'name')),
             self[2],
-            escape(mos(self[3], 'name')),
+            escape(self._mos(self[3], 'name')),
             title,
-            mos(self[6], lambda x : x.strftime('%d.%m.%Y')),
+            self._mos(self[6], lambda x : x.strftime('%d.%m.%Y')),
             comma_number(self[7]),
         ]
         for i, entry in enumerate(row):
             if entry == 'Multiple entries':
                 row[i] = '<b>Multiple entries</b>'
 
-        if self.subrows:
+        if self._subrows:
             row[-1] = '<b>%s</b>' % row[-1]
 
         return row
 
-
-def dump_entries_to_excel(entries):
-    def _format_row(a_row):
-        row = list(a_row)
-        row[0] = (row[0].name,)                                    #client
-        row[1] = (row[1].name,)                                    #project
-        row[2] = (row[2],)                                         #ticketid
-        row[3] = (row[3].email,)                                   #email
-        row[4] = (unicode(row[5]),)                                #desc
+class ExcelRow(Row):
+    def _print_row(self):
         date_xf = xlwt.easyxf(num_format_str='DD/MM/YYYY')
-        row[5] = (row[6].strftime('%d/%m/%Y'), date_xf)            #date
-        row[6] = (round(row[7], 2),)                               #time
-        return row[:7]
+        row = [
+            (self._mos(self[0], 'name'),),
+            (self._mos(self[1], 'name'),),
+            (self[2],),
+            (self._mos(self[3], 'name'),),
+            (self[5],),
+            (self._mos(self[6], lambda x : x.strftime('%d.%m.%Y')),date_xf),
+            (comma_number(self[7]),),
+        ]
+        return row
 
+
+def dump_entries_to_excel(entries, group_by, bigger_than):
     wbk = xlwt.Workbook()
     sheet = wbk.add_sheet('Hours')
 
@@ -365,8 +370,9 @@ def dump_entries_to_excel(entries):
     sheet.set_horz_split_pos(1)
     sheet.set_remove_splits(True)
 
-    for j, row in enumerate(entries):
-        row = _format_row(row)
+    rows, asum = ExcelRow.from_ordered_data(entries, group_by, bigger_than)
+    for j, row in enumerate(rows):
+        row = row.pprint_row()
         for i, cell in enumerate(row):
             sheet.write(j+1, i, *cell)
 
