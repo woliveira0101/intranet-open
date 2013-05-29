@@ -75,5 +75,8 @@ class Full(BaseView):
 @view_config(route_name='presence_absences')
 class Absences(BaseView):
     def get(self):
+        users = self.session.query(User).filter(User.is_active==True).all()
         return dict(
+            users=users,
+            days=30,
         )
