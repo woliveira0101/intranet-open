@@ -162,6 +162,7 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
 class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
         sprint = self.v['sprint']
+        #sprint.project_ids = [59, 132]
         bugs = self._fetch_bugs(sprint)
 
         sw = SprintWrapper(sprint, bugs, self.request)
