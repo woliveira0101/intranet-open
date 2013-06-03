@@ -1,6 +1,9 @@
 New release
 ===========
 
+0.8.3 (03-06-2013)
+===============
+
 - scrum board enhancements
 - minor bug fixes
 - add installation guide to README.md
