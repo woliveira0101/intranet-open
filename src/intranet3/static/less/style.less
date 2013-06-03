@@ -562,6 +562,51 @@ table.bugs-list tbody tr.other-projects td {
 }
 
 .absences {
+    table {
+        thead, tfoot {
+            th {
+                padding-left: 0px;
+                padding-right: 0px;
+            }
+            th.day {
+                border: solid 1px #d3d3d3;
+            }
+            th.weekday {
+                border: solid 1px #d3d3d3;
+                border-bottom: solid 1px;
+            }
+            th.month {
+                border-bottom: solid 1px #d3d3d3;
+                border-right: solid 1px;
+            }
+            th.user {
+                border-right: solid 1px;
+            }
+            th.holiday {
+                background-color: #F7DFDE;
+
+            }
+        }
+        td {
+            padding-left: 0px;
+            padding-right: 0px;
+            text-align: center;
+            border: solid 1px #d3d3d3;
+        }
+        td.user {
+            border-right: solid 1px;
+        }
+        td.highlighted {
+            background-color: red;
+        }
+        td.holiday {
+            background-color: #F7DFDE;
+        }
+        .monthend {
+            border-right: solid 1px !important;
+        }
+
+    }
 }
 
 /* Hours */

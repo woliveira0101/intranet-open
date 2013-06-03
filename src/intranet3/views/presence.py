@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 
 from sqlalchemy import func
@@ -75,8 +76,21 @@ class Full(BaseView):
 @view_config(route_name='presence_absences')
 class Absences(BaseView):
     def get(self):
-        users = self.session.query(User).filter(User.is_active==True).all()
+        users_p = User.query.filter(User.is_not_client()) \
+                          .filter(User.is_active==True) \
+                          .filter(User.location=='poznan') \
+                          .order_by(User.freelancer, User.name).all()
+        users_w = User.query.filter(User.is_not_client()) \
+                          .filter(User.is_active==True) \
+                          .filter(User.location=='wroclaw') \
+                          .order_by(User.freelancer, User.name).all()
+        users_p.extend(users_w)
+        days = [u'Ś', u'C', u'P', u'S', u'N', u'P', u'W'] * 20
+
         return dict(
-            users=users,
-            days=30,
+            users=users_p,
+            days=days,
+            may_weekdays = days[0:31],
+            june_weekdays = days[31:61],
+            july_weekdays = days[61:92],
         )
