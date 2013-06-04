@@ -26,7 +26,6 @@
                 {% for i in range(1, july_days+1) %}
                     <th class="day{% if loop.last %} monthend{% endif %}{% if i in july_holidays %} holiday{% endif %}">{{ i }}</th>
                 {% endfor %}
-                <th></th>
             </tr>
             <tr>
                 {% for i in range(1, may_days+1) %}
@@ -38,7 +37,6 @@
                 {% for i in range(1, july_days+1) %}
                     <th class="weekday{% if loop.last %} monthend{% endif %}{% if i in july_holidays %} holiday{% endif %}">{{ loop.cycle(*july_weekdays) }}</th>
                 {% endfor %}
-                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -54,7 +52,6 @@
                 {% for i in range(1, july_days+1) %}
                     <td class="{% if loop.last %}monthend{% endif %}{% if i in july_holidays %} holiday{% endif %}"></td>
                 {% endfor %}
-                <td></td>
             </tr>
         {% endfor %}
         </tbody>
@@ -88,6 +85,9 @@
             ]
         } );
         new FixedColumns( oTable, {"iLeftWidth": 150});
+        setTimeout(function (){
+            oTable.fnAdjustColumnSizing();
+        }, 10 );
         /*
         http://www.datatables.net/examples/api/highlight.html
         $('td', oTable.fnGetNodes()).hover(
