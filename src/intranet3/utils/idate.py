@@ -48,6 +48,14 @@ def first_day_of_quarter(date):
 def first_day_of_month(date):
     return datetime.date(date.year, date.month, 1)
 
+def first_day_of_week(date=None):
+    if not date:
+        date = datetime.date.today()
+    weekday = date.weekday()
+    monday = date - datetime.timedelta(days=weekday)
+    if isinstance(date, datetime.datetime):
+        monday = monday.date()
+    return monday
 
 def last_day_of_month(date):
     return first_day_of_month(h.next_month(date)) - relativedelta(days=1)
@@ -62,3 +70,27 @@ def months_between(d1, d2):
         d1 += relativedelta(months=1)
 
     return result
+
+class date_range(object):
+    def _gen_func(self, d1, d2, group_by_month=False):
+        if group_by_month:
+            while d1 < d2:
+                previous = d1
+                result = []
+                while d1.month == previous.month:
+                    result.append(d1)
+                    d1 += datetime.timedelta(days=1)
+                yield result
+        else:
+            while d1 < d2:
+                yield d1
+                d1 += datetime.timedelta(days=1)
+
+    def __init__(self, d1, d2, group_by_month=False):
+        self.d1 = d1
+        self.d2 = d2
+        self.group_by_month = group_by_month
+
+    def __iter__(self):
+        return self._gen_func(self.d1, self.d2, self.group_by_month)
+

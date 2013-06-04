@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 import datetime
+from calendar import monthrange
 
+from babel.core import Locale
 from sqlalchemy import func
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
 from intranet3.utils.views import BaseView
-from intranet3.models import User, PresenceEntry
+from intranet3.models import User, PresenceEntry, Holiday
 from intranet3.helpers import previous_day, next_day
-from intranet3.utils import excuses
+from intranet3.utils import excuses, idate
 
 day_start = datetime.time(0, 0, 0)
 day_end = datetime.time(23, 59, 59)
 hour_9 = datetime.time(9, 0, 0)
+
+locale = Locale('en', 'US')
 
 
 @view_config(route_name='presence_today')
@@ -75,22 +79,55 @@ class Full(BaseView):
 
 @view_config(route_name='presence_absences')
 class Absences(BaseView):
+    WEEKDAYS = locale.days['stand-alone']['narrow']
+
+    @classmethod
+    def weekday(cls, date):
+        weekday = date.weekday()
+        return cls.WEEKDAYS[weekday]
+
+    def necessary_data(self):
+        sunday = idate.first_day_of_week() - datetime.timedelta(days=1)
+        curr_year = sunday.year
+        monday = idate.first_day_of_week(sunday)
+        dec31 = datetime.date(curr_year, 12, 31)
+        days = (dec31 - monday).days
+        date_range = idate.date_range(monday, dec31, group_by_month=True)
+        month_range = idate.months_between(monday, dec31)
+        month_names = locale.months['format']['wide'].items()
+        months = [
+            (month_names[m-1][1], monthrange(curr_year, m)[1])
+            for m in month_range
+        ]
+
+        this_month = months.pop(0)
+        this_month = this_month[0], this_month[1]-(monday.day-1)
+        months.insert(0, this_month)
+        holidays = Holiday.all()
+
+
+
+        return days, date_range, months
+
     def get(self):
+        days, date_range, months = self.necessary_data()
+
         users_p = User.query.filter(User.is_not_client()) \
-                          .filter(User.is_active==True) \
-                          .filter(User.location=='poznan') \
-                          .order_by(User.freelancer, User.name).all()
+                            .filter(User.is_active==True) \
+                            .filter(User.location=='poznan') \
+                            .order_by(User.freelancer, User.name).all()
         users_w = User.query.filter(User.is_not_client()) \
-                          .filter(User.is_active==True) \
-                          .filter(User.location=='wroclaw') \
-                          .order_by(User.freelancer, User.name).all()
+                            .filter(User.is_active==True) \
+                            .filter(User.location=='wroclaw') \
+                            .order_by(User.freelancer, User.name).all()
         users_p.extend(users_w)
-        days = [u'Ś', u'C', u'P', u'S', u'N', u'P', u'W'] * 20
+        holidays = Holiday.all()
 
         return dict(
             users=users_p,
             days=days,
-            may_weekdays = days[0:31],
-            june_weekdays = days[31:61],
-            july_weekdays = days[61:92],
+            date_range=date_range,
+            months=months,
+            weekday=self.weekday,
+            is_holiday=lambda date: Holiday.is_holiday(date, holidays=holidays),
         )
