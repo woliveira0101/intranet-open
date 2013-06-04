@@ -103,7 +103,6 @@ class Absences(BaseView):
         this_month = months.pop(0)
         this_month = this_month[0], this_month[1]-(monday.day-1)
         months.insert(0, this_month)
-        holidays = Holiday.all()
 
 
 
@@ -111,6 +110,9 @@ class Absences(BaseView):
 
     def get(self):
         days, date_range, months = self.necessary_data()
+        holidays = Holiday.all()
+        today = datetime.date.today()
+
 
         users_p = User.query.filter(User.is_not_client()) \
                             .filter(User.is_active==True) \
@@ -121,7 +123,6 @@ class Absences(BaseView):
                             .filter(User.location=='wroclaw') \
                             .order_by(User.freelancer, User.name).all()
         users_p.extend(users_w)
-        holidays = Holiday.all()
 
         return dict(
             users=users_p,
@@ -130,4 +131,5 @@ class Absences(BaseView):
             months=months,
             weekday=self.weekday,
             is_holiday=lambda date: Holiday.is_holiday(date, holidays=holidays),
+            is_today=lambda date: date == today
         )

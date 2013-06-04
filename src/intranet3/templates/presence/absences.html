@@ -13,14 +13,14 @@
             <tr>
                 {% for month in date_range %}
                     {% for day in month %}
-                        <th class="day{% if loop.last %} monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}">{{ day.day }}</th>
+                        <th class="day{% if loop.last %} monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}{% if is_today(day) %} today{% endif %}">{{ day.day }}</th>
                     {% endfor%}
                 {% endfor %}
             </tr>
             <tr>
                 {% for month in date_range %}
                     {% for day in month %}
-                        <th class="day{% if loop.last %} monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}">{{ weekday(day) }}</th>
+                        <th class="day{% if loop.last %} monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}{% if is_today(day) %} today{% endif %}">{{ weekday(day) }}</th>
                     {% endfor%}
                 {% endfor %}
             </tr>
@@ -31,7 +31,7 @@
                 <td class="user">{{ user.name }}</td>
                 {% for month in date_range %}
                     {% for day in month %}
-                        <td class="{% if loop.last %}monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}"></td>
+                        <td class="{% if loop.last %}monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}{% if is_today(day) %} today{% endif %}"></td>
                     {% endfor%}
                 {% endfor %}
             </tr>
