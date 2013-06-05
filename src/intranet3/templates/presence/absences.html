@@ -59,8 +59,13 @@
         var tableScrollXInner = 20 * days;
         var sScrollXInner = tableScrollXInner + 'px';
 
-        $('#example tbody td[title]').tooltip( {
-            "delay": 0,
+        $('td.late').tooltip( {
+            container: 'body',
+            template: '<div class="tooltip tooltip-late"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+        });
+        $('td.planowany, td.planowany, td.zadanie, td.l4, td.okolicznosciowy, td.inne').tooltip( {
+            container: 'body',
+            template: '<div class="tooltip tooltip-absence"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
         });
 
         var oTable = $('#example').dataTable( {
@@ -80,8 +85,6 @@
             oTable.fnAdjustColumnSizing();
         }, 10 );
 
-
-        $('#element').tooltip('show')
 
 
         /*

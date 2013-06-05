@@ -625,6 +625,41 @@ table.bugs-list tbody tr.other-projects td {
         }
     }
 }
+@tooltipAbsenceColor: darkred;
+@tooltipLateColor: darkgoldenrod;
+
+.tooltip-absence .tooltip-inner{
+    background-color: @tooltipAbsenceColor;
+}
+.tooltip-absence.top .tooltip-arrow {
+    border-top-color: @tooltipAbsenceColor;
+}
+.tooltip-absence.right .tooltip-arrow {
+    border-right-color: @tooltipAbsenceColor;
+}
+.tooltip-absence.left .tooltip-arrow {
+    border-left-color: @tooltipAbsenceColor;
+}
+.tooltip-absence.bottom .tooltip-arrow {
+    border-bottom-color: @tooltipAbsenceColor;
+}
+
+.tooltip-late .tooltip-inner{
+    background-color: @tooltipLateColor;
+}
+.tooltip-late.top .tooltip-arrow {
+    border-top-color: @tooltipLateColor;
+}
+.tooltip-late.right .tooltip-arrow {
+    border-right-color: @tooltipLateColor;
+}
+.tooltip-late.left .tooltip-arrow {
+    border-left-color: @tooltipLateColor;
+}
+.tooltip-late.bottom .tooltip-arrow {
+    border-bottom-color: @tooltipLateColor;
+}
+
 
 /* Hours */
 .time-entrie-forms {
