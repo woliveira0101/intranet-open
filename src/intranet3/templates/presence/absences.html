@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="absences">
-    <table cellpadding="0" cellspacing="0" border="0" class="display" id="example1">
+    <table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
         <thead>
             <tr>
                 <th rowspan="3" class="user">User</th>
@@ -20,18 +20,23 @@
             <tr>
                 {% for month in date_range %}
                     {% for day in month %}
-                        <th class="day{% if loop.last %} monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}{% if is_today(day) %} today{% endif %}">{{ weekday(day) }}</th>
+                        <th class="day{% if loop.last %} monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}{% if is_today(day) %} today{% endif %}">{{ v.weekday(day) }}</th>
                     {% endfor%}
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
         {% for user in users %}
+            {% set user_absences = absences[user.id] %}
+            {% set user_lates = lates[user.id] %}
             <tr>
                 <td class="user">{{ user.name }}</td>
                 {% for month in date_range %}
                     {% for day in month %}
-                        <td class="{% if loop.last %}monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}{% if is_today(day) %} today{% endif %}"></td>
+                        {% set absence = user_absences[day] %}
+                        {% set late = user_lates[day] %}
+                        <td class="{% if loop.last %}monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}{% if is_today(day) %} today{% endif %}{% if absence %} {{ absence[0] }}{% endif %}{% if late %} late{% endif %}"
+                            title="{{ absence and absence[1] or late }}"></td>
                     {% endfor%}
                 {% endfor %}
             </tr>
@@ -53,8 +58,12 @@
         var days = {{ days }};
         var tableScrollXInner = 20 * days;
         var sScrollXInner = tableScrollXInner + 'px';
-        console.log(days);
-        var oTable = $('#example1').dataTable( {
+
+        $('#example tbody td[title]').tooltip( {
+            "delay": 0,
+        });
+
+        var oTable = $('#example').dataTable( {
             "sScrollY": "500px",
             "sScrollX": "100%",
             "sScrollXInner": sScrollXInner,
@@ -70,6 +79,11 @@
         setTimeout(function (){
             oTable.fnAdjustColumnSizing();
         }, 10 );
+
+
+        $('#element').tooltip('show')
+
+
         /*
         http://www.datatables.net/examples/api/highlight.html
         $('td', oTable.fnGetNodes()).hover(

@@ -71,7 +71,26 @@ def months_between(d1, d2):
 
     return result
 
-class date_range(object):
+
+def date_range(d1, d2, group_by_month=False):
+    result = []
+    if group_by_month:
+        while d1 < d2:
+            previous = d1
+            month_result = []
+            while d1.month == previous.month:
+                month_result.append(d1)
+                d1 += datetime.timedelta(days=1)
+            result.append(month_result)
+    else:
+        while d1 < d2:
+            result.append(d1)
+            d1 += datetime.timedelta(days=1)
+
+    return result
+
+
+class xdate_range(object):
     def _gen_func(self, d1, d2, group_by_month=False):
         if group_by_month:
             while d1 < d2:
