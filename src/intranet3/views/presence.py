@@ -8,7 +8,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
 from intranet3.utils.views import BaseView
-from intranet3.models import User, PresenceEntry, Holiday
+from intranet3.models import User, PresenceEntry, Holiday, Absence, Late
 from intranet3.helpers import previous_day, next_day
 from intranet3.utils import excuses, idate
 
@@ -86,30 +86,39 @@ class Absences(BaseView):
         weekday = date.weekday()
         return cls.WEEKDAYS[weekday]
 
-    def necessary_data(self):
+    def get_range(self):
         sunday = idate.first_day_of_week() - datetime.timedelta(days=1)
         curr_year = sunday.year
         monday = idate.first_day_of_week(sunday)
         dec31 = datetime.date(curr_year, 12, 31)
-        days = (dec31 - monday).days
-        date_range = idate.date_range(monday, dec31, group_by_month=True)
-        month_range = idate.months_between(monday, dec31)
+        return monday, dec31
+
+    def necessary_data(self, start, end):
+        curr_year = start.year
+        days = (end - start).days
+        date_range = idate.date_range(start, end, group_by_month=True)
+        month_range = idate.months_between(start, end)
         month_names = locale.months['format']['wide'].items()
         months = [
             (month_names[m-1][1], monthrange(curr_year, m)[1])
             for m in month_range
         ]
 
+        # we have to modify number of days for first month
         this_month = months.pop(0)
-        this_month = this_month[0], this_month[1]-(monday.day-1)
+        this_month = this_month[0], this_month[1]-(start.day-1)
         months.insert(0, this_month)
-
-
 
         return days, date_range, months
 
+    def get_absences(self, start, end):
+        absences = self.session.query(Absence)\
+                               .filter(Absence.date_start>=start)\
+                               .filter(Absence.date_start<=end)
+
     def get(self):
-        days, date_range, months = self.necessary_data()
+        start, end = self.get_range()
+        days, date_range, months = self.necessary_data(start, end)
         holidays = Holiday.all()
         today = datetime.date.today()
 
@@ -123,6 +132,7 @@ class Absences(BaseView):
                             .filter(User.location=='wroclaw') \
                             .order_by(User.freelancer, User.name).all()
         users_p.extend(users_w)
+        absences = self.get_absences(start, end)
 
         return dict(
             users=users_p,
