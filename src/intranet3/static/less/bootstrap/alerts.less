@@ -6,7 +6,7 @@
 // Base styles
 // -------------------------
 
-.alert, form .errors {
+.alert {
   padding: 8px 35px 8px 14px;
   margin-bottom: @baseLineHeight;
   text-shadow: 0 1px 0 rgba(255,255,255,.5);
@@ -44,15 +44,10 @@
   color: @successText;
 }
 .alert-danger,
-.alert-error, form .errors {
+.alert-error {
   background-color: @errorBackground;
   border-color: @errorBorder;
   color: @errorText;
-  a {
-    color: @errorText;
-    font-weight: bold;
-    text-decoration: underline;
-  }
 }
 .alert-danger h4,
 .alert-error h4 {
