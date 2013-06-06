@@ -19,19 +19,14 @@ hour_9 = datetime.time(9, 0, 0)
 
 locale = Locale('en', 'US')
 
-
-@view_config(route_name='presence_today')
-class Today(BaseView):
-    def get(self):
-        today = datetime.datetime.now().date()
-        url = self.request.url_for('/presence/list', date=today.strftime('%d.%m.%Y'))
-        return HTTPFound(location=url)
-
-
 @view_config(route_name='presence_list')
 class List(BaseView):
     def get(self):
-        date = datetime.datetime.strptime(self.request.GET.get('date'), '%d.%m.%Y')
+        date = self.request.GET.get('date')
+        if date:
+            date = datetime.datetime.strptime(date, '%d.%m.%Y')
+        else:
+            date = datetime.date.today()
         start_date = datetime.datetime.combine(date, day_start)
         end_date = datetime.datetime.combine(date, day_end)
         entries_p = self.session.query(User.id, User.name, func.min(PresenceEntry.ts), func.max(PresenceEntry.ts))\
@@ -63,7 +58,11 @@ class List(BaseView):
 @view_config(route_name='presence_full')
 class Full(BaseView):
     def get(self):
-        date = datetime.datetime.strptime(self.request.GET.get('date'), '%d.%m.%Y')
+        date = self.request.GET.get('date')
+        if date:
+            date = datetime.datetime.strptime(date, '%d.%m.%Y')
+        else:
+            date = datetime.date.today()
 
         start_date = datetime.datetime.combine(date, day_start)
         end_date = datetime.datetime.combine(date, day_end)
@@ -90,7 +89,7 @@ class Absences(BaseView):
         sunday = idate.first_day_of_week() - datetime.timedelta(days=1)
         curr_year = sunday.year
         monday = idate.first_day_of_week(sunday)
-        dec31 = datetime.date(curr_year, 8, 31)
+        dec31 = datetime.date(curr_year, 12, 31)
         return monday, dec31
 
     def necessary_data(self, start, end):

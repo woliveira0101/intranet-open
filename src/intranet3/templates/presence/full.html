@@ -1,4 +1,6 @@
-{% extends "templates/_base.html" %}
+{% extends "templates/presence/_base.html" %}
+
+{% set page = 'full' %}
 
 {% block tail_script %}
     <script>
@@ -12,19 +14,7 @@
     </script>
 {% endblock %}
 
-{% block content %}
-    <div class="tabs">
-        <ul class="nav nav-tabs">
-            <li class="title">{% trans date='%s' % date.strftime('%d.%m.%Y') %}Presence for {{ date }}{% endtrans %}</li>
-            {% if 'full' in request.path %}
-            <li><a href="{{ request.url_for('/presence/list', date=date.strftime('%d.%m.%Y')) }}">{% trans %}Normal{% endtrans %}</a></li>
-            <li class="active"><a>{% trans %}Full list{% endtrans %}</a></li>
-            {% else %}
-            <li class="active"><a>{% trans %}Normal{% endtrans %}</a></li>
-            <li><a href="{{ request.url_for('/presence/full', date=date.strftime('%d.%m.%Y')) }}">{% trans %}Full list{% endtrans %}</a></li>
-            {% endif %}
-        </ul>
-    </div>
+{% block body %}
     <ul class="pager">
         <li><a href="{{ request.url_for('/presence/full', date=prev_date.strftime('%d.%m.%Y')) }}">{% trans %}Previous day{% endtrans %}</a></li>
         <li><input type="hidden" id="datepicker" value="{{ date.strftime('%m/%d/%Y') }}"/></li>
@@ -49,4 +39,4 @@
             {% endfor %}
         </tbody>
     </table>
-{% endblock %}
+{% endblock body %}

@@ -1,0 +1,26 @@
+{% extends "templates/_base.html" %}
+
+{% block content %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            {% if page == 'full' %}
+                <li class="title">{% trans date='%s' % date.strftime('%d.%m.%Y') %}Presence for {{ date }}{% endtrans %}</li>
+                <li><a href="{{ request.url_for('/presence/list', date=date.strftime('%d.%m.%Y')) }}">{% trans %}Normal{% endtrans %}</a></li>
+                <li class="active"><a>{% trans %}Full list{% endtrans %}</a></li>
+                <li><a href="{{ request.url_for('/presence/absences') }}">{% trans %}Absences{% endtrans %}</a></li>
+            {% elif page == 'list' %}
+                <li class="title">{% trans date='%s' % date.strftime('%d.%m.%Y') %}Presence for {{ date }}{% endtrans %}</li>
+                <li class="active"><a>{% trans %}Normal{% endtrans %}</a></li>
+                <li><a href="{{ request.url_for('/presence/full', date=date.strftime('%d.%m.%Y')) }}">{% trans %}Full list{% endtrans %}</a></li>
+                <li><a href="{{ request.url_for('/presence/absences') }}">{% trans %}Absences{% endtrans %}</a></li>
+            {% else %}
+                <li class="title">{% trans %}Absences{% endtrans %}</li>
+                <li><a href="{{ request.url_for('/presence/list') }}">{% trans %}Normal{% endtrans %}</a></li>
+                <li><a href="{{ request.url_for('/presence/full') }}">{% trans %}Full list{% endtrans %}</a></li>
+                <li class="active"><a>{% trans %}Absences{% endtrans %}</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    {% block body %}
+    {% endblock body %}
+{% endblock content %}
