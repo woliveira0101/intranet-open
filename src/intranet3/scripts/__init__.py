@@ -6,7 +6,6 @@ from pyramid.paster import bootstrap
 from sqlalchemy import engine_from_config
 from pyramid.paster import get_appsettings, setup_logging
 
-from intranet3.models import DBSession, Base
 
 
 def script():
@@ -30,6 +29,7 @@ def script():
 
 
 def init_db(config_path):
+    from intranet3.models import DBSession, Base
     setup_logging(config_path)
     settings = get_appsettings(config_path)
     engine = engine_from_config(settings, 'sqlalchemy.')
@@ -38,6 +38,7 @@ def init_db(config_path):
     print 'Done'
 
 def make_admin(config_path):
+    from intranet3.models import DBSession, Base
     from intranet3.models import User
     user_login = sys.argv[-1]
     if len(sys.argv) < 4:
