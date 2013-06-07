@@ -5,7 +5,10 @@
 {% block body %}
 <div class="absences">
     <table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
-        <thead>
+        <!-- This table will be populated by Javascript. -->
+        <thead></thead>
+        <tbody></tbody>
+        {#<thead>
             <tr>
                 <th rowspan="3" class="user">User</th>
                 {% for name, days in months %}
@@ -22,13 +25,14 @@
             <tr>
                 {% for month in date_range %}
                     {% for day in month %}
-                        <th class="day{% if loop.last %} monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}{% if is_today(day) %} today{% endif %}">{{ v.weekday(day) }}</th>
+                        <th class="day
+                        {% if loop.last %} monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}{% if is_today(day) %} today{% endif %}">{{ v.weekday(day) }}</th>
                     {% endfor%}
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
-        {% for user in users %}
+        {% for user in users[0:1] %}
             {% set user_absences = absences[user.id] %}
             {% set user_lates = lates[user.id] %}
             <tr>
@@ -37,13 +41,17 @@
                     {% for day in month %}
                         {% set absence = user_absences[day] %}
                         {% set late = user_lates[day] %}
-                        <td class="{% if loop.last %}monthend{% endif %}{% if is_holiday(day) %} holiday{% endif %}{% if is_today(day) %} today{% endif %}{% if absence %} {{ absence[0] }}{% endif %}{% if late %} late{% endif %}"
+                        <td class="{% if loop.last %}monthend{% endif %}
+                        {% if is_holiday(day) %} holiday{% endif %}
+                        {% if is_today(day) %} today{% endif %}
+                        {% if absence %} {{ absence[0] }}{% endif %}
+                        {% if late %} late{% endif %}"
                             title="{{ absence and absence[1] or late }}"></td>
                     {% endfor%}
                 {% endfor %}
             </tr>
         {% endfor %}
-        </tbody>
+        </tbody>#}
     </table>
 </div>
 {% endblock body %}
@@ -55,22 +63,37 @@
 {% block tail_script %}
     <script src="{{ request.static_path('intranet3:static/js/vendor/jquery.dataTables.js') }}"></script>
     <script src="{{ request.static_path('intranet3:static/js/vendor/FixedColumns.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/absences.js') }}"></script>
     <script>
     $(document).ready( function () {
-        var days = {{ days }};
-        var tableScrollXInner = 20 * days;
-        var sScrollXInner = tableScrollXInner + 'px';
+        var start = new Date().getTime();
+        var data = {
+            year: {{ year }},
+            startDay: {{ start_day|safe }},
+            users: {{ users|safe }},
+            dayCount: {{ days }},
+            months: {{ months|safe }},
+            absences: {{ absences|safe }},
+            holidays: {{ holidays|safe }}
+            //lates: {{ lates|safe }}
+        };
+        generateTable(data);
+        var end = new Date().getTime();
+        console.log('Done in '+(end-start)+'ms');
 
-        $('td.late').tooltip( {
-            container: 'body',
-            template: '<div class="tooltip tooltip-late"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
-        });
-        $('td.planowany, td.planowany, td.zadanie, td.l4, td.okolicznosciowy, td.inne').tooltip( {
-            container: 'body',
-            template: '<div class="tooltip tooltip-absence"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
-        });
+        // var tableScrollXInner = 20 * days;
+        // var sScrollXInner = tableScrollXInner + 'px';
+// 
+        // $('td.late').tooltip( {
+            // container: 'body',
+            // template: '<div class="tooltip tooltip-late"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+        // });
+        // $('td.planowany, td.planowany, td.zadanie, td.l4, td.okolicznosciowy, td.inne').tooltip( {
+            // container: 'body',
+            // template: '<div class="tooltip tooltip-absence"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+        // });
 
-        var oTable = $('#example').dataTable( {
+        /*var oTable = $('#example').dataTable( {
             "sScrollY": "500px",
             "sScrollX": "100%",
             "sScrollXInner": sScrollXInner,
@@ -85,7 +108,7 @@
         new FixedColumns( oTable, {"iLeftWidth": 150});
         setTimeout(function (){
             oTable.fnAdjustColumnSizing();
-        }, 10 );
+        }, 10 );*/
 
 
 

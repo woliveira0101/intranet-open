@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import json
 from calendar import monthrange
 from collections import defaultdict
 
@@ -99,14 +100,9 @@ class Absences(BaseView):
         month_range = idate.months_between(start, end)
         month_names = locale.months['format']['wide'].items()
         months = [
-            (month_names[m-1][1], monthrange(curr_year, m)[1])
+            (month_names[m-1][1], monthrange(curr_year, m)[1], m)
             for m in month_range
         ]
-
-        # we have to modify number of days for first month
-        this_month = months.pop(0)
-        this_month = this_month[0], this_month[1]-(start.day-1)
-        months.insert(0, this_month)
 
         return days, date_range, months
 
@@ -127,11 +123,14 @@ class Absences(BaseView):
             lambda x: x[1:],
         )
 
-        absences_groupped = defaultdict(lambda: {})
+        absences_groupped = {}
         for user_id, absences in absences.iteritems():
+            if not user_id in absences_groupped:
+                absences_groupped[user_id] = {}
             for start, end, type_, remarks in absences:
                 dates = idate.date_range(start, end)
                 for date in dates:
+                    date = date.strftime('%Y-%m-%d')
                     absences_groupped[user_id][date] = (type_, remarks)
 
         return absences_groupped
@@ -157,7 +156,9 @@ class Absences(BaseView):
     def get(self):
         start, end = self.get_range()
         days, date_range, months = self.necessary_data(start, end)
-        holidays = Holiday.all()
+        holidays = Holiday.query \
+                          .filter(Holiday.date >= start) \
+                          .all()
         today = datetime.date.today()
 
 
@@ -172,15 +173,22 @@ class Absences(BaseView):
         users_p.extend(users_w)
         absences = self.get_absences(start, end)
         lates = self.get_lates(start, end)
-
+        
+        start_day = dict(
+            day=start.day,
+            dow=start.weekday(),
+        )
 
         return dict(
-            users=users_p,
+            users=json.dumps([u.name for u in users_p], ensure_ascii=False), # TODO: quick fix change it later
+            year=start.year,
+            start_day=json.dumps(start_day),
             days=days,
             date_range=date_range,
-            months=months,
-            absences=absences,
-            lates=lates,
+            months=json.dumps(months, ensure_ascii=False),
+            absences=json.dumps(absences, ensure_ascii=False),
+            holidays=json.dumps([h.date.strftime('%Y-%m-%d') for h in holidays]),
+#            lates=lates,
             is_holiday=lambda date: Holiday.is_holiday(date, holidays=holidays),
             is_today=lambda date: date == today,
             v=self,
