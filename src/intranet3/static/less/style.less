@@ -562,12 +562,36 @@ table.bugs-list tbody tr.other-projects td {
 }
 
 .absences {
+    overflow: hidden;
+
+    div {
+        &.clear {
+            clear: both;
+        }
+        &.floaty {
+            overflow: hidden;
+            max-width: 800px;
+            float: left;
+            
+            &.scrollable {
+                overflow: auto;
+                padding: 0 15px 15px 0;
+            }
+        }
+        .userPlaceholder {
+            width: 15em;
+            font-weight: bold;
+            // Recompensation for border
+            margin-right: 2px;
+        }
+    }
     table {
         tr {
             line-height: 2em;
         }
         thead, tfoot {
             th {
+                cursor: default;
                 padding-left: 0px;
                 padding-right: 0px;
 
@@ -594,23 +618,24 @@ table.bugs-list tbody tr.other-projects td {
             }
         }
         tbody {
-            max-height: 500px;
-            overflow: auto;
-
             tr:nth-child(odd) {
                 background: #E2E4FF;
             }
         }
-        td {
+        td, th {
             padding-left: 0px;
             padding-right: 0px;
-            text-align: center;
-            border: solid 1px #d3d3d3;
             min-width: 2em;
+            min-height: 2em;
+            line-height: 2em;
+            text-align: center;
+        }
+        td {
+            border: solid 1px #d3d3d3;
 
             &.user {
                 border-right: solid 1px;
-                min-width: 15em;
+                width: 15em;
             }
             &.highlighted {
                 background-color: red;

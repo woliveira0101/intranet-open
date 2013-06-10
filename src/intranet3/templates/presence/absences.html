@@ -4,11 +4,31 @@
 
 {% block body %}
 <div class="absences">
-    <table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
-        <!-- This table will be populated by Javascript. -->
+    <div class="holder">
+        <div class="floaty userPlaceholder">User</div>
+        <div class="floaty">
+            <table class="display" id="days">
+                <thead></thead>
+            </table>
+        </div>
+    </div>
+    <div class="clear"><!-- nothing --></div>
+    <div class="holder">
+        <div class="floaty">
+            <table class="display" id="users">
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="floaty scrollable">
+            <table class="display" id="data">
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <!--{#<table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
         <thead></thead>
         <tbody></tbody>
-        <!--{#<thead>
+        <thead>
             <tr>
                 <th rowspan="3" class="user">User</th>
                 {% for name, days in months %}
@@ -51,8 +71,8 @@
                 {% endfor %}
             </tr>
         {% endfor %}
-        </tbody>#}-->
-    </table>
+        </tbody>
+    </table>#}-->
 </div>
 {% endblock body %}
 

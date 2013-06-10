@@ -6,20 +6,23 @@ function generateTable(data) {
     var startDay = data.startDay.day;
     var dayOfWeek = data.startDay.dow;
 
-    var $table = $('#example');
-    $table.hide();
-    // Table generator
-    var $thead = $('#example thead');
-    var $tbody = $('#example tbody');
+    $tables = $('.absences table');
+    $tables.hide();
+    // Selectors
+    var $days = $('#days thead');
+    var $users = $('#users tbody');
+    var $data = $('#data tbody');
     var singleRowStub = $('<tr />');
     var rows = [];
+
+    // Generate all headers!
     // Header 1: month's name (July)
     var header1 = $('<tr />');
     // Header 2: month's days (1, 2, 3...)
     var header2 = $('<tr />');
     // Header 3: week days (M, T, W...)
     var header3 = $('<tr />');
-    header1.append('<th rowspan="3">User</th>');
+    var first = true;
     _.each(data.months, function(m){
         var firstMonth = (data.months.indexOf(m) == 0);
         // Headers
@@ -31,7 +34,14 @@ function generateTable(data) {
             var dayId = data.year + '-' + (m[2]<10 ? '0' : '') + m[2] + '-' + (i<10 ? '0' : '') + i
             var head2Td = $('<th class="day">'+i+'</th>');
             var head3Td = $('<th class="day">'+dayLetters[(dayOfWeek%7)]+'</th>');
-            var td = $('<td />').addClass(dayId);
+            var td;
+            if(first) {
+                td = $('<td class="'+dayId+'">&nbsp;</td>');
+                first = false;
+            } else {
+                td = $('<td />');
+            }
+            td.addClass(dayId);
             if(i == m[1]) { // End of the month
                 head2Td.addClass('monthend');
                 head3Td.addClass('monthend');
@@ -53,12 +63,12 @@ function generateTable(data) {
             dayOfWeek++;
         }
     });
-    $thead.append(header1);
-    $thead.append(header2);
-    $thead.append(header3);
+
+    // Generate all users!
+    users = '';
     _.each(data.users, function(u){
         var row = singleRowStub.clone();
-        row.prepend('<td class="user">'+u.name+'</td>');
+        users += '<tr><td class="user">'+u.name+'</td></tr>';
         if(u.id in data.absences) { // Absences
             _.each(data.absences[u.id], function(attr, start){
                 // attr: [length, type, description]
@@ -77,6 +87,22 @@ function generateTable(data) {
         }
         rows.push(row);
     });
-    $tbody.append(rows);
-    $table.show();
+
+    // Append!
+    $days.append(header1);
+    $days.append(header2);
+    $days.append(header3);
+    $users.append(users);
+    $data.append(rows);
+    $tables.show();
 }
+
+$(function(){
+    $('#data, #days').parent().width(800); // TODO: insert real window width here later!
+    $('#data, #users').parent().height(500); // TODO: insert real window height here later!
+    var $p = $('#data').parent();
+    $p.on('scroll', function(e){
+        $('#days').parent().scrollLeft($p.scrollLeft());
+        $('#users').parent().scrollTop($p.scrollTop());
+    });
+});
