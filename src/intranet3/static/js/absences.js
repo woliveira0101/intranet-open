@@ -98,8 +98,10 @@ function generateTable(data) {
 }
 
 $(function(){
-    $('#data, #days').parent().width(800); // TODO: insert real window width here later!
-    $('#data, #users').parent().height(500); // TODO: insert real window height here later!
+    var width = $(window).innerWidth(),
+        height = $(window).innerHeight();
+    $('#data, #days').parent().width(width-500);
+    $('#data, #users').parent().height(height-230);
     var $p = $('#data').parent();
     $p.on('scroll', function(e){
         $('#days').parent().scrollLeft($p.scrollLeft());
