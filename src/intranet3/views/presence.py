@@ -146,9 +146,12 @@ class Absences(BaseView):
             lambda x: x[1:],
         )
 
-        lates_groupped = defaultdict(lambda: {})
+        lates_groupped = {}
         for user_id, lates in lates.iteritems():
+            if not user_id in lates_groupped:
+                lates_groupped[user_id] = {}
             for date, explanation in lates:
+                date = date.strftime('%Y-%m-%d')
                 lates_groupped[user_id][date] = explanation
 
         return lates_groupped
@@ -173,23 +176,23 @@ class Absences(BaseView):
         users_p.extend(users_w)
         absences = self.get_absences(start, end)
         lates = self.get_lates(start, end)
-        
+
         start_day = dict(
             day=start.day,
             dow=start.weekday(),
         )
 
+        users = [{'id': str(u.id), 'name': u.name} for u in users_p]
+
         return dict(
-            users=json.dumps([u.name for u in users_p], ensure_ascii=False), # TODO: quick fix change it later
+            users=json.dumps(users, ensure_ascii=False), # TODO: quick fix change it later
             year=start.year,
             start_day=json.dumps(start_day),
             days=days,
             date_range=date_range,
             months=json.dumps(months, ensure_ascii=False),
             absences=json.dumps(absences, ensure_ascii=False),
+            lates=json.dumps(lates, ensure_ascii=False),
             holidays=json.dumps([h.date.strftime('%Y-%m-%d') for h in holidays]),
-#            lates=lates,
-            is_holiday=lambda date: Holiday.is_holiday(date, holidays=holidays),
-            is_today=lambda date: date == today,
             v=self,
         )
