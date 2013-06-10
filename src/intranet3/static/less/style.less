@@ -563,6 +563,7 @@ table.bugs-list tbody tr.other-projects td {
 
 .absences {
     overflow: hidden;
+    width: 100%;
 
     div {
         &.clear {
@@ -579,12 +580,18 @@ table.bugs-list tbody tr.other-projects td {
         }
         .userPlaceholder {
             width: 15em;
+            line-height: 6em;
+            text-align: center;
             font-weight: bold;
             // Recompensation for border
             margin-right: 2px;
         }
     }
+    #users {
+        margin-bottom: 15px;
+    }
     table {
+        margin: 0 auto;
         tr {
             line-height: 2em;
         }

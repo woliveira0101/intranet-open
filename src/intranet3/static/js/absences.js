@@ -98,13 +98,16 @@ function generateTable(data) {
 }
 
 $(function(){
-    var width = $(window).innerWidth(),
+    var width = $('.absences').innerWidth(),
         height = $(window).innerHeight();
-    $('#data, #days').parent().width(width-500);
+    $('#data, #days').parent().width(width-190);
     $('#data, #users').parent().height(height-230);
     var $p = $('#data').parent();
+    $daysParent = $('#days').parent();
+    $usersParent = $('#users').parent();
     $p.on('scroll', function(e){
-        $('#days').parent().scrollLeft($p.scrollLeft());
-        $('#users').parent().scrollTop($p.scrollTop());
+        // This is NOT optimized.
+        $daysParent.scrollLeft($p.scrollLeft());
+        $usersParent.scrollTop($p.scrollTop());
     });
 });
