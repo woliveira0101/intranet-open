@@ -1,5 +1,4 @@
 function generateTable(data) {
-    console.log(data);
     // All necessary variables
     var today = new Date();
     var todayString = $.datepicker.formatDate('yy-mm-dd', today);
@@ -61,8 +60,14 @@ function generateTable(data) {
         var row = singleRowStub.clone();
         row.prepend('<td class="user">'+u.name+'</td>');
         if(u.id in data.absences) { // Absences
-            _.each(data.absences[u.id], function(what, when){
-                row.find('.'+when).addClass(what[0]).attr('title', what[1]);
+            _.each(data.absences[u.id], function(attr, start){
+                // attr: [length, type, description]
+                var $td = row.find('.'+start);
+                $td.addClass(attr[1]).attr({
+                    colspan: attr[0],
+                    title: attr[2]
+                });
+                $td.nextAll(':lt('+(attr[0]-1)+')').remove();
             });
         }
         if(u.id in data.lates) { // Latenesses

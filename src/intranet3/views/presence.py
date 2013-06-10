@@ -128,10 +128,9 @@ class Absences(BaseView):
             if not user_id in absences_groupped:
                 absences_groupped[user_id] = {}
             for start, end, type_, remarks in absences:
-                dates = idate.date_range(start, end)
-                for date in dates:
-                    date = date.strftime('%Y-%m-%d')
-                    absences_groupped[user_id][date] = (type_, remarks)
+                length = (end-start).days
+                start = start.strftime('%Y-%m-%d')
+                absences_groupped[user_id][start] = (length, type_, remarks)
 
         return absences_groupped
 
