@@ -184,7 +184,7 @@ class Absences(BaseView):
         users = [{'id': str(u.id), 'name': u.name} for u in users_p]
 
         return dict(
-            users=json.dumps(users, ensure_ascii=False), # TODO: quick fix change it later
+            users=json.dumps(users, ensure_ascii=False),
             year=start.year,
             start_day=json.dumps(start_day),
             days=days,

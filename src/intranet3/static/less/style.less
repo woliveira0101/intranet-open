@@ -563,30 +563,42 @@ table.bugs-list tbody tr.other-projects td {
 
 .absences {
     table {
+        tr {
+            line-height: 2em;
+        }
         thead, tfoot {
             th {
                 padding-left: 0px;
                 padding-right: 0px;
+
+                &.day {
+                    border: solid 1px #d3d3d3;
+                }
+                &.weekday {
+                    border: solid 1px #d3d3d3;
+                    border-bottom: solid 1px;
+                }
+                &.month {
+                    border-bottom: solid 1px #d3d3d3;
+                    border-right: solid 1px;
+                }
+                &.user {
+                    border-right: solid 1px;
+                }
+                &.holiday {
+                    background-color: #F7DFDE;
+                }
+                &.today {
+                    background-color: lightyellow;
+                }
             }
-            th.day {
-                border: solid 1px #d3d3d3;
-            }
-            th.weekday {
-                border: solid 1px #d3d3d3;
-                border-bottom: solid 1px;
-            }
-            th.month {
-                border-bottom: solid 1px #d3d3d3;
-                border-right: solid 1px;
-            }
-            th.user {
-                border-right: solid 1px;
-            }
-            th.holiday {
-                background-color: #F7DFDE;
-            }
-            th.today {
-                background-color: lightyellow;
+        }
+        tbody {
+            max-height: 500px;
+            overflow: auto;
+
+            tr:nth-child(odd) {
+                background: #E2E4FF;
             }
         }
         td {
@@ -594,23 +606,26 @@ table.bugs-list tbody tr.other-projects td {
             padding-right: 0px;
             text-align: center;
             border: solid 1px #d3d3d3;
-        }
-        td.user {
-            border-right: solid 1px;
-        }
-        td.highlighted {
-            background-color: red;
-        }
-        td.holiday {
-            background-color: #F7DFDE;
-        }
-        td.today {
-            background-color: lightyellow;
+            min-width: 2em;
+
+            &.user {
+                border-right: solid 1px;
+                min-width: 15em;
+            }
+            &.highlighted {
+                background-color: red;
+            }
+            &.holiday {
+                background-color: #F7DFDE;
+            }
+            &.today {
+                background-color: lightyellow;
+            }
         }
         .monthend {
             border-right: solid 1px !important;
         }
-        td.planowany, td.planowany, td.zadanie, td.l4, td.okolicznosciowy, td.inne{
+        td.planowany, td.planowany, td.zadanie, td.l4, td.okolicznosciowy, td.inne {
             background-color: darkred;
             border-right: solid 1px darkred;
             border-left: solid 1px darkred;
