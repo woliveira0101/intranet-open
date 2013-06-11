@@ -65,10 +65,11 @@ function generateTable(data) {
     });
 
     // Generate all users!
-    users = '';
+    var users = '';
     _.each(data.users, function(u){
         var row = singleRowStub.clone();
         users += '<tr><td class="user">'+u.name+'</td></tr>';
+        /*
         if(u.id in data.absences) { // Absences
             _.each(data.absences[u.id], function(attr, start){
                 // attr: [length, type, description]
@@ -84,7 +85,7 @@ function generateTable(data) {
             _.each(data.lates[u.id], function(why, when){
                 row.find('.'+when).addClass('late').attr('title', why);
             });
-        }
+        }*/
         rows.push(row);
     });
 
@@ -95,16 +96,28 @@ function generateTable(data) {
     $users.append(users);
     $data.append(rows);
     $tables.show();
+    
+    setSize();
+}
+
+function setSize() {
+    var width = $('.absences').innerWidth(),
+        height = $(window).innerHeight() - 225,
+        $daysParent = $('#days').parent(),
+        $usersParent = $('#users').parent(),
+        $p = $('#data').parent(),
+        fromLeft = $usersParent.width(),
+        margin = 15;
+    $daysParent.width(width-fromLeft-margin);
+    $usersParent.height(height-margin);
+    // Recompensation for scrollbars
+    $p.width(width-fromLeft).height(height);
 }
 
 $(function(){
-    var width = $('.absences').innerWidth(),
-        height = $(window).innerHeight();
-    $('#data, #days').parent().width(width-190);
-    $('#data, #users').parent().height(height-230);
-    var $p = $('#data').parent();
-    $daysParent = $('#days').parent();
-    $usersParent = $('#users').parent();
+    var $daysParent = $('#days').parent(),
+        $usersParent = $('#users').parent(),
+        $p = $('#data').parent();
     $p.on('scroll', function(e){
         // This is NOT optimized.
         $daysParent.scrollLeft($p.scrollLeft());
