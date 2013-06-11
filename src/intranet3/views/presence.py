@@ -87,13 +87,6 @@ class Absences(BaseView):
         weekday = date.weekday()
         return self.WEEKDAYS[weekday]
 
-    def get_range(self):
-        sunday = idate.first_day_of_week() - datetime.timedelta(days=1)
-        curr_year = sunday.year
-        monday = idate.first_day_of_week(sunday)
-        dec31 = datetime.date(curr_year, 12, 31)
-        return monday, dec31
-
     def necessary_data(self, start, end):
         curr_year = start.year
         days = (end - start).days
@@ -129,7 +122,7 @@ class Absences(BaseView):
             if not user_id in absences_groupped:
                 absences_groupped[user_id] = {}
             for start, end, type_, remarks in absences:
-                length = (end-start).days
+                length = (end-start).days + 1
                 start = start.strftime('%Y-%m-%d')
                 absences_groupped[user_id][start] = (length, type_, remarks)
 
@@ -157,7 +150,10 @@ class Absences(BaseView):
         return lates_groupped
 
     def get(self):
-        start, end = self.get_range()
+        year = self.request.GET.get('year')
+        year = int(year) if year else datetime.date.today().year
+        start = datetime.date(year, 1, 1)
+        end = datetime.date(year, 12, 31)
         days, date_range, months = self.necessary_data(start, end)
         holidays = Holiday.query \
                           .filter(Holiday.date >= start) \

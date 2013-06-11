@@ -3,6 +3,11 @@
 {% set page = 'absences' %}
 
 {% block body %}
+<ul class="pager">
+    <li><a href="{{ request.url_for('/presence/absences') }}?year={{ year-1 }}">{% trans %}Previous year{% endtrans %}</a></li>
+    <li>{{ year }}</li>
+    <li><a href="{{ request.url_for('/presence/absences') }}?year={{ year+1 }}">{% trans %}Next year{% endtrans %}</a></li>
+</ul>
 <div class="absences">
     You have to have Javascript enabled in order to see this data.
 </div>

@@ -7,7 +7,7 @@ function generateTable(data) {
     // be 100% generated.
     var $struct = $([ 
         '<div class="holder">',
-            '<div class="floaty userPlaceholder">User</div>',
+            '<div class="floaty userPlaceholder"></div>',
             '<div class="floaty days">',
                 '<table class="display" id="days">',
                     '<thead></thead>',
@@ -28,6 +28,10 @@ function generateTable(data) {
             '</div>',
         '</div>'
     ].join('\n'));
+
+    // Navigation
+    var $pager = $('ul.pager');
+    $pager.appendTo($struct.find('.userPlaceholder'));
 
     // All necessary variables
     var today = new Date();
@@ -107,6 +111,10 @@ function generateTable(data) {
         if(u.id in data.absences) { // Absences
             _.each(data.absences[u.id], function(attr, start){
                 // attr: [length, type, description]
+                // Failsafety for wrong entries
+                if(attr[0] <= 0) {
+                    attr[0] = 1;
+                }
                 var $td = row.find('.'+start);
                 $td.addClass(attr[1]).attr({
                     colspan: attr[0],
@@ -130,7 +138,7 @@ function generateTable(data) {
     $users.append(users);
     $data.append(rows);
     $absences.text('').append($struct);
-    
+
     /*
      * setSize sets size of all divs containing tables, to expand to the whole screen.
      */
