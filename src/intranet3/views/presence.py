@@ -13,6 +13,7 @@ from intranet3.utils.views import BaseView
 from intranet3.models import User, PresenceEntry, Holiday, Absence, Late
 from intranet3 import helpers as h
 from intranet3.utils import excuses, idate
+from intranet3.models.user import Leave
 
 day_start = datetime.time(0, 0, 0)
 day_end = datetime.time(23, 59, 59)
@@ -163,7 +164,6 @@ class Absences(BaseView):
                           .all()
         today = datetime.date.today()
 
-
         users_p = User.query.filter(User.is_not_client()) \
                             .filter(User.is_active==True) \
                             .filter(User.location=='poznan') \
@@ -173,15 +173,23 @@ class Absences(BaseView):
                             .filter(User.location=='wroclaw') \
                             .order_by(User.freelancer, User.name).all()
         users_p.extend(users_w)
+
         absences = self.get_absences(start, end)
         lates = self.get_lates(start, end)
+        leave_mandated = Leave.get_for_year(start.year)
+        leave_used = Leave.get_used_for_year(start.year)
 
         start_day = dict(
             day=start.day,
             dow=start.weekday(),
         )
 
-        users = [{'id': str(u.id), 'name': u.name} for u in users_p]
+        users = [dict(
+                      id=str(u.id),
+                      name=u.name,
+                      leave_mandated=leave_mandated[u.id][0],
+                      leave_used=leave_used[u.id],
+                     ) for u in users_p]
 
         return dict(
             users=json.dumps(users, ensure_ascii=False),

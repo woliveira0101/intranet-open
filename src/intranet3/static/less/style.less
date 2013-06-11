@@ -578,7 +578,7 @@ table.bugs-list tbody tr.other-projects td {
             }
         }
         .userPlaceholder {
-            width: 180px;
+            width: 20em;
             line-height: 6em;
             text-align: center;
             font-weight: bold;
@@ -640,11 +640,15 @@ table.bugs-list tbody tr.other-projects td {
 
             &.user {
                 border-right: solid 1px;
-                width: 180px;
-                max-width: 180px;
+                width: 20em;
+                max-width: 20em;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                .help {
+                    cursor: help;
+                    border-bottom: dotted 1px #666;
+                }
             }
             &.highlighted {
                 background-color: red;

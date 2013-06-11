@@ -77,19 +77,7 @@ class AbsencePivot(BaseView):
         year = self.request.GET.get('year', datetime.date.today().year)
         users = User.query.filter(User.is_not_client()).filter(User.is_active==True).filter(User.freelancer==False).all()
 
-        used_entries = self.session.query('user_id', 'days').from_statement("""
-            SELECT t.user_id, sum(t.time)/8 as days
-            FROM time_entry t
-            WHERE deleted = false AND
-                  t.project_id = 86 AND
-                  date_part('year', t.date) = :year
-            GROUP BY user_id
-        """).params(year=year).all()
-
-        used = defaultdict(lambda: 0)
-        for u in used_entries:
-            used[u[0]] = u[1]
-
+        used = Leave.get_used_for_year(year)
         applications = m.Absence.get_for_year(year)
 
         return dict(

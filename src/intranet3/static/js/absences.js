@@ -102,7 +102,8 @@ function generateTable(data) {
     var users = '';
     _.each(data.users, function(u){
         var row = singleRowStub.clone();
-        users += '<tr><td class="user">'+u.name+'</td></tr>';
+        var leaves = '<span class="help" title="leave days used / leave days mandated">('+u.leave_used+'/'+u.leave_mandated+')</span>';
+        users += '<tr><td class="user">'+u.name+' '+leaves+'</td></tr>';
         if(u.id in data.absences) { // Absences
             _.each(data.absences[u.id], function(attr, start){
                 // attr: [length, type, description]
