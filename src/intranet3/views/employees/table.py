@@ -90,7 +90,7 @@ class Absences(BaseView):
         year = int(year) if year else datetime.date.today().year
         start = datetime.date(year, 1, 1)
         end = datetime.date(year, 12, 31)
-        days, date_range, months = self.necessary_data(start, end)
+        day_count, date_range, months = self.necessary_data(start, end)
         holidays = Holiday.query \
                           .filter(Holiday.date >= start) \
                           .all()
@@ -122,15 +122,19 @@ class Absences(BaseView):
                       leave_used=leave_used[u.id],
                      ) for u in users_p]
 
+        data = {
+            'users': users,
+            'year': start.year,
+            'startDay': start_day,
+            'dayCount': day_count,
+            'months': months,
+            'absences': absences,
+            'lates': lates,
+            'holidays': [h.date.strftime('%Y-%m-%d') for h in holidays],
+        }
+
         return dict(
-            users=json.dumps(users, ensure_ascii=False),
+            data=json.dumps(data, ensure_ascii=False),
             year=start.year,
-            start_day=json.dumps(start_day),
-            days=days,
-            date_range=date_range,
-            months=json.dumps(months, ensure_ascii=False),
-            absences=json.dumps(absences, ensure_ascii=False),
-            lates=json.dumps(lates, ensure_ascii=False),
-            holidays=json.dumps([h.date.strftime('%Y-%m-%d') for h in holidays]),
             v=self,
         )

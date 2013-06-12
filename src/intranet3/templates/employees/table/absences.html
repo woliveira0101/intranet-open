@@ -17,16 +17,7 @@
     <script src="{{ request.static_path('intranet3:static/js/absences.js') }}"></script>
     <script>
     $(document).ready( function () {
-        var data = {
-            year: {{ year }},
-            startDay: {{ start_day|safe }},
-            users: {{ users|safe }},
-            dayCount: {{ days }},
-            months: {{ months|safe }},
-            absences: {{ absences|safe }},
-            holidays: {{ holidays|safe }},
-            lates: {{ lates|safe }}
-        };
+        var data = {{ data|safe }};
         // generateTable function is in absences.js file
         generateTable(data);
 
