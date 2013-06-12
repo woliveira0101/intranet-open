@@ -7,7 +7,7 @@ function generateTable(data) {
     // be 100% generated.
     var $struct = $([ 
         '<div class="holder">',
-            '<div class="floaty userPlaceholder"></div>',
+            '<div class="floaty pagerPlaceholder"></div>',
             '<div class="floaty days">',
                 '<table class="display" id="days">',
                     '<thead></thead>',
@@ -31,7 +31,7 @@ function generateTable(data) {
 
     // Navigation
     var $pager = $('ul.pager');
-    $pager.appendTo($struct.find('.userPlaceholder'));
+    $pager.appendTo($struct.find('.pagerPlaceholder'));
 
     // All necessary variables
     var today = new Date();
@@ -146,17 +146,26 @@ function generateTable(data) {
         var $absences = $('.absences'),
             $daysParent = $('#days').parent(),
             $usersParent = $('#users').parent(),
-            $p = $('#data').parent(),
+            $pager = $('.pagerPlaceholder'),
+            $data = $('#data'),
+            $p = $data.parent(),
             // Width: .absences width - userlist width
             width = $absences.innerWidth() - $usersParent.width(),
             // Height: window height - everything above .absences - dayslist
             height = $(window).innerHeight() - $absences.offset().top - $daysParent.height(), 
             // Margin compensates for scrollbars and bottom padding
             margin = 15;
-        $daysParent.width(width-margin);
-        $usersParent.height(height-3*margin);
+        $pager.height($daysParent.height());
+        if($data.height() < height) { // Do we need scrollbars?
+            $daysParent.width(width);
+            height = $data.height() + margin;
+        } else {
+            $daysParent.width(width-margin);
+            height = height - 2*margin;
+        }
+        $usersParent.height(height-margin);
         // $p is bigger to recompensate for scrollbars
-        $p.width(width).height(height-2*margin);
+        $p.width(width).height(height);
     }
     
     var $daysParent = $('#days').parent(),
