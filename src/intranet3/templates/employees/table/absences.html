@@ -1,29 +1,22 @@
-{% extends "templates/presence/_base.html" %}
+{% extends "templates/employees/list/_absence_base.html" %}
 
-{% set page = 'absences' %}
+{% set current_subpage = 'table' %}
 
-{% block body %}
+{% block subbody %}
 <ul class="pager">
-    <li><a href="{{ request.url_for('/presence/absences') }}?year={{ year-1 }}">{% trans %}Previous year{% endtrans %}</a></li>
+    <li><a href="{{ request.url_for('/employees/table/absences') }}?year={{ year-1 }}">{% trans %}Previous year{% endtrans %}</a></li>
     <li>{{ year }}</li>
-    <li><a href="{{ request.url_for('/presence/absences') }}?year={{ year+1 }}">{% trans %}Next year{% endtrans %}</a></li>
+    <li><a href="{{ request.url_for('/employees/table/absences') }}?year={{ year+1 }}">{% trans %}Next year{% endtrans %}</a></li>
 </ul>
 <div class="absences">
     You have to have Javascript enabled in order to see this data.
 </div>
-{% endblock body %}
-
-{% block headstyle_block %}
-    <link rel="stylesheet" type="text/css" href="{{ request.static_path('intranet3:static/css/jquery.dataTables.css') }}" />
-{% endblock %}
+{% endblock subbody %}
 
 {% block tail_script %}
-    <script src="{{ request.static_path('intranet3:static/js/vendor/jquery.dataTables.js') }}"></script>
-    <script src="{{ request.static_path('intranet3:static/js/vendor/FixedColumns.js') }}"></script>
     <script src="{{ request.static_path('intranet3:static/js/absences.js') }}"></script>
     <script>
     $(document).ready( function () {
-        var start = new Date().getTime();
         var data = {
             year: {{ year }},
             startDay: {{ start_day|safe }},
@@ -34,9 +27,8 @@
             holidays: {{ holidays|safe }},
             lates: {{ lates|safe }}
         };
+        // generateTable function is in absences.js file
         generateTable(data);
-        var end = new Date().getTime();
-        console.log('Done in '+(end-start)+'ms');
 
         $('td.late').tooltip( {
             container: 'body',

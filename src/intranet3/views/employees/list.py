@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime
-from collections import defaultdict
 
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -14,12 +13,14 @@ from intranet3.helpers import groupby
 from intranet3.forms.employees import  FilterForm
 from intranet3.log import INFO_LOG
 
+
 LOG = INFO_LOG(__name__)
 
 LEAVE_PROJECT_ID = 86
 L4_PROJECT_ID = 87
 
 hour9 = datetime.time(hour=9)
+
 
 class ApplyArgsMixin(object):
     def _apply_args(self, cls, query):
