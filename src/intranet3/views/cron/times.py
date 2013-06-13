@@ -132,27 +132,30 @@ class WrongTimeReport(AnnuallyReportMixin, CronView):
         return Response('ok')
 
 
-@view_config(route_name='cron_times_todayhours', permission='cron')
+@view_config(route_name='cron_times_todayhours')
 class TodayHours(CronView):
     """ Daily report with hours """
 
     def action(self):
-        date = datetime.date.today() - relativedelta(days=1)
+#        date = datetime.date.today() - relativedelta(days=1)
+        date = datetime.date(2013, 4, 24)
         config_obj = ApplicationConfig.get_current_config()
-        self._today_hours(
+        x = self._today_hours(
             date,
             config_obj.reports_project_ids,
             config_obj.reports_omit_user_ids
         )
-        return Response('ok')
+#        return Response('ok')
+        return Response(x, content_type='text/plain')
+
 
     def _today_hours(self, date, projects, omit_users):
         time_entries = self.session.query('user', 'description', 'time',
-            'project', 'client', 'ticket_id').from_statement("""
+            'project', 'client', 'ticket_id', 'tracker_id').from_statement("""
         SELECT
             u.name as "user", t.description as "description",
             t.time as "time", p.name as "project", c.name as "client",
-            t.ticket_id as "ticket_id"
+            t.ticket_id as "ticket_id", p.tracker_id as "tracker_id"
         FROM
             time_entry as t, project as p, client as c, "user" as u
         WHERE
@@ -174,11 +177,17 @@ class TodayHours(CronView):
         total_sum = 0
         user_sum = defaultdict(lambda: 0.0)
         user_entries = defaultdict(lambda: [])
+        trackers = {}
+        for user, description, time, project, client, ticket_id, tracker_id in time_entries:
+            # Lazy dict filling
+            if not tracker_id in trackers:
+                trackers[tracker_id] = Tracker.query.get(tracker_id)
+            tracker = trackers[tracker_id]
+            ticket_url = tracker.get_bug_url(ticket_id)
 
-        for user, description, time, project, client, ticket_id in time_entries:
             total_sum += time
             user_sum[user] += time
-            user_entries[user].append((description, time, project, client, ticket_id))
+            user_entries[user].append((description, time, project, client, ticket_id, ticket_url))
 
         output.append(self._(u"Daily hours report (${total_sum} h)", total_sum='%.2f' % total_sum))
 
@@ -186,19 +195,24 @@ class TodayHours(CronView):
             output.append(u"")
             output.append(u"\t%s (%.2f h):" % (user, user_sum[user]))
 
-            for description, time, project, client, ticket_id in entries:
-                ticket_id = ticket_id and "[%s] " % ticket_id or u""
+            for description, time, project, client, ticket_id, bug_url in entries:
+                if ticket_id:
+                    ticket_id = "[<a href=\"%s\">%s</a>] " % (bug_url, ticket_id)
+                else:
+                    ticket_id = ""
                 output.append(u"\t\t- %s / %s / %s%s %.2f h" % (client, project, ticket_id, description, time))
 
-        message = u'\n'.join(output)
+        message = u'<br />\n'.join(output).replace('\t', '&emsp;&emsp;')
 
         def on_success(result):
             LOG(u'Report with hours added on %s - sent' % (date,))
         def on_error(err):
+            import ipdb                                 # BREAK POINT HERE
+            ipdb.set_trace()                            # BREAK POINT HERE
             EXCEPTION(u'Failed to sent Report with hours added on %s' % (date,))
         topic = self._(u"[intranet] Daily hours report")
-        deferred = EmailSender.send(config['MANAGER_EMAIL'], topic, message)
-        deferred.addCallbacks(on_success, on_error)
+        #deferred = EmailSender.send_html(config['MANAGER_EMAIL'], topic, message)
+        #deferred.addCallbacks(on_success, on_error)
         LOG(u"Report with hours on %s - started" % (date,))
         return message
 
