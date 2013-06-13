@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from operator import itemgetter
 import os
 import datetime
 import xlwt
@@ -132,53 +133,59 @@ class WrongTimeReport(AnnuallyReportMixin, CronView):
         return Response('ok')
 
 
-@view_config(route_name='cron_times_todayhours')
+@view_config(route_name='cron_times_todayhours', permission='cron')
 class TodayHours(CronView):
     """ Daily report with hours """
 
     def action(self):
-#        date = datetime.date.today() - relativedelta(days=1)
-        date = datetime.date(2013, 4, 24)
+        date = datetime.date.today() - relativedelta(days=1)
         config_obj = ApplicationConfig.get_current_config()
-        x = self._today_hours(
+        self._today_hours(
             date,
             config_obj.reports_project_ids,
             config_obj.reports_omit_user_ids
         )
-#        return Response('ok')
-        return Response(x, content_type='text/plain')
-
+        return Response('ok')
 
     def _today_hours(self, date, projects, omit_users):
         time_entries = self.session.query('user', 'description', 'time',
-            'project', 'client', 'ticket_id', 'tracker_id').from_statement("""
-        SELECT
-            u.name as "user", t.description as "description",
-            t.time as "time", p.name as "project", c.name as "client",
-            t.ticket_id as "ticket_id", p.tracker_id as "tracker_id"
-        FROM
-            time_entry as t, project as p, client as c, "user" as u
-        WHERE
-            t.deleted = False AND
-            t.date = :date AND
-            u.id = t.user_id AND
-            p.id = t.project_id AND
-            c.id = p.client_id AND
-            p.id IN :projects AND
-            u.id NOT IN :users
-        ORDER BY u.name, c.name, p.name
-    """).params(date=date, projects=tuple(projects), users=tuple(omit_users)).all()
+            'project', 'client', 'ticket_id', 'tracker_id',
+            'total_time').from_statement("""
+                SELECT
+                    u.name as "user", t.description as "description",
+                    t.time as "time", p.name as "project", c.name as "client",
+                    t.ticket_id as "ticket_id", p.tracker_id as "tracker_id",
+                    (
+                        SELECT SUM(te.time)
+                        FROM time_entry te
+                        WHERE te.ticket_id=t.ticket_id
+                    ) as "total_time"
+                FROM
+                    time_entry as t, project as p, client as c, "user" as u
+                WHERE
+                    t.deleted = False AND
+                    t.date = :date AND
+                    u.id = t.user_id AND
+                    p.id = t.project_id AND
+                    c.id = p.client_id AND
+                    p.id IN :projects AND
+                    u.id NOT IN :users
+                ORDER BY u.name, c.name, p.name
+            """).params(date=date, projects=tuple(projects),
+                        users=tuple(omit_users)).all()
 
         if not time_entries:
-            LOG(u"No time entries for report with hours added on %s" % (date,))
-            return u"No time entries for report with hours added on %s" % (date,)
+            s = u"No time entries for report with hours added on %s" % date
+            LOG(s)
+            return s
 
         output = []
         total_sum = 0
         user_sum = defaultdict(lambda: 0.0)
         user_entries = defaultdict(lambda: [])
         trackers = {}
-        for user, description, time, project, client, ticket_id, tracker_id in time_entries:
+        for (user, description, time, project, client, ticket_id, tracker_id,
+             total_time) in time_entries:
             # Lazy dict filling
             if not tracker_id in trackers:
                 trackers[tracker_id] = Tracker.query.get(tracker_id)
@@ -187,32 +194,50 @@ class TodayHours(CronView):
 
             total_sum += time
             user_sum[user] += time
-            user_entries[user].append((description, time, project, client, ticket_id, ticket_url))
+            user_entries[user].append((description, time, project, client,
+                                       ticket_id, ticket_url, total_time)
+            )
 
-        output.append(self._(u"Daily hours report (${total_sum} h)", total_sum='%.2f' % total_sum))
+        output.append(self._(u"Daily hours report (${total_sum} h)",
+                             total_sum='%.2f' % total_sum)
+        )
 
-        for user, entries in user_entries.iteritems():
+        user_entries = sorted(
+            user_entries.iteritems(),
+            key=lambda u: user_sum[u[0]],
+            reverse=True,
+        )
+        for user, entries in user_entries:
+            entries = sorted(
+                entries,
+                key=itemgetter(1),
+                reverse=True,
+            )
             output.append(u"")
             output.append(u"\t%s (%.2f h):" % (user, user_sum[user]))
 
-            for description, time, project, client, ticket_id, bug_url in entries:
+            for (description, time, project, client, ticket_id, bug_url,
+                 total_time) in entries:
                 if ticket_id:
-                    ticket_id = "[<a href=\"%s\">%s</a>] " % (bug_url, ticket_id)
+                    ticket_id = "[<a href=\"%s\">%s</a>] " % (bug_url,
+                                                              ticket_id)
                 else:
                     ticket_id = ""
-                output.append(u"\t\t- %s / %s / %s%s %.2f h" % (client, project, ticket_id, description, time))
+                total_time = " (%.2fh)" % total_time if ticket_id else ""
+                output.append(u"\t\t- %s / %s / %s%s - %.2fh%s" %
+                              (client, project, ticket_id, description, time,
+                               total_time)
+                )
 
         message = u'<br />\n'.join(output).replace('\t', '&emsp;&emsp;')
 
         def on_success(result):
             LOG(u'Report with hours added on %s - sent' % (date,))
         def on_error(err):
-            import ipdb                                 # BREAK POINT HERE
-            ipdb.set_trace()                            # BREAK POINT HERE
             EXCEPTION(u'Failed to sent Report with hours added on %s' % (date,))
         topic = self._(u"[intranet] Daily hours report")
-        #deferred = EmailSender.send_html(config['MANAGER_EMAIL'], topic, message)
-        #deferred.addCallbacks(on_success, on_error)
+        deferred = EmailSender.send_html(config['MANAGER_EMAIL'], topic, message)
+        deferred.addCallbacks(on_success, on_error)
         LOG(u"Report with hours on %s - started" % (date,))
         return message
 

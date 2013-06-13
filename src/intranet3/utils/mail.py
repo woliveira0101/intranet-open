@@ -97,7 +97,7 @@ class EmailSender(object):
 
         email = MIMEMultipart('alternative')
         email['Subject'] = topic
-        email['From'] = 'janislaw.tosterowy@gmail.com' #config.google_user_email
+        email['From'] = config.google_user_email
         email['To'] = to
         email.attach(MIMEText(message,'html', 'utf-8'))
 
@@ -108,8 +108,8 @@ class EmailSender(object):
         resultDeferred = Deferred()
 
         senderFactory = ESMTPSenderFactory(
-            'janislaw.tosterowy@gmail.com', # config.google_user_email, # user
-            'googledupa', # config.google_user_password, # secret
+            config.google_user_email, # user
+            config.google_user_password, # secret
             config.google_user_email, # from
             to, # to
             messageFile, # message
