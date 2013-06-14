@@ -183,7 +183,13 @@ class BaseFetcher(object):
             if resp.code == 302:
                 LOG(u"Redirect (302) found in response")
                 location = resp.headers.getRawHeaders('location')[0]
-                self.request(location, headers, on_success, on_failure, 'GET', None)
+                if method == 'POST':
+                    new_url, body = location.split('?')
+                    self.request(new_url, headers, on_success, on_failure,
+                                 method, body)
+                else:
+                    self.request(location, headers, on_success, on_failure,
+                                 'GET', None)
             else:
                 on_success(resp)
         deferred.addCallbacks(redirecting_on_success if self.redirect_support else on_success, on_failure)

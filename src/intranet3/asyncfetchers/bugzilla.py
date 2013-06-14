@@ -10,8 +10,10 @@ from intranet3.asyncfetchers.base import ( BaseFetcher, CSVParserMixin,
 from intranet3 import helpers as h
 from intranet3.log import EXCEPTION_LOG, INFO_LOG
 
+
 LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
+
 
 class BugzillaBug(Bug):
     
@@ -67,8 +69,8 @@ def _fetcher_function(resolved, single):
             if resolved else self.common_url_params()
         params.update(self.single_user_params() if
                       single else self.all_users_params())
-        url = h.serialize_url(self.tracker.url + '/buglist.cgi?', **params)
-        self.fetch(url)
+        url = '%s/buglist.cgi' % self.tracker.url
+        self.fetch_post(url, params)
     return fetcher
 
 def _query_fetcher_function(**conditions):
@@ -85,8 +87,8 @@ def _query_fetcher_function(**conditions):
                 params.update(product=project_selector)
                 if component_selector:
                     params.update(component=component_selector)
-        url = h.serialize_url(self.tracker.url + '/buglist.cgi?', **params)
-        self.fetch(url)
+        url = '%s/buglist.cgi' % self.tracker.url
+        self.fetch_post(url, params)
     return fetcher
     
 
@@ -113,7 +115,15 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
     def fetch(self, url):
         headers = self.get_headers()
         self.request(url, headers, self.responded)
-        
+
+    def fetch_post(self, url, params, on_success=None):
+        if not on_success:
+            on_success = self.responded
+        url = url.encode('utf-8')
+        body = h.serialize_url('', **params)
+        headers = self.get_headers()
+        self.request(url, headers, on_success, method='POST', body=body)
+
     def common_url_params(self):
         return dict(
             bug_status=['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED',
@@ -166,9 +176,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
     fetch_all_bugs_for_query = _query_fetcher_function()
 
     def fetch_scrum(self, sprint_name, project_id=None):
-        url = ('%s/buglist.cgi' % self.tracker.url).encode('utf-8')
-        body = h.serialize_url(
-            '',
+        params = dict(
             ctype='csv',
             status_whiteboard_type='regexp',
             status_whiteboard='s=%s(?!\S)' % sprint_name,
@@ -184,26 +192,24 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
                 'CLOSED'
             ],
         )
-        headers = self.get_headers()
-        self.request(url, headers, self.responded, method='POST', body=body)
+        url = '%s/buglist.cgi' % self.tracker.url
+        self.fetch_post(url, params)
 
     def fetch_bug_titles_and_depends_on(self, ticket_ids):
-        url = ('%s/show_bug.cgi' % self.tracker.url).encode('utf-8')
-        body = h.serialize_url(
-            '',
+        params = dict(
             ctype='xml',
             field=['dependson', 'bug_id', 'short_desc', 'bug_severity',
                    'resolution'],
             id=[str(id_) for id_ in ticket_ids],
         )
-        headers = self.get_headers()
-        self.request(
+        url = '%s/show_bug.cgi' % self.tracker.url
+        self.fetch_post(
             url,
-            headers,
-            partial(self.xml_response,
-                    self.parse_response_of_bug_titles_and_depends_on),
-            method='POST',
-            body=body
+            params,
+            on_success=partial(
+                self.xml_response,
+                self.parse_response_of_bug_titles_and_depends_on
+            ),
         )
     
     def fetch_dependons_for_ticket_ids(self, ticket_ids):
@@ -216,16 +222,14 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             params.update(id=ids)
         if not ids:
             return self.fail(FetchException(u'Ticket ids list is empty'))
-        url = ('%s/show_bug.cgi' % self.tracker.url).encode('utf-8')
-        body = h.serialize_url('', **params)
-        headers = self.get_headers()
-        self.request(
+        url = '%s/show_bug.cgi' % self.tracker.url
+        self.fetch_post(
             url,
-            headers,
-            partial(self.xml_response,
-                    self.parse_response_of_dependons_for_ticket_ids),
-            method='POST',
-            body=body
+            params,
+            on_success=partial(
+                self.xml_response,
+                self.parse_response_of_dependons_for_ticket_ids,
+            ),
         )
     
     def _parse_xml_response(self, data, bug_callback, success_callback):
@@ -324,20 +328,19 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
     def get_status_of_dependson_and_blocked_bugs(self):
         bug_ids = self.dependson_and_blocked_status.keys()
         if bug_ids:
-            url = ('%s/show_bug.cgi' % self.tracker.url).encode('utf-8')
-            body = h.serialize_url('',
-                                   ctype='xml',
-                                   id=bug_ids,
-                                   field=['bug_status', 'bug_id', 'short_desc']
-                                   )
-            headers = self.get_headers()
-            self.request(
+            url = '%s/show_bug.cgi' % self.tracker.url
+            params = dict(
+                ctype='xml',
+                id=bug_ids,
+                field=['bug_status', 'bug_id', 'short_desc']
+            )
+            self.fetch_post(
                 url,
-                headers,
-                partial(self.xml_response,
-                        self.parse_dependson_and_blocked_bugs_xml),
-                method='POST',
-                body=body
+                params,
+                on_success=partial(
+                    self.xml_response,
+                    self.parse_dependson_and_blocked_bugs_xml
+                ),
             )
         else:
             self.success()
@@ -381,14 +384,13 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             self.fail(FetchException(u'Received xml response %s' % resp.code))
 
     def get_dependson_and_blocked_by(self):
-        url = ('%s/show_bug.cgi' % self.tracker.url).encode('utf-8')
-        body = h.serialize_url('',
-                               ctype='xml',
-                               id=self.bugs.keys(),
-                               field=['blocked', 'dependson', 'bug_id'])
-        headers = self.get_headers()
-        self.request(url, headers, partial(self.xml_response, self.parse_xml),
-                     method='POST', body=body)
+        url = '%s/show_bug.cgi' % self.tracker.url
+        params = dict(
+            ctype='xml',
+            id=self.bugs.keys(),
+            field=['blocked', 'dependson', 'bug_id']
+        )
+        self.fetch_post(url, params, partial(self.xml_response, self.parse_xml))
     
     def received(self, data):
         """ Called when server returns whole response body """
