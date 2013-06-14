@@ -20,7 +20,7 @@ class BugzillaBug(Bug):
         return self.tracker.url + '/show_bug.cgi?id=%(id)s' % {'id': number}
 
     def is_unassigned(self):
-        return True if self.owner and self.owner.email == 'nobody@example.com' else False
+        return self.owner and self.owner.email == 'nobody@example.com'
 
     @reify
     def is_blocked(self):
@@ -63,14 +63,17 @@ bugzilla_converter = h.Converter(
 def _fetcher_function(resolved, single):
     @cached_bug_fetcher(lambda: u'resolved-%s-single-%s' % (resolved, single))
     def fetcher(self):
-        params = self.resolved_common_url_params() if resolved else self.common_url_params()
-        params.update(self.single_user_params() if single else self.all_users_params())
+        params = self.resolved_common_url_params() \
+            if resolved else self.common_url_params()
+        params.update(self.single_user_params() if
+                      single else self.all_users_params())
         url = h.serialize_url(self.tracker.url + '/buglist.cgi?', **params)
         self.fetch(url)
     return fetcher
 
 def _query_fetcher_function(**conditions):
-    def fetcher(self, ticket_ids, project_selector, component_selector, version):
+    def fetcher(self, ticket_ids, project_selector, component_selector,
+                version):
         params = dict(
             ctype='csv'
         )
@@ -113,7 +116,8 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
         
     def common_url_params(self):
         return dict(
-            bug_status=['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED', 'WAITING'],
+            bug_status=['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED',
+                        'CONFIRMED', 'WAITING'],
             ctype='csv',
             emailassigned_to1='1'
         )
@@ -150,32 +154,57 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
         
     fetch_all_resolved_tickets = _fetcher_function(resolved=True, single=False)
                                                    
-    fetch_bugs_for_query = _query_fetcher_function(bug_status=['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED', 'WAITING'])
+    fetch_bugs_for_query = _query_fetcher_function(
+        bug_status=['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED',
+                    'WAITING']
+    )
         
-    fetch_resolved_bugs_for_query = _query_fetcher_function(bug_status=['RESOLVED', 'VERIFIED'])
+    fetch_resolved_bugs_for_query = _query_fetcher_function(
+        bug_status=['RESOLVED', 'VERIFIED']
+    )
 
     fetch_all_bugs_for_query = _query_fetcher_function()
 
     def fetch_scrum(self, sprint_name, project_id=None):
-        params = dict(
+        url = ('%s/buglist.cgi' % self.tracker.url).encode('utf-8')
+        body = h.serialize_url(
+            '',
             ctype='csv',
             status_whiteboard_type='regexp',
             status_whiteboard='s=%s(?!\S)' % sprint_name,
-            bug_status=['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED', 'WAITING', 'RESOLVED', 'VERIFIED', 'CLOSED'],
+            bug_status=[
+                'NEW',
+                'ASSIGNED',
+                'REOPENED',
+                'UNCONFIRMED',
+                'CONFIRMED',
+                'WAITING',
+                'RESOLVED',
+                'VERIFIED',
+                'CLOSED'
+            ],
         )
-        url = h.serialize_url(self.tracker.url + '/buglist.cgi?', **params)
-        self.fetch(url)
+        headers = self.get_headers()
+        self.request(url, headers, self.responded, method='POST', body=body)
 
     def fetch_bug_titles_and_depends_on(self, ticket_ids):
-        params = dict(
+        url = ('%s/show_bug.cgi' % self.tracker.url).encode('utf-8')
+        body = h.serialize_url(
+            '',
             ctype='xml',
-            field=['dependson', 'bug_id', 'short_desc', 'bug_severity', 'resolution'],
-            id=[str(id) for id in ticket_ids],
-            #bug_status=['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'RESOLVED', 'VERIFIED']
+            field=['dependson', 'bug_id', 'short_desc', 'bug_severity',
+                   'resolution'],
+            id=[str(id_) for id_ in ticket_ids],
         )
-        url = h.serialize_url(self.tracker.url + '/show_bug.cgi?', **params)
         headers = self.get_headers()
-        self.request(url, headers, partial(self.xml_response, self.parse_response_of_bug_titles_and_depends_on))
+        self.request(
+            url,
+            headers,
+            partial(self.xml_response,
+                    self.parse_response_of_bug_titles_and_depends_on),
+            method='POST',
+            body=body
+        )
     
     def fetch_dependons_for_ticket_ids(self, ticket_ids):
         params = dict(
@@ -183,22 +212,30 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             field=['dependson', 'bug_id', 'bug_severity', 'resolution']
         )
         if ticket_ids:
-            ids = []
-            for id in ticket_ids:
-                if id:
-                    ids.append(str(id))
+            ids = [str(id_) for id_ in ticket_ids if id_]
             params.update(id=ids)
         if not ids:
             return self.fail(FetchException(u'Ticket ids list is empty'))
-        url = h.serialize_url(self.tracker.url + '/show_bug.cgi?', **params)
+        url = ('%s/show_bug.cgi' % self.tracker.url).encode('utf-8')
+        body = h.serialize_url('', **params)
         headers = self.get_headers()
-        self.request(url, headers, partial(self.xml_response, self.parse_response_of_dependons_for_ticket_ids))
+        self.request(
+            url,
+            headers,
+            partial(self.xml_response,
+                    self.parse_response_of_dependons_for_ticket_ids),
+            method='POST',
+            body=body
+        )
     
     def _parse_xml_response(self, data, bug_callback, success_callback):
         """ Parse xml """
         try:
             # igozilla returns iso-8859-2, but does not declare it
-            data = data.replace('<?xml version="1.0" standalone="yes"?>', '<?xml version="1.0" encoding="iso-8859-2" standalone="yes"?>')
+            data = data.replace(
+                '<?xml version="1.0" standalone="yes"?>',
+                '<?xml version="1.0" encoding="iso-8859-2" standalone="yes"?>'
+            )
             xml = ET.fromstring(data)
             for bug in xml.findall('bug'):
                 bug_callback(bug)
@@ -215,7 +252,12 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             short_desc = getattr(bug.find('short_desc'), 'text', '')
             depends_on = [item.text for item in bug.findall('dependson')]
             is_bug = self.is_bug(bug)
-            self.bugs[bug_id] = {'title': short_desc, 'depends_on': depends_on, 'is_bug': is_bug, 'severity': getattr(bug.find('bug_severity'), 'text', '')}
+            self.bugs[bug_id] = {
+                'title': short_desc,
+                'depends_on': depends_on,
+                'is_bug': is_bug,
+                'severity': getattr(bug.find('bug_severity'),'text', '')
+            }
         
         self._parse_xml_response(data, handle, self.success)
     
@@ -223,11 +265,14 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
         return getattr(bug.find('bug_severity'), 'text', '')
     
     def is_bug(self, bug):
-        """ Check if given XML bug definition adheres to "bug" definition from #69234 """
+        """
+        Check if given XML bug definition adheres to "bug" definition
+        from #69234
+        """
         severity = self.get_severity(bug)
         resolution = getattr(bug.find('resolution'), 'text', '')
-        return (not severity in ('enhancement high', 'enhancement medium', 'enhancement low')) \
-               and (not resolution == 'INVALID')
+        return (not severity in ('enhancement high', 'enhancement medium',
+                'enhancement low')) and (not resolution == 'INVALID')
             
     def parse_response_of_dependons_for_ticket_ids(self, data):
         """ Parse response for query of depends on """
@@ -256,14 +301,18 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             status = getattr(bug.find('bug_status'), 'text', None)
             description = getattr(bug.find('short_desc'), 'text', None)
             if status:
-                self.dependson_and_blocked_status[bug_id]['resolved'] = status in ('CLOSED', 'RESOLVED', 'VERIFIED')
+                self.dependson_and_blocked_status[bug_id]['resolved'] = \
+                    status in ('CLOSED', 'RESOLVED', 'VERIFIED')
             if description:
                 self.dependson_and_blocked_status[bug_id]['desc'] = description
     
     def parse_dependson_and_blocked_bugs_xml(self, data):
         try:
             # igozilla returns iso-8859-2, but does not declare it
-            data = data.replace('<?xml version="1.0" standalone="yes"?>', '<?xml version="1.0" encoding="iso-8859-2" standalone="yes"?>')
+            data = data.replace(
+                '<?xml version="1.0" standalone="yes"?>',
+                '<?xml version="1.0" encoding="iso-8859-2" standalone="yes"?>'
+            )
             xml = ET.fromstring(data)
             self.update_bugs_statuses(xml)
         except BaseException, e:
@@ -275,26 +324,41 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
     def get_status_of_dependson_and_blocked_bugs(self):
         bug_ids = self.dependson_and_blocked_status.keys()
         if bug_ids:
-            url = h.serialize_url('%s/show_bug.cgi?' % self.tracker.url,
-                                ctype='xml',
-                                id=bug_ids,
-                                field=['bug_status', 'bug_id', 'short_desc'])
+            url = ('%s/show_bug.cgi' % self.tracker.url).encode('utf-8')
+            body = h.serialize_url('',
+                                   ctype='xml',
+                                   id=bug_ids,
+                                   field=['bug_status', 'bug_id', 'short_desc']
+                                   )
             headers = self.get_headers()
-            self.request(url, headers, partial(self.xml_response, self.parse_dependson_and_blocked_bugs_xml))
+            self.request(
+                url,
+                headers,
+                partial(self.xml_response,
+                        self.parse_dependson_and_blocked_bugs_xml),
+                method='POST',
+                body=body
+            )
         else:
             self.success()
     
     def parse_xml(self, data):
         try:
             # igozilla returns iso-8859-2, but does not declare it
-            data = data.replace('<?xml version="1.0" standalone="yes"?>', '<?xml version="1.0" encoding="iso-8859-2" standalone="yes"?>')
+            data = data.replace(
+                '<?xml version="1.0" standalone="yes"?>',
+                '<?xml version="1.0" encoding="iso-8859-2" standalone="yes"?>'
+            )
             xml = ET.fromstring(data.decode(self.encoding))
             for bug in xml.findall('bug'):
                 bug_id = bug.find('bug_id').text
                 obj = self.bugs.get(bug_id)
                 if obj:
                     for key in ('blocked', 'dependson'):
-                        results = dict((item.text, {'resolved': False}) for item in bug.findall(key))
+                        results = dict(
+                            (item.text, {'resolved': False})
+                            for item in bug.findall(key)
+                        )
                         self.dependson_and_blocked_status.update(results)
 
                         if results:
@@ -314,15 +378,17 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
         if resp.code == 200:
             resp.deliverBody(SimpleProtocol(on_success, self.xml_failed))
         else:
-            self.fail(FetchException(u'Received xml response %s' % (resp.code, )))
+            self.fail(FetchException(u'Received xml response %s' % resp.code))
 
     def get_dependson_and_blocked_by(self):
-        url = h.serialize_url('%s/show_bug.cgi?' % self.tracker.url,
-                            ctype='xml',
-                            id=self.bugs.keys(),
-                            field=['blocked', 'dependson', 'bug_id'])
+        url = ('%s/show_bug.cgi' % self.tracker.url).encode('utf-8')
+        body = h.serialize_url('',
+                               ctype='xml',
+                               id=self.bugs.keys(),
+                               field=['blocked', 'dependson', 'bug_id'])
         headers = self.get_headers()
-        self.request(url, headers, partial(self.xml_response, self.parse_xml))
+        self.request(url, headers, partial(self.xml_response, self.parse_xml),
+                     method='POST', body=body)
     
     def received(self, data):
         """ Called when server returns whole response body """
