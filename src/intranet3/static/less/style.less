@@ -581,9 +581,9 @@ table.bugs-list tbody tr.other-projects td {
             width: 20em;
             text-align: center;
             // Recompensation for border
-            margin-left: 1px;
+            margin-left: -1px;
             // Recompensation for bottom border
-            margin-bottom: -1px;
+            margin-top: -1px;
             position: relative;
             border-right: solid 1px #000;
             border-bottom: solid 1px #000;
@@ -667,6 +667,20 @@ table.bugs-list tbody tr.other-projects td {
             }
             &.today {
                 background-color: lightyellow;
+            }
+            &.city {
+                text-align: center;
+                padding-top: 7em;
+                background: #fff;
+                span {
+                    .rotate(-90deg);
+                    letter-spacing: 3px;
+                    display: block;
+                    text-transform: uppercase;
+                    font-weight: bold;
+                    width: 1em;
+                    margin: 0 auto;
+                }
             }
         }
         .monthend {

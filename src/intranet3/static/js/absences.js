@@ -104,10 +104,20 @@ function generateTable(data) {
 
     // Generate all users!
     var users = '';
+    // cg = currentGroup
+    var cgNo = 0;
+    var cgUser = 0;
+    var cg = data.userGroups[0];
     _.each(data.users, function(u){
+        if(cgUser >= cg[1]) {
+            cgNo++;
+            cg = data.userGroups[cgNo];
+            cgUser = 0;
+        }
         var row = singleRowStub.clone();
         var leaves = '<span class="help" title="leave days used / leave days mandated">('+u.leave_used+'/'+u.leave_mandated+')</span>';
-        users += '<tr><td class="user">'+u.name+' '+leaves+'</td></tr>';
+        var groupHeader = cgUser == 0 ? '<td class="city" rowspan="'+cg[1]+'"><span>'+cg[0]+'</span></td>' : '';
+        users += '<tr>'+groupHeader+'<td class="user">'+u.name+' '+leaves+'</td></tr>';
         if(u.id in data.absences) { // Absences
             _.each(data.absences[u.id], function(attr, start){
                 // attr: [length, type, description]
@@ -129,6 +139,7 @@ function generateTable(data) {
             });
         }
         rows.push(row);
+        cgUser++;
     });
 
     // Append!
@@ -156,6 +167,7 @@ function generateTable(data) {
             // Margin compensates for scrollbars and bottom padding
             margin = 15;
         $pager.height($daysParent.height());
+        $pager.width($usersParent.width());
         if($data.height() < height) { // Do we need scrollbars?
             $daysParent.width(width);
             height = $data.height() + margin;

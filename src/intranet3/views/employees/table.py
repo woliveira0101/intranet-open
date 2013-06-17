@@ -103,6 +103,10 @@ class Absences(BaseView):
                             .filter(User.is_active==True) \
                             .filter(User.location=='wroclaw') \
                             .order_by(User.freelancer, User.name).all()
+        user_groups = [
+            (u'Poznań', len(users_p)),
+            (u'Wrocław', len(users_w)),
+        ]
         users_p.extend(users_w)
 
         absences = self.get_absences(start, end)
@@ -124,6 +128,7 @@ class Absences(BaseView):
 
         data = {
             'users': users,
+            'userGroups': user_groups,
             'year': start.year,
             'startDay': start_day,
             'dayCount': day_count,
