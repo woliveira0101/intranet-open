@@ -7,8 +7,8 @@ function generateTable(data) {
     // be 100% generated.
     var $struct = $([ 
         '<div class="holder">',
-            '<div class="floaty pagerPlaceholder"></div>',
-            '<div class="floaty days">',
+            '<div class="floaty placeholder pagerPlaceholder"></div>',
+            '<div class="floaty topHeader days">',
                 '<table class="display" id="days">',
                     '<thead></thead>',
                 '</table>',
@@ -16,7 +16,7 @@ function generateTable(data) {
         '</div>',
         '<div class="clear"><!-- nothing --></div>',
         '<div class="holder">',
-            '<div class="floaty users">',
+            '<div class="floaty leftHeader users">',
                 '<table class="display" id="users">',
                     '<tbody></tbody>',
                 '</table>',
@@ -149,60 +149,4 @@ function generateTable(data) {
     $users.append(users);
     $data.append(rows);
     $absences.text('').append($struct);
-
-    /*
-     * setSize sets size of all divs containing tables, to expand to the whole screen.
-     */
-    function setSize() {
-        var $absences = $('.absences'),
-            $daysParent = $('#days').parent(),
-            $usersParent = $('#users').parent(),
-            $pager = $('.pagerPlaceholder'),
-            $data = $('#data'),
-            $p = $data.parent(),
-            // Width: .absences width - userlist width
-            width = $absences.innerWidth() - $usersParent.width(),
-            // Height: window height - everything above .absences - dayslist
-            height = $(window).innerHeight() - $absences.offset().top - $daysParent.height(), 
-            // Margin compensates for scrollbars and bottom padding
-            margin = 15;
-        $pager.height($daysParent.height());
-        $pager.width($usersParent.width());
-        if($data.height() < height) { // Do we need scrollbars?
-            $daysParent.width(width);
-            height = $data.height() + margin;
-        } else {
-            $daysParent.width(width-margin);
-            height = height - 2*margin;
-        }
-        $usersParent.height(height-margin);
-        // $p is bigger to recompensate for scrollbars
-        $p.width(width).height(height);
-    }
-    
-    var $daysParent = $('#days').parent(),
-        $usersParent = $('#users').parent(),
-        $p = $('#data').parent(),
-        lastLeft = $p.scrollLeft(),
-        lastTop = $p.scrollTop();
-    // Scroll event
-    $p.on('scroll', function(e){
-        var left = $p.scrollLeft(),
-            top = $p.scrollTop();
-        // Do something only if values have changed
-        if(left != lastLeft) {
-            $daysParent.scrollLeft(left);
-            lastLeft = left;
-        }
-        if(top != lastTop) {
-            $usersParent.scrollTop(top);
-            lastTop = top;
-        }
-    });
-    // Resize elements along with window, or else everything will break
-    $(window).resize(function(e){
-        setSize();
-    });
-    // After all is generated, resize!
-    setSize();
 }

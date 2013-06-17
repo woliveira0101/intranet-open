@@ -562,39 +562,23 @@ table.bugs-list tbody tr.other-projects td {
 }
 
 .absences {
-    overflow: hidden;
-    width: 100%;
-
-    div {
-        &.clear {
-            clear: both;
-        }
-        &.floaty {
-            overflow: hidden;
-            float: left;
-            
-            &.scrollable {
-                overflow: auto;
-            }
-        }
-        .pagerPlaceholder {
-            width: 20em;
-            text-align: center;
-            // Recompensation for border
-            margin-left: -1px;
-            // Recompensation for bottom border
-            margin-top: -1px;
-            position: relative;
-            border-right: solid 1px #000;
-            border-bottom: solid 1px #000;
-            .pager {
-                position: absolute;
-                bottom: 0.5em;
-                width: 100%;
-                margin: 0;
-                a {
-                    padding: 5px 8px;
-                }
+    .pagerPlaceholder {
+        width: 20em;
+        text-align: center;
+        // Recompensation for border
+        margin-left: -1px;
+        // Recompensation for bottom border
+        margin-top: -1px;
+        position: relative;
+        border-right: solid 1px #000;
+        border-bottom: solid 1px #000;
+        .pager {
+            position: absolute;
+            bottom: 0.5em;
+            width: 100%;
+            margin: 0;
+            a {
+                padding: 5px 8px;
             }
         }
     }
@@ -1766,3 +1750,23 @@ form.absence-form {
         }
     }
 }
+
+.scrolltable {
+    overflow: hidden;
+    width: 100%;
+
+    div {
+        &.clear {
+            clear: both;
+        }
+        &.floaty {
+            overflow: hidden;
+            float: left;
+            
+            &.scrollable {
+                overflow: auto;
+            }
+        }
+    }
+}
+
