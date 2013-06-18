@@ -1,0 +1,34 @@
+{% extends "templates/employees/list/_absence_base.html" %}
+
+{% set current_subpage = 'table' %}
+
+{% block subbody %}
+<ul class="pager">
+    <li><a href="{{ request.url_for('/employees/table/absences') }}?year={{ year-1 }}">{% trans %}Previous year{% endtrans %}</a></li>
+    <li>{{ year }}</li>
+    <li><a href="{{ request.url_for('/employees/table/absences') }}?year={{ year+1 }}">{% trans %}Next year{% endtrans %}</a></li>
+</ul>
+<div class="absences">
+    You have to have Javascript enabled in order to see this data.
+</div>
+{% endblock subbody %}
+
+{% block tail_script %}
+    <script src="{{ request.static_path('intranet3:static/js/absences.js') }}"></script>
+    <script>
+    $(document).ready( function () {
+        var data = {{ data|safe }};
+        // generateTable function is in absences.js file
+        generateTable(data);
+
+        $('td.late').tooltip( {
+            container: 'body',
+            template: '<div class="tooltip tooltip-late"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+        });
+        $('td.planowany, td.planowany, td.zadanie, td.l4, td.okolicznosciowy, td.inne').tooltip( {
+            container: 'body',
+            template: '<div class="tooltip tooltip-absence"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+        });
+    });
+    </script>
+{% endblock %}
