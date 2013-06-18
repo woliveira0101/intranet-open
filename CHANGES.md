@@ -1,6 +1,14 @@
 New release
 ===========
 
+0.8.5 (18-06-2013)
+===============
+
+- fixes to absence view
+- minor fixes everywhere
+
+- add absences view
+
 0.8.4 (06-06-2013)
 ===============
 
