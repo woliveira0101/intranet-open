@@ -1759,6 +1759,7 @@ form.absence-form {
 .scrolltable {
     overflow: hidden;
     width: 100%;
+    position: relative;
 
     div {
         &.clear {
@@ -1766,11 +1767,23 @@ form.absence-form {
         }
         &.floaty {
             overflow: hidden;
-            float: left;
-            
-            &.scrollable {
-                overflow: auto;
+            position: absolute;
+            &.placeHolder, &.topHeader {
+                top: 0;
             }
+            &.placeHolder, &.leftHeader {
+                left: 0;
+            }
+            &.topHeader, &.data {
+                right: 0;
+            }
+            &.leftHeader, &.data {
+                bottom: 0;
+            }
+        }
+        &.scrollable {
+            width: 100%;
+            overflow: auto;
         }
     }
 }
