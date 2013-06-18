@@ -223,14 +223,17 @@ class HoursWorkedMixin(object):
         if only_fully_employed:
             sql_user += 'AND ("user".start_full_time_work IS NULL OR "user".start_full_time_work < NOW())'
 
-        sql = """SELECT round(CAST(sum(time_entry.time) AS numeric), 1) AS time,
-                        round(CAST(sum(time_entry.time)-8 AS Numeric), 1) AS diff,
-                        time_entry.user_id, "user".email,
-                        "user".name, {sql_cols}
+        sql = """SELECT round(CAST(sum(time_entry.time) AS numeric), 2) AS time,
+                        round(CAST(sum(time_entry.time)-8 AS Numeric), 2) AS diff,
+                        time_entry.user_id,
+                        "user".email,
+                        "user".name,
+                        {sql_cols}
                  FROM time_entry
                  JOIN "user" ON "user".id = time_entry.user_id
                      AND "user".is_active = True
                  WHERE
+                        time_entry.deleted = FALSE AND
                         time_entry.date BETWEEN :date_start AND :date_end
                         {sql_user}
                  GROUP BY
