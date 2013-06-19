@@ -59,26 +59,27 @@ function scrollTablePrepare($table) {
         '</div>'
     ].join('\n'));
     // classes and IDs
+    $struct.addClass($table.attr('class')).attr('id', $table.attr('id'));
     $struct.find('table').addClass($table.attr('class')).attr('id', $table.attr('id'));
     $table.find('thead tr').each(function(){
         // placeholders
         var $row = $(this),
-            $phRow = $('<tr/>');
+            $phRow = $('<tr/>').addClass($row.attr('class')).attr('id', $row.attr('id'));
         $row.find('th[data-scrolltable="placeholder"]').appendTo($phRow);
         $struct.find('.placeholder table thead').append($phRow);
         // top header
-        $topRow = $('<tr/>');
+        $topRow = $('<tr/>').addClass($row.attr('class')).attr('id', $row.attr('id'));
         $row.find('th').appendTo($topRow);
         $struct.find('.topHeader table thead').append($topRow);
     });
     $table.find('tbody tr').each(function(){
         // left header
         var $row = $(this),
-            $leftRow = $('<tr/>');
+            $leftRow = $('<tr/>').addClass($row.attr('class')).attr('id', $row.attr('id'));
         $row.find('td[data-scrolltable="leftHeader"]').appendTo($leftRow);
         $struct.find('.leftHeader table tbody').append($leftRow);
         // normal cells
-        $newRow = $('<tr/>');
+        $newRow = $('<tr/>').addClass($row.attr('class')).attr('id', $row.attr('id'));
         $row.find('td').appendTo($newRow);
         $struct.find('.data table tbody').append($newRow);
     });
@@ -126,15 +127,15 @@ function scrollTable($base) {
 
         $leftParent.css('top', $topParent.height()+'px');
         if($data.width() < width) { // Do we need horizontal scrollbar?
-           $leftParent.css('bottom', '0');
+            $leftParent.css('bottom', '0');
         } else {
-           $leftParent.css('bottom', margin+'px');
+            $leftParent.css('bottom', margin+'px');
         }
         $topParent.css('left', $leftParent.width()+'px');
-        if($data.width() < width) { // Do we need horizontal scrollbar?
-           $topParent.css('right', '0');
+        if($data.height() < height) { // Do we need vertical scrollbar?
+            $topParent.css('right', '0');
         } else {
-           $topParent.css('right', margin+'px');
+            $topParent.css('right', margin+'px');
         }
         // $p is bigger to recompensate for scrollbars
         $p.css({
@@ -142,10 +143,10 @@ function scrollTable($base) {
             left: $leftParent.width()+'px'
         });
         $scrollable.height($p.height());
-        
+        $data.css('min-width', ($p.width()-2*margin)+'px');
     }
     $(window).resize(function(e){
         setSize();
     });
-    setSize();
+    setTimeout(setSize, 10);
 }

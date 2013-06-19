@@ -58,10 +58,26 @@ class Pivot(MonthMixin, BaseView):
         """).params(month_start=month_start, month_end=month_end)
         if not self.request.has_perm('view'):
             users = [self.request.user] # TODO do we need to constrain entries also?
+            locations= {
+                self.request.user.location: ('', 1)
+            }
         else:
-            users = User.query.filter(User.is_not_client())\
-                              .filter(User.is_active==True)\
-                              .order_by(User.freelancer, User.name).all()
+            users_w = User.query.filter(User.is_not_client()) \
+                                .filter(User.is_active==True) \
+                                .filter(User.location=='wroclaw') \
+                                .order_by(User.freelancer, User.name) \
+                                .all()
+            users_p = User.query.filter(User.is_not_client()) \
+                                .filter(User.is_active==True) \
+                                .filter(User.location=='poznan') \
+                                .order_by(User.freelancer, User.name) \
+                                .all()
+            locations = {
+                'wroclaw': (u'Wrocław', len(users_w)),
+                'poznan': (u'Poznań', len(users_p)),
+            }
+            users = users_p
+            users.extend(users_w)
 
         today = datetime.date.today()
         grouped = defaultdict(lambda: defaultdict(lambda: 0.0))
@@ -100,8 +116,6 @@ class Pivot(MonthMixin, BaseView):
 
         users.insert(0, users.pop(current_user_index))
 
-
-
         return dict(
             entries=grouped, users=users, sums=sums, late=late, excuses=excuses.wrongtime(),
             daily_sums=daily_sums, monthly_sum=sum(daily_sums.values()),
@@ -112,7 +126,8 @@ class Pivot(MonthMixin, BaseView):
             next_date=next_month(month_start),
             today=today,
             count_of_required_month_hours=count_of_required_month_hours,
-            count_of_required_hours_to_today=count_of_required_hours_to_today
+            count_of_required_hours_to_today=count_of_required_hours_to_today,
+            locations=locations,
         )
 
 
