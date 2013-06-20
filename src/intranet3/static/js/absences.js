@@ -133,7 +133,16 @@ function generateTable(data) {
                     title: attr[2]
                 });
                 $td.nextAll(':lt('+(attr[0]-1)+')').remove();
-                $td.append('<a href="/times/list_user?date=20.06.2013&user_id=24">test</a>');
+                var date = new Date(Date.parse(start)),
+                    links = '',
+                    dateString = '';
+                for(var i=0; i<attr[0]; i++) {
+                    dateString = $.datepicker.formatDate('dd.mm.yy', date);
+                    links += '<a href="/times/list_user?date='+dateString+'&user_id='+u.id+'"></a>';
+                    date.setDate(date.getDate()+1); // Add 1 day - obvious, isn't it?
+                }
+                // Needs remargining
+                //$td.html(links);
             });
         }
         if(u.id in data.lates) { // Latenesses
