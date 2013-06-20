@@ -124,7 +124,16 @@ class Absences(BaseView):
                       name=u.name,
                       leave_mandated=leave_mandated[u.id][0],
                       leave_used=leave_used[u.id],
+                      location=u.location,
                      ) for u in users_p]
+        users = sorted(
+            sorted(
+                users,
+                key=lambda u: u['leave_mandated']-u['leave_used'],
+                reverse=True,
+            ),
+            key=lambda u: u['location'],
+        )
 
         data = {
             'users': users,
