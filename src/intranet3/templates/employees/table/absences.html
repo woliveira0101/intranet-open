@@ -20,14 +20,8 @@
     $(document).ready( function () {
         var data = {{ data|safe }};
         // generateTable function is in absences.js file
-        var start = new Date().getTime();
         generateTable(data);
-        var mid = new Date().getTime();
         scrollTable($('.absences'));
-        var end = new Date().getTime();
-        console.log('Table generated in '+(mid-start)+'ms');
-        console.log('Table scrollable in '+(end-mid)+'ms');
-        console.log('Total: '+(end-start)+'ms');
 
         $('td.late').tooltip( {
             container: 'body',

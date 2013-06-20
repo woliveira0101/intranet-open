@@ -4,6 +4,9 @@
 {% set title = _('Time report for %s') % month_start.strftime('%m.%Y') %}
 
 {% block body %}
+    <ul class="agenda no-margin pull-right">
+        <li class="late">{% trans %}Changed{% endtrans %}</li>
+    </ul>
     <ul class="pager">
         <li><a href="{{ request.url_for('/times/report/pivot', month=prev_date.strftime('%m.%Y')) }}">{% trans %}Previous month{% endtrans %}</a></li>
         <li><input type="hidden" id="datepicker" value="{{ month_start.strftime('%m/%d/%Y') }}"/></li>
@@ -66,9 +69,6 @@
             {% endfor %}
         </tbody>
     </table>
-<!--    <ul class="agenda">
-        <li class="late">{% trans %}Changed{% endtrans %}</li>
-</ul> -->
 {% endblock %}
 
 {% block tail_script %}

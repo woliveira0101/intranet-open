@@ -25,7 +25,7 @@ function generateTable(data) {
                     '</table>',
                 '</div>',
             '</div>',
-        '</div>',
+        '</div>'
     ].join('\n'));
 
     // Navigation
