@@ -593,6 +593,7 @@ table.bugs-list tbody tr.other-projects td {
                 cursor: default;
                 padding-left: 0px;
                 padding-right: 0px;
+                background: #e0e0e0;
 
                 &.day {
                     border: solid 1px #d3d3d3;
@@ -609,16 +610,16 @@ table.bugs-list tbody tr.other-projects td {
                     border-right: solid 1px;
                 }
                 &.holiday {
-                    background-color: #F7DFDE;
+//                    background-color: #F2EBEB;
                 }
                 &.today {
-                    background-color: lightyellow;
+//                    background-color: #ddd;
                 }
             }
         }
         tbody {
             tr:nth-child(odd) {
-                background: #E2E4FF;
+                background: #f6f6f6;
             }
         }
         td, th {
@@ -648,10 +649,10 @@ table.bugs-list tbody tr.other-projects td {
                 background-color: red;
             }
             &.holiday {
-                background-color: #F7DFDE;
+                background-color: #F2EBEB;
             }
             &.today {
-                background-color: lightyellow;
+                background-color: #ddd;
             }
         }
         .monthend {
@@ -663,6 +664,14 @@ table.bugs-list tbody tr.other-projects td {
         td.late {
             background-color: darkgoldenrod;
         }
+    }
+}
+.agenda-absences {
+    .absence {
+        background: darkred;
+    }
+    .late {
+        background: darkgoldenrod;
     }
 }
 .absences table, .time-report table {
@@ -949,6 +958,12 @@ table.bugs-list tbody tr.other-projects td {
     }
     &.no-margin li {
         margin-bottom: 0;
+    }
+    &.agenda-absences {
+        position: relative;
+        float: right;
+        margin-top: -4.5em;
+        right: 1.5em;
     }
 }
 /* Report time */

@@ -3,6 +3,10 @@
 {% set current_subpage = 'table' %}
 
 {% block subbody %}
+<ul class="agenda agenda-absences no-margin">
+    <li class="absence">Absence</li>
+    <li class="late">Lateness</li>
+</ul>
 <ul class="pager">
     <li><a href="{{ request.url_for('/employees/table/absences') }}?year={{ year-1 }}">{% trans %}Previous year{% endtrans %}</a></li>
     <li>{{ year }}</li>

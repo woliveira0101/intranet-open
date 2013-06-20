@@ -133,6 +133,7 @@ function generateTable(data) {
                     title: attr[2]
                 });
                 $td.nextAll(':lt('+(attr[0]-1)+')').remove();
+                $td.append('<a href="lol">test</a>');
             });
         }
         if(u.id in data.lates) { // Latenesses
