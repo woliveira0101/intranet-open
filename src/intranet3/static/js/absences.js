@@ -60,6 +60,9 @@ function generateTable(data) {
         // Month name is spanning through all days
         var colspan = firstMonth ? m[1]-startDay+1 : m[1];
         var headTd = $('<th/>').text(m[0]).attr('colspan', colspan).addClass('month');
+        if(data.year === today.getFullYear() && m[2] === today.getMonth()+1) {
+            headTd.addClass('current');
+        }
         header1.append(headTd);
         var iTemp = firstMonth ? startDay : 1;
         for(var i=iTemp; i<=m[1]; i++) {

@@ -22,6 +22,14 @@
         // generateTable function is in absences.js file
         generateTable(data);
         scrollTable($('.absences'));
+        // If current year, scroll to today
+        if(data.year === new Date().getFullYear()) {
+            $(window).load(function(){
+                var $current = $('.absences th.month.current'),
+                    posX = $current.position().left;
+                $('.absences .data .scrollable').scrollLeft(posX);
+            });
+        }
 
         $('td.late').tooltip( {
             container: 'body',
