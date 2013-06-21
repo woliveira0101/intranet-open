@@ -686,12 +686,26 @@ table.bugs-list tbody tr.other-projects td {
         }
     }
 }
-.agenda-absences {
-    .absence {
-        background: darkred;
+.absences-nav {
+    float: right;
+    position: relative;
+    margin-top: -4.5em;
+    .agenda {
+        float: left;
+        margin-left: 2em;
+        .absence {
+            background: darkred;
+        }
+        .late {
+            background: darkgoldenrod;
+            cursor: pointer;
+            &.inactive {
+                opacity: 0.2;
+            }
+        }
     }
-    .late {
-        background: darkgoldenrod;
+    .pager {
+        float: left;
     }
 }
 .absences table, .time-report table {

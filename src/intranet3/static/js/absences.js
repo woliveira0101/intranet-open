@@ -28,10 +28,6 @@ function generateTable(data) {
         '</div>'
     ].join('\n'));
 
-    // Navigation
-    var $pager = $('ul.pager');
-    $pager.appendTo($struct.find('.pagerPlaceholder'));
-
     // All necessary variables
     var today = new Date();
     var todayString = $.datepicker.formatDate('yy-mm-dd', today);
