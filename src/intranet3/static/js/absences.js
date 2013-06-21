@@ -116,10 +116,27 @@ function generateTable(data) {
             cgUser = 0;
         }
         var row = singleRowStub.clone();
+        row.attr('id', 'u'+u.id);
         var leaves = '<span class="help" title="leave days used / leave days mandated">('+u.leave_used+'/'+u.leave_mandated+')</span>';
         var groupHeader = cgUser == 0 ? '<td class="city" rowspan="'+cg[1]+'"><span>'+cg[0]+'</span></td>' : '';
         var link = '/employees/list/absence?user_id='+u.id+'&limit=200&date_start=01-01-'+data.year+'&date_end=31-12-'+data.year;
-        users += '<tr>'+groupHeader+'<td class="user"><a href="'+link+'">'+u.name+' '+leaves+'</a></td></tr>';
+        users += '<tr id="u'+u.id+'">'+groupHeader+'<td class="user"><a href="'+link+'">'+u.name+' '+leaves+'</a></td></tr>';
+        rows.push(row);
+        cgUser++;
+    });
+
+    // Append!
+    $days.append(header1);
+    $days.append(header2);
+    $days.append(header3);
+    $users.append(users);
+    $data.append(rows);
+    $absences.replaceWith($struct);
+}
+
+function absencesAndLatenesses($table, data) {
+    _.each(data.users, function(u){
+        var row = $table.find('#u'+u.id);
         if(u.id in data.absences) { // Absences
             _.each(data.absences[u.id], function(attr, start){
                 // attr: [length, type, description]
@@ -128,11 +145,22 @@ function generateTable(data) {
                     attr[0] = 1;
                 }
                 var $td = row.find('.'+start);
-                $td.addClass(attr[1]).attr({
-                    colspan: attr[0],
-                    title: attr[2]
+                var pos = $td.position();
+                var width = $td.outerWidth();
+                var height = $td.outerHeight();
+                var $floatd = $('<div class="floatd '+attr[1]+'">hurr</div>');
+                $floatd.css({
+                    top: pos.top,
+                    left: pos.left,
+                    width: width+'px',
+                    height: height+'px'
                 });
-                $td.nextAll(':lt('+(attr[0]-1)+')').remove();
+                $table.prepend($floatd);
+                // $td.addClass(attr[1]).attr({
+                    // colspan: attr[0],
+                    // title: attr[2]
+                // });
+                // $td.nextAll(':lt('+(attr[0]-1)+')').remove();
                 var date = new Date(Date.parse(start)),
                     links = '',
                     dateString = '';
@@ -150,15 +178,5 @@ function generateTable(data) {
                 row.find('.'+when).addClass('late').attr('title', why);
             });
         }
-        rows.push(row);
-        cgUser++;
     });
-
-    // Append!
-    $days.append(header1);
-    $days.append(header2);
-    $days.append(header3);
-    $users.append(users);
-    $data.append(rows);
-    $absences.replaceWith($struct);
 }

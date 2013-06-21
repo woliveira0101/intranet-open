@@ -29,13 +29,14 @@
         generateTable(data);
         scrollTable($('.absences'));
         // If current year, scroll to today
-        if(data.year === new Date().getFullYear()) {
-            $(window).load(function(){
+        $(window).load(function(){
+            absencesAndLatenesses($('.absences .data .scrollable'), data);
+            if(data.year === new Date().getFullYear()) {
                 var $current = $('.absences th.month.current'),
                     posX = $current.position().left;
                 $('.absences .data .scrollable').scrollLeft(posX);
-            });
-        }
+            }
+        });
 
         // Toggling latenesses!
         $('.absences-nav .agenda .late').on('click', function(){

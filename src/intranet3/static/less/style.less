@@ -685,6 +685,22 @@ table.bugs-list tbody tr.other-projects td {
             background-color: darkgoldenrod;
         }
     }
+    .scrollable table {
+        z-index: 10;
+    }
+    .floatd {
+        position: absolute;
+        display: block;
+        width: 1.5em;
+        height: 1.2em;
+        z-index: 20;
+        &.planowany, &.zadanie, &.l4, &.okolicznosciowy, &.inne {
+            background-color: darkred;
+        }
+        &.late {
+            background-color: darkgoldenrod;
+        }
+    }
 }
 .absences-nav {
     float: right;
@@ -1876,6 +1892,7 @@ form.absence-form {
         &.scrollable {
             width: 100%;
             overflow: auto;
+            position: relative;
             table {
             	margin-right: 1px;
             }
