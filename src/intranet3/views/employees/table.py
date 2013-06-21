@@ -2,6 +2,7 @@
 from calendar import monthrange
 import datetime
 import json
+import logging
 
 from babel.core import Locale
 from pyramid.view import view_config
@@ -37,6 +38,12 @@ class Absences(BaseView):
         return days, date_range, months
 
     def get_absences(self, start, end):
+        holidays = Holiday.query \
+                          .filter(Holiday.date >= start) \
+                          .filter(Holiday.date <= end) \
+                          .all()
+        holidays = [i.date.isoformat() for i in holidays]
+
         absences = self.session.query(
             Absence.user_id,
             Absence.date_start,
@@ -53,16 +60,41 @@ class Absences(BaseView):
             lambda x: x[1:],
         )
 
+        months = {i: 0 for i in range(1,13)}
+
         absences_groupped = {}
+        td = datetime.timedelta
         for user_id, absences in absences.iteritems():
             if not user_id in absences_groupped:
                 absences_groupped[user_id] = {}
             for start, end, type_, remarks in absences:
+                month = start.month
+                if type_ != 'l4':
+                    tmp_start = start
+                    while month <= end.month:
+                        tmp_end = datetime.date(
+                            start.year,
+                            month,
+                            monthrange(start.year, month)[1]
+                        )
+                        if month < end.month:
+                            length = (tmp_end-tmp_start).days + 1
+                        else:
+                            length = (end-tmp_start).days + 1
+                        # Remove all holidays
+                        while tmp_start <= tmp_end and tmp_start <= end:
+                            if (tmp_start.isoformat() in holidays or
+                                tmp_start.isoweekday() > 5):
+                                length -= 1
+                            tmp_start += td(days=1)
+                        months[month] += length
+                        month += 1
+                        tmp_start = tmp_start.replace(month=month, day=1)
                 length = (end-start).days + 1
-                start = start.strftime('%Y-%m-%d')
+                start = start.isoformat()
                 absences_groupped[user_id][start] = (length, type_, remarks)
 
-        return absences_groupped
+        return absences_groupped, months
 
     def get_lates(self, start, end):
         lates = self.session.query(Late.user_id, Late.date, Late.explanation)
@@ -109,7 +141,7 @@ class Absences(BaseView):
         ]
         users_p.extend(users_w)
 
-        absences = self.get_absences(start, end)
+        absences, absences_months = self.get_absences(start, end)
         lates = self.get_lates(start, end)
         leave_mandated = Leave.get_for_year(start.year)
         leave_used = Leave.get_used_for_year(start.year)
@@ -143,6 +175,7 @@ class Absences(BaseView):
             'dayCount': day_count,
             'months': months,
             'absences': absences,
+            'absencesMonths': absences_months,
             'lates': lates,
             'holidays': [h.date.strftime('%Y-%m-%d') for h in holidays],
         }

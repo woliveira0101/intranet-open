@@ -59,7 +59,10 @@ function generateTable(data) {
         // Month header
         // Month name is spanning through all days
         var colspan = firstMonth ? m[1]-startDay+1 : m[1];
-        var headTd = $('<th/>').text(m[0]).attr('colspan', colspan).addClass('month');
+        var monthNo = m[2]<10 ? '0'+m[2] : m[2];
+        var link = '/employees/list/absence?limit=200&date_start=01-'+monthNo+'-'+data.year+'&date_end='+m[1]+'-'+monthNo+'-'+data.year;
+        var monthText = m[0] + ' (<a href="'+link+'">'+data.absencesMonths[m[2]]+'</a>)';
+        var headTd = $('<th/>').html(monthText).attr('colspan', colspan).addClass('month');
         if(data.year === today.getFullYear() && m[2] === today.getMonth()+1) {
             headTd.addClass('current');
         }
@@ -67,7 +70,7 @@ function generateTable(data) {
         var iTemp = firstMonth ? startDay : 1;
         for(var i=iTemp; i<=m[1]; i++) {
             // Day ID, e.g. 2013-06-10
-            var dayId = data.year + '-' + (m[2]<10 ? '0' : '') + m[2] + '-' + (i<10 ? '0' : '') + i
+            var dayId = data.year + '-' + monthNo + '-' + (i<10 ? '0' : '') + i
             // Day number
             var head2Td = $('<th class="day">'+i+'</th>');
             // Week day letter
@@ -119,7 +122,7 @@ function generateTable(data) {
         var row = singleRowStub.clone();
         var leaves = '<span class="help" title="leave days used / leave days mandated">('+u.leave_used+'/'+u.leave_mandated+')</span>';
         var groupHeader = cgUser == 0 ? '<td class="city" rowspan="'+cg[1]+'"><span>'+cg[0]+'</span></td>' : '';
-        var link = '/employees/list/absence?user_id='+u.id+'&limit=200&date_start=01-01-'+data.year+'&date_end=31-12-'+data.year
+        var link = '/employees/list/absence?user_id='+u.id+'&limit=200&date_start=01-01-'+data.year+'&date_end=31-12-'+data.year;
         users += '<tr>'+groupHeader+'<td class="user"><a href="'+link+'">'+u.name+' '+leaves+'</a></td></tr>';
         if(u.id in data.absences) { // Absences
             _.each(data.absences[u.id], function(attr, start){
