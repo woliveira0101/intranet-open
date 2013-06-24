@@ -144,38 +144,23 @@ function absencesAndLatenesses($table, data) {
                 if(attr[0] <= 0) {
                     attr[0] = 1;
                 }
-                var $td = row.find('.'+start);
-                var pos = $td.position();
-                var width = $td.outerWidth();
-                var height = $td.outerHeight();
-                var $floatd = $('<div class="floatd '+attr[1]+'">hurr</div>');
-                $floatd.css({
-                    top: pos.top,
-                    left: pos.left,
-                    width: width+'px',
-                    height: height+'px'
+                var $td = row.find('.'+start+', .'+start+':lt('+(attr[0]-1)+')');
+                $td.addClass('absent').attr({
+                    title: attr[2]
                 });
-                $table.prepend($floatd);
-                // $td.addClass(attr[1]).attr({
-                    // colspan: attr[0],
-                    // title: attr[2]
-                // });
-                // $td.nextAll(':lt('+(attr[0]-1)+')').remove();
                 var date = new Date(Date.parse(start)),
-                    links = '',
                     dateString = '';
                 for(var i=0; i<attr[0]; i++) {
                     dateString = $.datepicker.formatDate('dd.mm.yy', date);
-                    links += '<a href="/times/list_user?date='+dateString+'&user_id='+u.id+'"></a>';
+                    var link = '<a href="/times/list_user?date='+dateString+'&user_id='+u.id+'">Hours</a>';
                     date.setDate(date.getDate()+1); // Add 1 day - obvious, isn't it?
+                    $td.eq(i).html(link);
                 }
-                // Needs remargining
-                //$td.html(links);
             });
         }
         if(u.id in data.lates) { // Latenesses
             _.each(data.lates[u.id], function(why, when){
-                row.find('.'+when).addClass('late').attr('title', why);
+                row.find('.'+when).addClass('late inactive').attr('title', why);
             });
         }
     });

@@ -36,25 +36,21 @@
                     posX = $current.position().left;
                 $('.absences .data .scrollable').scrollLeft(posX);
             }
+            $('td.absent').tooltip({
+                container: 'body',
+                template: '<div class="tooltip tooltip-absence"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+            });
         });
 
         // Toggling latenesses!
         $('.absences-nav .agenda .late').on('click', function(){
-            if($(this).is('.inactive')) {
-                $('.floatd.late').hide();
-            } else {
-                $('.floatd.late').show();
-            }
+            $('.data .late').toggleClass('inactive');
             $(this).toggleClass('inactive');
         });
 
         $('td.late').tooltip( {
             container: 'body',
             template: '<div class="tooltip tooltip-late"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
-        });
-        $('td.planowany, td.planowany, td.zadanie, td.l4, td.okolicznosciowy, td.inne').tooltip( {
-            container: 'body',
-            template: '<div class="tooltip tooltip-absence"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
         });
     });
     </script>
