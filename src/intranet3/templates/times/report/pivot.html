@@ -4,35 +4,43 @@
 {% set title = _('Time report for %s') % month_start.strftime('%m.%Y') %}
 
 {% block body %}
+    <ul class="agenda no-margin pull-right">
+        <li class="late">{% trans %}Changed{% endtrans %}</li>
+    </ul>
     <ul class="pager">
         <li><a href="{{ request.url_for('/times/report/pivot', month=prev_date.strftime('%m.%Y')) }}">{% trans %}Previous month{% endtrans %}</a></li>
         <li><input type="hidden" id="datepicker" value="{{ month_start.strftime('%m/%d/%Y') }}"/></li>
         <li><a href="{{ request.url_for('/times/report/pivot', month=next_date.strftime('%m.%Y')) }}">{% trans %}Next month{% endtrans %}</a></li>
     </ul>
-    <table class="table table-bordered table-hover" id="time-report">
+    <table class="intranet-table time-report">
         <thead>
             <tr>
-                <th class="index"></th>
-                <th class="username">{% trans %}User\date{% endtrans %}</th>
+                <th class="username" data-scrolltable="placeholder">{% trans %}User\date{% endtrans %}</th>
                 {% for date in dates %}
-                <th class="{% if date == today %}current_date {% endif %}{% if is_holiday(date) %}holiday_date{% endif %}">{{ date.day }}</th>
+                <th class="time {% if date == today %}current_date {% endif %}{% if is_holiday(date) %}holiday_date{% endif %}">{{ date.day }}</th>
                 {% endfor %}
                 <th class="wrk">{% trans %}Wrk (diff){% endtrans %}</th>
-                <th>{% trans %}Exp.{% endtrans %}</th>
+                <th class="time">{% trans %}Exp.{% endtrans %}</th>
+            </tr>
+            <tr class="stats">
+                <th class="username" data-scrolltable="placeholder">{% trans %}Daily sum{% endtrans %}</th>
+                {% for date in dates %}
+                <th class="time {% if date == today %}current_date {% endif %}{% if is_holiday(date) %}holiday_date{% endif %}">{{ '%.0f' % daily_sums[date] if daily_sums[date] else '.' }}</th>
+                {% endfor %}
+                <th class="wrk">{{ '%.0f' % monthly_sum }}</th><th class="time"></th>
             </tr>
         </thead>
         <tbody>
-            <tr class="stats">
-                <td class="index"></td><td class="username">{% trans %}Daily sum{% endtrans %}</td>
-                {% for date in dates %}
-                <td class="{% if date == today %}current_date {% endif %}{% if is_holiday(date) %}holiday_date{% endif %}">{{ '%.0f' % daily_sums[date] if daily_sums[date] else '.' }}</td>
-                {% endfor %}
-                <td>{{ '%.0f' % monthly_sum }}</td><td></td>
-            </tr>
+            {% set last_location = None %}
             {% for user in users %}
-            <tr class="{{ loop.cycle('odd', 'even') }}{% if user == request.user %} current_user{% endif%}{% if user.freelancer %} freelancer{% endif %}">
-                <td class="index">{{ loop.index }}</td>
-                <td class="username">
+            <tr class="{{ loop.cycle('odd', 'even') }}{% if user == request.user %} current_user{% endif%}{% if user.freelancer %} freelancer{% endif %}{% if last_location and user.location != last_location %} new-city{% endif %}">
+                {% if user != request.user and user.location != last_location %}
+                    {% set last_location = user.location %}
+                    <td class="city" rowspan="{{ locations[user.location][1] }}" data-scrolltable="leftHeader"><span>{{ locations[user.location][0] }}</span></td>
+                {% elif user.location != last_location %}
+                    <td class="city" data-scrolltable="leftHeader"></td>
+                {% endif %}
+                <td class="username" data-scrolltable="leftHeader">
                     <a class="x-user-tooltip-{{user.id}}" href="{{ request.url_for('/user/view', user_id=user.id) }}">
                         {{ user.name }}
                         {% if user.freelancer %}
@@ -41,7 +49,7 @@
                     </a>
                 </td>
                 {% for date in dates %}
-                <td class="{% if date == today %}current_date {% endif %}{% if late[user.id][date] %}{% if excuses[user.id][date.strftime('%Y-%m-%d')] %}late-light {% else %}late {% endif %}{% endif %}">
+                <td class="time {% if date == today %}current_date {% endif %}{% if late[user.id][date] %}{% if excuses[user.id][date.strftime('%Y-%m-%d')] %}late-light {% else %}late {% endif %}{% endif %}">
                     {% if user == request.user %}
                     <a href="{{ request.url_for('/times/list', date=date.strftime('%d.%m.%Y')) }}"
                        title="{{ user.name }} / {{ date }}">{{ '%.2f' % entries[user.id][date] if entries[user.id][date] else '.' }}
@@ -53,22 +61,23 @@
                     {% endif %}
                 </td>
                 {% endfor %}
-                <td class="{% if count_of_required_month_hours[user.id] == 0 %}{% elif (sums[user.id] - count_of_required_hours_to_today[user.id] > 0) %}enough{% else %}too-small{% endif %}">
+                <td class="wrk {% if count_of_required_month_hours[user.id] == 0 %}{% elif (sums[user.id] - count_of_required_hours_to_today[user.id] > 0) %}enough{% else %}too-small{% endif %}">
                     {{ '%.2f' % sums[user.id] }}{% if (count_of_required_month_hours[user.id]) > 0 %} ({{ '%.2f' % (sums[user.id] - count_of_required_hours_to_today[user.id]) }}) {% endif %}
                 </td>
-                <td>{{ count_of_required_month_hours[user.id] or ''}}</td>
+                <td class="time">{{ count_of_required_month_hours[user.id] or ''}}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <ul class="agenda">
-        <li class="late">{% trans %}Changed{% endtrans %}</li>
-    </ul>
 {% endblock %}
 
 {% block tail_script %}
+<script src="{{ request.static_path('intranet3:static/js/scrolltable.js') }}"></script>
 <script>
     $(function(){
+        scrollTablePrepare($('.time-report'));
+        scrollTable($('.scrolltable'));
+
         $('#datepicker').datepicker({
             onChangeMonthYear: function(year, month, inst) {
                 window.location = "{{ request.url_for('/times/report/pivot') }}?month="+ month + "." + year;

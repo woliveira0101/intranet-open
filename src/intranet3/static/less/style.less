@@ -1,4 +1,6 @@
 @import "bootstrap/bootstrap.less";
+@import "colors.less";
+@import "absences.less";
 
 @navbarText: #777;
 @grayLight: #999;
@@ -561,175 +563,6 @@ table.bugs-list tbody tr.other-projects td {
     }
 }
 
-.absences {
-    overflow: hidden;
-    width: 100%;
-
-    div {
-        &.clear {
-            clear: both;
-        }
-        &.floaty {
-            overflow: hidden;
-            float: left;
-            
-            &.scrollable {
-                overflow: auto;
-            }
-        }
-        .pagerPlaceholder {
-            width: 20em;
-            text-align: center;
-            // Recompensation for border
-            margin-left: -1px;
-            // Recompensation for bottom border
-            margin-top: -1px;
-            position: relative;
-            border-right: solid 1px #000;
-            border-bottom: solid 1px #000;
-            .pager {
-                position: absolute;
-                bottom: 0.5em;
-                width: 100%;
-                margin: 0;
-                a {
-                    padding: 5px 8px;
-                }
-            }
-        }
-    }
-    #days {
-        border-left: solid 1px transparent;
-    }
-    table {
-        margin: 0 auto;
-        thead, tfoot {
-            th {
-                cursor: default;
-                padding-left: 0px;
-                padding-right: 0px;
-
-                &.day {
-                    border: solid 1px #d3d3d3;
-                }
-                &.weekday {
-                    border: solid 1px #d3d3d3;
-                    border-bottom: solid 1px;
-                }
-                &.month {
-                    border-bottom: solid 1px #d3d3d3;
-                    border-right: solid 1px;
-                }
-                &.user {
-                    border-right: solid 1px;
-                }
-                &.holiday {
-                    background-color: #F7DFDE;
-                }
-                &.today {
-                    background-color: lightyellow;
-                }
-            }
-        }
-        tbody {
-            tr:nth-child(odd) {
-                background: #E2E4FF;
-            }
-        }
-        td, th {
-            padding-left: 0px;
-            padding-right: 0px;
-            min-width: 1.5em;
-            min-height: 1.2em;
-            line-height: 1.2em;
-            text-align: center;
-        }
-        td {
-            border: solid 1px #d3d3d3;
-
-            &.user {
-                border-right: solid 1px;
-                width: 20em;
-                max-width: 20em;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                .help {
-                    cursor: help;
-                    border-bottom: dotted 1px #666;
-                }
-            }
-            &.highlighted {
-                background-color: red;
-            }
-            &.holiday {
-                background-color: #F7DFDE;
-            }
-            &.today {
-                background-color: lightyellow;
-            }
-            &.city {
-                text-align: center;
-                padding-top: 7em;
-                background: #fff;
-                span {
-                    .rotate(-90deg);
-                    letter-spacing: 3px;
-                    display: block;
-                    text-transform: uppercase;
-                    font-weight: bold;
-                    width: 1em;
-                    margin: 0 auto;
-                }
-            }
-        }
-        .monthend {
-            border-right: solid 1px !important;
-        }
-        td.planowany, td.planowany, td.zadanie, td.l4, td.okolicznosciowy, td.inne {
-            background-color: darkred;
-        }
-        td.late {
-            background-color: darkgoldenrod;
-        }
-    }
-}
-@tooltipAbsenceColor: darkred;
-@tooltipLateColor: darkgoldenrod;
-
-.tooltip-absence .tooltip-inner{
-    background-color: @tooltipAbsenceColor;
-}
-.tooltip-absence.top .tooltip-arrow {
-    border-top-color: @tooltipAbsenceColor;
-}
-.tooltip-absence.right .tooltip-arrow {
-    border-right-color: @tooltipAbsenceColor;
-}
-.tooltip-absence.left .tooltip-arrow {
-    border-left-color: @tooltipAbsenceColor;
-}
-.tooltip-absence.bottom .tooltip-arrow {
-    border-bottom-color: @tooltipAbsenceColor;
-}
-
-.tooltip-late .tooltip-inner{
-    background-color: @tooltipLateColor;
-}
-.tooltip-late.top .tooltip-arrow {
-    border-top-color: @tooltipLateColor;
-}
-.tooltip-late.right .tooltip-arrow {
-    border-right-color: @tooltipLateColor;
-}
-.tooltip-late.left .tooltip-arrow {
-    border-left-color: @tooltipLateColor;
-}
-.tooltip-late.bottom .tooltip-arrow {
-    border-bottom-color: @tooltipLateColor;
-}
-
-
 /* Hours */
 .time-entrie-forms {
     ul,ol {
@@ -844,7 +677,7 @@ table.bugs-list tbody tr.other-projects td {
     color: green;
     white-space: nowrap;
 }
-.table {
+.table, .intranet-table {
     th {
         background: #d2d2d2 !important;
     }
@@ -885,13 +718,16 @@ table.bugs-list tbody tr.other-projects td {
         background: #ddd !important;
     }
 }
-#time-report {
+.time-report {
     .holiday_date {
         opacity: .5;
     }
-    td,th {
+    td, th {
         text-align: center;
         padding: 5px 3px;
+        &.username {
+            width: auto;
+        }
     }
     a {
         color: #000;
@@ -900,11 +736,52 @@ table.bugs-list tbody tr.other-projects td {
             text-decoration: none;
         }
     }
-    .username {
-        text-align: left;
+    .placeholder table {
+        width: 100%;
+        height: 100%;
     }
-    tr.stats td {
-        background: #d2d2d2 !important;
+    .topHeader tr.stats th {
+        border: solid 1px #eee;
+        border-left: solid 1px transparent;
+        border-bottom: none;
+    }
+    thead {
+        border: solid 1px #d2d2d2 !important;
+        tr.stats th {
+            background: #d2d2d2 !important;
+            font-weight: normal;
+        }
+        th {
+            -webkit-box-sizing: border-box;
+               -moz-box-sizing: border-box;
+                    box-sizing: border-box;
+        }
+    }
+    tbody tr {
+        &:nth-child(odd) {
+            background: #f6f6f6;
+        }
+        &:hover {
+            background: #ddd !important;
+        }
+        td {
+            border: solid 1px #eee;
+            -webkit-box-sizing: border-box;
+               -moz-box-sizing: border-box;
+                    box-sizing: border-box;
+            &.username {
+                text-align: left;
+            }
+        }
+    }
+    .time {
+    	min-width: 4.5em;
+    }
+    .wrk {
+    	min-width: 10em;
+    }
+    tr.new-city {
+    	border-top: solid 1px #000;
     }
 }
 .agenda {
@@ -916,6 +793,15 @@ table.bugs-list tbody tr.other-projects td {
         padding: 5px 10px;
         margin-bottom: 15px;
         color: #fff;
+    }
+    &.no-margin li {
+        margin-bottom: 0;
+    }
+    &.agenda-absences {
+        position: relative;
+        float: right;
+        margin-top: -4.5em;
+        right: 1.5em;
     }
 }
 /* Report time */
@@ -1757,12 +1643,65 @@ form.absence-form {
         th.sprint {
             width: 130px;
             text-align: center;
-
         }
     }
     tbody tr {
         td.sprint {
             text-align: center;
         }
+    }
+}
+
+/* Scrolltable */
+.scrolltable {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+
+    div {
+        &.clear {
+            clear: both;
+        }
+        &.floaty {
+            overflow: hidden;
+            position: absolute;
+            &.placeHolder, &.topHeader {
+                top: 0;
+            }
+            &.placeHolder, &.leftHeader {
+                left: 0;
+            }
+            &.topHeader, &.data {
+                right: 0;
+            }
+            &.leftHeader, &.data {
+                bottom: 0;
+            }
+        }
+        &.scrollable {
+            width: 100%;
+            overflow: auto;
+            position: relative;
+            table {
+            	margin-right: 1px;
+            }
+        }
+    }
+    table {
+    	table-layout: fixed;
+    }
+}
+
+table td.city-vertical {
+    text-align: center;
+    background: #fff;
+    span {
+        .rotate(-90deg);
+        letter-spacing: 3px;
+        display: block;
+        text-transform: uppercase;
+        font-weight: bold;
+        width: 1em;
+        margin: 5em auto 0 auto;
     }
 }
