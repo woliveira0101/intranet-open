@@ -124,15 +124,23 @@ class Absences(BaseView):
         return lates_groupped
 
     def get(self):
+        # Requested (or current) year
         year = self.request.GET.get('year')
         year = int(year) if year else datetime.date.today().year
+        # Year start day and end day
         start = datetime.date(year, 1, 1)
         end = datetime.date(year, 12, 31)
+        start_day = dict(
+            day=start.day,
+            dow=start.weekday(),
+        )
+
         day_count, date_range, months = self.necessary_data(start, end)
         holidays = Holiday.query \
                           .filter(Holiday.date >= start) \
                           .all()
 
+        # Users
         users_p = User.query.filter(User.is_not_client()) \
                             .filter(User.is_active==True) \
                             .filter(User.location=='poznan') \
@@ -147,14 +155,11 @@ class Absences(BaseView):
         ]
         users_p.extend(users_w)
 
+        # Leaves
         leave_mandated = Leave.get_for_year(start.year)
         leave_used = Leave.get_used_for_year(start.year)
 
-        start_day = dict(
-            day=start.day,
-            dow=start.weekday(),
-        )
-
+        # Transform users to dictionary, group by city and order by leave days
         users = [dict(
                       id=str(u.id),
                       name=u.name,
@@ -173,7 +178,6 @@ class Absences(BaseView):
 
         absences, absences_months = self.get_absences(start, end, users)
         lates = self.get_lates(start, end)
-
         absences_sum = (
             reduce(lambda s, u: s + u['leave_used'], users, 0),
             reduce(lambda s, u: s + u['leave_mandated'], users, 0),
