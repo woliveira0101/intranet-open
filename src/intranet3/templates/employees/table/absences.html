@@ -10,8 +10,8 @@
         <li><a href="{{ request.url_for('/employees/table/absences') }}?year={{ year+1 }}">{% trans %}Next year{% endtrans %}</a></li>
     </ul>
     <ul class="agenda">
-        <li class="absence">Absence</li>
-        <li class="late inactive">Lateness</li>
+        <li class="absence">Absences</li>
+        <li class="late inactive">Latenesses</li>
     </ul>
 </div>
 <div class="absences">
@@ -28,9 +28,8 @@
         // generateTable function is in absences.js file
         generateTable(data);
         scrollTable($('.absences'));
-        // If current year, scroll to today
         $(window).load(function(){
-            absencesAndLatenesses($('.absences .data .scrollable'), data);
+            // If current year, scroll to today
             if(data.year === new Date().getFullYear()) {
                 var $current = $('.absences th.month.current'),
                     posX = $current.position().left;
@@ -40,17 +39,16 @@
                 container: 'body',
                 template: '<div class="tooltip tooltip-absence"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
             });
+            $('td.late').tooltip( {
+                container: 'body',
+                template: '<div class="tooltip tooltip-late"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+            });
         });
 
         // Toggling latenesses!
         $('.absences-nav .agenda .late').on('click', function(){
             $('.data .late').toggleClass('inactive');
             $(this).toggleClass('inactive');
-        });
-
-        $('td.late').tooltip( {
-            container: 'body',
-            template: '<div class="tooltip tooltip-late"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
         });
     });
     </script>

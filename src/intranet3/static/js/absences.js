@@ -121,30 +121,21 @@ function generateTable(data) {
         var groupHeader = cgUser == 0 ? '<td class="city" rowspan="'+cg[1]+'"><span>'+cg[0]+'</span></td>' : '';
         var link = '/employees/list/absence?user_id='+u.id+'&limit=200&date_start=01-01-'+data.year+'&date_end=31-12-'+data.year;
         users += '<tr id="u'+u.id+'">'+groupHeader+'<td class="user"><a href="'+link+'">'+u.name+' '+leaves+'</a></td></tr>';
-        rows.push(row);
-        cgUser++;
-    });
-
-    // Append!
-    $days.append(header1);
-    $days.append(header2);
-    $days.append(header3);
-    $users.append(users);
-    $data.append(rows);
-    $absences.replaceWith($struct);
-}
-
-function absencesAndLatenesses($table, data) {
-    _.each(data.users, function(u){
-        var row = $table.find('#u'+u.id);
         if(u.id in data.absences) { // Absences
-            _.each(data.absences[u.id], function(attr, start){
+            for(start in data.absences[u.id]) {
+                var attr = data.absences[u.id][start];
                 // attr: [length, type, description]
                 // Failsafety for wrong entries
                 if(attr[0] <= 0) {
                     attr[0] = 1;
                 }
-                var $td = row.find('.'+start+', .'+start+':lt('+(attr[0]-1)+')');
+                var $td = row.find('.'+start);
+                if (attr[0] > 1) {
+                    var $tdNext = $td.nextAll(':lt('+(attr[0]-1)+')');
+                    if($tdNext.length) {
+                        $td = $td.add($tdNext);
+                    }
+                }
                 $td.addClass('absent').attr({
                     title: attr[2]
                 });
@@ -156,12 +147,25 @@ function absencesAndLatenesses($table, data) {
                     date.setDate(date.getDate()+1); // Add 1 day - obvious, isn't it?
                     $td.eq(i).html(link);
                 }
-            });
+                $td.last().addClass('last');
+            }
         }
         if(u.id in data.lates) { // Latenesses
-            _.each(data.lates[u.id], function(why, when){
+            for(when in data.lates[u.id]) {
+                var why = data.lates[u.id][when];
                 row.find('.'+when).addClass('late inactive').attr('title', why);
-            });
+            }
         }
+        rows.push(row);
+        cgUser++;
     });
+
+    // Append!
+    $days.append(header1);
+    $days.append(header2);
+    $days.append(header3);
+    $users.append(users);
+    $data.append(rows);
+
+    $absences.replaceWith($struct);
 }

@@ -660,6 +660,10 @@ table.bugs-list tbody tr.other-projects td {
         }
         td.absent {
             background: darkred;
+            border-right: solid 1px darkred;
+            &.last {
+                border-right-color: #d3d3d3;
+            }
             overflow-x: hidden;
             white-space: nowrap;
             text-align: center;
