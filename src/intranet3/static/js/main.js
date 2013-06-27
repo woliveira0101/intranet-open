@@ -270,7 +270,8 @@
             buttonImageOnly: true,
             changeMonth: true,
             changeYear: true,
-            dateFormat: 'mm/dd/yy'
+            dateFormat: 'mm/dd/yy',
+            firstDay: 1
         });
 
         var usertooltip = (function(){
