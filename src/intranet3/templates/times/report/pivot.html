@@ -36,9 +36,9 @@
             <tr class="{{ loop.cycle('odd', 'even') }}{% if user == request.user %} current_user{% endif%}{% if user.freelancer %} freelancer{% endif %}{% if last_location and user.location != last_location %} new-city{% endif %}">
                 {% if user != request.user and user.location != last_location %}
                     {% set last_location = user.location %}
-                    <td class="city" rowspan="{{ locations[user.location][1] }}" data-scrolltable="leftHeader"><span>{{ locations[user.location][0] }}</span></td>
+                    <td class="city-vertical" rowspan="{{ locations[user.location][1] }}" data-scrolltable="leftHeader"><span>{{ locations[user.location][0] }}</span></td>
                 {% elif user.location != last_location %}
-                    <td class="city" data-scrolltable="leftHeader"></td>
+                    <td class="city-vertical" data-scrolltable="leftHeader"></td>
                 {% endif %}
                 <td class="username" data-scrolltable="leftHeader">
                     <a class="x-user-tooltip-{{user.id}}" href="{{ request.url_for('/user/view', user_id=user.id) }}">
