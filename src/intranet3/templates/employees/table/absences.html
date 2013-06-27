@@ -37,16 +37,20 @@
             }
             $('td.absent').tooltip({
                 container: 'body',
+                animation: false,
                 template: '<div class="tooltip tooltip-absence"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
             });
-            $('td.late').tooltip( {
+            $('td.late').tooltip({
                 container: 'body',
+                animation: false,
                 template: '<div class="tooltip tooltip-late"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
             });
+            $('td.late').tooltip('disable'); // Latenesses are hidden by default
         });
 
         // Toggling latenesses!
         $('.absences-nav .agenda .late').on('click', function(){
+            $('td.late').tooltip($(this).is('.inactive') ? 'enable' : 'disable');
             $('.data .late').toggleClass('inactive');
             $(this).toggleClass('inactive');
         });
