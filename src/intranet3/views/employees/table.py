@@ -37,7 +37,7 @@ class Absences(BaseView):
 
         return days, date_range, months
 
-    def get_absences(self, start, end):
+    def get_absences(self, start, end, users):
         holidays = Holiday.query \
                           .filter(Holiday.date >= start) \
                           .filter(Holiday.date <= end) \
@@ -62,33 +62,39 @@ class Absences(BaseView):
 
         months = {i: 0 for i in range(1,13)}
 
-        absences_groupped = {}
+        absences_groupped = {int(u['id']): {} for u in users}
         td = datetime.timedelta
         for user_id, absences in absences.iteritems():
+            # We don't want users that aren't being shown
             if not user_id in absences_groupped:
-                absences_groupped[user_id] = {}
+                continue
             for start, end, type_, remarks in absences:
+                if end < start: # what is this I don't even
+                    continue
+                if type_ == 'l4': # no illness leaves
+                    continue
                 month = start.month
-                if type_ != 'l4':
-                    tmp_start = start
-                    while month <= end.month:
-                        tmp_end = datetime.date(
-                            start.year,
-                            month,
-                            monthrange(start.year, month)[1]
-                        )
-                        if month < end.month:
-                            length = (tmp_end-tmp_start).days + 1
-                        else:
-                            length = (end-tmp_start).days + 1
-                        # Remove all holidays
-                        while tmp_start <= tmp_end and tmp_start <= end:
-                            if (tmp_start.isoformat() in holidays or
-                                tmp_start.isoweekday() > 5):
-                                length -= 1
-                            tmp_start += td(days=1)
-                        months[month] += length
-                        month += 1
+                tmp_start = start
+                while month <= end.month:
+                    # tmp_end is last day of current month
+                    tmp_end = datetime.date(
+                        start.year,
+                        month,
+                        monthrange(start.year, month)[1]
+                    )
+                    if month < end.month: # is it the last month of absence?
+                        length = (tmp_end-tmp_start).days + 1
+                    else: # or is it not?
+                        length = (end-tmp_start).days + 1
+                    # Remove all holidays (weekends + holidays)
+                    while tmp_start <= tmp_end and tmp_start <= end:
+                        if (tmp_start.isoformat() in holidays or
+                            tmp_start.isoweekday() > 5):
+                            length -= 1
+                        tmp_start += td(days=1)
+                    months[month] += length
+                    month += 1 # To the next month!
+                    if month <= 12: # But only if there are any months left!
                         tmp_start = tmp_start.replace(month=month, day=1)
                 length = (end-start).days + 1
                 start = start.isoformat()
@@ -141,8 +147,6 @@ class Absences(BaseView):
         ]
         users_p.extend(users_w)
 
-        absences, absences_months = self.get_absences(start, end)
-        lates = self.get_lates(start, end)
         leave_mandated = Leave.get_for_year(start.year)
         leave_used = Leave.get_used_for_year(start.year)
 
@@ -167,6 +171,14 @@ class Absences(BaseView):
             key=lambda u: u['location'],
         )
 
+        absences, absences_months = self.get_absences(start, end, users)
+        lates = self.get_lates(start, end)
+
+        absences_sum = (
+            reduce(lambda s, u: s + u['leave_used'], users, 0),
+            reduce(lambda s, u: s + u['leave_mandated'], users, 0),
+        )
+
         data = {
             'users': users,
             'userGroups': user_groups,
@@ -175,6 +187,7 @@ class Absences(BaseView):
             'dayCount': day_count,
             'months': months,
             'absences': absences,
+            'absencesSum': absences_sum,
             'absencesMonths': absences_months,
             'lates': lates,
             'holidays': [h.date.strftime('%Y-%m-%d') for h in holidays],

@@ -7,7 +7,7 @@ function generateTable(data) {
     // be 100% generated.
     var $struct = $([
         '<div class="absences">',
-            '<div class="floaty placeholder pagerPlaceholder"></div>',
+            '<div class="floaty placeholder"></div>',
             '<div class="floaty topHeader days">',
                 '<table class="display" id="days">',
                     '<thead></thead>',
@@ -29,18 +29,22 @@ function generateTable(data) {
     ].join('\n'));
 
     // All necessary variables
-    var today = new Date();
-    var todayString = $.datepicker.formatDate('yy-mm-dd', today);
-    var dayLetters = ['M', 'T', 'W', 'M', 'F', 'S', 'S'];
-    var startDay = data.startDay.day;
-    var dayOfWeek = data.startDay.dow;
+    var today = new Date(),
+        todayString = $.datepicker.formatDate('yy-mm-dd', today),
+        dayLetters = ['M', 'T', 'W', 'M', 'F', 'S', 'S'],
+        startDay = data.startDay.day,
+        dayOfWeek = data.startDay.dow,
+        rows = [];
 
     // Selectors
-    var $days = $struct.find('#days thead');
-    var $users = $struct.find('#users tbody');
-    var $data = $struct.find('#data tbody');
-    var singleRowStub = $('<tr />');
-    var rows = [];
+    var $days = $struct.find('#days thead'),
+        $users = $struct.find('#users tbody'),
+        $data = $struct.find('#data tbody'),
+        $placeholder = $struct.find('.placeholder');
+        singleRowStub = $('<tr />'),
+
+    // Placeholder!
+    $placeholder.html('<div>Total: <span class="help" title="leave days used / leave days mandated">'+data.absencesSum[0]+'/'+data.absencesSum[1]+'</span></div>');
 
     // Generate all headers!
     // Header 1: month's name (July)
@@ -57,7 +61,7 @@ function generateTable(data) {
         var colspan = firstMonth ? m[1]-startDay+1 : m[1];
         var monthNo = m[2]<10 ? '0'+m[2] : m[2];
         var link = '/employees/list/absence?limit=200&date_start=01-'+monthNo+'-'+data.year+'&date_end='+m[1]+'-'+monthNo+'-'+data.year;
-        var monthText = m[0] + ' (<a href="'+link+'">'+data.absencesMonths[m[2]]+'</a>)';
+        var monthText = m[0] + ' (<a href="'+link+'" class="help" title="leave days count (excluding illness leaves)">'+data.absencesMonths[m[2]]+'</a>)';
         var headTd = $('<th/>').html(monthText).attr('colspan', colspan).addClass('month');
         if(data.year === today.getFullYear() && m[2] === today.getMonth()+1) {
             headTd.addClass('current');
@@ -106,9 +110,9 @@ function generateTable(data) {
     // Generate all users!
     var users = '';
     // cg = currentGroup
-    var cgNo = 0;
-    var cgUser = 0;
-    var cg = data.userGroups[0];
+    var cgNo = 0,
+        cgUser = 0,
+        cg = data.userGroups[0];
     _.each(data.users, function(u){
         if(cgUser >= cg[1]) {
             cgNo++;

@@ -2,7 +2,7 @@
 @import "colors.less";
 
 .absences {
-    .pagerPlaceholder {
+    .placeholder {
         width: 20em;
         text-align: center;
         // Recompensation for border
@@ -11,17 +11,19 @@
         margin-top: -1px;
         position: relative;
         border-right: solid 1px #000;
-        border-bottom: solid 1px #000;
-        .pager {
+        div {
+            display: block;
             position: absolute;
-            bottom: 0.5em;
+            bottom: 1em;
             width: 100%;
             margin: 0;
             text-align: center;
-            a {
-                padding: 5px 8px;
-            }
+            font-size: 1.5em;
         }
+    }
+    .help {
+        cursor: help;
+        border-bottom: dotted 1px #666;
     }
     #days {
         border-left: solid 1px transparent;
@@ -74,10 +76,6 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                .help {
-                    cursor: help;
-                    border-bottom: dotted 1px #666;
-                }
             }
             &.holiday {
                 background-color: @absences-holiday;
