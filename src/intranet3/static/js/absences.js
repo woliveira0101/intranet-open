@@ -122,7 +122,7 @@ function generateTable(data) {
         var row = singleRowStub.clone();
         row.attr('id', 'u'+u.id);
         var leaves = '<span class="help" title="leave days used / leave days mandated">('+u.leave_used+'/'+u.leave_mandated+')</span>';
-        var groupHeader = cgUser == 0 ? '<td class="city" rowspan="'+cg[1]+'"><span>'+cg[0]+'</span></td>' : '';
+        var groupHeader = cgUser == 0 ? '<td class="city-vertical" rowspan="'+cg[1]+'"><span>'+cg[0]+'</span></td>' : '';
         var link = '/employees/list/absence?user_id='+u.id+'&limit=200&date_start=01-01-'+data.year+'&date_end=31-12-'+data.year;
         users += '<tr id="u'+u.id+'">'+groupHeader+'<td class="user"><a href="'+link+'">'+u.name+' '+leaves+'</a></td></tr>';
         if(u.id in data.absences) { // Absences
