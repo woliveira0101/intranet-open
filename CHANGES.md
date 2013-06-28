@@ -1,6 +1,13 @@
 New release
 ===========
 
+0.8.6 (28-06-2013)
+===============
+
+- more fixes to absence view
+- better /times/report/pivot
+- scrum role fix
+
 0.8.5 (18-06-2013)
 ===============
 
