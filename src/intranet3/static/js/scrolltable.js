@@ -128,12 +128,16 @@ function scrollTable($base) {
         $leftParent.css('top', $topParent.height()+'px');
         if($data.width() < width) { // Do we need horizontal scrollbar?
             $leftParent.css('bottom', '0');
+            $p.css('width', ($data.width()+margin+1)+'px');
         } else {
             $leftParent.css('bottom', margin+'px');
         }
         $topParent.css('left', $leftParent.width()+'px');
         if($data.height() < height) { // Do we need vertical scrollbar?
             $topParent.css('right', '0');
+            var newHeight = $data.height()+margin+1;
+            $p.css('height', newHeight+'px');
+            $base.height(newHeight+$topParent.height());
         } else {
             $topParent.css('right', margin+'px');
         }
@@ -143,7 +147,6 @@ function scrollTable($base) {
             left: $leftParent.width()+'px'
         });
         $scrollable.height($p.height());
-        $data.css('min-width', ($p.width()-2*margin)+'px');
     }
     $(window).resize(function(e){
         setSize();

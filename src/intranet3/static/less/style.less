@@ -764,6 +764,9 @@ table.bugs-list tbody tr.other-projects td {
         &:hover {
             background: #ddd !important;
         }
+        &.new-city {
+            border-top: solid 3px #ccc;
+        }
         td {
             border: solid 1px #eee;
             -webkit-box-sizing: border-box;
@@ -775,13 +778,21 @@ table.bugs-list tbody tr.other-projects td {
         }
     }
     .time {
-    	min-width: 4.5em;
+        min-width: 3.5em;
+        max-width: 3.5em;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: 10px;
     }
     .wrk {
-    	min-width: 10em;
+        min-width: 10em;
+        max-width: 10em;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: 10px;
     }
     tr.new-city {
-    	border-top: solid 1px #000;
+        border-top: solid 1px #000;
     }
 }
 .agenda {
@@ -1673,6 +1684,9 @@ form.absence-form {
             }
             &.topHeader, &.data {
                 right: 0;
+                table {
+                    float: left;
+                }
             }
             &.leftHeader, &.data {
                 bottom: 0;
