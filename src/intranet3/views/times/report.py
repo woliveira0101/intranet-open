@@ -73,9 +73,10 @@ class Pivot(MonthMixin, BaseView):
                                 .order_by(User.freelancer, User.name) \
                                 .all()
             locations = {
-                'wroclaw': (u'Wrocław', len(users_w)),
-                'poznan': (u'Poznań', len(users_p)),
+                'wroclaw': [u'Wrocław', len(users_w)],
+                'poznan': [u'Poznań', len(users_p)],
             }
+            locations[self.request.user.location][1] -= 1
             users = users_p
             users.extend(users_w)
 
