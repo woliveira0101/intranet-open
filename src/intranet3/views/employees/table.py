@@ -12,7 +12,6 @@ from intranet3.utils.views import BaseView
 from intranet3.utils import idate
 from intranet3 import helpers as h
 
-
 locale = Locale('en', 'US')
 
 
@@ -149,11 +148,18 @@ class Absences(BaseView):
                             .filter(User.is_active==True) \
                             .filter(User.location=='wroclaw') \
                             .order_by(User.freelancer, User.name).all()
+        
         user_groups = [
             (u'Poznań', len(users_p)),
             (u'Wrocław', len(users_w)),
         ]
-        users_p.extend(users_w)
+        
+        reverse = False
+        if self.request.user.location == 'wroclaw':
+            user_groups.insert(0, user_groups.pop())
+            reverse = True
+
+        users_p.extend(users_w) 
 
         # Leaves
         leave_mandated = Leave.get_for_year(start.year)
@@ -167,15 +173,23 @@ class Absences(BaseView):
                       leave_used=leave_used[u.id],
                       location=u.location,
                      ) for u in users_p]
+        
+        
+        employees, students = [], []
+        for user in users:
+            if user['leave_mandated'] > 0:
+                employees.append(user)
+            else:
+                students.append(user)
+        
+        users = employees + students
+        # groupby location
         users = sorted(
-            sorted(
-                users,
-                key=lambda u: u['leave_mandated']-u['leave_used'],
-                reverse=True,
-            ),
+            users,
             key=lambda u: u['location'],
+            reverse=reverse
         )
-
+        
         absences, absences_months = self.get_absences(start, end, users)
         lates = self.get_lates(start, end)
         absences_sum = (
