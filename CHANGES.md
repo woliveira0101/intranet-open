@@ -1,6 +1,8 @@
 New release
 ===========
 
+- better sorting for /times/report/pivot and /employees/table/absences
+
 0.8.6 (28-06-2013)
 ===============
 
