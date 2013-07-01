@@ -77,8 +77,12 @@ class Pivot(MonthMixin, BaseView):
                 'poznan': [u'Poznań', len(users_p)],
             }
             locations[self.request.user.location][1] -= 1
-            users = users_p
-            users.extend(users_w)
+            if self.request.user.location == 'wroclaw':
+                users = users_w
+                users.extend(users_p)
+            else:
+                users = users_p
+                users.extend(users_w)
 
         today = datetime.date.today()
         grouped = defaultdict(lambda: defaultdict(lambda: 0.0))
