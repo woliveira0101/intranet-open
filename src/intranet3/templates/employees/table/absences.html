@@ -33,7 +33,9 @@
             if(data.year === new Date().getFullYear()) {
                 var $current = $('.absences th.month.current'),
                     posX = $current.position().left;
-                $('.absences .data .scrollable').scrollLeft(posX);
+                setTimeout(function(){
+                    $('.absences .data .scrollable').scrollLeft(posX);
+                }, 10);
             }
             $('td.absent').tooltip({
                 container: 'body',
