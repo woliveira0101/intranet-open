@@ -50,8 +50,12 @@ class OldBugsReport(CronView):
             EXCEPTION(u'Failed to sent Monthly report with old bugs')
 
         if coordinator in bugs:
+            if coordinator == '__all__':
+                title = u'Lista najstarszych niezamkniętych bugów\nwe wszystkich projektach'
+            else:
+                title = u'Lista najstarszych niezamkniętych bugów\nw projektach w których jesteś koordynatorem'
             data = {'bugs': bugs[coordinator][1][:20],
-                    'title': self._(u'Lista najstarszych niezamkniętych bugów\nw projektach w których jesteś koordynatorem')}
+                    'title': self._(title)}
 
             response = render(
                 'intranet3:templates/_email_reports/old_bugs_report.html',
