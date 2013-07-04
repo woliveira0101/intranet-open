@@ -111,7 +111,13 @@
             &.late {
                 background: @absences-late;
                 &.inactive {
-                    background: transparent;
+                    background: inherit;
+                    &.holiday {
+                        background: @absences-holiday;
+                    }
+                    &.today {
+                        background: @absences-today;
+                    }
                 }
             }
         }
