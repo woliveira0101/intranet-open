@@ -1,7 +1,11 @@
 New release
 ===========
 
+0.8.7 (04-07-2013)
+===============
+
 - better sorting for /times/report/pivot and /employees/table/absences
+- color fixes for /employees/table/absences
 
 0.8.6 (28-06-2013)
 ===============
