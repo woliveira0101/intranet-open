@@ -196,8 +196,9 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseSprintV
 
         group_by = True, True, form.group_by_bugs.data, form.group_by_user.data
         bigger_than = form.bigger_than.data
+        ticket_choice = form.ticket_choice.data
 
-        uber_query = self._prepare_uber_query_for_sprint(sprint, bugs)
+        uber_query = self._prepare_uber_query_for_sprint(sprint, bugs, ticket_choice)
         entries = uber_query.all()
 
         if self.request.GET.get('excel'):
