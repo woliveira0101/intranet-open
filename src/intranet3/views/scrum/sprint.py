@@ -177,7 +177,8 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
 
 
 @view_config(route_name='scrum_sprint_times', permission='client')
-class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseSprintView):
+class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin,
+            BaseSprintView):
     def dispatch(self):
         sprint = self.v['sprint']
         bugs = self._fetch_bugs(sprint)
@@ -198,12 +199,16 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseSprintV
         bigger_than = form.bigger_than.data
         ticket_choice = form.ticket_choice.data
 
-        uber_query = self._prepare_uber_query_for_sprint(sprint, bugs, ticket_choice)
+        uber_query = self._prepare_uber_query_for_sprint(
+            sprint, bugs,ticket_choice
+        )
         entries = uber_query.all()
 
         if self.request.GET.get('excel'):
             from intranet3.lib.times import dump_entries_to_excel
-            file, response = dump_entries_to_excel(entries, group_by, bigger_than)
+            file, response = dump_entries_to_excel(
+                entries, group_by, bigger_than
+            )
             return response
 
         participation_of_workers = self._get_participation_of_workers(entries)
@@ -211,7 +216,9 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseSprintV
         tickets_id = ','.join([str(e[2]) for e in entries])
         trackers_id = ','.join([str(e[4].id) for e in entries])
 
-        rows, entries_sum = HTMLRow.from_ordered_data(entries, group_by, bigger_than)
+        rows, entries_sum = HTMLRow.from_ordered_data(
+            entries, group_by, bigger_than
+        )
 
         return dict(
             rows=rows,
@@ -219,7 +226,9 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin, BaseSprintV
             form=form,
             info=sw.get_info(),
             participation_of_workers=participation_of_workers,
-            participation_of_workers_sum=sum([time[1] for time in participation_of_workers]),
+            participation_of_workers_sum=sum(
+                [time[1] for time in participation_of_workers]
+            ),
             trackers_id=trackers_id, tickets_id=tickets_id,
         )
 
