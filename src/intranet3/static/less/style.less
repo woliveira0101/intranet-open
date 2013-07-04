@@ -893,6 +893,27 @@ select#clients {
             height: 220px;
         }
     }
+    // Special styles for sprint times
+    &.sprint {
+        .selectors div {
+            float: left;
+            dl {
+                dt {
+                    width: auto;
+                    padding: 0 10px 0 30px;
+                }
+                dd {
+                    padding: 0 5px;
+                    #ticket_choice {
+                        margin-top: 0;
+                    }
+                }
+            }
+            .description {
+                display: none;
+            }
+        }
+    }
 }
 #ticket_choice {
     margin-left: 0px;
