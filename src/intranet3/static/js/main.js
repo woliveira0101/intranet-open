@@ -20,7 +20,7 @@
     function clear_intervals_list(){
         var i,
             len = intervals_list.length;
-        
+
         if(len > 0){
             for(i=0; i<len; i++){
                 var id = intervals_list[i];
@@ -52,7 +52,7 @@
             function update_time(){
                 var seconds = (new Date() - timer_ts) / 1000; //seconds
                 var min = (hours * 60) + minutes + (seconds / 60);
-                
+
                 var h = Math.floor(min / 60),
                     m = Math.floor(min % 60),
                     fm = m.toFixed();
@@ -66,7 +66,7 @@
                 status = 'start_timer';
             } else {
                 status = 'stop_timer';
-                timer_ts = new Date(parseInt(timer_ts));
+                timer_ts = new Date(parseInt(timer_ts, 10));
                 intervalID = setInterval(update_time, TIMEOUT);
                 intervals_list.push(intervalID);
                 obj.parents('tr').addClass('timer_on');
@@ -82,7 +82,7 @@
                         if(status === 'start_timer'){
                             text = 'Stop Timer';
                             obj.removeClass('start').addClass('stop');
-                            obj.addClass('btn-primary')
+                            obj.addClass('btn-primary');
                             obj.parents('tr').find('input.superkurazu').addClass('off');
                             intervalID = setInterval(update_time, TIMEOUT);
                             timer_ts = new Date();
@@ -212,7 +212,7 @@
                     .replace(/verified/, 7)
                     .replace(/closed/, 8)
                     .replace(/resolved/, 9);
-                return result
+                return result;
             },
             // set type, either numeric or text
             type: 'numeric'
@@ -248,7 +248,7 @@
             window.open(this.href);
             return false;
         });
-       
+
         $('a.fancybox').fancybox({
             'width'             : '100%',
             'height'            : '100%',
@@ -295,7 +295,7 @@
                    $dom.css({
                        left:x,
                        top:y
-                   });  
+                   });
                 }
             };
             var show = function(uid){
@@ -304,12 +304,12 @@
                 $dom.html('Loading...').show();
                 get(uid,function(html){
                     $dom.html(html);
-                });    
+                });
             };
             var hide = function(){
                 isShow = false;
                 $dom.hide();
-            }
+            };
 
             var $dom = $('<div>',{
                 id:'users-tootip'
@@ -333,7 +333,7 @@
                     clearTimeout(_t);
                     _t = setTimeout(function(){
                         hide();
-                    },10);  
+                    },10);
                 }
             };
         })();
@@ -479,6 +479,34 @@
             });
         }
 
+        function matchPeople(input) {
+            var reg = new RegExp(input.split('').join('\\w*').replace(/\W/, ""), 'i');
+            return people.filter(function(person) {
+                if (person.match(reg)) {
+                    return person;
+                }
+            });
+        }
+        // Typeahead for projects - single project
+        $('.projectAheadSingle').each(function(){
+            var $this = $(this);
+            var projects = [];
+            $this.find('option[value!=""]').each(function(){
+                projects.push($(this).text());
+            });
+            var $input = $('<input type="text" autocomplete="off" />');
+            $input.typeahead({
+                source: projects,
+                matcher: function(item) { return fuzzyMatcher(item, this.query, 50, true); },
+                highlighter: function(item) { return fuzzyHighlighter(item, this.query, false, 50, true); }
+            }).on('blur', function(){
+                if(!($(this).val() in projects)) {
+                    $(this).val('');
+                }
+            });
+            $this.after($input);
+            $this.hide();
+        });
     });
 })(jQuery);
 
@@ -489,9 +517,9 @@
             setTimeout(function(){
                 f();
                 loop_f();
-            }, delay)
+            }, delay);
         })();
-    }
+    };
 }( window.IH = window.IH || {}, jQuery, _ ));
 
 // IL - intranet library
@@ -503,11 +531,11 @@
             offset = 0;
         } else if ( typeof(date) === 'string' || typeof(date) === 'number'){
             offset = date;
-            date = Date.today()
+            date = Date.today();
         } else if (offset === undefined){
             offset = 0;
         }
-        offset = parseInt(offset)
+        offset = parseInt(offset, 10);
 
         var first = new Date(date.getTime()), last = new Date(date.getTime());
 
@@ -520,7 +548,7 @@
         last.add({ days: 7*offset });
         last.add({ days: 6});
 
-        return [first, last]
-    }
+        return [first, last];
+    };
 
 }( window.IL = window.IL || {}, jQuery, _, Date ));
