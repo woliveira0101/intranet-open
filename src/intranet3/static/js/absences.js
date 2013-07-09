@@ -171,5 +171,8 @@ function generateTable(data) {
     $users.append(users);
     $data.append(rows);
 
+    // Wrap all today cells
+    $data.find('.today').prev().addClass('today');
+
     $absences.replaceWith($struct);
 }
