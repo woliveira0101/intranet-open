@@ -15,7 +15,7 @@
 
     <div class="filters form_late">
         <form method="GET" action="{{ request.url_for('/scrum/sprint/list') }}">
-        {{ form_field(form.project_id, _('Projects'), class='projectAheadSingle') }}
+        {{ form_field(form.project_id, _('Projects'), class='typeAheadSingle') }}
         {{ form_field(form.active_only, _('Show active sprints only')) }}
         {{ form_field(form.limit, _('Limit')) }}
         <div class="buttons">

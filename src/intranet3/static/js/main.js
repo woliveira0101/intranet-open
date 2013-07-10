@@ -489,24 +489,28 @@
         }
 
         // Typeahead for projects - single project
-        $('.projectAheadSingle').each(function(){
+        $('.typeAheadSingle').each(function(){
             var $this = $(this);
             // List for feeding the typeahead
-            var projects = [];
+            var values = [];
             // Map for getting selected project's ID
-            var projectsIds = {};
+            var ids = {};
             // Filling these two above
             $this.find('option[value!=""]').each(function(){
-                projects.push($(this).text());
-                projectsIds[$(this).text()] = $(this).val();
+                values.push($(this).text());
+                ids[$(this).text()] = $(this).val();
             });
             // Our input field
             var $input = $('<input type="text" autocomplete="off" />');
             // Set the same size as select
             $input.width($(this).width());
+            // If anything was selected, set it as value for input
+            if($this.val() !== '') {
+                $input.val($this.find('option:selected').text());
+            }
             // Activate typeahead!
             $input.typeahead({
-                source: projects,
+                source: values,
                 // Fuzzy matching is used here. Basically, if someone types "adg",
                 // "An unwanted dog" may be returned.
                 matcher: function(item) { return fuzzyMatcher(item, this.query, 50, false); },
@@ -515,7 +519,7 @@
                 // who can't use typeahead is still able to properly select project.
                 // Also validating for incorrect values.
                 updater: function(item) {
-                    var id = projectsIds[item];
+                    var id = ids[item];
                     if(id != null) {
                         $this.val(id);
                     }
@@ -525,12 +529,12 @@
                 if($(this).val() === '') {
                     $this.val('');
                 }
-                if(projects.indexOf($(this).val()) < 0) {
+                if(values.indexOf($(this).val()) < 0) {
                     $(this).val('');
                 }
             }).on('keydown', function(e){ // Additional checking when user presses the Enter key
                 if(e.which == 13 || e.keyCode == 13) {
-                    if(projects.indexOf($(this).val()) < 0) {
+                    if(values.indexOf($(this).val()) < 0) {
                         $this.val('');
                     }
                 }
