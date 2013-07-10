@@ -509,8 +509,8 @@
                 source: projects,
                 // Fuzzy matching is used here. Basically, if someone types "adg",
                 // "An unwanted dog" may be returned.
-                matcher: function(item) { return fuzzyMatcher(item, this.query, 50, true); },
-                highlighter: function(item) { return fuzzyHighlighter(item, this.query, false, 50, true); },
+                matcher: function(item) { return fuzzyMatcher(item, this.query, 50, false); },
+                highlighter: function(item) { return fuzzyHighlighter(item, this.query, false, 50, false); },
                 // Update the original select control. This is to ensure someone
                 // who can't use typeahead is still able to properly select project.
                 // Also validating for incorrect values.
