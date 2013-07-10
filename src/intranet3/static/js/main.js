@@ -487,24 +487,57 @@
                 }
             });
         }
+
         // Typeahead for projects - single project
         $('.projectAheadSingle').each(function(){
             var $this = $(this);
+            // List for feeding the typeahead
             var projects = [];
+            // Map for getting selected project's ID
+            var projectsIds = {};
+            // Filling these two above
             $this.find('option[value!=""]').each(function(){
                 projects.push($(this).text());
+                projectsIds[$(this).text()] = $(this).val();
             });
+            // Our input field
             var $input = $('<input type="text" autocomplete="off" />');
+            // Set the same size as select
+            $input.width($(this).width());
+            // Activate typeahead!
             $input.typeahead({
                 source: projects,
+                // Fuzzy matching is used here. Basically, if someone types "adg",
+                // "An unwanted dog" may be returned.
                 matcher: function(item) { return fuzzyMatcher(item, this.query, 50, true); },
-                highlighter: function(item) { return fuzzyHighlighter(item, this.query, false, 50, true); }
-            }).on('blur', function(){
-                if(!($(this).val() in projects)) {
+                highlighter: function(item) { return fuzzyHighlighter(item, this.query, false, 50, true); },
+                // Update the original select control. This is to ensure someone
+                // who can't use typeahead is still able to properly select project.
+                // Also validating for incorrect values.
+                updater: function(item) {
+                    var id = projectsIds[item];
+                    if(id != null) {
+                        $this.val(id);
+                    }
+                    return item;
+                }
+            }).on('blur', function(){ // Checking for empty and incorrect values
+                if($(this).val() === '') {
+                    $this.val('');
+                }
+                if(projects.indexOf($(this).val()) < 0) {
                     $(this).val('');
+                }
+            }).on('keydown', function(e){ // Additional checking when user presses the Enter key
+                if(e.which == 13 || e.keyCode == 13) {
+                    if(projects.indexOf($(this).val()) < 0) {
+                        $this.val('');
+                    }
                 }
             });
             $this.after($input);
+            // Original select is no longer needed for user, but it's needed by
+            // us to set proper form values!
             $this.hide();
         });
     });
