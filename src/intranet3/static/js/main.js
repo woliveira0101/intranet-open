@@ -506,6 +506,7 @@
             if(multi) {
                 // Multi select needs additional list of selected items
                 $multiList = $('<ul class="unstyled"/>');
+                // ...and ability to remove them freely
                 $multiList.on('click', 'li i.icon-remove', function(){
                     var id = $(this).parent().data('id').toString();
                     var list = _.filter($this.val(), function(item){
@@ -516,6 +517,7 @@
                 // Change event for multi select
                 $this.on('change', function(){
                     $multiList.html('');
+                    // Readd all elements
                     var list = _.map($(this).val(), function(id){
                         var item = $this.find('option[value="'+id+'"]').text();
                         $multiList.append('<li data-id="'+id+'"><i class="icon-remove pointer"></i> '+item+'</li>');
@@ -524,10 +526,11 @@
             }
             // Our input field
             var $input = $('<input type="text" autocomplete="off" />');
-            // If anything was selected, set it as value for input
             if(!multi && $this.val() !== '') {
+                // If anything was selected, set it as value for input
                 $input.val($this.find('option:selected').text());
             } else if(multi && $this.val() !== null) {
+                // ...or just trigger change event
                 $this.change();
             }
             // Activate typeahead!
@@ -543,12 +546,17 @@
                 updater: function(item) {
                     var id = ids[item];
                     if(!multi && id !== undefined) {
+                        // For single select, just set proper value and return current item
                         $this.val(id);
                         return item;
                     } else if(multi && id !== undefined) {
+                        // For multi select, a list of values is returned
+                        // (or null if nothing is selected - then we need to initialize an empty list)
                         var selected = $this.val() != null ? $this.val() : [];
                         selected.push(id);
+                        // Trigger change event, to update $multiList
                         $this.val(selected).change();
+                        // And clear the input field!
                         return '';
                     }
                     return item;
@@ -572,14 +580,18 @@
             // Add show all button
             var $button = $('<button class="btn" type="button">Show all</button>');
             $button.on('click', function(){
+                // Hide our input
                 $wrap.hide();
-                $this.off('change').show();
-                if(multi) {
+                if(multi) { // Hide multiList
                     $multiList.hide();
                 }
+                // Turn off change event and show
+                $this.off('change').show();
             });
+            // Prepare container for input and show all button
             var $wrap = $('<div class="input-append" />');
             $wrap.append($input).append($button);
+            // APPEND!
             $this.after($wrap);
             if(multi) {
                 $wrap.after($multiList);
