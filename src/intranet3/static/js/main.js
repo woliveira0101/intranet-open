@@ -488,7 +488,12 @@
             });
         }
 
-        // Typeahead for selects
+        /**
+         * TYPEAHEAD FOR SELECTS
+         * 
+         * Usage: just add typeAheadSelect class to your select control, and
+         * let the magic happen!
+         */
         $('.typeAheadSelect').each(function(){
             var $this = $(this);
             // Is this multi select?
@@ -538,7 +543,17 @@
                 source: values,
                 // Fuzzy matching is used here. Basically, if someone types "adg",
                 // "An unwanted dog" may be returned.
-                matcher: function(item) { return fuzzyMatcher(item, this.query, 50, false); },
+                // Also, duplicates are not returned for multi selects.
+                matcher: function(item) {
+                    // Check for duplicates first!
+                    if(multi && $this.val()) {
+                        var id = ids[item].toString();
+                        if($this.val().indexOf(id) >= 0) {
+                            return false;
+                        }
+                    }
+                    return fuzzyMatcher(item, this.query, 50, false);
+                },
                 highlighter: function(item) { return fuzzyHighlighter(item, this.query, false, 50, false); },
                 // Update the original select control. This is to ensure someone
                 // who can't use typeahead is still able to properly select project.
