@@ -24,7 +24,7 @@ class SprintListFilterForm(wtf.Form):
 
 class SprintForm(wtf.Form):
     name = wtf.TextField(_(u"Sprint name"), validators=[validators.Required()])
-    project_id = wtf.SelectField(_(u"Projects"), choices=ProjectChoices(), validators=[validators.Required()])
+    project_id = wtf.SelectField(_(u"Project"), choices=ProjectChoices(), validators=[validators.Required()])
     start  = wtf.DateField(_(u"Start date"), format='%d/%m/%Y', validators=[])
     end  = wtf.DateField(_(u"End date"), format='%d/%m/%Y', validators=[])
     goal = wtf.TextAreaField(_(u'Goal'), validators=[])

@@ -488,9 +488,11 @@
             });
         }
 
-        // Typeahead for projects - single project
-        $('.typeAheadSingle').each(function(){
+        // Typeahead for selects
+        $('.typeAheadSelect').each(function(){
             var $this = $(this);
+            // Is this multi select?
+            var multi = $this.is('[multiple]');
             // List for feeding the typeahead
             var values = [];
             // Map for getting selected project's ID
@@ -500,13 +502,33 @@
                 values.push($(this).text());
                 ids[$(this).text()] = $(this).val();
             });
+            var $multiList;
+            if(multi) {
+                // Multi select needs additional list of selected items
+                $multiList = $('<ul class="unstyled"/>');
+                $multiList.on('click', 'li i.icon-remove', function(){
+                    var id = $(this).parent().data('id').toString();
+                    var list = _.filter($this.val(), function(item){
+                        return item !== id;
+                    });
+                    $this.val(list).change();
+                });
+                // Change event for multi select
+                $this.on('change', function(){
+                    $multiList.html('');
+                    var list = _.map($(this).val(), function(id){
+                        var item = $this.find('option[value="'+id+'"]').text();
+                        $multiList.append('<li data-id="'+id+'"><i class="icon-remove pointer"></i> '+item+'</li>');
+                    });
+                });
+            }
             // Our input field
             var $input = $('<input type="text" autocomplete="off" />');
-            // Set the same size as select
-            $input.width($(this).width());
             // If anything was selected, set it as value for input
-            if($this.val() !== '') {
+            if(!multi && $this.val() !== '') {
                 $input.val($this.find('option:selected').text());
+            } else if(multi && $this.val() !== null) {
+                $this.change();
             }
             // Activate typeahead!
             $input.typeahead({
@@ -520,26 +542,50 @@
                 // Also validating for incorrect values.
                 updater: function(item) {
                     var id = ids[item];
-                    if(id != null) {
+                    if(!multi && id !== undefined) {
                         $this.val(id);
+                        return item;
+                    } else if(multi && id !== undefined) {
+                        var selected = $this.val() != null ? $this.val() : [];
+                        selected.push(id);
+                        $this.val(selected).change();
+                        return '';
                     }
                     return item;
                 }
             }).on('blur', function(){ // Checking for empty and incorrect values
-                if($(this).val() === '') {
-                    $this.val('');
-                }
-                if(values.indexOf($(this).val()) < 0) {
-                    $(this).val('');
+                if(!multi) {
+                    if($(this).val() === '') {
+                        $this.val('');
+                    }
+                    if(values.indexOf($(this).val()) < 0) {
+                        $(this).val('');
+                    }
                 }
             }).on('keydown', function(e){ // Additional checking when user presses the Enter key
-                if(e.which == 13 || e.keyCode == 13) {
+                if(!multi && (e.which == 13 || e.keyCode == 13)) {
                     if(values.indexOf($(this).val()) < 0) {
                         $this.val('');
                     }
                 }
             });
-            $this.after($input);
+            // Add show all button
+            var $button = $('<button class="btn" type="button">Show all</button>');
+            $button.on('click', function(){
+                $wrap.hide();
+                $this.off('change').show();
+                if(multi) {
+                    $multiList.hide();
+                }
+            });
+            var $wrap = $('<div class="input-append" />');
+            $wrap.append($input).append($button);
+            $this.after($wrap);
+            if(multi) {
+                $wrap.after($multiList);
+            }
+            // Set the same size as select minus button
+            $input.width($this.outerWidth() - $button.outerWidth());
             // Original select is no longer needed for user, but it's needed by
             // us to set proper form values!
             $this.hide();
