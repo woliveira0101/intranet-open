@@ -508,9 +508,12 @@
                 ids[$(this).text()] = $(this).val();
             });
             var $multiList;
+            // This is used for performance reasons. jQuery's val() is slow, indexOf is slow...
+            // everything is slow!
+            var multiValue = null;
             if(multi) {
                 // Multi select needs additional list of selected items
-                $multiList = $('<ul class="unstyled"/>');
+                $multiList = $('<ul class="unstyled typeAheadList"/>');
                 // ...and ability to remove them freely
                 $multiList.on('click', 'li i.icon-remove', function(){
                     var id = $(this).parent().data('id').toString();
@@ -525,8 +528,9 @@
                     // Readd all elements
                     var list = _.map($(this).val(), function(id){
                         var item = $this.find('option[value="'+id+'"]').text();
-                        $multiList.append('<li data-id="'+id+'"><i class="icon-remove pointer"></i> '+item+'</li>');
+                        $multiList.append('<li data-id="'+id+'"><i class="icon-remove icon-red pointer" title="remove from selected items"></i> <span>'+item+'</span></li>');
                     });
+                    multiValue = $(this).val();
                 });
             }
             // Our input field
@@ -546,10 +550,15 @@
                 // Also, duplicates are not returned for multi selects.
                 matcher: function(item) {
                     // Check for duplicates first!
-                    if(multi && $this.val()) {
+                    // $.val() is VERY SLOW!
+                    var val = multiValue;
+                    if(multi && val) {
                         var id = ids[item].toString();
-                        if($this.val().indexOf(id) >= 0) {
-                            return false;
+                        // indexOf is SLOW!
+                        for(var i=0, len=val.length; i<len; i++) {
+                            if(val[i] === id) {
+                                return false;
+                            }
                         }
                     }
                     return fuzzyMatcher(item, this.query, 50, false);
@@ -567,7 +576,7 @@
                     } else if(multi && id !== undefined) {
                         // For multi select, a list of values is returned
                         // (or null if nothing is selected - then we need to initialize an empty list)
-                        var selected = $this.val() != null ? $this.val() : [];
+                        var selected = multiValue !== null ? multiValue : [];
                         selected.push(id);
                         // Trigger change event, to update $multiList
                         $this.val(selected).change();
@@ -576,7 +585,7 @@
                     }
                     return item;
                 }
-            }).on('blur', function(){ // Checking for empty and incorrect values
+            }).on('blur', function(){ // Checking for empty and incorrect values for single select
                 if(!multi) {
                     if($(this).val() === '') {
                         $this.val('');
@@ -586,9 +595,18 @@
                     }
                 }
             }).on('keydown', function(e){ // Additional checking when user presses the Enter key
-                if(!multi && (e.which == 13 || e.keyCode == 13)) {
-                    if(values.indexOf($(this).val()) < 0) {
-                        $this.val('');
+                if(e.which == 13 || e.keyCode == 13) {
+                    var val = $(this).val();
+                    if(val === '' && !multi) { // Empty string entered?
+                        $this.val(''); // Clear select as well
+                    } else if(values.indexOf(val) < 0) { // Something gibberish entered
+                        if(multi) { // Clear input
+                            $input.val('');
+                        } else { // Clear input and select
+                            $input.val('');
+                            $this.val('');
+                        }
+                        return false; // and DON'T submit!
                     }
                 }
             });
