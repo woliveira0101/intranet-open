@@ -631,6 +631,10 @@
             }
             // Set the same size as select minus button
             $input.width($this.outerWidth() - $button.outerWidth());
+            // For multilist, set also the same height
+            if(multi) {
+                $multiList.css('max-height', ($this.outerHeight() - $button.outerHeight()) + 'px');
+            }
             // Original select is no longer needed for user, but it's needed by
             // us to set proper form values!
             $this.hide();
