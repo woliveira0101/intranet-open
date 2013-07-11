@@ -479,15 +479,6 @@
             });
         }
 
-        function matchPeople(input) {
-            var reg = new RegExp(input.split('').join('\\w*').replace(/\W/, ""), 'i');
-            return people.filter(function(person) {
-                if (person.match(reg)) {
-                    return person;
-                }
-            });
-        }
-
         /**
          * TYPEAHEAD FOR SELECTS
          * 
