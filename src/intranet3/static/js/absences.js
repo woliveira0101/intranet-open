@@ -141,7 +141,7 @@ function generateTable(data) {
                     }
                 }
                 $td.addClass('absent').attr({
-                    title: attr[2]
+                    title: '<b>'+u.name+'</b> <i>('+u.leave_used+'/'+u.leave_mandated+'</i>)<br />'+attr[2]
                 });
                 var date = new Date(Date.parse(start)),
                     dateString = '';
@@ -156,7 +156,7 @@ function generateTable(data) {
         }
         if(u.id in data.lates) { // Latenesses
             for(when in data.lates[u.id]) {
-                var why = data.lates[u.id][when];
+                var why ='<b>'+u.name+'</b><br />'+data.lates[u.id][when];
                 row.find('.'+when).addClass('late inactive').attr('title', why);
             }
         }
@@ -170,6 +170,9 @@ function generateTable(data) {
     $days.append(header3);
     $users.append(users);
     $data.append(rows);
+
+    // Wrap all today cells
+    $data.find('.today').prev().addClass('today');
 
     $absences.replaceWith($struct);
 }
