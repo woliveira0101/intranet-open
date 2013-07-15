@@ -1,6 +1,14 @@
 New release
 ===========
 
+0.8.8 (15-07-2013)
+===============
+
+- typeahead for project(s) selectors
+- better old bugs report
+- absence table enhancements
+- new filter options for sprint times
+
 0.8.7 (04-07-2013)
 ===============
 
