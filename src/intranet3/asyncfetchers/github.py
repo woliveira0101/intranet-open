@@ -3,6 +3,7 @@
 Github connector
 """
 import json
+import re
 from intranet3.asyncfetchers import base
 from intranet3.helpers import Converter, serialize_url
 from dateutil.parser import parse
@@ -14,12 +15,40 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 
 
 class GithubBug(base.Bug):
+    _project_name = None
+    _component_name = None
+    url = None
+
+    def __init__(self, *args, **kwargs):
+        if 'url' in kwargs:
+            self.url = kwargs['url']
+            del kwargs['url']
+        super(GithubBug, self).__init__(*args, **kwargs)
+
     def get_url(self):
-        return 'HAHAHA NIE'
-        # return u'%s/issue/%s' % (
-        #     self.tracker.url.replace('https://api.bitbucket.org/1.0/repositories/', 'https://bitbucket.org/'),
-        #     self.id
-        # )
+        return self.url
+
+    @property
+    def project_name(self):
+        return self._project_name
+    @project_name.setter
+    def project_name(self, value):
+        m = re.match('(.*?)github.com/(.*?)/(.*?)($|/.*)', value)
+        if m:
+            self._project_name = m.group(2)
+        else:
+            self._project_name = value
+    
+    @property
+    def component_name(self):
+        return self._component_name
+    @component_name.setter
+    def component_name(self, value):
+        m = re.match('(.*?)github.com/(.*?)/(.*?)($|/.*)', value)
+        if m:
+            self._component_name = m.group(3)
+        else:
+            self._component_name = value
 
 
 github_converter = Converter(
@@ -29,11 +58,12 @@ github_converter = Converter(
     owner=lambda d: d['assignee']['login'],
     priority=lambda d: 'none',
     severity=lambda d: 'none',
-    status='state',
+    status=lambda d: 'assigned',
     resolution=lambda d: 'none',
-    project_name=lambda d: 'none',
-    component_name=lambda d: d['milestone']['description'] or 'none',
-    deadline=lambda d: 'none',
+    project_name=lambda d: d['html_url'],
+    component_name=lambda d: d['html_url'],
+    url=lambda d: d['html_url'],
+    deadline=lambda d: d['milestone']['due_on'] or 'none',
     opendate=lambda d: parse(d.get('created_at', '')),
     changeddate=lambda d: parse(d.get('updated_at', '')),
     dependson=lambda d: {},
@@ -42,14 +72,13 @@ github_converter = Converter(
 
 
 def _fetcher_function(resolved, single):
-    @cached_bug_fetcher(lambda: u'resolved-%s-single-%s' % (resolved, single))
+    #@cached_bug_fetcher(lambda: u'resolved-%s-single-%s' % (resolved, single))
     def fetcher(self):
         if resolved:
             # Github doesn't have open resolved
             self.success()
             return
         params = self.common_url_params()
-        # import ipdb;ipdb.set_trace()                         # BREAK HERE
         # params.update(self.single_user_params() if single else self.all_users_params())
         url = serialize_url(self.tracker.url + 'issues?', **params)
         self.fetch(url)
@@ -70,7 +99,7 @@ def _query_fetcher_function(resolved):
             # project selector is not supported in bitbucket
             if component_selector:
                 params.update(component=component_selector)
-        url = serialize_url(self.tracker.url + '/issues?', **params)
+        url = serialize_url(self.tracker.url + 'issues?', **params)
         self.fetch(url)
     return fetcher
 
@@ -133,3 +162,5 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
         else:
             self.success()
 
+    # def resolved(self, bug):
+    #     pass
