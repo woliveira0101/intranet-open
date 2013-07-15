@@ -19,7 +19,7 @@
         {{ form_field(form.google_user_email, _('Google User Email')) }}
         {{ form_field(form.google_user_password, _('Google User Password')) }}
         {{ form_field(form.cleaning_time_presence, _('After how many days should presence entries be compressed')) }}
-        {{ form_field(form.absence_project_id, _('Which project should have automatic absence hours inserted')) }}
+        {{ form_field(form.absence_project_id, _('Which project should have automatic absence hours inserted'), class='typeAheadSelect') }}
         {{ form_field(form.monthly_late_limit, _('How many times employee can be late')) }}
         {{ form_field(form.monthly_incorrect_time_record_limit, _('How many times employee can record incorrect time')) }}
         </div>
@@ -31,9 +31,9 @@
         </div>
 
         <div style="{% if subpage != 'reports' %}display: none{% endif %}">
-        {{ form_field(form.reports_project_ids, _('Which projects should be included in the report'), size=15) }}
+        {{ form_field(form.reports_project_ids, _('Which projects should be included in the report'), size=15, class='typeAheadSelect') }}
         {{ form_field(form.reports_omit_user_ids, _('Which users should be omitted in daily reports'), size=15) }}
-        {{ form_field(form.reports_without_ticket_project_ids, _('Which projects should be included in the report without ticket'), size=15) }}
+        {{ form_field(form.reports_without_ticket_project_ids, _('Which projects should be included in the report without ticket'), size=15, class='typeAheadSelect') }}
         {{ form_field(form.reports_without_ticket_omit_user_ids, _('Which users should be omitted in report without ticket'), size=15) }}
         </div>
 

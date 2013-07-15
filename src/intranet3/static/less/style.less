@@ -883,7 +883,7 @@ select#clients {
         margin: 10px 0px 20px 0px;
     }
     .checkboxes {
-        width:  1000px;
+        margin-left: 50px;
     }
     .client {
         .checkboxes {
@@ -1738,5 +1738,20 @@ table td.city-vertical {
         font-weight: bold;
         width: 1em;
         margin: 5em auto 0 auto;
+    }
+}
+
+i.pointer {
+    cursor: pointer;
+}
+.typeAheadList {
+    overflow-y: auto;
+    li {
+        i.icon-remove:hover {
+            color: red;
+            &+ span {
+                color: red;
+            }
+        }
     }
 }

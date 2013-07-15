@@ -22,18 +22,18 @@
             {{ form_field(form.date_range, _('format dd-mm-yyyy - dd-mm-yyyy'), class='daterange') }}
             <div>
                 <div class="onerow selectors">
-                    {{ form_field(form.projects, _('Projects')) }}
+                    {{ form_field(form.projects, _('Projects'), class='typeAheadSelect') }}
                     {% if not request.is_user_in_group('client') %}
-                        {{ form_field(form.users, _('Employees')) }}
+                        {{ form_field(form.users, _('Employees'), class='typeAheadSelect') }}
                     {% endif %}
-                </div>
-                <div class="onerow checkboxes" id="ticket-grouping">
-                    {{ form_field(form.group_by_client, _('Group by client')) }}
-                    {{ form_field(form.group_by_project, _('Group by project')) }}
-                    {{ form_field(form.group_by_bugs, _('Group by bugs')) }}
-                    {{ form_field(form.group_by_user, _('Group by employee')) }}
-                    {{ form_field(form.ticket_choice) }}
-                    {{ form_field(form.bigger_than, _('Time')) }}
+                    <div class="checkboxes" id="ticket-grouping">
+                        {{ form_field(form.group_by_client, _('Group by client')) }}
+                        {{ form_field(form.group_by_project, _('Group by project')) }}
+                        {{ form_field(form.group_by_bugs, _('Group by bugs')) }}
+                        {{ form_field(form.group_by_user, _('Group by employee')) }}
+                        {{ form_field(form.ticket_choice) }}
+                        {{ form_field(form.bigger_than, _('Time')) }}
+                    </div>
                 </div>
             </div>
             <div class="buttons">
