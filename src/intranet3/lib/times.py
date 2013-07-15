@@ -88,10 +88,14 @@ class ProtectTimeEntriesMixin(object):
 
 
 class TimesReportMixin(object):
-    def _prepare_uber_query_for_sprint(self, sprint, bugs):
+    def _prepare_uber_query_for_sprint(self, sprint, bugs, ticket_choice):
         query = self.session.query
-        uber_query = query(Client, Project, TimeEntry.ticket_id, User, Tracker, TimeEntry.description, TimeEntry.date, TimeEntry.time)
+        uber_query = query(
+            Client, Project, TimeEntry.ticket_id, User, Tracker,
+            TimeEntry.description, TimeEntry.date, TimeEntry.time
+        )
         uber_query = uber_query.filter(TimeEntry.user_id==User.id) \
+                               .filter(TimeEntry.project_id==sprint.project_id) \
                                .filter(TimeEntry.project_id==Project.id) \
                                .filter(Project.tracker_id==Tracker.id) \
                                .filter(Project.client_id==Client.id)
@@ -100,23 +104,36 @@ class TimesReportMixin(object):
                                .filter(TimeEntry.date<=sprint.end) \
                                .filter(TimeEntry.deleted==False)
 
-        if bugs:
-            or_list = []
-            for bug in bugs:
-                or_list.append(and_(TimeEntry.ticket_id==bug.id, TimeEntry.project_id==bug.project.id))
+        if ticket_choice == 'without_bug_only':
+            uber_query = uber_query.filter(TimeEntry.ticket_id=='')
+        elif ticket_choice == 'meetings_only':
+            meeting_ids = [t['value'] for t in TimeEntryForm.PREDEFINED_TICKET_IDS]
+            uber_query = uber_query.filter(TimeEntry.ticket_id.in_(meeting_ids))
+        elif ticket_choice == 'all':
+            if bugs:
+                or_list = []
+                for bug in bugs:
+                    or_list.append(
+                        and_(
+                            TimeEntry.ticket_id==bug.id,
+                            TimeEntry.project_id==bug.project.id
+                        )
+                    )
+                uber_query = uber_query.filter(or_(*or_list))
+            else:
+                uber_query = uber_query.filter(TimeEntry.ticket_id.in_([]))
 
-            uber_query = uber_query.filter(or_(*or_list))
-        else:
-            uber_query = uber_query.filter(TimeEntry.ticket_id.in_([]))
-
-
-        uber_query = uber_query.order_by(Client.name, Project.name, TimeEntry.ticket_id, User.name)
+        uber_query = uber_query.order_by(
+            Client.name, Project.name, TimeEntry.ticket_id, User.name
+        )
         return uber_query
-
 
     def _prepare_uber_query(self, start_date, end_date, projects, users, ticket_choice):
         query = self.session.query
-        uber_query = query(Client, Project, TimeEntry.ticket_id, User, Tracker, TimeEntry.description, TimeEntry.date, TimeEntry.time)
+        uber_query = query(
+            Client, Project, TimeEntry.ticket_id, User, Tracker,
+            TimeEntry.description, TimeEntry.date, TimeEntry.time
+        )
         uber_query = uber_query.filter(TimeEntry.user_id==User.id)\
                                .filter(TimeEntry.project_id==Project.id)\
                                .filter(Project.tracker_id==Tracker.id)\
@@ -138,7 +155,9 @@ class TimesReportMixin(object):
         if users and users != ([],):
             uber_query = uber_query.filter(User.id.in_(users))
 
-        uber_query = uber_query.order_by(Client.name, Project.name, TimeEntry.ticket_id, User.name)
+        uber_query = uber_query.order_by(
+            Client.name, Project.name, TimeEntry.ticket_id, User.name
+        )
         return uber_query
 
     def _get_participation_of_workers(self, entries):
