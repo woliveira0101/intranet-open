@@ -48,10 +48,14 @@ def pivotaltracker_new_ticket_url(tracker_url, project_selector, component_selec
 def unfuddle_ticket_url(tracker_url, ticket_id):
     return tracker_url
 
-
 def unfuddle_new_ticket_url(tracker_url, project_selector, component_selector):
     return tracker_url
 
+def github_ticket_url(tracker_url, ticket_id):
+    return tracker_url
+
+def github_new_ticket_url(tracker_url, project_selector, component_selector):
+    return tracker_url
 
 class Tracker(Base):
     """ Tracker model """
@@ -66,6 +70,7 @@ class Tracker(Base):
         'bitbucket': bitbucket_ticket_url,
         'pivotaltracker': pivotaltracker_ticket_url,
         'unfuddle': unfuddle_ticket_url,
+        'github': github_ticket_url,
     }
     
     NEW_BUG_URL_CONSTRUCTORS = {
@@ -77,12 +82,13 @@ class Tracker(Base):
         'bitbucket': bitbucket_new_ticket_url,
         'pivotaltracker': pivotaltracker_new_ticket_url,
         'unfuddle': unfuddle_new_ticket_url,
+        'github': github_new_ticket_url,
     }
 
 
     id = Column(Integer, primary_key=True, nullable=False, index=True)
     
-    type = Column(Enum("bugzilla", "trac", "cookie_trac", "igozilla", "bitbucket", "rockzilla", "pivotaltracker", "harvest", 'unfuddle', name='tracker_type_enum'), nullable=False)
+    type = Column(Enum("bugzilla", "trac", "cookie_trac", "igozilla", "bitbucket", "rockzilla", "pivotaltracker", "harvest", 'unfuddle', 'github', name='tracker_type_enum'), nullable=False)
     name = Column(String, nullable=False, unique=True)
     url = Column(String, nullable=False, unique=True)
     mailer = Column(String, nullable=True, unique=True)
