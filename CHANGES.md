@@ -1,6 +1,8 @@
 New release
 ===========
 
+- change date format in log names
+
 0.8.8 (15-07-2013)
 ===============
 
