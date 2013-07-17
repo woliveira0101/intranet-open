@@ -13,6 +13,16 @@ from twisted import copyright
 def _umask(value):
     return int(value, 8)
 
+class DailyLogFile(logfile.DailyLogFile):
+
+    def suffix(self, tupledate):
+        """Return the suffix given a (year, month, day) tuple or unixtime"""
+        try:
+            return '-'.join(map(str, tupledate))
+        except:
+            # try taking a float unixtime
+            return '-'.join(map(str, self.toDate(tupledate)))
+
 
 class ServerOptions(app.ServerOptions):
     synopsis = "Usage: twistd [options]"
@@ -136,7 +146,7 @@ class UnixAppLogger(app.AppLogger):
         else:
             if not self._logfilename:
                 self._logfilename = 'twistd.log'
-            logFile = logfile.DailyLogFile.fromFullPath(self._logfilename)
+            logFile = DailyLogFile.fromFullPath(self._logfilename)
             try:
                 import signal
             except ImportError:
