@@ -422,7 +422,7 @@ class ClientHours(CronView):
                 config_obj.google_user_email,
                 config_obj.google_user_password,
                 config_obj.hours_employee_project,
-                'DB-CLIENT-test',
+                'DB-CLIENT',
                 [u'Miesiac', u'Klient', u'Osoba', u'Liczba przepracowanych godzin', u'Miesiac (import)'],
                 rows
             ),
