@@ -2,6 +2,7 @@ New release
 ===========
 
 - change date format in log names
+- bugfix: add default project for bugs in sprint
 
 0.8.8 (15-07-2013)
 ===============

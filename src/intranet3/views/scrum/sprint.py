@@ -84,7 +84,6 @@ class FetchBugsMixin(object):
         bugs = Bugs(self.request, user).get_sprint(sprint)
         return bugs
 
-
 class ClientProtectionMixin(object):
     def protect(self):
         if not self.request.is_user_in_group('client'):
