@@ -40,11 +40,7 @@ class BugUglyAdapter(object):
         return None
 
     @classmethod
-    def produce(cls, bugs, project):
-        for bug in bugs:
-            if not bug.project_id:
-                bug.project = project
-                bug.project_id = project.id
+    def produce(cls, bugs):
         bugs = [BugUglyAdapter(bug) for bug in bugs]
         bugs_dict = dict([(bug.id, bug) for bug in bugs])
 
@@ -89,7 +85,7 @@ def move_blocked_to_the_end(bugs):
 class SprintWrapper(object):
     def __init__(self, sprint, bugs, request):
         self.sprint = sprint
-        self.bugs = BugUglyAdapter.produce(bugs, sprint.project)
+        self.bugs = BugUglyAdapter.produce(bugs)
         self.request = request
         self.session = request.db_session
 
