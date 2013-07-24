@@ -562,7 +562,7 @@
                     var id = ids[item];
                     if(!multi && id !== undefined) {
                         // For single select, just set proper value and return current item
-                        $this.val(id);
+                        $this.val(id).change();
                         return item;
                     } else if(multi && id !== undefined) {
                         // For multi select, a list of values is returned
