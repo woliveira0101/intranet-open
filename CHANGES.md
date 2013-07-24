@@ -1,8 +1,12 @@
 New release
 ===========
 
+0.8.9 (24-07-2013)
+===============
+
 - change date format in log names
 - bugfix: add default project for bugs in sprint
+- export Export hours per Client By Employee (excel)
 
 0.8.8 (15-07-2013)
 ===============

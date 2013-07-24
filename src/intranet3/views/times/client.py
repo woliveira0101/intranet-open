@@ -3,9 +3,11 @@ import calendar
 import datetime
 from operator import itemgetter
 
+import xlwt
 from sqlalchemy import func
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest, HTTPFound
+from pyramid.response import Response
 
 from intranet3 import config
 from intranet3.utils.views import BaseView
@@ -86,6 +88,71 @@ class Report(BaseView):
             whole_sum_without_us=whole_sum_without_us,
             our_monthly_hours=our_monthly_hours,
         )
+
+
+@view_config(route_name='times_client_per_client_per_employee_excel', permission='coordinator')
+class PerClientPerEmployeeExcel(BaseView):
+    def _to_excel(self, rows):
+        wbk = xlwt.Workbook()
+        sheet = wbk.add_sheet('Hours')
+
+        heading_xf = xlwt.easyxf('font: bold on; align: wrap on, vert centre, horiz center')
+        headings = ('Client id', 'Client name', 'Employee', 'Month', 'Time')
+        for colx, value in enumerate(headings):
+            sheet.write(0, colx, value, heading_xf)
+        #headings_width = (x*256 for x in (20, 20, 40, 12, 10))
+        #for i, width in enumerate(headings_width):
+        #    sheet.col(i).width = width
+
+
+        sheet.set_panes_frozen(True)
+        sheet.set_horz_split_pos(1)
+        sheet.set_remove_splits(True)
+
+        for j, row in enumerate(rows):
+            for i, cell in enumerate(row):
+                sheet.write(j+1, i, cell)
+
+        file_path = '/tmp/tmp.xls'
+        wbk.save(file_path)
+
+        file_ = open(file_path, 'rb')
+
+        return file_
+
+    def post(self):
+        date = self.request.POST.get('date')
+        date = datetime.datetime.strptime(date, '%d/%m/%Y')
+        rows = self.session.query('id', 'name', 'uname', 'date', 'time').from_statement("""
+        SELECT c.id as id, c.name as name, u.name as uname, date_trunc('month', t.date) as date, SUM(t.time) as time
+        FROM time_entry t, project p, client c, "user" u
+        WHERE t.project_id = p.id AND
+              p.client_id = c.id AND
+              t.user_id = u.id AND
+              t.deleted = false AND
+              date_trunc('month', t.date) = :date
+        GROUP BY c.id, c.name, u.id, u.name, date_trunc('month', t.date)
+        ORDER BY date_trunc('month', t.date)
+        """).params(date=date).all()
+
+        rows = [(
+            row[0],
+            row[1],
+            row[2],
+            row[3].strftime('%Y-%m-%d'),
+            row[4],
+        ) for row in rows]
+
+        stream = self._to_excel(rows)
+
+        response = Response(
+            content_type='application/vnd.ms-excel',
+            app_iter=stream,
+        )
+        response.headers['Cache-Control'] = 'no-cache'
+        response.content_disposition = 'attachment; filename="report-%s.xls"' % datetime.datetime.now().strftime('%d-%m-%Y--%H-%M-%S')
+
+        return response
 
 
 @view_config(route_name='times_client_current_pivot', permission='coordinator')
