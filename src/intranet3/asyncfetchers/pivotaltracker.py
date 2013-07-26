@@ -21,6 +21,14 @@ class PivotalTrackerBug(Bug):
         number = number if number else self.id
         return make_path(self.tracker.url, '/story/show', number)
 
+    def get_status(self):
+        return 'NEW'
+
+    def is_unassigned(self):
+        result = (self.owner.name == '')
+        import ipdb; ipdb.set_trace()
+        return result
+
 
 pivotaltracker_converter = Converter(
     id='id',
@@ -105,6 +113,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
             self_callback = partial(self.fetch, endpoint, filters=filters, callback=callback)
             self.get_project(self_callback)
         else:
+            import ipdb; ipdb.set_trace()
             headers = self.get_headers()
             callback = callback or self.responded
             url = self.prepare_url(self._project_id, endpoint, filters)
@@ -161,6 +170,11 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
             state=','.join(ISSUE_STATE_RESOLVED),
         ))
 
+    def fetch_scrum(self, sprint_name, project_id=None):
+        self.fetch('stories', filters=dict(
+            label=sprint_name,
+        ))
+
     def fetch_bug_titles_and_depends_on(self, ticket_ids):
         ids = []
         for id in ticket_ids:
@@ -192,9 +206,14 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         converter = self.get_converter()
         self.users = {}
         for story in xml.findall('story'):
-            if story.find('owned_by') is None:
-                continue
-            owner_name = story.find('owned_by').text
+            owner_name_node = story.find('owned_by')
+            owner_name = owner_name_node and owner_name_node.text or ''
+
+            if owner_name_node is not None:
+                owner_name = owner_name_node.text
+            else:
+                owner_name = ''
+
             bug_desc = dict(
                 tracker=self.tracker,
                 id=story.find('id').text,
