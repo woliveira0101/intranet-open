@@ -50,7 +50,11 @@ class Bug(object):
         self.changeddate = changeddate
         self.dependson = {} if dependson is _marker else dependson
         self.blocked = {} if blocked is _marker else blocked
-        self.whiteboard = parse_whiteboard(whiteboard)
+
+        if isinstance(whiteboard, basestring):
+            self.whiteboard = parse_whiteboard(whiteboard)
+        else:
+            self.whiteboard = whiteboard
         self.version = version
 
     def get_url(self):

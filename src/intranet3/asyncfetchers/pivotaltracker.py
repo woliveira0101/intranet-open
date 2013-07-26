@@ -11,8 +11,8 @@ from intranet3 import memcache
 LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
 
-ISSUE_STATE_RESOLVED = ['delivered', 'finished']
-ISSUE_STATE_UNRESOLVED = ['started','unstarted','unscheduled']
+ISSUE_STATE_RESOLVED = ['delivered', 'finished', 'rejected']
+ISSUE_STATE_UNRESOLVED = ['started','unstarted','unscheduled', 'accepted']
 
 
 class PivotalTrackerBug(Bug):
@@ -22,11 +22,16 @@ class PivotalTrackerBug(Bug):
         return make_path(self.tracker.url, '/story/show', number)
 
     def get_status(self):
+        if self.status == 'delivered':
+            return 'CLOSED'
+        elif self.status in ISSUE_STATE_RESOLVED:
+            return 'RESOLVED'
+        elif self.status in ISSUE_STATE_UNRESOLVED:
+            return 'NEW'
         return 'NEW'
 
     def is_unassigned(self):
         result = (self.owner.name == '')
-        import ipdb; ipdb.set_trace()
         return result
 
 
@@ -44,6 +49,7 @@ pivotaltracker_converter = Converter(
     severity='priority',
     component_name='component',
     deadline='deadline',
+    whiteboard='whiteboard',
 )
 
 
@@ -113,7 +119,6 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
             self_callback = partial(self.fetch, endpoint, filters=filters, callback=callback)
             self.get_project(self_callback)
         else:
-            import ipdb; ipdb.set_trace()
             headers = self.get_headers()
             callback = callback or self.responded
             url = self.prepare_url(self._project_id, endpoint, filters)
@@ -214,6 +219,12 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
             else:
                 owner_name = ''
 
+            points = story.find('estimate').text
+
+            if not points:
+                points = 0
+            points = int(points)
+
             bug_desc = dict(
                 tracker=self.tracker,
                 id=story.find('id').text,
@@ -224,6 +235,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
                 project_name=self.tracker.name,
                 opendate=story.find('created_at').text,
                 changeddate=story.find('updated_at').text,
+                whiteboard={'p': points}
             )
             yield self.bug_class(
                 tracker=self.tracker,
