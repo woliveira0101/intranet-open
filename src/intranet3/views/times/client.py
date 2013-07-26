@@ -97,7 +97,7 @@ class PerClientPerEmployeeExcel(BaseView):
         sheet = wbk.add_sheet('Hours')
 
         heading_xf = xlwt.easyxf('font: bold on; align: wrap on, vert centre, horiz center')
-        headings = ('Client id', 'Client name', 'Employee', 'Month', 'Time')
+        headings = ('Client name', 'Employee', 'Client time', 'Month', 'Month time')
         for colx, value in enumerate(headings):
             sheet.write(0, colx, value, heading_xf)
         #headings_width = (x*256 for x in (20, 20, 40, 12, 10))
@@ -121,27 +121,27 @@ class PerClientPerEmployeeExcel(BaseView):
         return file_
 
     def post(self):
-        date = self.request.POST.get('date')
-        date = datetime.datetime.strptime(date, '%d/%m/%Y')
-        rows = self.session.query('id', 'name', 'uname', 'date', 'time').from_statement("""
-        SELECT c.id as id, c.name as name, u.name as uname, date_trunc('month', t.date) as date, SUM(t.time) as time
+        rows = self.session.query('cid', 'cname', 'uid', 'uname', 'date', 'time').from_statement("""
+        SELECT c.id as cid, c.name as cname, u.id as uid, u.name as uname, date_trunc('month', t.date) as date, SUM(t.time) as time
         FROM time_entry t, project p, client c, "user" u
         WHERE t.project_id = p.id AND
               p.client_id = c.id AND
               t.user_id = u.id AND
-              t.deleted = false AND
-              date_trunc('month', t.date) = :date
+              t.deleted = false
         GROUP BY c.id, c.name, u.id, u.name, date_trunc('month', t.date)
         ORDER BY date_trunc('month', t.date)
-        """).params(date=date).all()
+        """).all()
+
+        monthly = h.groupby(rows, lambda row: (row[2], row[-2]), lambda row: row[5])
 
         rows = [(
-            row[0],
             row[1],
-            row[2],
-            row[3].strftime('%Y-%m-%d'),
-            row[4],
+            row[3],
+            row[5],
+            row[4].strftime('%Y-%m-%d'),
+            sum(monthly[row[2], row[-2]]),
         ) for row in rows]
+
 
         stream = self._to_excel(rows)
 

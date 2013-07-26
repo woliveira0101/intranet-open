@@ -1,6 +1,8 @@
 New release
 ===========
 
+- fixes to Export hours per Client By Employee
+
 0.8.9 (24-07-2013)
 ===============
 
