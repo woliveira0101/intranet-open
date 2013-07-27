@@ -134,7 +134,7 @@ class cached_bug_fetcher(object):
             bugs = memcache.get(key)
             if bugs is None: # fetch as usual
                 DEBUG(u"Bugs not in cache for key %s" % (key, ))
-                this.cache_key = key # mark where to cache results
+                this.cache_key = key.replace(' ', '') # mark where to cache results
                 func(this, *args, **kwargs)
             else:  # bugs got from cache
                 DEBUG(u"Bugs found in cache for key %s" % (key, ))

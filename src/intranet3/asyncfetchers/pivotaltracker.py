@@ -62,6 +62,19 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
     bug_class = PivotalTrackerBug
     get_converter = lambda self: pivotaltracker_converter
 
+
+    def __init__(self, tracker, credentials, login_mapping):
+        super(PivotalTrackerTokenFetcher, self).__init__(tracker, credentials, login_mapping)
+        try:
+            email, login =  credentials.login.split(';')
+        except Exception:
+            email, login = '', ''
+        self.email = email
+        self.login = login
+        self.login_mapping = dict([
+            (k.split(';')[1], v) for k, v in login_mapping.iteritems() if ';' in k
+        ])
+
     def get_headers(self):
         headers = super(PivotalTrackerTokenFetcher, self).get_headers()
         if self._token:
@@ -70,7 +83,7 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
 
     def fetch_token(self, callback):
         headers = self.get_headers()
-        credentials = base64.encodestring('%s:%s' % (self.login, self.password))
+        credentials = base64.encodestring('%s:%s' % (self.email, self.password))
         headers['Authorization'] = ["Basic %s" % credentials]
         self.request(
             self._token_url,
@@ -141,7 +154,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
     @cached_bug_fetcher(lambda: u'user')
     def fetch_user_tickets(self):
         self.fetch('stories', filters=dict(
-            owner='"%s"' % self.user.name,
+            owner='"%s"' % self.login,
             state=','.join(ISSUE_STATE_UNRESOLVED),
         ))
 
@@ -154,7 +167,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
     @cached_bug_fetcher(lambda: u'user-resolved')
     def fetch_user_resolved_tickets(self):
         self.fetch('stories', filters=dict(
-            owner='"%s"' % self.user.name,
+            owner='"%s"' % self.login,
             state=','.join(ISSUE_STATE_RESOLVED),
         ))
 
