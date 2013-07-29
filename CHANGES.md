@@ -1,7 +1,11 @@
 New release
 ===========
 
+0.8.10 (29-07-2013)
+===============
+
 - fixes to Export hours per Client By Employee
+- add scrum support for Pivotal Tracker
 
 0.8.9 (24-07-2013)
 ===============
