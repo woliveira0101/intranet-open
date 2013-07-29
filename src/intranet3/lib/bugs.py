@@ -25,7 +25,7 @@ class Bugs(object):
         If no user is provided,  we will fetch bugs using current user credentials
         """
         self.request = request
-        self.user = user or request.user
+        self.user = request.user
 
     @log_time
     def _get_bugs(self, fetcher_callback, full_mapping=True):

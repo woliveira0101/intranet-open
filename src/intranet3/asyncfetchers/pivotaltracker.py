@@ -11,8 +11,8 @@ from intranet3 import memcache
 LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
 
-ISSUE_STATE_RESOLVED = ['delivered', 'finished']
-ISSUE_STATE_UNRESOLVED = ['started','unstarted','unscheduled']
+ISSUE_STATE_RESOLVED = ['delivered', 'finished', 'rejected']
+ISSUE_STATE_UNRESOLVED = ['started','unstarted','unscheduled', 'accepted']
 
 
 class PivotalTrackerBug(Bug):
@@ -20,6 +20,19 @@ class PivotalTrackerBug(Bug):
     def get_url(self, number=None):
         number = number if number else self.id
         return make_path(self.tracker.url, '/story/show', number)
+
+    def get_status(self):
+        if self.status == 'delivered':
+            return 'CLOSED'
+        elif self.status in ISSUE_STATE_RESOLVED:
+            return 'RESOLVED'
+        elif self.status in ISSUE_STATE_UNRESOLVED:
+            return 'NEW'
+        return 'NEW'
+
+    def is_unassigned(self):
+        result = (self.owner.name == '')
+        return result
 
 
 pivotaltracker_converter = Converter(
@@ -36,6 +49,7 @@ pivotaltracker_converter = Converter(
     severity='priority',
     component_name='component',
     deadline='deadline',
+    whiteboard='whiteboard',
 )
 
 
@@ -48,6 +62,19 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
     bug_class = PivotalTrackerBug
     get_converter = lambda self: pivotaltracker_converter
 
+
+    def __init__(self, tracker, credentials, login_mapping):
+        super(PivotalTrackerTokenFetcher, self).__init__(tracker, credentials, login_mapping)
+        try:
+            email, login =  credentials.login.split(';')
+        except Exception:
+            email, login = '', ''
+        self.email = email
+        self.login = login
+        self.login_mapping = dict([
+            (k.split(';')[1], v) for k, v in login_mapping.iteritems() if ';' in k
+        ])
+
     def get_headers(self):
         headers = super(PivotalTrackerTokenFetcher, self).get_headers()
         if self._token:
@@ -56,7 +83,7 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
 
     def fetch_token(self, callback):
         headers = self.get_headers()
-        credentials = base64.encodestring('%s:%s' % (self.login, self.password))
+        credentials = base64.encodestring('%s:%s' % (self.email, self.password))
         headers['Authorization'] = ["Basic %s" % credentials]
         self.request(
             self._token_url,
@@ -127,7 +154,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
     @cached_bug_fetcher(lambda: u'user')
     def fetch_user_tickets(self):
         self.fetch('stories', filters=dict(
-            owner='"%s"' % self.user.name,
+            owner='"%s"' % self.login,
             state=','.join(ISSUE_STATE_UNRESOLVED),
         ))
 
@@ -140,7 +167,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
     @cached_bug_fetcher(lambda: u'user-resolved')
     def fetch_user_resolved_tickets(self):
         self.fetch('stories', filters=dict(
-            owner='"%s"' % self.user.name,
+            owner='"%s"' % self.login,
             state=','.join(ISSUE_STATE_RESOLVED),
         ))
 
@@ -159,6 +186,11 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         self.fetch('stories', filters=dict(
             id=','.join(ticket_ids),
             state=','.join(ISSUE_STATE_RESOLVED),
+        ))
+
+    def fetch_scrum(self, sprint_name, project_id=None):
+        self.fetch('stories', filters=dict(
+            label=sprint_name,
         ))
 
     def fetch_bug_titles_and_depends_on(self, ticket_ids):
@@ -192,9 +224,20 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         converter = self.get_converter()
         self.users = {}
         for story in xml.findall('story'):
-            if story.find('owned_by') is None:
-                continue
-            owner_name = story.find('owned_by').text
+            owner_name_node = story.find('owned_by')
+            owner_name = owner_name_node and owner_name_node.text or ''
+
+            if owner_name_node is not None:
+                owner_name = owner_name_node.text
+            else:
+                owner_name = ''
+
+            points = story.find('estimate').text
+
+            if not points:
+                points = 0
+            points = int(points)
+
             bug_desc = dict(
                 tracker=self.tracker,
                 id=story.find('id').text,
@@ -205,6 +248,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
                 project_name=self.tracker.name,
                 opendate=story.find('created_at').text,
                 changeddate=story.find('updated_at').text,
+                whiteboard={'p': points}
             )
             yield self.bug_class(
                 tracker=self.tracker,
