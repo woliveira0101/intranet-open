@@ -22,6 +22,7 @@ from twisted.mail.smtp import ESMTPSenderFactory
 from twisted.mail.pop3client import POP3Client
 from twisted.internet.protocol import ClientFactory
 
+import transaction
 from intranet3.models import ApplicationConfig, Project, Tracker, TrackerCredentials
 from intranet3.models.project import SelectorMapping
 from intranet3.log import DEBUG_LOG, WARN_LOG, EXCEPTION_LOG, INFO_LOG
@@ -392,6 +393,7 @@ class MailerPOP3Client(POP3Client):
             return
         user_id, date, bug_id, project_id, hours, subject = data
         add_time(user_id, date, bug_id, project_id, hours, subject)
+        transaction.commit()
 
 
     def on_finish(self, results):

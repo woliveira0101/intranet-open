@@ -1,4 +1,3 @@
-import transaction
 from intranet3.models import TimeEntry, DBSession
 from intranet3.log import DEBUG_LOG, WARN_LOG, EXCEPTION_LOG, INFO_LOG
 
@@ -37,4 +36,3 @@ def add_time(user_id, date, bug_id, project_id, hours, subject):
             LOG(u'Updating existing entry')
         else:
             LOG(u'Omission of an existing entry because it is frozen')
-    transaction.commit()
