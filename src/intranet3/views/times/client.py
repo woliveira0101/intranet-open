@@ -121,8 +121,8 @@ class PerClientPerEmployeeExcel(BaseView):
         return file_
 
     def post(self):
-        rows = self.session.query('cid', 'cname', 'uid', 'uname', 'date', 'time').from_statement("""
-        SELECT c.id as cid, c.name as cname, u.id as uid, u.name as uname, date_trunc('month', t.date) as date, SUM(t.time) as time
+        rows = self.session.query('cid', 'cname', 'uid', 'uemail', 'date', 'time').from_statement("""
+        SELECT c.id as cid, c.name as cname, u.id as uid, u.email as uemail, date_trunc('month', t.date) as date, SUM(t.time) as time
         FROM time_entry t, project p, client c, "user" u
         WHERE t.project_id = p.id AND
               p.client_id = c.id AND

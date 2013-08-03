@@ -1,6 +1,8 @@
 New release
 ===========
 
+- email as a user identifier in Export hours per Client By Employee
+
 0.8.10 (29-07-2013)
 ===============
 
