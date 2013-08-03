@@ -2,6 +2,9 @@ New release
 ===========
 
 - email as a user identifier in Export hours per Client By Employee
+- project_id -> project_name mapping for unfuddle connector
+- component_id -> component_name mapping for unfuddle connector
+- add component name to unfuddle bug
 
 0.8.10 (29-07-2013)
 ===============
