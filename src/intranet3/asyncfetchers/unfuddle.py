@@ -96,7 +96,7 @@ class UnfuddleUserFetcher(BasicAuthMixin, BaseFetcher):
 
         users = self._get_users(jdata['people'])
         projects = self._get_projects(jdata['projects'])
-        components = self._get_components(jdata['components'])
+        components = self._get_components(jdata.get('components', []))
 
         data = {
             'users': users,
