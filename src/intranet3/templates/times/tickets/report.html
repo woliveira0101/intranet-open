@@ -1,14 +1,7 @@
 {% extends "templates/_base.html" %}
 
-{% block style_block %}
-    <link rel="stylesheet" type="text/css" href="{{ request.static_path('intranet3:static/css/jquery.multiselect.css', v=1) }}" />
-    <link rel="stylesheet" type="text/css" href="{{ request.static_path('intranet3:static/css/jquery.multiselect.filter.css', v=1) }}" />
-{% endblock %}
-
 {% block head_script %}
     <script src="{{ request.static_path('intranet3:static/js/vendor/organictabs.js') }}"></script>
-    <script src="{{ request.static_path('intranet3:static/js/vendor/jquery.multiselect.js') }}"></script>
-    <script src="{{ request.static_path('intranet3:static/js/vendor/jquery.multiselect.filter.js') }}"></script>
 {% endblock %}
 
 {% block content %}
