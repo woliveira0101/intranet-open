@@ -1,6 +1,9 @@
 New release
 ===========
 
+0.8.11 (05-08-2013)
+===============
+
 - email as a user identifier in Export hours per Client By Employee
 - project_id -> project_name mapping for unfuddle connector
 - component_id -> component_name mapping for unfuddle connector
