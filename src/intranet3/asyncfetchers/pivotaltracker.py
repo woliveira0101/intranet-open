@@ -113,9 +113,11 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
 
 
 class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
-
-    _project_id = None
     api_url = 'services/v3/projects'
+
+    def __init__(self, *args, **kwargs):
+        super(PivotalTrackerFetcher, self).__init__(*args, **kwargs)
+        self._project_ids = None
 
     def prepare_url(self, project_id='', endpoint='', filters={}):
         tracker_url = self.tracker.url.replace('http://', 'https://')
@@ -128,16 +130,17 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         if not self._token:
             self_callback = partial(self.fetch, endpoint, filters=filters, callback=callback)
             self.get_token(self_callback)
-        elif not self._project_id:
+        elif self._project_ids is None:
             self_callback = partial(self.fetch, endpoint, filters=filters, callback=callback)
-            self.get_project(self_callback)
+            self.get_projects(self_callback)
         else:
             headers = self.get_headers()
             callback = callback or self.responded
-            url = self.prepare_url(self._project_id, endpoint, filters)
-            self.request(url, headers, callback)
+            for project_id in self._project_ids:
+                url = self.prepare_url(project_id, endpoint, filters)
+                self.request(url, headers, callback)
 
-    def get_project(self, callback):
+    def get_projects(self, callback):
         headers = self.get_headers()
         url = self.prepare_url()
         self.request(
@@ -148,7 +151,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
 
     def parse_project(self, callback, data):
         xml = ET.fromstring(data)
-        self._project_id = xml.find('project').find('id').text
+        self._project_ids = [p.text for p in xml.findall('project/id')]
         callback()
 
     @cached_bug_fetcher(lambda: u'user')
@@ -232,7 +235,8 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
             else:
                 owner_name = ''
 
-            points = story.find('estimate').text
+            points = story.find('estimate')
+            points = 0 if not points else points.text
 
             if not points:
                 points = 0
@@ -263,4 +267,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
             EXCEPTION(u"Could not parse tracker response")
             self.fail(e)
         else:
-            self.success()
+            if len(self._project_ids) == 1:
+                self.success()
+            else:
+                self._project_ids.pop()

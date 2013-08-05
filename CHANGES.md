@@ -6,6 +6,7 @@ New release
 - component_id -> component_name mapping for unfuddle connector
 - add component name to unfuddle bug
 - change twisted web server combined log to be daily rotated
+- support multiple project for PivotalTracker
 
 0.8.10 (29-07-2013)
 ===============
