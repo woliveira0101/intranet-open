@@ -22,7 +22,7 @@ class BugzillaBug(Bug):
         return self.tracker.url + '/show_bug.cgi?id=%(id)s' % {'id': number}
 
     def is_unassigned(self):
-        return self.owner and self.owner.email == 'nobody@example.com'
+        return not self.owner or not self.owner.email.endswith('stxnext.pl')
 
     @reify
     def is_blocked(self):
@@ -401,5 +401,3 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
         except BaseException, e:
             EXCEPTION(u"Could not parse tracker response")
             self.fail(e)
-
-    
