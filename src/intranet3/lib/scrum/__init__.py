@@ -85,7 +85,7 @@ def move_blocked_to_the_end(bugs):
 class SprintWrapper(object):
     def __init__(self, sprint, bugs, request):
         self.sprint = sprint
-        self.bugs = BugUglyAdapter.produce(bugs)
+        self.bugs = BugUglyAdapter.produce([b for b in bugs if getattr(b, 'project')])
         self.request = request
         self.session = request.db_session
 
