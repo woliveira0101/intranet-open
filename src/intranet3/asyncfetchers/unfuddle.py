@@ -91,17 +91,29 @@ class UnfuddleUserFetcher(BasicAuthMixin, BaseFetcher):
         mapping = dict([ ( str(c['id']), c['name'] ) for c in components])
         return mapping
 
+    def _get_milestones(self, milestones):
+        mapping = dict([ ( (str(m['project_id']), str(m['title'])), m['id'] ) for m in milestones])
+        return mapping
+
+    def _get_custom_fields(self, custom_fields):
+        mapping = dict([ ( (str(cf['project_id']), str(cf['id'])), cf['value'] ) for cf in custom_fields])
+        return mapping
+
     def parse_data(self, callback, data):
         jdata = json.loads(data)
 
         users = self._get_users(jdata['people'])
         projects = self._get_projects(jdata['projects'])
         components = self._get_components(jdata.get('components', []))
+        milestones = self._get_milestones(jdata.get('milestones', []))
+        custom_fields = self._get_custom_fields(jdata.get('custom_field_values', []))
 
         data = {
             'users': users,
             'projects': projects,
             'components': components,
+            'milestones': milestones,
+            'custom_fields': custom_fields,
         }
 
         self.unfuddle_data = data
@@ -141,8 +153,6 @@ A comma or vertical bar separated list of report criteria composed as
     get_converter = lambda self: unfuddletracker_converter
 
     def __init__(self, *args, **kwargs):
-        self._milestones = {}
-        self._custom_fields = {}
         super(UnfuddleFetcher, self).__init__(*args, **kwargs)
 
     def api_url(self, project_id=None):
@@ -233,45 +243,18 @@ A comma or vertical bar separated list of report criteria composed as
         self.fetch(full_url)
 
     def fetch_scrum(self, sprint_name, project_id=None):
-        if not self._custom_fields:
-            url = '/api/v1/projects/%s/custom_field_values.json' % project_id
-            url = str(make_path(self.tracker.url, url))
-            self.request(
-                url,
-                self.get_headers(),
-                partial(self.responded, on_success=partial(self.parse_custom_fields, partial(self.fetch_scrum, sprint_name, project_id))),
-            )
-        elif not self._milestones:
-            url = '/api/v1/milestones.json'
-            url = str(make_path(self.tracker.url, url))
-            self.request(
-                url,
-                self.get_headers(),
-                partial(self.responded, on_success=partial(self.parse_milestones, partial(self.fetch_scrum, sprint_name, project_id))),
-            )
+        if not self.unfuddle_data:
+            self.get_data(partial(self.fetch_scrum, sprint_name, project_id=project_id))
         else:
             url = self.api_url() + '?'
-            milestone_id = self._milestones.get(sprint_name)
+            milestone_id = self.unfuddle_data['milestones'].get((str(project_id), sprint_name))
             if not milestone_id:
                 flash('Wrong sprint name')
                 self.fail('Wrong sprint name')
             else:
-                conditions_string = 'milestone-eq-%s' % self._milestones[sprint_name]
+                conditions_string = 'milestone-eq-%s' % milestone_id
                 full_url = serialize_url(url, conditions_string=conditions_string)
                 self.fetch(full_url)
-
-    def parse_custom_fields(self, callback, data):
-        jdata = json.loads(data)
-        for field in jdata:
-            if field['field_number'] == 3:
-                self._custom_fields[field['id']] = field['value']
-        callback()
-
-    def parse_milestones(self, callback, data):
-        jdata = json.loads(data)
-        for milestone in jdata:
-            self._milestones[milestone['title']] = milestone['id']
-        callback()
 
     def parse(self, data):
         """
@@ -306,9 +289,10 @@ A comma or vertical bar separated list of report criteria composed as
                 opendate=dateutil.parser.parse(ticket['created_at']),
                 changeddate=dateutil.parser.parse(ticket['updated_at']),
             )
-            whiteboard_field_id = ticket['field3_value_id']
-            if self._custom_fields and whiteboard_field_id:
-                whiteboard = self._custom_fields[whiteboard_field_id]
+            whiteboard_field_id = ticket.get('field3_value_id')
+            key = str(ticket['project_id']), str(whiteboard_field_id)
+            whiteboard = self.unfuddle_data['custom_fields'].get(key)
+            if whiteboard:
                 bug_desc['whiteboard'] = whiteboard
 
             yield self.bug_class(
