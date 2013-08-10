@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import os
 
 name = "intranet3"
-version = "0.8.2"
+version = "0.8.11"
 
 
 def read(*rnames):

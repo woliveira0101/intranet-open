@@ -50,7 +50,11 @@ class Bug(object):
         self.changeddate = changeddate
         self.dependson = {} if dependson is _marker else dependson
         self.blocked = {} if blocked is _marker else blocked
-        self.whiteboard = parse_whiteboard(whiteboard)
+
+        if isinstance(whiteboard, basestring):
+            self.whiteboard = parse_whiteboard(whiteboard)
+        else:
+            self.whiteboard = whiteboard
         self.version = version
 
     def get_url(self):
@@ -130,7 +134,7 @@ class cached_bug_fetcher(object):
             bugs = memcache.get(key)
             if bugs is None: # fetch as usual
                 DEBUG(u"Bugs not in cache for key %s" % (key, ))
-                this.cache_key = key # mark where to cache results
+                this.cache_key = key.replace(' ', '') # mark where to cache results
                 func(this, *args, **kwargs)
             else:  # bugs got from cache
                 DEBUG(u"Bugs found in cache for key %s" % (key, ))
@@ -183,7 +187,13 @@ class BaseFetcher(object):
             if resp.code == 302:
                 LOG(u"Redirect (302) found in response")
                 location = resp.headers.getRawHeaders('location')[0]
-                self.request(location, headers, on_success, on_failure, 'GET', None)
+                if method == 'POST':
+                    new_url, body = location.split('?')
+                    self.request(new_url, headers, on_success, on_failure,
+                                 method, body)
+                else:
+                    self.request(location, headers, on_success, on_failure,
+                                 'GET', None)
             else:
                 on_success(resp)
         deferred.addCallbacks(redirecting_on_success if self.redirect_support else on_success, on_failure)

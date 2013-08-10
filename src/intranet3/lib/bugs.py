@@ -12,7 +12,7 @@ LOG = INFO_LOG(__name__)
 WARN = WARN_LOG(__name__)
 ERROR = ERROR_LOG(__name__)
 
-MAX_TIMEOUT = 20 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
+MAX_TIMEOUT = 50 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 
 SCRUM_BUG_CACHE_KEY = 'sprint-%s'
 SCRUM_BUG_CACHE_TIMEOUT = 3*60
@@ -177,7 +177,11 @@ class Bugs(object):
 
         # now assign projects to bugs
         for bug in bugs:
-            bug.project = projects.get(bug.project_id)
+            if bug.project_id:
+                bug.project = projects.get(bug.project_id)
+            else:
+                bug.project_id = sprint.project_id
+                bug.project = sprint.project
 
         bugs = self.add_time(bugs, sprint=sprint)
         memcache.set(SCRUM_BUG_CACHE_KEY % sprint.id, bugs, SCRUM_BUG_CACHE_TIMEOUT)

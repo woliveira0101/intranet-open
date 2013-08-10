@@ -1,0 +1,188 @@
+@import "bootstrap/bootstrap.less";
+@import "colors.less";
+
+.absences {
+    .placeholder {
+        width: 20em;
+        text-align: center;
+        // Recompensation for border
+        margin-left: -1px;
+        // Recompensation for bottom border
+        margin-top: -1px;
+        position: relative;
+        border-right: solid 1px #000;
+        div {
+            display: block;
+            position: absolute;
+            bottom: 1em;
+            width: 100%;
+            margin: 0;
+            text-align: center;
+            font-size: 1.5em;
+        }
+    }
+    .help {
+        cursor: help;
+        border-bottom: dotted 1px #666;
+    }
+    #days {
+        border-left: solid 1px transparent;
+    }
+    table {
+        margin: 0 auto;
+        thead, tfoot {
+            th {
+                cursor: default;
+                padding-left: 0px;
+                padding-right: 0px;
+                background: #e0e0e0;
+
+                &.day {
+                    border: solid 1px @absences-border;
+                }
+                &.weekday {
+                    border: solid 1px @absences-border;
+                    border-bottom: solid 1px;
+                }
+                &.month {
+                    border-bottom: solid 1px @absences-border;
+                    border-right: solid 1px;
+                }
+                &.user {
+                    border-right: solid 1px;
+                }
+            }
+        }
+        tbody {
+            tr:nth-child(odd) {
+                background: @absences-odd-row;
+            }
+        }
+        td, th {
+            padding-left: 0px;
+            padding-right: 0px;
+            min-width: 1.5em;
+            min-height: 1.2em;
+            line-height: 1.2em;
+            text-align: center;
+        }
+        td {
+            border: solid 1px @absences-border;
+
+            &.user {
+                border-right: solid 1px;
+                width: 20em;
+                max-width: 20em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            &.holiday {
+                background-color: @absences-holiday;
+            }
+            &.today {
+                border-right: solid 1px @absences-today;
+           }
+            &.absent {
+                background: @absences-absent;
+                border-right: solid 1px @absences-absent;
+                &.last {
+                    border-right-color: @absences-border;
+                }
+                overflow-x: hidden;
+                white-space: nowrap;
+                text-align: center;
+                position: relative;
+                a {
+                    -webkit-box-sizing: content-box;
+                       -moz-box-sizing: content-box;
+                            box-sizing: content-box;
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-indent: -9999px;
+                    &:hover {
+                        background: rgba(255,255,255,0.25);
+                    }
+                }
+            }
+            &.late {
+                background: @absences-late;
+                &.inactive {
+                    background: inherit;
+                    &.holiday {
+                        background: @absences-holiday;
+                    }
+                    &.today {
+                        background: transparent;
+                    }
+                }
+            }
+        }
+        .monthend {
+            border-right: solid 1px !important;
+        }
+    }
+    .scrollable table {
+        z-index: 10;
+    }
+}
+.absences-nav {
+    float: right;
+    position: relative;
+    margin-top: -4.5em;
+    .agenda {
+        float: left;
+        margin-left: 2em;
+        li {
+            &.inactive {
+                opacity: 0.2;
+            }
+            &.absence {
+                background: @absences-absent;
+            }
+            &.late {
+                cursor: pointer;
+                background: @absences-late;
+            }
+        }
+    }
+    .pager {
+        float: left;
+    }
+}
+
+
+.tooltip-absence .tooltip-inner{
+    background-color: @absences-absent;
+}
+.tooltip-absence.top .tooltip-arrow {
+    border-top-color: @absences-absent;
+}
+.tooltip-absence.right .tooltip-arrow {
+    border-right-color: @absences-absent;
+}
+.tooltip-absence.left .tooltip-arrow {
+    border-left-color: @absences-absent;
+}
+.tooltip-absence.bottom .tooltip-arrow {
+    border-bottom-color: @absences-absent;
+}
+
+.tooltip-late .tooltip-inner{
+    background-color: @absences-late;
+}
+.tooltip-late.top .tooltip-arrow {
+    border-top-color: @absences-late;
+}
+.tooltip-late.right .tooltip-arrow {
+    border-right-color: @absences-late;
+}
+.tooltip-late.left .tooltip-arrow {
+    border-left-color: @absences-late;
+}
+.tooltip-late.bottom .tooltip-arrow {
+    border-bottom-color: @absences-late;
+}

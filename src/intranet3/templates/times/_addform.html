@@ -8,7 +8,7 @@
       accept-charset="utf-8">
     {{ csrf_field }}
     <div class="project-selector">
-        {{ form_field(form.project_id, _('Project')) }}
+        {{ form_field(form.project_id, _('Project'), class='typeAheadSelect') }}
         <div id="add-to-harvest">
             <div class="description">{{ form.add_to_harvest.label }}</div>
             {{ form.add_to_harvest()|safe }}

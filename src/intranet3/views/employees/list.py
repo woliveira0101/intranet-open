@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime
-from collections import defaultdict
 
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -14,12 +13,14 @@ from intranet3.helpers import groupby
 from intranet3.forms.employees import  FilterForm
 from intranet3.log import INFO_LOG
 
+
 LOG = INFO_LOG(__name__)
 
 LEAVE_PROJECT_ID = 86
 L4_PROJECT_ID = 87
 
 hour9 = datetime.time(hour=9)
+
 
 class ApplyArgsMixin(object):
     def _apply_args(self, cls, query):
@@ -77,19 +78,7 @@ class AbsencePivot(BaseView):
         year = self.request.GET.get('year', datetime.date.today().year)
         users = User.query.filter(User.is_not_client()).filter(User.is_active==True).filter(User.freelancer==False).all()
 
-        used_entries = self.session.query('user_id', 'days').from_statement("""
-            SELECT t.user_id, sum(t.time)/8 as days
-            FROM time_entry t
-            WHERE deleted = false AND
-                  t.project_id = 86 AND
-                  date_part('year', t.date) = :year
-            GROUP BY user_id
-        """).params(year=year).all()
-
-        used = defaultdict(lambda: 0)
-        for u in used_entries:
-            used[u[0]] = u[1]
-
+        used = Leave.get_used_for_year(year)
         applications = m.Absence.get_for_year(year)
 
         return dict(

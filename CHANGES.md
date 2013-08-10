@@ -1,6 +1,67 @@
 New release
 ===========
 
+0.8.11 (05-08-2013)
+===============
+
+- email as a user identifier in Export hours per Client By Employee
+- project_id -> project_name mapping for unfuddle connector
+- component_id -> component_name mapping for unfuddle connector
+- add component name to unfuddle bug
+- change twisted web server combined log to be daily rotated
+- support multiple project for PivotalTracker
+
+0.8.10 (29-07-2013)
+===============
+
+- fixes to Export hours per Client By Employee
+- add scrum support for Pivotal Tracker
+
+0.8.9 (24-07-2013)
+===============
+
+- change date format in log names
+- bugfix: add default project for bugs in sprint
+- export Export hours per Client By Employee (excel)
+
+0.8.8 (15-07-2013)
+===============
+
+- typeahead for project(s) selectors
+- better old bugs report
+- absence table enhancements
+- new filter options for sprint times
+
+0.8.7 (04-07-2013)
+===============
+
+- better sorting for /times/report/pivot and /employees/table/absences
+- color fixes for /employees/table/absences
+
+0.8.6 (28-06-2013)
+===============
+
+- more fixes to absence view
+- better /times/report/pivot
+- scrum role fix
+
+0.8.5 (18-06-2013)
+===============
+
+- fixes to absence view
+- minor fixes everywhere
+
+- add absences view
+
+0.8.4 (06-06-2013)
+===============
+
+- add absences view
+
+
+0.8.3 (03-06-2013)
+===============
+
 - scrum board enhancements
 - minor bug fixes
 - add installation guide to README.md
@@ -36,6 +97,7 @@ New release
 - sprint layout slighty changed
 - fixed client add bug
 - modify client map columns
+- modify velocity per bug - count when closed or verified
 
 0.8 (23-04-2013)
 ===============

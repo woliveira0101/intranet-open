@@ -7,15 +7,16 @@
 {% endblock %}
 
 {% block body %}
-    <div class="tickets_report">
+    <div class="tickets_report sprint">
         <form action="{{ request.url_for('/scrum/sprint/times') }}" method="GET" accept-charset="utf-8">
             <input type="hidden" name="sprint_id" value="{{ sprint.id }}">
             <input type="hidden" name="submited" value="y">
             <div class="selectors" id="ticket-grouping">
                 {{ form_field(form.group_by_bugs, _('Group by bugs')) }}
                 {{ form_field(form.group_by_user, _('Group by employee')) }}
+                {{ form_field(form.ticket_choice, _('Tickets')) }}
+                {{ form_field(form.bigger_than, _('Time')) }}
             </div>
-            {{ form_field(form.bigger_than, _('Time')) }}
             <div class="buttons">
                 <input type="submit" value="{% trans %}Filter{% endtrans %}" class="button btn btn-primary" />
                 <a class="button btn btn-success excel-submit" href="#">{% trans %}Download{% endtrans %}</a>

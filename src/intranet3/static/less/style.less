@@ -1,4 +1,6 @@
 @import "bootstrap/bootstrap.less";
+@import "colors.less";
+@import "absences.less";
 
 @navbarText: #777;
 @grayLight: #999;
@@ -560,6 +562,7 @@ table.bugs-list tbody tr.other-projects td {
         background: #ddd !important;
     }
 }
+
 /* Hours */
 .time-entrie-forms {
     ul,ol {
@@ -674,7 +677,7 @@ table.bugs-list tbody tr.other-projects td {
     color: green;
     white-space: nowrap;
 }
-.table {
+.table, .intranet-table {
     th {
         background: #d2d2d2 !important;
     }
@@ -715,13 +718,16 @@ table.bugs-list tbody tr.other-projects td {
         background: #ddd !important;
     }
 }
-#time-report {
+.time-report {
     .holiday_date {
         opacity: .5;
     }
-    td,th {
+    td, th {
         text-align: center;
         padding: 5px 3px;
+        &.username {
+            width: auto;
+        }
     }
     a {
         color: #000;
@@ -730,11 +736,63 @@ table.bugs-list tbody tr.other-projects td {
             text-decoration: none;
         }
     }
-    .username {
-        text-align: left;
+    .placeholder table {
+        width: 100%;
+        height: 100%;
     }
-    tr.stats td {
-        background: #d2d2d2 !important;
+    .topHeader tr.stats th {
+        border: solid 1px #eee;
+        border-left: solid 1px transparent;
+        border-bottom: none;
+    }
+    thead {
+        border: solid 1px #d2d2d2 !important;
+        tr.stats th {
+            background: #d2d2d2 !important;
+            font-weight: normal;
+        }
+        th {
+            -webkit-box-sizing: border-box;
+               -moz-box-sizing: border-box;
+                    box-sizing: border-box;
+        }
+    }
+    tbody tr {
+        &:nth-child(odd) {
+            background: #f6f6f6;
+        }
+        &:hover {
+            background: #ddd !important;
+        }
+        &.new-city {
+            border-top: solid 3px #ccc;
+        }
+        td {
+            border: solid 1px #eee;
+            -webkit-box-sizing: border-box;
+               -moz-box-sizing: border-box;
+                    box-sizing: border-box;
+            &.username {
+                text-align: left;
+            }
+        }
+    }
+    .time {
+        min-width: 3.5em;
+        max-width: 3.5em;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: 10px;
+    }
+    .wrk {
+        min-width: 10em;
+        max-width: 10em;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: 10px;
+    }
+    tr.new-city {
+        border-top: solid 1px #000;
     }
 }
 .agenda {
@@ -746,6 +804,15 @@ table.bugs-list tbody tr.other-projects td {
         padding: 5px 10px;
         margin-bottom: 15px;
         color: #fff;
+    }
+    &.no-margin li {
+        margin-bottom: 0;
+    }
+    &.agenda-absences {
+        position: relative;
+        float: right;
+        margin-top: -4.5em;
+        right: 1.5em;
     }
 }
 /* Report time */
@@ -798,6 +865,7 @@ table.bugs-list tbody tr.other-projects td {
 }
 select#projects {
     height: 400px;
+    width: 348px;
 }
 select#clients {
     height: 200px;
@@ -816,7 +884,7 @@ select#clients {
         margin: 10px 0px 20px 0px;
     }
     .checkboxes {
-        width:  1000px;
+        margin-left: 50px;
     }
     .client {
         .checkboxes {
@@ -824,6 +892,27 @@ select#clients {
         }
         #projects {
             height: 220px;
+        }
+    }
+    // Special styles for sprint times
+    &.sprint {
+        .selectors div {
+            float: left;
+            dl {
+                dt {
+                    width: auto;
+                    padding: 0 10px 0 30px;
+                }
+                dd {
+                    padding: 0 5px;
+                    #ticket_choice {
+                        margin-top: 0;
+                    }
+                }
+            }
+            .description {
+                display: none;
+            }
         }
     }
 }
@@ -883,7 +972,7 @@ select#clients {
 
     }
     .project_name {
-        width: 100px;
+        width: 240px;
 
     }
     .bug_id {
@@ -1587,12 +1676,83 @@ form.absence-form {
         th.sprint {
             width: 130px;
             text-align: center;
-
         }
     }
     tbody tr {
         td.sprint {
             text-align: center;
+        }
+    }
+}
+
+/* Scrolltable */
+.scrolltable {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+
+    div {
+        &.clear {
+            clear: both;
+        }
+        &.floaty {
+            overflow: hidden;
+            position: absolute;
+            &.placeHolder, &.topHeader {
+                top: 0;
+            }
+            &.placeHolder, &.leftHeader {
+                left: 0;
+            }
+            &.topHeader, &.data {
+                right: 0;
+                table {
+                    float: left;
+                }
+            }
+            &.leftHeader, &.data {
+                bottom: 0;
+            }
+        }
+        &.scrollable {
+            width: 100%;
+            overflow: auto;
+            position: relative;
+            table {
+            	margin-right: 1px;
+            }
+        }
+    }
+    table {
+    	table-layout: fixed;
+    }
+}
+
+table td.city-vertical {
+    text-align: center;
+    background: #fff;
+    span {
+        .rotate(-90deg);
+        letter-spacing: 3px;
+        display: block;
+        text-transform: uppercase;
+        font-weight: bold;
+        width: 1em;
+        margin: 5em auto 0 auto;
+    }
+}
+
+i.pointer {
+    cursor: pointer;
+}
+.typeAheadList {
+    overflow-y: auto;
+    li {
+        i.icon-remove:hover {
+            color: red;
+            &+ span {
+                color: red;
+            }
         }
     }
 }

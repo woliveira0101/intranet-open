@@ -20,7 +20,7 @@
     function clear_intervals_list(){
         var i,
             len = intervals_list.length;
-        
+
         if(len > 0){
             for(i=0; i<len; i++){
                 var id = intervals_list[i];
@@ -52,7 +52,7 @@
             function update_time(){
                 var seconds = (new Date() - timer_ts) / 1000; //seconds
                 var min = (hours * 60) + minutes + (seconds / 60);
-                
+
                 var h = Math.floor(min / 60),
                     m = Math.floor(min % 60),
                     fm = m.toFixed();
@@ -66,7 +66,7 @@
                 status = 'start_timer';
             } else {
                 status = 'stop_timer';
-                timer_ts = new Date(parseInt(timer_ts));
+                timer_ts = new Date(parseInt(timer_ts, 10));
                 intervalID = setInterval(update_time, TIMEOUT);
                 intervals_list.push(intervalID);
                 obj.parents('tr').addClass('timer_on');
@@ -82,7 +82,7 @@
                         if(status === 'start_timer'){
                             text = 'Stop Timer';
                             obj.removeClass('start').addClass('stop');
-                            obj.addClass('btn-primary')
+                            obj.addClass('btn-primary');
                             obj.parents('tr').find('input.superkurazu').addClass('off');
                             intervalID = setInterval(update_time, TIMEOUT);
                             timer_ts = new Date();
@@ -212,7 +212,7 @@
                     .replace(/verified/, 7)
                     .replace(/closed/, 8)
                     .replace(/resolved/, 9);
-                return result
+                return result;
             },
             // set type, either numeric or text
             type: 'numeric'
@@ -248,7 +248,7 @@
             window.open(this.href);
             return false;
         });
-       
+
         $('a.fancybox').fancybox({
             'width'             : '100%',
             'height'            : '100%',
@@ -270,7 +270,8 @@
             buttonImageOnly: true,
             changeMonth: true,
             changeYear: true,
-            dateFormat: 'mm/dd/yy'
+            dateFormat: 'mm/dd/yy',
+            firstDay: 1
         });
 
         var usertooltip = (function(){
@@ -294,7 +295,7 @@
                    $dom.css({
                        left:x,
                        top:y
-                   });  
+                   });
                 }
             };
             var show = function(uid){
@@ -303,12 +304,12 @@
                 $dom.html('Loading...').show();
                 get(uid,function(html){
                     $dom.html(html);
-                });    
+                });
             };
             var hide = function(){
                 isShow = false;
                 $dom.hide();
-            }
+            };
 
             var $dom = $('<div>',{
                 id:'users-tootip'
@@ -332,7 +333,7 @@
                     clearTimeout(_t);
                     _t = setTimeout(function(){
                         hide();
-                    },10);  
+                    },10);
                 }
             };
         })();
@@ -478,6 +479,157 @@
             });
         }
 
+        /**
+         * TYPEAHEAD FOR SELECTS
+         * 
+         * Usage: just add typeAheadSelect class to your select control, and
+         * let the magic happen!
+         */
+        $('.typeAheadSelect').each(function(){
+            var $this = $(this);
+            // Is this multi select?
+            var multi = $this.is('[multiple]');
+            // List for feeding the typeahead
+            var values = [];
+            // Map for getting selected project's ID
+            var ids = {};
+            // Filling these two above
+            $this.find('option[value!=""]').each(function(){
+                values.push($(this).text());
+                ids[$(this).text()] = $(this).val();
+            });
+            var $multiList;
+            // This is used for performance reasons. jQuery's val() is slow, indexOf is slow...
+            // everything is slow!
+            var multiValue = null;
+            if(multi) {
+                // Multi select needs additional list of selected items
+                $multiList = $('<ul class="unstyled typeAheadList"/>');
+                // ...and ability to remove them freely
+                $multiList.on('click', 'li i.icon-remove', function(){
+                    var id = $(this).parent().data('id').toString();
+                    var list = _.filter($this.val(), function(item){
+                        return item !== id;
+                    });
+                    $this.val(list).change();
+                });
+                // Change event for multi select
+                $this.on('change', function(){
+                    $multiList.html('');
+                    // Readd all elements
+                    var list = _.map($(this).val(), function(id){
+                        var item = $this.find('option[value="'+id+'"]').text();
+                        $multiList.append('<li data-id="'+id+'"><i class="icon-remove icon-red pointer" title="remove from selected items"></i> <span>'+item+'</span></li>');
+                    });
+                    multiValue = $(this).val();
+                });
+            }
+            // Our input field
+            var $input = $('<input type="text" autocomplete="off" />');
+            if(!multi && $this.val() !== '') {
+                // If anything was selected, set it as value for input
+                $input.val($this.find('option:selected').text());
+            } else if(multi && $this.val() !== null) {
+                // ...or just trigger change event
+                $this.change();
+            }
+            // Activate typeahead!
+            $input.typeahead({
+                source: values,
+                // Fuzzy matching is used here. Basically, if someone types "adg",
+                // "An unwanted dog" may be returned.
+                // Also, duplicates are not returned for multi selects.
+                matcher: function(item) {
+                    // Check for duplicates first!
+                    // $.val() is VERY SLOW!
+                    var val = multiValue;
+                    if(multi && val) {
+                        var id = ids[item].toString();
+                        // indexOf is SLOW!
+                        for(var i=0, len=val.length; i<len; i++) {
+                            if(val[i] === id) {
+                                return false;
+                            }
+                        }
+                    }
+                    return fuzzyMatcher(item, this.query, 50, false);
+                },
+                highlighter: function(item) { return fuzzyHighlighter(item, this.query, false, 50, false); },
+                // Update the original select control. This is to ensure someone
+                // who can't use typeahead is still able to properly select project.
+                // Also validating for incorrect values.
+                updater: function(item) {
+                    var id = ids[item];
+                    if(!multi && id !== undefined) {
+                        // For single select, just set proper value and return current item
+                        $this.val(id).change();
+                        return item;
+                    } else if(multi && id !== undefined) {
+                        // For multi select, a list of values is returned
+                        // (or null if nothing is selected - then we need to initialize an empty list)
+                        var selected = multiValue !== null ? multiValue : [];
+                        selected.push(id);
+                        // Trigger change event, to update $multiList
+                        $this.val(selected).change();
+                        // And clear the input field!
+                        return '';
+                    }
+                    return item;
+                }
+            }).on('blur', function(){ // Checking for empty and incorrect values for single select
+                if(!multi) {
+                    if($(this).val() === '') {
+                        $this.val('');
+                    }
+                    if(values.indexOf($(this).val()) < 0) {
+                        $(this).val('');
+                    }
+                }
+            }).on('keydown', function(e){ // Additional checking when user presses the Enter key
+                if(e.which == 13 || e.keyCode == 13) {
+                    var val = $(this).val();
+                    if(val === '' && !multi) { // Empty string entered?
+                        $this.val(''); // Clear select as well
+                    } else if(values.indexOf(val) < 0) { // Something gibberish entered
+                        if(multi) { // Clear input
+                            $input.val('');
+                        } else { // Clear input and select
+                            $input.val('');
+                            $this.val('');
+                        }
+                        return false; // and DON'T submit!
+                    }
+                }
+            });
+            // Add show all button
+            var $button = $('<button class="btn" type="button">Show all</button>');
+            $button.on('click', function(){
+                // Hide our input
+                $wrap.hide();
+                if(multi) { // Hide multiList
+                    $multiList.hide();
+                }
+                // Turn off change event and show
+                $this.off('change').show();
+            });
+            // Prepare container for input and show all button
+            var $wrap = $('<div class="input-append" />');
+            $wrap.append($input).append($button);
+            // APPEND!
+            $this.after($wrap);
+            if(multi) {
+                $wrap.after($multiList);
+            }
+            // Set the same size as select minus button
+            $input.width($this.outerWidth() - $button.outerWidth());
+            // For multilist, set also the same height
+            if(multi) {
+                $multiList.css('max-height', ($this.outerHeight() - $button.outerHeight()) + 'px');
+            }
+            // Original select is no longer needed for user, but it's needed by
+            // us to set proper form values!
+            $this.hide();
+        });
     });
 })(jQuery);
 
@@ -488,9 +640,9 @@
             setTimeout(function(){
                 f();
                 loop_f();
-            }, delay)
+            }, delay);
         })();
-    }
+    };
 }( window.IH = window.IH || {}, jQuery, _ ));
 
 // IL - intranet library
@@ -502,11 +654,11 @@
             offset = 0;
         } else if ( typeof(date) === 'string' || typeof(date) === 'number'){
             offset = date;
-            date = Date.today()
+            date = Date.today();
         } else if (offset === undefined){
             offset = 0;
         }
-        offset = parseInt(offset)
+        offset = parseInt(offset, 10);
 
         var first = new Date(date.getTime()), last = new Date(date.getTime());
 
@@ -519,7 +671,7 @@
         last.add({ days: 7*offset });
         last.add({ days: 6});
 
-        return [first, last]
-    }
+        return [first, last];
+    };
 
 }( window.IL = window.IL || {}, jQuery, _, Date ));

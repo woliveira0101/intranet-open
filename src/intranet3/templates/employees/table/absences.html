@@ -1,0 +1,63 @@
+{% extends "templates/employees/list/_absence_base.html" %}
+
+{% set current_subpage = 'table' %}
+
+{% block subbody %}
+<div class="absences-nav">
+    <ul class="pager">
+        <li><a href="{{ request.url_for('/employees/table/absences') }}?year={{ year-1 }}">{% trans %}Previous year{% endtrans %}</a></li>
+        <li>{{ year }}</li>
+        <li><a href="{{ request.url_for('/employees/table/absences') }}?year={{ year+1 }}">{% trans %}Next year{% endtrans %}</a></li>
+    </ul>
+    <ul class="agenda">
+        <li class="absence">Absent</li>
+        <li class="late inactive">Late</li>
+    </ul>
+</div>
+<div class="absences">
+    You have to have Javascript enabled in order to see this data.
+</div>
+{% endblock subbody %}
+
+{% block tail_script %}
+    <script src="{{ request.static_path('intranet3:static/js/scrolltable.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/absences.js') }}"></script>
+    <script>
+    $(document).ready( function () {
+        var data = {{ data|safe }};
+        // generateTable function is in absences.js file
+        generateTable(data);
+        scrollTable($('.absences'));
+        $(window).load(function(){
+            // If current year, scroll to today
+            if(data.year === new Date().getFullYear()) {
+                var $current = $('.absences th.month.current'),
+                    posX = $current.position().left;
+                setTimeout(function(){
+                    $('.absences .data .scrollable').scrollLeft(posX);
+                }, 10);
+            }
+            $('td.absent').tooltip({
+                container: 'body',
+                animation: false,
+                html: true,
+                template: '<div class="tooltip tooltip-absence"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+            });
+            $('td.late').tooltip({
+                container: 'body',
+                animation: false,
+                html: true,
+                template: '<div class="tooltip tooltip-late"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+            });
+            $('td.late').tooltip('disable'); // Latenesses are hidden by default
+        });
+
+        // Toggling latenesses!
+        $('.absences-nav .agenda .late').on('click', function(){
+            $('td.late').tooltip($(this).is('.inactive') ? 'enable' : 'disable');
+            $('.data .late').toggleClass('inactive');
+            $(this).toggleClass('inactive');
+        });
+    });
+    </script>
+{% endblock %}

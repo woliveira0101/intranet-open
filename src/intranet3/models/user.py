@@ -184,7 +184,7 @@ class User(Base):
     def is_not_client(cls):
         # used in queries i.e. User.query.filter(User.is_not_client()).filter(...
         # <@ = http://www.postgresql.org/docs/8.3/static/functions-array.html
-        return User.groups.op('<@')('{user, freelancer, admin}')
+        return User.groups.op('<@')('{user, freelancer, admin, scrum}')
 
     @classmethod
     def is_client(cls):
@@ -210,3 +210,18 @@ class Leave(Base):
         for leave in leaves:
             result[leave.user_id] = (leave.number, leave.remarks)
         return result
+
+    @classmethod
+    def get_used_for_year(cls, year):
+        used_entries = DBSession.query('user_id', 'days').from_statement("""
+            SELECT t.user_id, sum(t.time)/8 as days
+            FROM time_entry t
+            WHERE deleted = false AND
+                  t.project_id = 86 AND
+                  date_part('year', t.date) = :year
+            GROUP BY user_id
+        """).params(year=year).all()
+        used = defaultdict(lambda: 0)
+        for u in used_entries:
+            used[u[0]] = int(u[1])
+        return used

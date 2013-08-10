@@ -58,10 +58,31 @@ class Pivot(MonthMixin, BaseView):
         """).params(month_start=month_start, month_end=month_end)
         if not self.request.has_perm('view'):
             users = [self.request.user] # TODO do we need to constrain entries also?
+            locations= {
+                self.request.user.location: ('', 1)
+            }
         else:
-            users = User.query.filter(User.is_not_client())\
-                              .filter(User.is_active==True)\
-                              .order_by(User.freelancer, User.name).all()
+            users_w = User.query.filter(User.is_not_client()) \
+                                .filter(User.is_active==True) \
+                                .filter(User.location=='wroclaw') \
+                                .order_by(User.freelancer, User.name) \
+                                .all()
+            users_p = User.query.filter(User.is_not_client()) \
+                                .filter(User.is_active==True) \
+                                .filter(User.location=='poznan') \
+                                .order_by(User.freelancer, User.name) \
+                                .all()
+            locations = {
+                'wroclaw': [u'Wrocław', len(users_w)],
+                'poznan': [u'Poznań', len(users_p)],
+            }
+            locations[self.request.user.location][1] -= 1
+            if self.request.user.location == 'wroclaw':
+                users = users_w
+                users.extend(users_p)
+            else:
+                users = users_p
+                users.extend(users_w)
 
         today = datetime.date.today()
         grouped = defaultdict(lambda: defaultdict(lambda: 0.0))
@@ -100,8 +121,6 @@ class Pivot(MonthMixin, BaseView):
 
         users.insert(0, users.pop(current_user_index))
 
-
-
         return dict(
             entries=grouped, users=users, sums=sums, late=late, excuses=excuses.wrongtime(),
             daily_sums=daily_sums, monthly_sum=sum(daily_sums.values()),
@@ -112,7 +131,8 @@ class Pivot(MonthMixin, BaseView):
             next_date=next_month(month_start),
             today=today,
             count_of_required_month_hours=count_of_required_month_hours,
-            count_of_required_hours_to_today=count_of_required_hours_to_today
+            count_of_required_hours_to_today=count_of_required_hours_to_today,
+            locations=locations,
         )
 
 
@@ -223,14 +243,17 @@ class HoursWorkedMixin(object):
         if only_fully_employed:
             sql_user += 'AND ("user".start_full_time_work IS NULL OR "user".start_full_time_work < NOW())'
 
-        sql = """SELECT round(CAST(sum(time_entry.time) AS numeric), 1) AS time,
-                        round(CAST(sum(time_entry.time)-8 AS Numeric), 1) AS diff,
-                        time_entry.user_id, "user".email,
-                        "user".name, {sql_cols}
+        sql = """SELECT round(CAST(sum(time_entry.time) AS numeric), 2) AS time,
+                        round(CAST(sum(time_entry.time)-8 AS Numeric), 2) AS diff,
+                        time_entry.user_id,
+                        "user".email,
+                        "user".name,
+                        {sql_cols}
                  FROM time_entry
                  JOIN "user" ON "user".id = time_entry.user_id
                      AND "user".is_active = True
                  WHERE
+                        time_entry.deleted = FALSE AND
                         time_entry.date BETWEEN :date_start AND :date_end
                         {sql_user}
                  GROUP BY
