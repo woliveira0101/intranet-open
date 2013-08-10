@@ -69,17 +69,43 @@ class ProjectChoices(EntityChoices):
         self.skip_inactive = skip_inactive
         self.client = client
         self.a_filter = additional_filter
-    
-    def __iter__(self):
-        if self.empty:
-            yield '', self.empty_title
-        query = DBSession.query(Project.id, Client.name, Project.name)\
-                .filter(Project.client_id==Client.id)
+
+    def get_projects_query(self):
+        query = DBSession.query(Project.id, Client.name, Project.name) \
+            .filter(Project.client_id==Client.id)
         if self.client:
             query = query.filter(Project.client_id==self.client.id)
         if self.skip_inactive:
             query = query.filter(Project.active==True)
         query = query.order_by(Client.name, Project.name)
         query = self.a_filter(query).distinct()
+        return query
+
+    def __iter__(self):
+        if self.empty:
+            yield '', self.empty_title
+        query = self.get_projects_query()
         for project_id, client_name, project_name in query:
             yield str(project_id), u'%s / %s' % (client_name, project_name)
+
+
+class ScrumProjectChoices(ProjectChoices):
+
+    def get_projects_query(self):
+        query = DBSession.query(Project.id, Client.name, Project.name, Project.tracker_id) \
+            .filter(Project.client_id==Client.id)
+        if self.client:
+            query = query.filter(Project.client_id==self.client.id)
+        if self.skip_inactive:
+            query = query.filter(Project.active==True)
+        query = query.order_by(Client.name, Project.name)
+        query = self.a_filter(query).distinct()
+        query = query.filter(Project.tracker_id.in_([1,10,12,13,9]))
+        return query
+
+    def __iter__(self):
+        if self.empty:
+            yield '', self.empty_title
+        query = self.get_projects_query()
+        for project_id, client_name, project_name, tracker_id in query:
+            yield (str(project_id), str(tracker_id)), u'%s / %s' % (client_name, project_name)
