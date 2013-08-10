@@ -246,6 +246,8 @@ A comma or vertical bar separated list of report criteria composed as
         if not self.unfuddle_data:
             self.get_data(partial(self.fetch_scrum, sprint_name, project_id=project_id))
         else:
+            projects_reversed = dict((v,k) for k, v in self.unfuddle_data['projects'].iteritems())
+            project_id = projects_reversed[project_id]
             url = self.api_url() + '?'
             milestone_id = self.unfuddle_data['milestones'].get((str(project_id), sprint_name))
             if not milestone_id:
