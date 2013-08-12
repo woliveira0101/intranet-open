@@ -10,7 +10,6 @@ class Client(Base):
     id = Column(Integer, primary_key=True, index=True)
     coordinator_id = Column(Integer, ForeignKey(User.id), nullable=True, index=True)
     name = Column(String, unique=True, nullable=False)
-    projects = orm.relationship('Project', backref='client', lazy='dynamic')
     emails = Column(String, nullable=True)
 
     color = Column(String, nullable=False, default='')
@@ -24,6 +23,9 @@ class Client(Base):
     mailing_url = Column(String, nullable=True)
     wiki_url    = Column(String, nullable=True)
     note        = Column(String, nullable=True)
+
+    projects = orm.relationship('Project', backref='client', lazy='dynamic')
+    coordinator = orm.relationship('User', backref='client')
 
     @reify
     def active(self):
