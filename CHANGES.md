@@ -1,6 +1,11 @@
 New release
 ===========
 
+0.8.12 (12-08-2013)
+===============
+- unfuddle connector enhancements and fixes
+- better multi user and multi project selector
+
 0.8.11 (05-08-2013)
 ===============
 
