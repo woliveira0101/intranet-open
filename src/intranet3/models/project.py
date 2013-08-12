@@ -66,7 +66,6 @@ class Project(Base):
     active = Column(Boolean, nullable=False)
 
     time_entries = orm.relationship('TimeEntry', backref='project', lazy='dynamic')
-    sprints = orm.relationship('Sprint', backref='project', lazy='dynamic')
 
     google_card = Column(String, nullable=True)
     google_wiki = Column(String, nullable=True)
