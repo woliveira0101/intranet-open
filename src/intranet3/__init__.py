@@ -90,6 +90,9 @@ def main(global_config, **settings):
     pyramid_config.add_forbidden_view(forbidden_view)
 
     pyramid_config.add_static_view('static', 'static', cache_max_age=3600)
+
+    pyramid_config.add_route('api_my_bugs', '/api/bugs/my')
+    
     pyramid_config.add_renderer('.html', 'pyramid_jinja2.renderer_factory')
     pyramid_config.add_renderer(None, 'intranet3.utils.renderer.renderer_factory')
     pyramid_config.add_translation_dirs('intranet3:locale/')

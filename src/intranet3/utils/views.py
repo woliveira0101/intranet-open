@@ -1,5 +1,6 @@
 import datetime
 import calendar
+import json
 
 from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden, HTTPNotFound
 
@@ -78,6 +79,21 @@ class BaseView(View):
 
     def post(self):
         raise HTTPNotFound()
+
+
+class ApiView(BaseView):
+
+    def __init__(self, context, request):
+        def response_exception(request, response):
+            try:
+                response.content_type = "application/json"
+                response.body = json.dumps({'message': response.exception.message})
+                return response
+            except AttributeError:
+                return response
+        request.add_response_callback(response_exception)
+        
+        super(ApiView, self).__init__(context, request)
 
 
 class CronView(View):

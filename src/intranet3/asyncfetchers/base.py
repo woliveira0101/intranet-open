@@ -84,6 +84,44 @@ class Bug(object):
         severity = getattr(self, 'severity', 'unknown')
         return PRIORITIES.get(severity.lower(), 5)
 
+    def to_dict(self):
+        response = {
+            'id': self.id,
+            'time': self.time,
+            'desc': self.desc,
+            'severity': self.severity,
+            'severity_number': self.severity_number,
+            'project_name': self.project_name,
+            'component_name': self.component_name,
+            'dependson': [(bug_id, value) for bug_id, value in self.dependson.iteritems()],
+            'blocked': [(bug_id, value) for bug_id, value in self.blocked.iteritems()],
+            'version': self.version,
+            'priority': self.priority,
+            'whiteboard': self.whiteboard,
+            'url': self.get_url(),
+            'owner_name': self.owner.name,
+            'raporter_name': self.reporter.name,
+            'opendate': self.opendate.strftime('%Y-%m-%d'),
+            'changeddate': self.changeddate.strftime('%Y-%m-%d'),
+            'deadline': self.deadline,
+        }
+
+        if self.project:
+            response.update({
+                'project': {
+                    'id': self.project.id,
+                    'name': self.project.name,
+                    'client_name': self.project.client.name
+                }
+            })
+        else:
+            response.update({
+                'project': None,
+            })
+
+        return response
+
+
 class FetchException(Exception):
     pass
 
