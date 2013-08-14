@@ -85,6 +85,10 @@ class User(Base):
     refresh_token = Column(String, nullable=False)
     _access_token = None
 
+    @property
+    def user_groups(self):
+        return ", ".join([str(group).title() for group in self.groups])
+
     @reify
     def access_token(self):
         access_token = memcache.get(GOOGLE_ACCESS_TOKEN_MEMCACHE_KEY % self.id)

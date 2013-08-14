@@ -4,6 +4,7 @@ import base64
 import mimetypes
 
 from pyramid.view import view_config
+from pyramid.exceptions import Forbidden
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from pyramid.response import Response
 
@@ -64,6 +65,8 @@ class Edit(BaseView):
 
         if user_id and self.request.has_perm('admin'):
             user = User.query.get(user_id)
+        elif user_id:
+            raise Forbidden()
         else:
             user = self.request.user
         form = UserEditForm(self.request.POST, obj=user)
