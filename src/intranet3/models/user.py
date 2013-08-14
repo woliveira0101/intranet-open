@@ -87,7 +87,7 @@ class User(Base):
 
     @property
     def user_groups(self):
-        return ", ".join([str(group).title() for group in self.groups])
+        return ", ".join([group for group in self.groups])
 
     @reify
     def access_token(self):
