@@ -3,9 +3,9 @@ import calendar
 import json
 
 from pyramid.httpexceptions import HTTPException, HTTPBadRequest, HTTPForbidden, HTTPMethodNotAllowed, HTTPNotFound 
+from pyramid.i18n import TranslationStringFactory, get_localizer
 
 from intranet3 import models
-from pyramid.i18n import TranslationStringFactory, get_localizer
 from intranet3.log import INFO_LOG
 
 LOG = INFO_LOG(__name__)
@@ -94,7 +94,8 @@ class ApiView(BaseView):
 
             if isinstance(e, HTTPException):
                 response.content_type = "application/json"
-                response.body = json.dumps({'message': e.message})    
+                response.body = json.dumps({'message': e.message})
+
             return response
         request.add_response_callback(_response_exception)
         
@@ -102,12 +103,12 @@ class ApiView(BaseView):
 
         self.flash = lambda message, klass='': None # We don't need flash messages. So do nothing
 
-    def dispatch(self):
+    def dispatch(self):       
         if self.request.method.lower() in self.http_method_names:
             handler = getattr(self, self.request.method.lower(), self.http_not_allowed_method)
         else:
             handler = self.http_not_allowed_method
-         
+
         return handler()
 
     def http_not_allowed_method(self):
