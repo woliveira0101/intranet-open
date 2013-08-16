@@ -1,4 +1,4 @@
- # coding: utf-8
+# coding: utf-8
 from colander import MappingSchema, SchemaNode, Boolean, Float, Integer, \
     String, Range, Invalid
 
