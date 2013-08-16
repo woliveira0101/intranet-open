@@ -2,17 +2,20 @@
 import calendar
 import datetime
 
+import colander
+
 from pyramid.httpexceptions import HTTPBadRequest, HTTPCreated, HTTPForbidden, HTTPNotFound, HTTPOk, HTTPNoContent
 from pyramid.view import view_config
 
 from intranet3.forms.times import time_filter
 from intranet3.helpers import previous_day, next_day, format_time
+from intranet3.lib.bugs import Bugs
 from intranet3.models import User, Project, TimeEntry
 from intranet3.utils.views import ApiView
 from intranet3.views.times import GetTimeEntriesMixin
 from intranet3.log import INFO_LOG
 
-from intranet3.schemas.times import AddEntrySchema, EditEntrySchema
+from intranet3.schemas.times import AddEntrySchema, EditEntrySchema, AddOneOfOwnBugsSchema
 
 LOG = INFO_LOG(__name__)
 
@@ -21,15 +24,16 @@ def _date_to_string(date):
     return date.strftime("%d.%m.%Y")
 
 
-def user_can_modify(user, timeentry_date):
+def user_can_modify(user, date):
     if user.has_perm('admin'):
         return True
 
-    today = datetime.datetime().now()
-    first_day, days_in_month = calendar.monthrange(today.year, today.month)
-    last_day = datetime.date(today.year, today.month, days_in_month)
+    # User Can modify entry only in current month
+    today = datetime.date.today()
+    if date.month == today.month:
+        return True
 
-    return (first_day < timeentry_ < last_day)
+    return False
 
 
 @view_config(route_name='api_times', renderer='json', permission='client_or_freelancer')
@@ -44,6 +48,7 @@ class Times(GetTimeEntriesMixin, ApiView):
                 'added': _date_to_string(entry.added_ts),
                 'modified': _date_to_string(entry.modified_ts),
                 'ticket_id': entry.ticket_id,
+                'time': entry.time,
                 'tracker_url': tracker.get_bug_url(entry.ticket_id),
                 'project': None
             }
@@ -64,23 +69,37 @@ class Times(GetTimeEntriesMixin, ApiView):
         '''
             User can edit `TimeEntry` only during current month
         '''
+        (user, date) = self.get_params()
+
         method = self.request.method.lower()
         if method in ["put", "delete"]:  # Protect update!
             if 'timeentry_id' in self.request.GET:
                 timeentry_id = self.request.GET.get('timeentry_id')
                 timeentry = TimeEntry.query.get(timeentry_id)
-                date = timeentry.date
 
-                if not user_can_modify(self.request, date):
+                if not user_can_modify(self.request, timeentry.date):
                     raise HTTPForbidden()
 
                 if not self.request.has_perm('admin'):
                     if timeentry.deleted:
-                        raise HTTPBadRequest
+                        raise HTTPBadRequest()
                     elif self.request.user.id != timeentry.user_id:
                         raise HTTPBadRequest()
 
                 self.v['timeentry'] = timeentry
+
+        if method == "post":
+            if 'date' in self.request.GET:
+                if not user_can_modify(self.request, date):
+                    raise HTTPForbidden()
+
+            if 'user_id' in self.request.GET:
+                if not self.request.has_perm('admin'):
+                    raise HTTPForbidden()
+
+        self.v['user'] = user
+        self.v['date'] = date
+
 
     def get_params(self):
         date_str = self.request.GET.get('date', None)
@@ -101,7 +120,7 @@ class Times(GetTimeEntriesMixin, ApiView):
         return user, date
 
     def get(self):
-        (user, date) = self.get_params()
+        (user, date) = self.v['user'], self.v['date']
 
         entries = self._get_time_entries(date, user.id)
         total_sum = sum(entry.time for (tracker, entry) in entries if not entry.deleted)
@@ -116,7 +135,7 @@ class Times(GetTimeEntriesMixin, ApiView):
         }
 
     def post(self):
-        (user, date) = self.params()
+        (user, date) = self.v['user'], self.v['date']
 
         try:
             schema = AddEntrySchema()
@@ -127,7 +146,7 @@ class Times(GetTimeEntriesMixin, ApiView):
             time = TimeEntry(
                 date = date,
                 user_id = user.id,
-                time = data.get('time'),
+                 time = data.get('time'),
                 description = data.get('description'),
                 ticket_id = data.get('ticket_id'),
                 project_id = project_id if project_id else None,
@@ -135,7 +154,7 @@ class Times(GetTimeEntriesMixin, ApiView):
                 frozen = bool(data.get('start_timer'))
             )
             self.session.add(time)
-        except Invalid as e:
+        except colander.Invalid as e:
             raise HTTPBadRequest(e.asdict())
 
         return HTTPCreated('OK')
@@ -147,7 +166,7 @@ class Times(GetTimeEntriesMixin, ApiView):
         try:
             schema = EditEntrySchema()
             data = schema.deserialize(self.request.POST)
-            import ipdb; ipdb.set_trace()
+
             if timeentry.project_id != data.get('project_id') and today > timeentry.date:
                 timeentry.deleted = True
                 timeentry.modified_ts = datetime.datetime.now() 
@@ -172,7 +191,7 @@ class Times(GetTimeEntriesMixin, ApiView):
                 timeentry.ticket_id = data.get('ticket_id')
                 timeentry.project_id = data.get('project_id', None)
 
-        except Invalid as e:
+        except colander.Invalid as e:
             raise HTTPBadRequest(e.asdict())
 
         return HTTPOk("OK")
@@ -188,15 +207,17 @@ class Times(GetTimeEntriesMixin, ApiView):
 
         return HTTPNoContent("Deleted")
 
-
+@view_config(route_name='api_entry_to_one_of_own_bugs', renderer='json', permission='client_or_freelancer')
 class EntryToOneOfOwnBugs(ApiView):
 
     def get(self):
-        return {
-            'todo': "project, ticket id"
-        }
+        date_str = self.request.GET.get('date', None)
+        if date_str is not None:
+            date = datetime.datetime.strptime(date_str, '%d.%m.%Y')
+        else:
+            date = datetime.datetime.now().date()
 
-    def post(self):
-        return {
-            'todo': 'request.POST[time,description,] /:ticket_id'
-        }
+        bugs = Bugs(self.request).get_user()
+        return dict(
+            bugs=[bug.to_dict() for bug in bugs if bug.project],
+        )

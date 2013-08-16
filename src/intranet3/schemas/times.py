@@ -1,4 +1,4 @@
-# coding: utf-8
+ # coding: utf-8
 from colander import MappingSchema, SchemaNode, Boolean, Float, Integer, \
     String, Range, Invalid
 
@@ -53,7 +53,6 @@ class TicketObject(object):
 
 
 class AddEntrySchema(MappingSchema):
-    user_id = SchemaNode(Integer())
     project_id = SchemaNode(Integer())
     ticket_id = SchemaNode(TicketObject())
     time = SchemaNode(TimeObject(), validator=Range(0.0, 24.00))
@@ -66,4 +65,9 @@ class EditEntrySchema(MappingSchema):
     project_id = SchemaNode(Integer())
     ticket_id = SchemaNode(TicketObject())
     time = SchemaNode(TimeObject(), validator=Range(0.0, 24.00))
+    description = SchemaNode(String())
+
+
+class AddOneOfOwnBugsSchema(MappingSchema):
+    time = SchemaNode(TimeObject, validator=Range(0.0, 24.00))
     description = SchemaNode(String())
