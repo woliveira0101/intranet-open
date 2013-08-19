@@ -34,18 +34,21 @@ class TimeCollection(GetTimeEntriesMixin, ApiView):
 
     def protect(self):
         user, date = self._get_params()
-
-        if self.request.method == "POST":
-            if 'date' in self.request.GET:
-                if not user_can_modify_timeentry(self.request.user, date):
-                    raise HTTPForbidden()
-
-            if 'user_id' in self.request.GET:
-                if not self.request.has_perm('admin'):
-                    raise HTTPForbidden()
+        is_same_user = user.id == self.request.user.id
 
         self.v['user'] = user
         self.v['date'] = date
+
+        if self.request.has_perm('admin'):
+            return
+
+        if self.request.method == "POST":
+            if not is_same_user or not user_can_modify_timeentry(self.request.user, date):
+                raise HTTPForbidden()
+
+        if self.request.method == "GET":
+            if user.freelancer and not is_same_user:
+                raise HTTPForbidden()
 
     def _get_params(self):
         date_str = self.request.GET.get('date')
@@ -109,23 +112,29 @@ class Time(ApiView):
         timeentry_id = self.request.matchdict.get('id')
         timeentry = TimeEntry.query.get(timeentry_id)
 
+        if timeentry is None:
+            raise HTTPNotFound("Not Found")
+
+        is_same_user = timeentry.user_id == self.request.user.id
+        self.v['timeentry'] = timeentry
+
+        if self.request.has_perm('admin'):
+            return
+
         if self.request.method in ("PUT", "DELETE"):
             if not user_can_modify_timeentry(self.request.user, timeentry.date):
                 raise HTTPForbidden()
+            elif timeentry.deleted:
+                raise HTTPBadRequest()
+            elif not is_same_user:
+                raise HTTPBadRequest()
 
-            if not self.request.has_perm('admin'):
-                if timeentry.deleted:
-                    raise HTTPBadRequest()
-                elif self.request.user.id != timeentry.user_id:
-                    raise HTTPBadRequest()
-
-        self.v['timeentry'] = timeentry
+        if self.request.method == "GET":
+            if self.request.user.freelancer and not is_same_user:
+                raise HTTPForbidden()
 
     def get(self):
         timeentry = self.v['timeentry']
-
-        if timeentry is None:
-            raise HTTPNotFound("Not Found")
 
         entry = timeentry.to_dict()
         # Add Tracker URL if project is not None
