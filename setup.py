@@ -64,7 +64,7 @@ setup(
         'webtest',
         'Mock',
         'markdown',
-
+        'iso8601',
     ],
     message_extractors = { 'src/intranet3': [
         ('**.py', 'python', None ),

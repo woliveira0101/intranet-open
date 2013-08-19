@@ -3,6 +3,7 @@ import calendar
 import datetime
 
 import colander
+import iso8601
 
 from pyramid.httpexceptions import HTTPBadRequest, HTTPCreated, HTTPForbidden, HTTPNotFound, HTTPOk, HTTPNoContent
 from pyramid.view import view_config
@@ -16,8 +17,6 @@ from intranet3.utils.views import ApiView
 from intranet3.views.times import GetTimeEntriesMixin
 
 from intranet3.schemas.times import AddEntrySchema, EditEntrySchema
-
-from .utils import parse_date
 
 
 @view_config(route_name='api_time_collection', renderer='json', permission='freelancer')
@@ -56,8 +55,8 @@ class TimeCollection(GetTimeEntriesMixin, ApiView):
         date_str = self.request.GET.get('date')
         if date_str is not None:
             try:
-                date = parse_date(date_str)
-            except (ValueError, TypeError, AttributeError):
+                date = iso8601.parse_date(date_str).date()
+            except iso8601.ParseError:
                 raise HTTPBadRequest("Accepted date format ISO-8601: YYYY-MM-DD/YYYMMDD")
         else:
             date = datetime.date.today()
@@ -90,7 +89,9 @@ class TimeCollection(GetTimeEntriesMixin, ApiView):
             return HTTPBadRequest(e.asdict())
 
         project_id = data.get('project_id')
-        project = Project.query.get(project_id) if project_id else None
+        project = Project.query.get(project_id)
+        if not project:
+            raise HTTPBadRequest("Project is required")
 
         time = TimeEntry(
             date = date,
