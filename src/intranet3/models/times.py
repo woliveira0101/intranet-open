@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, ForeignKey, orm
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.types import DateTime, Date, String, Integer, Float, Boolean
 
 from intranet3.models import Base
