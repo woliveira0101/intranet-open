@@ -66,8 +66,3 @@ class EditEntrySchema(MappingSchema):
     ticket_id = SchemaNode(TicketObject())
     time = SchemaNode(TimeObject(), validator=Range(0.0, 24.00))
     description = SchemaNode(String())
-
-
-class AddOneOfOwnBugsSchema(MappingSchema):
-    time = SchemaNode(TimeObject, validator=Range(0.0, 24.00))
-    description = SchemaNode(String())
