@@ -17,6 +17,8 @@ from intranet3.views.times import GetTimeEntriesMixin
 
 from intranet3.schemas.times import AddEntrySchema, EditEntrySchema
 
+from .utils import parse_date
+
 
 @view_config(route_name='api_time_collection', renderer='json', permission='freelancer')
 class TimeCollection(GetTimeEntriesMixin, ApiView):
@@ -53,7 +55,10 @@ class TimeCollection(GetTimeEntriesMixin, ApiView):
     def _get_params(self):
         date_str = self.request.GET.get('date')
         if date_str is not None:
-            date = datetime.datetime.strptime(date_str, '%d.%m.%Y')
+            try:
+                date = parse_date(date_str)
+            except (ValueError, TypeError, AttributeError):
+                raise HTTPBadRequest("Accepted date format ISO-8601: YYYY-MM-DD/YYYMMDD")
         else:
             date = datetime.date.today()
 
