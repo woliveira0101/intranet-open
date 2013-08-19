@@ -865,6 +865,7 @@ table.bugs-list tbody tr.other-projects td {
 }
 select#projects {
     height: 400px;
+    width: 348px;
 }
 select#clients {
     height: 200px;
@@ -883,7 +884,7 @@ select#clients {
         margin: 10px 0px 20px 0px;
     }
     .checkboxes {
-        width:  1000px;
+        margin-left: 50px;
     }
     .client {
         .checkboxes {
@@ -891,6 +892,27 @@ select#clients {
         }
         #projects {
             height: 220px;
+        }
+    }
+    // Special styles for sprint times
+    &.sprint {
+        .selectors div {
+            float: left;
+            dl {
+                dt {
+                    width: auto;
+                    padding: 0 10px 0 30px;
+                }
+                dd {
+                    padding: 0 5px;
+                    #ticket_choice {
+                        margin-top: 0;
+                    }
+                }
+            }
+            .description {
+                display: none;
+            }
         }
     }
 }
@@ -950,7 +972,7 @@ select#clients {
 
     }
     .project_name {
-        width: 100px;
+        width: 240px;
 
     }
     .bug_id {
@@ -1717,5 +1739,20 @@ table td.city-vertical {
         font-weight: bold;
         width: 1em;
         margin: 5em auto 0 auto;
+    }
+}
+
+i.pointer {
+    cursor: pointer;
+}
+.typeAheadList {
+    overflow-y: auto;
+    li {
+        i.icon-remove:hover {
+            color: red;
+            &+ span {
+                color: red;
+            }
+        }
     }
 }

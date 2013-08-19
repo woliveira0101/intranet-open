@@ -91,7 +91,7 @@ class ResolvedBugs(CronView):
     def _remind_resolved_bugs_user(self, user):
         """ remind (via email) user to close his resolved bugs """
         LOG(u"Starting email reminder for user %s" % (user.email, ))
-        my_bugs_url = self.request.url_for('/bugs/my', resolved=True)
+        my_bugs_url = self.request.url_for('/bugs/my', resolved=1)
         list_url = self.settings['FRONTEND_PREFIX'] + my_bugs_url
 
         bugs = Bugs(self.request, user).get_user(resolved=True)

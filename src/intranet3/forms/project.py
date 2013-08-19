@@ -15,7 +15,7 @@ class ProjectForm(wtf.Form):
     coordinator_id = wtf.SelectField(_(u"Coordinator"), validators=[], choices=UserChoices(empty=True))
     tracker_id = wtf.SelectField(_(u"Tracker"), validators=[validators.Required()], choices=EntityChoices(Tracker, lambda tracker: tracker.name))
     status = wtf.SelectField(_(u"Status"), validators=[validators.Required()], choices=STATUS)
-    turn_off_selectors = wtf.BooleanField(_(u"Turn off selectors"), validators=[])
+    turn_off_selectors = wtf.BooleanField(_(u"Turn off selectors"), validators=[], default=True)
     project_selector = wtf.TextField(_(u"Project selector"), validators=[])
     component_selector = wtf.TextField(_(u"Component selector"), validators=[])
     version_selector = wtf.TextField(_(u"Version selector"), validators=[])

@@ -22,6 +22,7 @@ class BugUglyAdapter(object):
         return getattr(self._bug, item)
 
     def is_closed(self):
+
         if self._bug.project.client_id == 20:
             return self._bug.get_status() == 'VERIFIED' and self._bug.get_resolution() == 'DEPLOYED'
         else:
@@ -33,8 +34,10 @@ class BugUglyAdapter(object):
 
     @property
     def velocity(self):
-        points = float(self.whiteboard.get('p', 0.0))
-        return (points / self.sprint_time) if self.sprint_time else 0.0
+        if self.is_closed():
+            points = float(self.whiteboard.get('p', 0.0))
+            return (points / self.sprint_time) if self.sprint_time else 0.0
+        return None
 
     @classmethod
     def produce(cls, bugs):
@@ -82,7 +85,7 @@ def move_blocked_to_the_end(bugs):
 class SprintWrapper(object):
     def __init__(self, sprint, bugs, request):
         self.sprint = sprint
-        self.bugs = BugUglyAdapter.produce(bugs)
+        self.bugs = BugUglyAdapter.produce([b for b in bugs if getattr(b, 'project')])
         self.request = request
         self.session = request.db_session
 

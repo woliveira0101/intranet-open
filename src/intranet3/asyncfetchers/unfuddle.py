@@ -29,7 +29,6 @@ class UnfuddleTrackerBug(Bug):
     def get_status(self):
         return self.status.upper()
 
-
 unfuddletracker_converter = Converter(
     id='id',
     desc='desc',
@@ -42,7 +41,7 @@ unfuddletracker_converter = Converter(
     changeddate='changeddate',
     priority='priority',
     severity='severity',
-    component_name='component',
+    component_name='component_name',
     deadline='deadline',
     whiteboard='whiteboard',
 )
@@ -54,38 +53,75 @@ class UnfuddleUserFetcher(BasicAuthMixin, BaseFetcher):
     we have to create new login mapping by fetching all users from unfuddle
     and then use it in self.parse
     """
-    unfuddle_login_mapping = None
-    UNFUDDLE_LOGIN_MAPPING_KEY = 'unfuddle_login_mapping'
-    UNFUDDLE_LOGIN_MAPPING_TIMEOUT = 60*3
-    people_api = '/api/v1/people.json'
+    unfuddle_data = None
+    UNFUDDLE_DATA_KEY = 'unfuddle_data'
+    UNFUDDLE_DATA_TIMEOUT = 60*3
+    DATA_API = '/api/v1/initializer.json'
 
-    def get_users(self, callback):
-        if not self.unfuddle_login_mapping:
-            login_mapping = memcache.get(self.UNFUDDLE_LOGIN_MAPPING_KEY)
-            if not login_mapping:
-                self.fetch_users(callback)
+    def get_data(self, callback):
+        if not self.unfuddle_data:
+            data = memcache.get(self.UNFUDDLE_DATA_KEY)
+            if not data:
+                self.fetch_data(callback)
                 return
             else:
-                self.unfuddle_login_mapping = login_mapping
+                self.unfuddle_data = data
         callback()
 
-    def fetch_users(self, callback):
+    def fetch_data(self, callback):
         headers = self.get_headers()
-        url = self.tracker.url + self.people_api
+        url = self.tracker.url + self.DATA_API
         url = str(url)
         self.request(
             url,
             headers,
-            partial(self.responded, on_success=partial(self.parse_users, callback)),
+            partial(self.responded, on_success=partial(self.parse_data, callback)),
         )
 
-    def parse_users(self, callback, data):
-        jdata = json.loads(data)
-        login_mapping = dict([ ( user['id'], user['username'] ) for user in jdata])
-        login_mapping[None] = 'nobody'
+    def _get_users(self, users):
+        mapping = dict([ ( user['id'], user['username'] ) for user in users])
+        mapping[None] = 'nobody'
+        return mapping
 
-        self.unfuddle_login_mapping = login_mapping
-        memcache.set(self.UNFUDDLE_LOGIN_MAPPING_KEY, login_mapping, timeout=self.UNFUDDLE_LOGIN_MAPPING_TIMEOUT)
+    def _get_projects(self, projects):
+        mapping = dict([ ( str(p['id']), p['title'] ) for p in projects])
+        return mapping
+
+    def _get_components(self, components):
+        mapping = dict([ ( str(c['id']), c['name'] ) for c in components])
+        return mapping
+
+    def _get_milestones(self, milestones):
+        mapping = dict([ ( (str(m['project_id']), str(m['title'])), m['id'] ) for m in milestones])
+        return mapping
+
+    def _get_custom_fields(self, custom_fields):
+        mapping = dict([ ( (str(cf['project_id']), str(cf['id'])), cf['value'] ) for cf in custom_fields])
+        return mapping
+
+    def parse_data(self, callback, data):
+        jdata = json.loads(data)
+
+        users = self._get_users(jdata['people'])
+        projects = self._get_projects(jdata['projects'])
+        components = self._get_components(jdata.get('components', []))
+        milestones = self._get_milestones(jdata.get('milestones', []))
+        custom_fields = self._get_custom_fields(jdata.get('custom_field_values', []))
+
+        data = {
+            'users': users,
+            'projects': projects,
+            'components': components,
+            'milestones': milestones,
+            'custom_fields': custom_fields,
+        }
+
+        self.unfuddle_data = data
+        memcache.set(
+            self.UNFUDDLE_DATA_KEY,
+            data,
+            timeout=self.UNFUDDLE_DATA_TIMEOUT
+        )
         callback()
 
 
@@ -117,8 +153,6 @@ A comma or vertical bar separated list of report criteria composed as
     get_converter = lambda self: unfuddletracker_converter
 
     def __init__(self, *args, **kwargs):
-        self._milestones = {}
-        self._custom_fields = {}
         super(UnfuddleFetcher, self).__init__(*args, **kwargs)
 
     def api_url(self, project_id=None):
@@ -131,9 +165,9 @@ A comma or vertical bar separated list of report criteria composed as
         return str(make_path(self.tracker.url, path))
 
     def fetch(self, url, callback=None):
-        if not self.unfuddle_login_mapping:
+        if not self.unfuddle_data:
             self_callback = partial(self.fetch, url)
-            self.get_users(self_callback)
+            self.get_data(self_callback)
         else:
             headers = self.get_headers()
             self.request(url, headers, self.responded)
@@ -146,7 +180,8 @@ A comma or vertical bar separated list of report criteria composed as
 
     def get_user_conditions(self, all=False):
         if all:
-            unfuddle_user_reverse_map = dict((v,k) for k, v in self.unfuddle_login_mapping.iteritems())
+            unfuddle_login_mapping = self.unfuddle_data['users']
+            unfuddle_user_reverse_map = dict((v,k) for k, v in unfuddle_login_mapping.iteritems())
             user_ids = [ unfuddle_user_reverse_map.get(username) for username in self.login_mapping.keys()]
             user_conditions = [ 'assignee-eq-%s' % user_id for user_id in user_ids if user_id]
             user_conditions = '|'.join(user_conditions)
@@ -172,8 +207,8 @@ A comma or vertical bar separated list of report criteria composed as
         self.fetch(full_url)
 
     def fetch_all_tickets(self):
-        if not self.unfuddle_login_mapping:
-            self.get_users(self.fetch_all_tickets)
+        if not self.unfuddle_data:
+            self.get_data(self.fetch_all_tickets)
         else:
             url = self.api_url() + '?'
             conditions_string = '%s,%s' % (self.get_unresolved_conditions(), self.get_user_conditions(all=True))
@@ -181,8 +216,8 @@ A comma or vertical bar separated list of report criteria composed as
             self.fetch(full_url)
 
     def fetch_all_resolved_tickets(self):
-        if not self.unfuddle_login_mapping:
-            self.get_users(self.fetch_all_resolved_tickets)
+        if not self.unfuddle_data:
+            self.get_data(self.fetch_all_resolved_tickets)
         else:
             url = self.api_url() + '?'
             conditions_string = '%s,%s' % (self.get_resolved_conditions(), self.get_user_conditions(all=True))
@@ -208,45 +243,20 @@ A comma or vertical bar separated list of report criteria composed as
         self.fetch(full_url)
 
     def fetch_scrum(self, sprint_name, project_id=None):
-        if not self._custom_fields:
-            url = '/api/v1/projects/%s/custom_field_values.json' % project_id
-            url = str(make_path(self.tracker.url, url))
-            self.request(
-                url,
-                self.get_headers(),
-                partial(self.responded, on_success=partial(self.parse_custom_fields, partial(self.fetch_scrum, sprint_name, project_id))),
-            )
-        elif not self._milestones:
-            url = '/api/v1/milestones.json'
-            url = str(make_path(self.tracker.url, url))
-            self.request(
-                url,
-                self.get_headers(),
-                partial(self.responded, on_success=partial(self.parse_milestones, partial(self.fetch_scrum, sprint_name, project_id))),
-            )
+        if not self.unfuddle_data:
+            self.get_data(partial(self.fetch_scrum, sprint_name, project_id=project_id))
         else:
+            projects_reversed = dict((v,k) for k, v in self.unfuddle_data['projects'].iteritems())
+            project_id = projects_reversed[project_id]
             url = self.api_url() + '?'
-            milestone_id = self._milestones.get(sprint_name)
+            milestone_id = self.unfuddle_data['milestones'].get((str(project_id), sprint_name))
             if not milestone_id:
                 flash('Wrong sprint name')
                 self.fail('Wrong sprint name')
             else:
-                conditions_string = 'milestone-eq-%s' % self._milestones[sprint_name]
+                conditions_string = 'milestone-eq-%s' % milestone_id
                 full_url = serialize_url(url, conditions_string=conditions_string)
                 self.fetch(full_url)
-
-    def parse_custom_fields(self, callback, data):
-        jdata = json.loads(data)
-        for field in jdata:
-            if field['field_number'] == 3:
-                self._custom_fields[field['id']] = field['value']
-        callback()
-
-    def parse_milestones(self, callback, data):
-        jdata = json.loads(data)
-        for milestone in jdata:
-            self._milestones[milestone['title']] = milestone['id']
-        callback()
 
     def parse(self, data):
         """
@@ -257,6 +267,10 @@ A comma or vertical bar separated list of report criteria composed as
         u'version_id', u'updated_at', u'milestone_id', u'resolution_description', u'component_id', u'created_at',
         u'summary', u'resolution'
         """
+        unfuddle_login_mapping = self.unfuddle_data['users']
+        unfuddle_project_mapping = self.unfuddle_data['projects']
+        unfuddle_component_mapping = self.unfuddle_data['components']
+
         jdata = json.loads(data)
         if len(jdata['groups']) ==0:
             return
@@ -268,17 +282,19 @@ A comma or vertical bar separated list of report criteria composed as
                 tracker=self.tracker,
                 id=ticket['number'],
                 desc=ticket['summary'],
-                reporter=self.unfuddle_login_mapping.get(ticket['reporter_id'], 'unknown'),
-                owner=self.unfuddle_login_mapping.get(ticket['assignee_id'], 'unknown'),
+                reporter=unfuddle_login_mapping.get(ticket['reporter_id'], 'unknown'),
+                owner=unfuddle_login_mapping.get(ticket['assignee_id'], 'unknown'),
                 status=ticket['status'],
                 priority=self.PRIORITY_MAP[ticket['priority']],
-                project_name=str(ticket['project_id']),
+                project_name=unfuddle_project_mapping.get(str(ticket['project_id']),'unknown'),
+                component_name=unfuddle_component_mapping.get(str(ticket['component_id']),'unknown'),
                 opendate=dateutil.parser.parse(ticket['created_at']),
                 changeddate=dateutil.parser.parse(ticket['updated_at']),
             )
-            whiteboard_field_id = ticket['field3_value_id']
-            if self._custom_fields and whiteboard_field_id:
-                whiteboard = self._custom_fields[whiteboard_field_id]
+            whiteboard_field_id = ticket.get('field3_value_id')
+            key = str(ticket['project_id']), str(whiteboard_field_id)
+            whiteboard = self.unfuddle_data['custom_fields'].get(key)
+            if whiteboard:
                 bug_desc['whiteboard'] = whiteboard
 
             yield self.bug_class(

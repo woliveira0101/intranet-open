@@ -1,7 +1,7 @@
 {% extends "templates/_base.html" %}
 
 {% block head_script %}
-        <script src="{{ request.static_path('intranet3:static/js/vendor/organictabs.js') }}"></script>
+    <script src="{{ request.static_path('intranet3:static/js/vendor/organictabs.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -22,18 +22,18 @@
             {{ form_field(form.date_range, _('format dd-mm-yyyy - dd-mm-yyyy'), class='daterange') }}
             <div>
                 <div class="onerow selectors">
-                    {{ form_field(form.projects, _('Projects')) }}
+                    {{ form_field(form.projects, _('Projects'), class='jq-multisel') }}
                     {% if not request.is_user_in_group('client') %}
-                        {{ form_field(form.users, _('Employees')) }}
+                        {{ form_field(form.users, _('Employees'), class='jq-multisel') }}
                     {% endif %}
-                </div>
-                <div class="onerow checkboxes" id="ticket-grouping">
-                    {{ form_field(form.group_by_client, _('Group by client')) }}
-                    {{ form_field(form.group_by_project, _('Group by project')) }}
-                    {{ form_field(form.group_by_bugs, _('Group by bugs')) }}
-                    {{ form_field(form.group_by_user, _('Group by employee')) }}
-                    {{ form_field(form.ticket_choice) }}
-                    {{ form_field(form.bigger_than, _('Time')) }}
+                    <div class="checkboxes" id="ticket-grouping">
+                        {{ form_field(form.group_by_client, _('Group by client')) }}
+                        {{ form_field(form.group_by_project, _('Group by project')) }}
+                        {{ form_field(form.group_by_bugs, _('Group by bugs')) }}
+                        {{ form_field(form.group_by_user, _('Group by employee')) }}
+                        {{ form_field(form.ticket_choice) }}
+                        {{ form_field(form.bigger_than, _('Time')) }}
+                    </div>
                 </div>
             </div>
             <div class="buttons">
@@ -45,4 +45,11 @@
     </div>
 
     {% include 'templates/times/tickets/_time_list.html' %}
+{% endblock %}
+
+
+{% block tail_script %}
+    <script type="text/javascript">
+        $('.jq-multisel').multiselect({noneSelectedText: ''}).multiselectfilter({placeholder: ''});
+    </script>
 {% endblock %}

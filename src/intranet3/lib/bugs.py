@@ -178,7 +178,11 @@ class Bugs(object):
 
         # now assign projects to bugs
         for bug in bugs:
-            bug.project = projects.get(bug.project_id)
+            if bug.project_id:
+                bug.project = projects.get(bug.project_id)
+            else:
+                bug.project_id = sprint.project_id
+                bug.project = sprint.project
 
         bugs = self.add_time(bugs, sprint=sprint)
         memcache.set(SCRUM_BUG_CACHE_KEY % sprint.id, bugs, SCRUM_BUG_CACHE_TIMEOUT)

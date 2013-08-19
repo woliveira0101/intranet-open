@@ -1,6 +1,7 @@
 import sys
 import logging
 import transaction
+import random
 
 from pyramid.paster import bootstrap
 from sqlalchemy import engine_from_config
@@ -65,6 +66,90 @@ def make_admin(config_path):
         user.groups = groups
 
     session.add(user)
+    transaction.commit()
+
+def remove(config_path):
+    from intranet3.models import *
+    user_login = sys.argv[-1]
+    session = DBSession()
+
+    TrackerCredentials.query.delete()
+    Sprint.query.delete()
+
+    ac = ApplicationConfig.query.first()
+    ac.office_ip = '127.0.0'
+    ac.google_user_email = ''
+    ac.google_user_password = 'asdasda'
+    ac.freelancers = ''
+    ac.hours_employee_project = ''
+    ac.holidays_spreadsheet = ''
+    session.add(ac)
+
+    for i, client in enumerate(Client.query):
+        print 'client %s' % i
+        client.name = 'Client_%s' % i
+        client.emails = ''
+        client.google_card = ''
+        client.google_wiki = ''
+        client.selector = ''
+        client.street = ''
+        client.city = ' '
+        client.postcode = ''
+        client.nip = ''
+        client.mailing_url = ''
+        client.wiki_url = ''
+        client.note = ''
+        session.add(client)
+
+    for i, project in enumerate(Project.query):
+        print 'project %s' % i
+        project.name = 'Project_%s' % i
+        project.project_selector = ''
+        project.component_selector = ''
+        project.version_selector = ''
+        project.ticket_id_selector = ''
+        project.google_card = ''
+        project.google_wiki = ''
+        project.mailing_url = ''
+        project.working_agreement = ''
+        project.definition_of_done = ''
+        project.definition_of_ready = ''
+        project.continuous_integration_url = ''
+        project.backlog_url = ''
+        session.add(project)
+
+    for i, user in enumerate(User.query):
+        print 'user %s' % i
+        user.email = 'user%s@stxnext.pl' % i
+        user.name = 'User_%s' % i
+        user.availability_link = ''
+        user.tasks_link = ''
+        user.skype = ''
+        user.irc = ''
+        user.phone = ''
+        user.phone_on_desk = ''
+
+        user.description = ''
+
+        user.refresh_token = ''
+        user._access_token = ''
+        session.add(user)
+
+    for i, timeentry in enumerate(TimeEntry.query):
+        if i % 1000 == 0:
+            print 'timeentry %s' % i
+        timeentry.description = 'description %s' % i
+        timeentry.ticket_id = i
+        timeentry.time = round(random.uniform(0.1, 1.2), 2)
+        session.add(timeentry)
+
+    for i, tracker in enumerate(Tracker.query):
+        print 'tracker %s' % i
+        tracker.name = 'Tracker_%s' % i
+        tracker.url = 'http://tracker%s.url.com' % i
+        tracker.mailer = 'tracker_mailer_%s' % i
+        session.add(tracker)
+
     transaction.commit()
 
 

@@ -11,7 +11,7 @@
             <td>{% trans %}Client name{% endtrans %}: </td> <td>{{ client.name }}</td>
         </tr>
         <tr class="x-user-tooltip-{{client.coordinator_id}}">
-            <td>{% trans %}Coordinator{% endtrans %}: </td> <td>{% if client.coordinator %}{{ client.coordinator.email }}{% else %}Not set{% endif %}</td>
+            <td>{% trans %}Coordinator{% endtrans %}: </td> <td>{% if client.coordinator_id %}{{ client.coordinator.email }}{% else %}Not set{% endif %}</td>
         </tr>
         <tr>
             <td>{% trans %}Selector{% endtrans %}: </td> <td>{{ client.selector or '' }}</td>
