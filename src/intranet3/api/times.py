@@ -109,7 +109,7 @@ class Time(ApiView):
         timeentry_id = self.request.matchdict.get('id')
         timeentry = TimeEntry.query.get(timeentry_id)
 
-        if self.request.method in ["PUT", "DELETE"]:
+        if self.request.method in ("PUT", "DELETE"):
             if not user_can_modify_timeentry(self.request.user, timeentry.date):
                 raise HTTPForbidden()
 
