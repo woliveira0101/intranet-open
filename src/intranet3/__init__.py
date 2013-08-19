@@ -91,9 +91,10 @@ def main(global_config, **settings):
 
     pyramid_config.add_static_view('static', 'static', cache_max_age=3600)
 
-    pyramid_config.add_route('api_my_bugs', '/api/bugs/my')
-    pyramid_config.add_route('api_times', '/api/times')
-    
+    pyramid_config.add_route('api_my_bugs', '/api/bugs')
+    pyramid_config.add_route('api_time_collection', '/api/times')
+    pyramid_config.add_route('api_time', '/api/times/{id}')
+
     pyramid_config.add_renderer('.html', 'pyramid_jinja2.renderer_factory')
     pyramid_config.add_renderer(None, 'intranet3.utils.renderer.renderer_factory')
     pyramid_config.add_translation_dirs('intranet3:locale/')

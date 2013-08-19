@@ -10,7 +10,7 @@ from pyramid.view import view_config
 from intranet3.forms.times import time_filter
 from intranet3.helpers import previous_day, next_day, format_time
 from intranet3.lib.bugs import Bugs
-from intranet3.models import User, Project, TimeEntry
+from intranet3.models import User, Project, TimeEntry, Tracker, Project
 from intranet3.utils.views import ApiView
 from intranet3.views.times import GetTimeEntriesMixin
 from intranet3.log import INFO_LOG
@@ -18,10 +18,6 @@ from intranet3.log import INFO_LOG
 from intranet3.schemas.times import AddEntrySchema, EditEntrySchema, AddOneOfOwnBugsSchema
 
 LOG = INFO_LOG(__name__)
-
-
-def _date_to_string(date):
-    return date.strftime("%d.%m.%Y")
 
 
 def user_can_modify(user, date):
@@ -36,59 +32,24 @@ def user_can_modify(user, date):
     return False
 
 
-@view_config(route_name='api_times', renderer='json', permission='client_or_freelancer')
-class Times(GetTimeEntriesMixin, ApiView):
+@view_config(route_name='api_time_collection', renderer='json', permission='client_or_freelancer')
+class TimeCollection(GetTimeEntriesMixin, ApiView):
 
     def _entries_serializer(self, objs):
         l = []
         for tracker, entry in objs:
-            response = {
-                'id': entry.id,
-                'desc': entry.description,
-                'added': _date_to_string(entry.added_ts),
-                'modified': _date_to_string(entry.modified_ts),
-                'ticket_id': entry.ticket_id,
-                'time': entry.time,
+            entry_dict = entry.to_dict()
+            # Add Tracker url
+            entry_dict.update({
                 'tracker_url': tracker.get_bug_url(entry.ticket_id),
-                'project': None
-            }
-
-            if entry.project:
-                response.update({
-                    'project': {
-                        'client_name': entry.project.client.name,
-                        'project_name': entry.project.name,
-                    }
-                })
-
-
-            l.append(response)
+            })
+            l.append(entry_dict)
         return l
 
     def protect(self):
-        '''
-            User can edit `TimeEntry` only during current month
-        '''
-        (user, date) = self.get_params()
+        user, date = self._get_params()
 
-        method = self.request.method.lower()
-        if method in ["put", "delete"]:  # Protect update!
-            if 'timeentry_id' in self.request.GET:
-                timeentry_id = self.request.GET.get('timeentry_id')
-                timeentry = TimeEntry.query.get(timeentry_id)
-
-                if not user_can_modify(self.request, timeentry.date):
-                    raise HTTPForbidden()
-
-                if not self.request.has_perm('admin'):
-                    if timeentry.deleted:
-                        raise HTTPBadRequest()
-                    elif self.request.user.id != timeentry.user_id:
-                        raise HTTPBadRequest()
-
-                self.v['timeentry'] = timeentry
-
-        if method == "post":
+        if self.request.method == "POST":
             if 'date' in self.request.GET:
                 if not user_can_modify(self.request, date):
                     raise HTTPForbidden()
@@ -100,8 +61,7 @@ class Times(GetTimeEntriesMixin, ApiView):
         self.v['user'] = user
         self.v['date'] = date
 
-
-    def get_params(self):
+    def _get_params(self):
         date_str = self.request.GET.get('date', None)
         try:
             user_id = int(self.request.GET.get('user_id', self.request.user.id))
@@ -120,22 +80,16 @@ class Times(GetTimeEntriesMixin, ApiView):
         return user, date
 
     def get(self):
-        (user, date) = self.v['user'], self.v['date']
+        user, date = self.v['user'], self.v['date']
 
         entries = self._get_time_entries(date, user.id)
-        total_sum = sum(entry.time for (tracker, entry) in entries if not entry.deleted)
 
         return {
-            'date': _date_to_string(date),
-            'user_id': user.id,
-            'previous_day': _date_to_string(previous_day(date)),
-            'next_day': _date_to_string(next_day(date)),
-            'total_sum': total_sum,
             'entries': self._entries_serializer(entries)
         }
 
     def post(self):
-        (user, date) = self.v['user'], self.v['date']
+        user, date = self.v['user'], self.v['date']
 
         try:
             schema = AddEntrySchema()
@@ -146,7 +100,7 @@ class Times(GetTimeEntriesMixin, ApiView):
             time = TimeEntry(
                 date = date,
                 user_id = user.id,
-                 time = data.get('time'),
+                time = data.get('time'),
                 description = data.get('description'),
                 ticket_id = data.get('ticket_id'),
                 project_id = project_id if project_id else None,
@@ -158,6 +112,48 @@ class Times(GetTimeEntriesMixin, ApiView):
             raise HTTPBadRequest(e.asdict())
 
         return HTTPCreated('OK')
+
+
+@view_config(route_name='api_time', renderer='json', permission='client_or_freelancer')
+class Time(ApiView):
+
+    def protect(self):
+        '''
+            User can edit `TimeEntry` only during current month
+        '''
+        if self.request.method in ["PUT", "DELETE"]:
+            if 'id' in self.request.matchdict:
+                timeentry_id = self.request.matchdict.get('id')
+                timeentry = TimeEntry.query.get(timeentry_id)
+
+                if not user_can_modify(self.request, timeentry.date):
+                    raise HTTPForbidden()
+
+                if not self.request.has_perm('admin'):
+                    if timeentry.deleted:
+                        raise HTTPBadRequest()
+                    elif self.request.user.id != timeentry.user_id:
+                        raise HTTPBadRequest()
+
+                self.v['timeentry'] = timeentry
+
+    def get(self):
+        timeentry_id = self.request.matchdict['id']
+
+        timeentry = TimeEntry.query.get(timeentry_id)
+        if timeentry is None:
+            raise HTTPNotFound("Not Found")
+
+        entry = timeentry.to_dict()
+        # Add Tracker URL if project is not None
+        if timeentry.project:
+            tracker = Tracker.query.get(timeentry.project.tracker_id)
+            entry.update({
+                    'tracker_url': tracker.get_bug_url(timeentry.ticket_id),
+
+            })
+
+        return entry
 
     def put(self):
         timeentry = self.v['timeentry']
@@ -206,18 +202,3 @@ class Times(GetTimeEntriesMixin, ApiView):
             timeentry.modified_ts = datetime.datetime.now()
 
         return HTTPNoContent("Deleted")
-
-@view_config(route_name='api_entry_to_one_of_own_bugs', renderer='json', permission='client_or_freelancer')
-class EntryToOneOfOwnBugs(ApiView):
-
-    def get(self):
-        date_str = self.request.GET.get('date', None)
-        if date_str is not None:
-            date = datetime.datetime.strptime(date_str, '%d.%m.%Y')
-        else:
-            date = datetime.datetime.now().date()
-
-        bugs = Bugs(self.request).get_user()
-        return dict(
-            bugs=[bug.to_dict() for bug in bugs if bug.project],
-        )

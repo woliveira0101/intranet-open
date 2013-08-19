@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, orm
 from sqlalchemy.types import DateTime, Date, String, Integer, Float, Boolean
 
 from intranet3.models import Base
@@ -25,6 +25,27 @@ class TimeEntry(Base):
     ticket_id = Column(Integer, nullable=True, index=True)
     
     project_id = Column(Integer, ForeignKey('project.id'), nullable=False, index=True)
+    project_info  = orm.relationship('Project', backref="timeentry")
     # TODO: task
     deleted = Column(Boolean, nullable=False, default=False, index=True)
     frozen = Column(Boolean, nullable=False, default=False, index=True)
+    
+    def to_dict(self):
+        entry = {
+            'id': self.id,
+            'desc': self.description,
+            'added': self.added_ts.strftime("%d.%m.%Y"),
+            'modified': self.modified_ts.strftime("%d.%m.%Y"),
+            'ticket_id': self.ticket_id,
+            'time': self.time,
+            'project': None
+        }
+
+        if self.project_info:
+            entry.update({
+                'project': {
+                    'client_name': self.project.client.name,
+                    'project_name': self.project.name,
+                }
+            })
+        return entry
