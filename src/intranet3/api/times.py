@@ -10,14 +10,11 @@ from pyramid.view import view_config
 from intranet3.forms.times import time_filter
 from intranet3.helpers import previous_day, next_day, format_time
 from intranet3.lib.bugs import Bugs
-from intranet3.models import User, Project, TimeEntry, Tracker, Project
+from intranet3.models import User, Project, TimeEntry, Tracker
 from intranet3.utils.views import ApiView
 from intranet3.views.times import GetTimeEntriesMixin
-from intranet3.log import INFO_LOG
 
 from intranet3.schemas.times import AddEntrySchema, EditEntrySchema, AddOneOfOwnBugsSchema
-
-LOG = INFO_LOG(__name__)
 
 
 def user_can_modify(user, date):
