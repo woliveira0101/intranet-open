@@ -25,7 +25,6 @@ class TimeEntry(Base):
     ticket_id = Column(Integer, nullable=True, index=True)
     
     project_id = Column(Integer, ForeignKey('project.id'), nullable=False, index=True)
-    project_info  = orm.relationship('Project', backref="timeentry")
     # TODO: task
     deleted = Column(Boolean, nullable=False, default=False, index=True)
     frozen = Column(Boolean, nullable=False, default=False, index=True)
@@ -41,7 +40,7 @@ class TimeEntry(Base):
             'project': None
         }
 
-        if self.project_info:
+        if self.project:
             entry.update({
                 'project': {
                     'client_name': self.project.client.name,
