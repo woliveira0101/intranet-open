@@ -153,25 +153,49 @@
                 $go_normalscreen_btn.hide()
             }
         });
-        var amountYellowCard = $('.yellow_card',this).length;
-        $('.task_board tbody td').each(function () {
-            var currentAmountYellowCard = $('.yellow_card',this).length,
-                percent = currentAmountYellowCard * 100/amountYellowCard + '%';
-            $(this).css('width',percent);
-            $(this).css('min-width','206px');
-            var percentCard = 100/parseInt($(this).width()/87) - 4 + '%';
-            if (currentAmountYellowCard==0) {
-                $(this).css('min-width','70px');
-            }
-            $('.yellow_card',this).each(function() {
-                $(this).css('width',percentCard);
-                if($(this).parent().hasClass('container_card_blocked')) {
-                    $(this).parent().css('width',percentCard);
+
+        var $task_board = $('.task_board');
+        var $task_board_td = $('.task_board tbody td');
+
+        var fixTable = function() {
+            var emptyCell = 0;
+            $task_board_td.each(function () {
+                var currentAmountYellowCard = $('> div > .yellow_card',this).length + $('> div > .container_card_blocked',this).length;
+                if(currentAmountYellowCard==0) {
+                    emptyCell += 1;
                 }
             });
+            var amountYellowCard = $('td > div > .yellow_card').length + $('td > div > .container_card_blocked').length;
+            var tableWidth = $task_board.width() - 33 - (81*emptyCell);
+            $task_board_td.each(function () {
+                var self = $(this);
+                var currentAmountYellowCard = $('> div > .yellow_card',self).length + $('> div > .container_card_blocked',self).length;
+                var percent = tableWidth * (currentAmountYellowCard/amountYellowCard);
+                self.css('width',percent);
+                self.css('max-width',percent);
+                var currentTdWidth = tableWidth * (currentAmountYellowCard/amountYellowCard),
+                    possibleAmountCard = parseInt(currentTdWidth/140),
+                    currentWidthCard = parseInt(currentTdWidth/possibleAmountCard) - 6;
+                if (currentAmountYellowCard==0) {
+                    self.css('max-width','70px');
+                    self.css('width','70px');
+                }
+                $('.yellow_card', self).each(function() {
+                    var self = $(this);
+                    self.css('width',currentWidthCard);
+
+                });
         });
-
-
+        };
+        fixTable();
+        $task_board.css('width','100%');
+        fixTable();
+        $task_board.removeAttr('style');
+        $(window).resize(function() {
+            $task_board.css('width','100%');
+            fixTable();
+            $task_board.removeAttr('style');
+        });
     });
 </script>
 {% endblock body %}
