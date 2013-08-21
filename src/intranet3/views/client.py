@@ -113,7 +113,7 @@ class Edit(BaseView):
             coordinator_id = int(form.coordinator_id.data) if form.coordinator_id.data.isdigit() else None
 
             client.name = form.name.data
-            client.active = client.has_active_project()
+            client.active = client.active
             client.google_card = form.google_card.data
             client.google_wiki = form.google_wiki.data
             client.color=form.color.data
