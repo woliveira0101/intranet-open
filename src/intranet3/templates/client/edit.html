@@ -9,6 +9,7 @@
     <form class="box box_edit_client" action="{{ request.url_for('/client/edit', client_id=client_id) }}" method="post" accept-charset="utf-8">
         {{ csrf_field }}
         {{ form_field(form.name, _('Client friendly name')) }}
+        {{ form_field(form.active, _('Based on client\'s active projects'), disabled=true) }}
         {{ form_field(form.coordinator_id, '') }}
         {{ form_field(form.selector, '') }}
         {{ form_field(form.emails, _('Clients emails, newline separated'), rows=6, cols=50, style="height: 100px;") }}
