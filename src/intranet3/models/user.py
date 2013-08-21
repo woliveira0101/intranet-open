@@ -185,7 +185,10 @@ class User(Base):
 
     @reify
     def freelancer(self):
-        return 'freelancer' in self.groups
+        groups = self.groups
+        if 'user' in groups:
+            groups.remove('user')
+        return ['freelancer'] == groups
 
     @classmethod
     def is_not_client(cls):
