@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from copy import copy
 import datetime
 import requests
 from collections import defaultdict
@@ -185,7 +186,7 @@ class User(Base):
 
     @reify
     def freelancer(self):
-        groups = self.groups
+        groups = copy(self.groups)
         if 'user' in groups:
             groups.remove('user')
         return ['freelancer'] == groups
