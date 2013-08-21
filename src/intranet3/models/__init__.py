@@ -28,3 +28,4 @@ from holiday import Holiday
 from presence import PresenceEntry
 from times import TimeEntry
 from sprint import Sprint
+from team import Team, TeamMember
