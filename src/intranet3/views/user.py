@@ -20,14 +20,16 @@ LOG = INFO_LOG(__name__)
 @view_config(route_name='user_list', permission='freelancer')
 class List(BaseView):
     def get(self):
-        users = User.query.filter(User.is_active==True)\
+        res = User.query.filter(User.is_active==True)\
                           .filter(User.is_not_client())\
-                          .filter(User.freelancer==False)\
                           .order_by(User.name).all()
-        freelancers = User.query.filter(User.is_active==True)\
-                                .filter(User.is_not_client())\
-                                .filter(User.freelancer==True)\
-                                .order_by(User.name).all()
+
+        freelancers, users = [], []
+        for u in res:
+            if u.freelancer:
+                freelancers.append(u)
+            else:
+                users.append(u)
 
         clients = []
         if self.request.has_perm('admin'):
