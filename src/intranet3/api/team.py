@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import colander
 from pyramid.view import view_config, view_defaults
-from pyramid.httpexceptions import HTTPBadRequest, HTTPCreated, HTTPOk
-from sqlalchemy.sql import and_
+from pyramid.httpexceptions import HTTPBadRequest, HTTPCreated, HTTPOk, HTTPNotFound
 from sqlalchemy.exc import IntegrityError
 
 from intranet3.utils.views import ApiView
@@ -49,14 +48,14 @@ class Team(ApiView):
         if team:
             return team.to_dict()
         else:
-            raise HTTPBadRequest('Wrong team id')
+            raise HTTPNotFound()
     
     @view_config(request_method='PUT', permission='admin')
     def put(self):
         team_id = self.request.matchdict.get('team_id')
         team = Team_m.query.get(team_id)
         if not team:
-            raise HTTPBadRequest('Wrong team id')
+            raise HTTPNotFound()
         
         try:
             json_team = self.request.json_body
@@ -70,24 +69,24 @@ class Team(ApiView):
             errors = e.asdict()
             raise HTTPBadRequest(errors)
         
-        if team_des['name'] and team.name != team_des['name']:
+        if team.name != team_des.get('name'):
             team.name = team_des['name']
             try:
                 self.session.flush()
             except IntegrityError:
                 raise HTTPBadRequest('Team exists')
         
-        if isinstance(team_des['users'], list):
-            teams = TeamMember.query.filter(TeamMember.team_id==team.id).all()
-            users_json = [u_id for u_id in team_des['users']]
-            users_db = [t.user_id for t in teams]
-            users_delete = list(set(users_db) - set(users_json))
-            users_add = list(set(users_json) - set(users_db))
+        if 'users' in team_des:
+            new_users = team_des['users']
+            old_users = self.session.query(TeamMember.user_id).filter(TeamMember.team_id==team.id).all() 
+            users_delete = list(set(old_users) - set(new_users))
+            users_add = list(set(new_users) - set(old_users))
 
             if users_delete:
-                TeamMember.query.filter(and_(TeamMember.team_id==team.id,\
-                                             TeamMember.user_id.in_(users_delete)))\
-                                             .delete(synchronize_session=False)
+                TeamMember.query.filter(TeamMember.team_id==team.id)\
+                                .filter(TeamMember.user_id.in_(users_delete))\
+                                .delete(synchronize_session=False)
+            
             if users_add:
                 self.session.add_all([TeamMember(user_id=u_id, team_id=team.id) for u_id in users_add])
         
@@ -100,7 +99,7 @@ class Users(ApiView):
         users = User.query.filter(User.is_active==True)\
                           .filter(User.is_not_client())\
                           .filter(User.freelancer==False)\
-                          .order_by(User.name).all()
+                          .order_by(User.name)
                           
         return [{'id': u.id, 'name': u.name, 'img': u.avatar_url} for u in users];
 

@@ -11,4 +11,4 @@ class UsersSchema(colander.SequenceSchema):
    
 class TeamUpdateSchema(colander.MappingSchema):
     name = colander.SchemaNode(colander.String(), validator=colander.Length(max=255), missing=None)
-    users = UsersSchema(missing=colander.null)
+    users = UsersSchema(missing=colander.drop)

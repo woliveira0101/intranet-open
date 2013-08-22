@@ -84,7 +84,6 @@ class User(Base):
 
     refresh_token = Column(String, nullable=False)
     _access_token = None
-    team_members = orm.relationship('TeamMember', backref='user', lazy='dynamic')
 
     @reify
     def access_token(self):
