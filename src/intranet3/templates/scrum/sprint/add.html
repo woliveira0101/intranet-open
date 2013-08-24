@@ -7,7 +7,8 @@
     <form action="{{ request.url_for('/scrum/sprint/add') }}" method="post" accept-charset="utf-8">
         {{ csrf_field }}
         {{ form_field(form.name, _('Name')) }}
-        {{ form_field(form.project_ids, _('Projects'), size='10') }}
+        {{ form_field(form.project_id, _('Project')) }}
+        {{ form_field(form.bugs_project_ids, _('Bugs projects'), size='10') }}
         {{ form_field(form.start, _('Start date'), class='datepicker') }}
         {{ form_field(form.end, _('End date'), class='datepicker') }}
         {{ form_field(form.goal, _('Goal'), cols='80', rows='8') }}
@@ -16,4 +17,49 @@
             <input class="btn btn-primary" type="submit" value="{% trans %}Add{% endtrans %}">
         </div>
     </form>
+
 {% endblock %}
+
+{% block tail_script %}
+	<script>
+		$(document).ready(function(){
+			// here we prevent from selecting project from different trackers
+			var $bugs_project_ids = $('#bugs_project_ids');
+			var $options = $bugs_project_ids.find('option');
+			var project_ids = _.map($options, function(option){
+				return $(option).val();
+			});
+			var tracker_ids = _.map($options, function(option){
+				return $(option).attr('data-tracker_id');
+			});
+			var mapping = _.object(project_ids, tracker_ids);
+
+			var filter_out = function(tracker_id){
+				var filtered = _.filter($options, function(option){
+					var $option = $(option);
+					return $option.attr('data-tracker_id') == tracker_id;
+				});
+				if($options.length !== filtered.length){
+					$bugs_project_ids.find('option').remove().end().append(filtered).scrollTop(1);
+				}
+			};
+
+			var refresh_projects = function(){
+				var selected_projects = $bugs_project_ids.val();
+				if(selected_projects){
+					var selected_tracker = mapping[selected_projects[0]];
+					filter_out(selected_tracker);
+				} else {
+					$bugs_project_ids.find('option').remove().end().append($options).scrollTop(1);
+				}
+
+			};
+
+			refresh_projects();
+			$bugs_project_ids.change(function(){
+				refresh_projects();
+			});
+
+		});
+	</script>
+{% endblock tail_script %}

@@ -108,4 +108,13 @@ class ScrumProjectChoices(ProjectChoices):
             yield '', self.empty_title
         query = self.get_projects_query()
         for project_id, client_name, project_name, tracker_id in query:
+            yield str(project_id), u'%s / %s' % (client_name, project_name)
+
+class ScrumBugsProjectChoices(ScrumProjectChoices):
+
+    def __iter__(self):
+        if self.empty:
+            yield '', self.empty_title
+        query = self.get_projects_query()
+        for project_id, client_name, project_name, tracker_id in query:
             yield (str(project_id), str(tracker_id)), u'%s / %s' % (client_name, project_name)

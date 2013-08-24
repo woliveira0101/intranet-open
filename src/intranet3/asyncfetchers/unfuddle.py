@@ -301,3 +301,13 @@ A comma or vertical bar separated list of report criteria composed as
                 tracker=self.tracker,
                 **converter(bug_desc)
             )
+    def received(self, data):
+        """ Called when server returns whole response body """
+        try:
+            for bug in self.parse(data):
+                self.bugs[bug.project_name, bug.id] = bug
+        except BaseException, e:
+            EXCEPTION(u"Could not parse tracker response")
+            self.fail(e)
+        else:
+            self.success()

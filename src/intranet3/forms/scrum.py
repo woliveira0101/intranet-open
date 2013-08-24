@@ -4,7 +4,7 @@ from wtforms.widgets.core import html_params, HTMLString, text_type, escape
 from pyramid.i18n import TranslationStringFactory
 from intranet3.models import Project, Sprint
 
-from intranet3.forms.project import ScrumProjectChoices
+from intranet3.forms.project import ScrumProjectChoices, ScrumBugsProjectChoices
 
 _ = TranslationStringFactory('intranet3')
 
@@ -50,7 +50,8 @@ class SprintListFilterForm(wtf.Form):
 
 class SprintForm(wtf.Form):
     name = wtf.TextField(_(u"Sprint name"), validators=[validators.Required()])
-    project_ids = SprintProjectsField(_(u"Projects"), choices=ScrumProjectChoices(), validators=[validators.Required()])
+    bugs_project_ids = SprintProjectsField(_(u"Bugs projects"), choices=ScrumBugsProjectChoices(skip_inactive=True), validators=[validators.Required()])
+    project_id = wtf.SelectField(_(u"Project"), choices=ScrumProjectChoices(skip_inactive=True), validators=[validators.Required()])
     start  = wtf.DateField(_(u"Start date"), format='%d/%m/%Y', validators=[])
     end  = wtf.DateField(_(u"End date"), format='%d/%m/%Y', validators=[])
     goal = wtf.TextAreaField(_(u'Goal'), validators=[])

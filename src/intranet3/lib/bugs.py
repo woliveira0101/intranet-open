@@ -147,66 +147,22 @@ class Bugs(object):
         if bugs:
             return bugs
         query = self.request.db_session.query
-        tracker, creds = query(Tracker, TrackerCredentials)\
-                            .filter(TrackerCredentials.tracker_id==sprint.project.tracker_id)\
-                            .filter(TrackerCredentials.tracker_id==Tracker.id)\
-                            .filter(TrackerCredentials.user_id==self.user.id).one()
-        fetcher = get_fetcher(tracker, creds, tracker.logins_mapping)
-        fetcher.fetch_scrum(sprint.name, sprint.project.project_selector)
-        start = time()
-        bugs = []
-        while True:
-            if fetcher.isReady():
-                if fetcher.error:
-                    ERROR(u"Fetcher for tracker %s failed with %r" % (tracker.name, fetcher.error))
-                    break
-                bugs = [ bug for bug in fetcher ]
-                break
-            else: # fetcher is not ready yet
-                if time() - start > MAX_TIMEOUT:
-                    ERROR(u'Request timed-out')
-                    break
-                else:
-                    sleep(0.1)
 
-        projects = {}
-        for bug in bugs:
-            projects[bug.project_id] = None
-            # query for all project id's
-        projects = dict((project.id, project) for project in Project.query.filter(Project.id.in_(projects.keys())))
-
-        # now assign projects to bugs
-        for bug in bugs:
-            if bug.project_id:
-                bug.project = projects.get(bug.project_id)
-            else:
-                bug.project_id = sprint.project_id
-                bug.project = sprint.project
-
-        bugs = self.add_time(bugs, sprint=sprint)
-        memcache.set(SCRUM_BUG_CACHE_KEY % sprint.id, bugs, SCRUM_BUG_CACHE_TIMEOUT)
-        return bugs
-
-    def get_sprint(self, sprint):
-        query = self.request.db_session.query
-
-        # backward compatibility
-        if not hasattr(sprint, 'project_ids'):
-            sprint.project_ids = [sprint.project_id]
+        project_ids = sprint.bugs_project_ids
 
         entries = query(Project, Tracker, TrackerCredentials) \
-                   .filter(Project.id.in_(sprint.project_ids)) \
+                   .filter(Project.id.in_(project_ids)) \
                    .filter(Project.tracker_id==Tracker.id) \
                    .filter(TrackerCredentials.tracker_id==Project.tracker_id) \
                    .filter(TrackerCredentials.user_id==self.user.id).all()
 
-        fetchers = [
-            get_fetcher(tracker, creds, tracker.logins_mapping)
-            for project, tracker, creds in entries
-        ]
-        for (project, tracker, creds), fetcher in zip(entries, fetchers):
-            # TODO: optimize, group projects with the same tracker
+        fetchers = []
+        for project, tracker, creds in entries:
+            fetcher = get_fetcher(tracker, creds, tracker.logins_mapping)
             fetcher.fetch_scrum(sprint.name, project.project_selector)
+            fetchers.append(fetcher)
+            if tracker.type in ('bugzilla', 'rockzilla', 'igozilla'):
+                break
 
         start = time()
         bugs = []
@@ -241,6 +197,7 @@ class Bugs(object):
             bug.project = projects.get(bug.project_id)
 
         bugs = self.add_time(bugs, sprint=sprint)
+        memcache.set(SCRUM_BUG_CACHE_KEY % sprint.id, bugs, SCRUM_BUG_CACHE_TIMEOUT)
         return bugs
 
     @classmethod
