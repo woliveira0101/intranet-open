@@ -94,6 +94,9 @@ def main(global_config, **settings):
     pyramid_config.add_route('api_my_bugs', '/api/bugs')
     pyramid_config.add_route('api_time_collection', '/api/times')
     pyramid_config.add_route('api_time', '/api/times/{id:\d+}')
+    pyramid_config.add_route('api_teams', '/api/teams')
+    pyramid_config.add_route('api_team', '/api/team/{team_id:\d+}')
+    pyramid_config.add_route('api_users', '/api/users')
 
     pyramid_config.add_renderer('.html', 'pyramid_jinja2.renderer_factory')
     pyramid_config.add_renderer(None, 'intranet3.utils.renderer.renderer_factory')
