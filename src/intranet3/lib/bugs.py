@@ -147,42 +147,54 @@ class Bugs(object):
         if bugs:
             return bugs
         query = self.request.db_session.query
-        tracker, creds = query(Tracker, TrackerCredentials)\
-                            .filter(TrackerCredentials.tracker_id==sprint.project.tracker_id)\
-                            .filter(TrackerCredentials.tracker_id==Tracker.id)\
-                            .filter(TrackerCredentials.user_id==self.user.id).one()
-        mapping = TrackerCredentials.get_logins_mapping(tracker)
-        fetcher = get_fetcher(tracker, creds, mapping)
-        fetcher.fetch_scrum(sprint.name, sprint.project.project_selector)
+
+        project_ids = sprint.bugs_project_ids
+
+        entries = query(Project, Tracker, TrackerCredentials) \
+                   .filter(Project.id.in_(project_ids)) \
+                   .filter(Project.tracker_id==Tracker.id) \
+                   .filter(TrackerCredentials.tracker_id==Project.tracker_id) \
+                   .filter(TrackerCredentials.user_id==self.user.id).all()
+
+        fetchers = []
+        for project, tracker, creds in entries:
+            fetcher = get_fetcher(tracker, creds, tracker.logins_mapping)
+            fetcher.fetch_scrum(sprint.name, project.project_selector)
+            fetchers.append(fetcher)
+            if tracker.type in ('bugzilla', 'rockzilla', 'igozilla'):
+                break
+
         start = time()
         bugs = []
-        while True:
-            if fetcher.isReady():
-                if fetcher.error:
-                    ERROR(u"Fetcher for tracker %s failed with %r" % (tracker.name, fetcher.error))
+        while fetchers:
+            for i, fetcher in enumerate(fetchers):
+                if fetcher.isReady():
+                    fetchers.pop(i)
+                    if fetcher.error:
+                        WARN(u"Could not fetch bugs from tracker %s: %s" % (fetcher.tracker.name, fetcher.error))
+                        flash(u"Could not fetch bugs from tracker %s" % (fetcher.tracker.name, ))
+                    else:
+                        for bug in fetcher:
+                            bugs.append(bug)
                     break
-                bugs = [ bug for bug in fetcher ]
-                break
-            else: # fetcher is not ready yet
+            else:
+                # no fetcher is yet ready, give them time
                 if time() - start > MAX_TIMEOUT:
-                    ERROR(u'Request timed-out')
-                    break
+                    WARN(u"Fetchers for trackers %s timed-out" % (u', '.join(fetcher.tracker.name for fetcher in fetchers)))
+                    for fetcher in fetchers:
+                        pass
+                        flash(u"Getting bugs from tracker %s timed out" % (fetcher.tracker.name, ))
+                    fetchers = []
                 else:
                     sleep(0.1)
+                    # all bugs were fetched, time to resolve their projects
 
-        projects = {}
-        for bug in bugs:
-            projects[bug.project_id] = None
-            # query for all project id's
-        projects = dict((project.id, project) for project in Project.query.filter(Project.id.in_(projects.keys())))
+        projects = [bug.project_id for bug in bugs]
+        projects = dict((project.id, project) for project in Project.query.filter(Project.id.in_(projects)))
 
         # now assign projects to bugs
         for bug in bugs:
-            if bug.project_id:
-                bug.project = projects.get(bug.project_id)
-            else:
-                bug.project_id = sprint.project_id
-                bug.project = sprint.project
+            bug.project = projects.get(bug.project_id)
 
         bugs = self.add_time(bugs, sprint=sprint)
         memcache.set(SCRUM_BUG_CACHE_KEY % sprint.id, bugs, SCRUM_BUG_CACHE_TIMEOUT)
