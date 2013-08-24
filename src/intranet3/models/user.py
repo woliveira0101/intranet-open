@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from copy import copy
 import datetime
 import requests
 from collections import defaultdict
@@ -186,10 +185,7 @@ class User(Base):
 
     @reify
     def freelancer(self):
-        groups = copy(self.groups)
-        if 'user' in groups:
-            groups.remove('user')
-        return ['freelancer'] == groups
+        return ['freelancer'] == self.groups
 
     @classmethod
     def is_not_client(cls):

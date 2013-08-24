@@ -24,12 +24,8 @@ class List(BaseView):
                           .filter(User.is_not_client())\
                           .order_by(User.name).all()
 
-        freelancers, users = [], []
-        for u in res:
-            if u.freelancer:
-                freelancers.append(u)
-            else:
-                users.append(u)
+        users = [user for user in res if not user.freelancer]
+        freelancers = [user for user in res if user.freelancer]
 
         clients = []
         if self.request.has_perm('admin'):
