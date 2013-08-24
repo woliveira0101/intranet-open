@@ -65,6 +65,7 @@ setup(
         'Mock',
         'markdown',
         'iso8601',
+        'colander',
     ],
     message_extractors = { 'src/intranet3': [
         ('**.py', 'python', None ),
