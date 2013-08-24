@@ -44,7 +44,6 @@ class User(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     name = Column(String, nullable=False)
     admin = Column(Boolean, default=False, nullable=False)
-    freelancer = Column(Boolean, default=False, nullable=False)
 
     is_active = Column(Boolean, default=True, nullable=False)
     is_programmer = Column(Boolean, default=False, nullable=False)
@@ -183,6 +182,10 @@ class User(Base):
     @reify
     def client(self):
         return self.get_client()
+
+    @reify
+    def freelancer(self):
+        return ['freelancer'] == self.groups
 
     @classmethod
     def is_not_client(cls):

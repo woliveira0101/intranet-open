@@ -20,7 +20,7 @@ class ProjectForm(wtf.Form):
     component_selector = wtf.TextField(_(u"Component selector"), validators=[])
     version_selector = wtf.TextField(_(u"Version selector"), validators=[])
     ticket_id_selector = wtf.TextField(_(u"Ticket ID selector"), validators=[])
-    active = wtf.BooleanField(_(u"Active"), validators=[])
+    active = wtf.BooleanField(_(u"Active"), validators=[], default=True)
     google_card = wtf.TextField(_(u"Link to project card in google docs"), validators=[])
     google_wiki = wtf.TextField(_(u"Link to project wiki in google sites"), validators=[])
     mailing_url = wtf.TextField(_(u"Link to mailing group"), validators=[])
