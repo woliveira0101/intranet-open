@@ -13,6 +13,7 @@ from intranet3.forms.user import UserEditForm
 from intranet3.log import INFO_LOG
 from intranet3 import helpers as h
 
+
 LOG = INFO_LOG(__name__)
 
 
@@ -52,12 +53,6 @@ class View(BaseView):
 
 @view_config(route_name='user_edit', permission='freelancer')
 class Edit(BaseView):
-    def _change_avatar(self, user_id):
-        path_temp = _avatar_path(user_id, self.request.registry.settings, True)
-        path = _avatar_path(user_id, self.request.registry.settings)
-        if os.path.exists(path):
-            os.remove(path)
-        os.rename(path_temp, path)
 
     def dispatch(self):
         user_id = self.request.GET.get('user_id')
@@ -88,7 +83,9 @@ class Edit(BaseView):
             user.is_graphic_designer = form.is_graphic_designer.data
 
             if form.avatar.data:
-                self._change_avatar(user.id)
+                from intranet3.api.preview import Preview
+                preview = Preview(self.request)
+                preview.swap_avatar(destination='users', img=user.id)
 
             self.flash(self._(u"User data saved"))
             LOG(u"User data saved")
@@ -108,10 +105,10 @@ class Tooltip(BaseView):
 
 
 def _avatar_path(user_id, settings, temp=False):
-    user_id = 'u' + str(user_id)
+    user_id = str(user_id)
     if temp:
-        user_id = 'temp_' + user_id
-    return os.path.join(settings['AVATAR_PATH'], user_id)
+        return os.path.join(settings['AVATAR_PATH'], 'previews', user_id)
+    return os.path.join(settings['AVATAR_PATH'], 'users', user_id)
 
 
 @view_config(route_name='user_avatar', permission='freelancer')
@@ -147,68 +144,3 @@ class Avatar(BaseView):
             data = self._file_read(path)
         return self._response(data)
 
-
-@view_config(route_name='files_upload_avatar', renderer='json', permission='freelancer')
-class UploadAvatar(BaseView):
-
-    def _file_write(self, path, data):
-        try:
-            dir = os.path.dirname(path)
-            if not os.path.exists(dir):
-                os.makedirs(dir)
-            f = open(path,'w')
-            f.write(data)
-            f.close()
-        except OSError, e:
-            LOG(e)
-
-    def _upload_data(self, data):
-        if data[:5] == 'data:':
-            info,data = data.split(';')
-            if data[:6] == 'base64':
-                data = base64.b64decode(data[7:])
-            else:
-                return ''
-        return data
-
-    def dispatch(self):
-        user_id = self.request.GET.get('user_id')
-        if user_id and self.request.has_perm('admin'):
-            user = User.query.get(user_id)
-        else:
-            user = self.request.user
-        res = dict(status='error', msg='', file={})
-        if self.request.method == 'POST':
-            file = self.request.POST['file']
-            data = self._upload_data(file.file.read())
-            size = len(data)
-            mimetype = mimetypes.guess_type(file.filename)[0]
-            if size and mimetype[:5] == 'image':
-                data = h.image_resize(data, 's', 100, 100)
-                self._file_write(_avatar_path(user.id, self.request.registry.settings, True), data)
-                res['status'] = 'ok'
-                res['file'] = {
-                    'url': self.request.url_for('/user/avatar_temp', user_id=user.id),
-                    'filename':file.filename,
-                    'mime':mimetype,
-                    'size':size
-                }
-        return res
-
-@view_config(route_name='files_avatar_temp', renderer='json', permission='freelancer')
-class AvatarTemp(BaseView):
-    def _avatar(self, user_id, temp=False):
-        return self._file_read(_avatar_path(user_id, self.request.registry.settings, temp))
-
-    def _response(self, data):
-        if data is None:
-            raise HTTPNotFound()
-        else:
-            response = Response(data)
-            response.headers['Content-Type'] = 'image/png'
-            return response
-
-    def get(self):
-        user_id = self.request.GET.get('user_id')
-        path_temp = _avatar_path(user_id, self.request.registry.settings, True)
-        return self._response(open(path_temp, 'rb').read())

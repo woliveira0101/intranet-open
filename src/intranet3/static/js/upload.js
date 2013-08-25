@@ -418,7 +418,7 @@
                 $('#upload-progress').css('width',parseInt(e.loaded/e.total*100,10)+'%');
             },
             onLoad: function(e) {
-                $('#my-avatar img').attr('src',e.file.url+'&t='+(new Date().getTime()));
+                $('#my-avatar img').attr('src',e.file.url+'?t='+(new Date().getTime()));
                 $('input#avatar').attr('value',1);
             },
             onComplete: function(e) {
