@@ -1,0 +1,27 @@
+<div>
+  <div class="modal-header">
+    <button class="close" aria-hidden="true" ng-click="close()">×</button>
+    <h3 ng-show="!team.id">Add Team</h3>
+    <h3 ng-show="team.id">Edit Team</h3>
+  </div>
+  <div>
+  </div>
+  <div class="modal-body">
+    <form name="teamForm" class="form-horizontal" ng-class="{submitted: form_submitted}" novalidate>
+
+      <div class="control-group">
+        <label class="control-label">Name</label>
+        <div class="controls">
+          <input name="name" type="text" ng-model="team.name" required>
+        </div>
+      </div>
+
+      <div class="alert alert-error" ng-bind="error" ng-show="error"></div>
+
+      <div class="pull-right">
+        <button class="btn btn-primary" type="submit" ng-show="!team.id" ng-click="add()">Submit</button>
+        <button class="btn btn-primary" type="submit" ng-show="team.id" ng-click="edit()">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -103,7 +103,7 @@ class ApiView(BaseView):
 
         self.flash = lambda message, klass='': None # We don't need flash messages. So do nothing
 
-    def dispatch(self):       
+    def dispatch(self):
         if self.request.method.lower() in self.http_method_names:
             handler = getattr(self, self.request.method.lower(), self.http_not_allowed_method)
         else:

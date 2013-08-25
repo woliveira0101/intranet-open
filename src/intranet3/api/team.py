@@ -7,15 +7,16 @@ from sqlalchemy.exc import IntegrityError
 from intranet3.utils.views import ApiView
 from intranet3.models import Team as Team_m, TeamMember, User
 from intranet3.schemas.team import TeamAddSchema, TeamUpdateSchema
+from intranet3.utils.decorators import has_perm
 
 
-@view_defaults(route_name='api_teams', renderer='json')
+@view_config(route_name='api_teams', renderer='json')
 class Teams(ApiView):
-    @view_config(request_method='GET')
+
     def get(self):
         return [t.to_dict() for t in Team_m.query.all()]
-    
-    @view_config(request_method='POST', permission='admin')
+
+    @has_perm('admin')
     def post(self):
         try:
             json_team = self.request.json_body
@@ -36,12 +37,13 @@ class Teams(ApiView):
         except IntegrityError:
             raise HTTPBadRequest('Team exists')
         
-        return HTTPCreated('OK')
+        return dict(
+            id=team.id,
+        )
         
 
-@view_defaults(route_name='api_team', renderer='json')   
+@view_config(route_name='api_team', renderer='json')
 class Team(ApiView):
-    @view_config(request_method='GET')
     def get(self):
         team_id = self.request.matchdict.get('team_id')
         team = Team_m.query.get(team_id)
@@ -50,7 +52,7 @@ class Team(ApiView):
         else:
             raise HTTPNotFound()
     
-    @view_config(request_method='PUT', permission='admin')
+    @has_perm('admin')
     def put(self):
         team_id = self.request.matchdict.get('team_id')
         team = Team_m.query.get(team_id)
@@ -69,13 +71,8 @@ class Team(ApiView):
             errors = e.asdict()
             raise HTTPBadRequest(errors)
         
-        if team.name != team_des.get('name'):
-            team.name = team_des['name']
-            try:
-                self.session.flush()
-            except IntegrityError:
-                raise HTTPBadRequest('Team exists')
-        
+        team.name = team_des.get('name') or team.name
+
         if 'users' in team_des:
             new_users = team_des['users']
             old_users = self.session.query(TeamMember.user_id).filter(TeamMember.team_id==team.id).all() 
@@ -91,7 +88,18 @@ class Team(ApiView):
                 self.session.add_all([TeamMember(user_id=u_id, team_id=team.id) for u_id in users_add])
         
         return HTTPOk("OK")
-        
+
+    @has_perm('admin')
+    def delete(self):
+        team_id = self.request.matchdict.get('team_id')
+        team = Team_m.query.get(team_id)
+        if not team:
+            raise HTTPNotFound()
+
+        TeamMember.query.filter(TeamMember.team_id==team.id).delete(synchronize_session=False)
+        self.session.delete(team)
+
+        return HTTPOk('OK')
 
 @view_config(route_name='api_users', renderer='json')
 class Users(ApiView):
