@@ -8,6 +8,7 @@ from intranet3.utils.views import ApiView
 from intranet3.models import Team as Team_m, TeamMember, User
 from intranet3.schemas.team import TeamAddSchema, TeamUpdateSchema
 from intranet3.utils.decorators import has_perm
+from intranet3.api.preview import Preview
 
 
 @view_config(route_name='api_teams', renderer='json')
@@ -36,6 +37,11 @@ class Teams(ApiView):
             self.session.flush()
         except IntegrityError:
             raise HTTPBadRequest('Team exists')
+        
+        if team_des.get('swap_with_preview'):
+            preview = Preview(self.request)
+            if not preview.swap_avatar(type='teams', id=team.id):
+                raise HTTPBadRequest('No preview to swap')
         
         return dict(
             id=team.id,
@@ -86,6 +92,11 @@ class Team(ApiView):
             
             if users_add:
                 self.session.add_all([TeamMember(user_id=u_id, team_id=team.id) for u_id in users_add])
+                
+        if team_des.get('swap_with_preview'):
+            preview = Preview(self.request)
+            if not preview.swap_avatar(type='teams', id=team.id):
+                raise HTTPBadRequest('No preview to swap')
         
         return HTTPOk("OK")
 

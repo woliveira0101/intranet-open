@@ -63,7 +63,7 @@
                         <dt>{% trans %}Image{% endtrans %}:</dt>
                         <dd id="my-avatar">
                             <img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" />
-                            <a href="#" data-href="{{ request.url_for('/user/upload_avatar', user_id=user.id) }}" id="upload-btn" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
+                            <a href="#" data-href="{{ request.route_url('api_preview', _query={'type':'user'}) }}" id="upload-btn" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
                             <div id="upload-progress"></div>
                         </dd>
                     </dl>
