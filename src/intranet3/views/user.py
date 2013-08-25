@@ -12,6 +12,7 @@ from intranet3.models import User
 from intranet3.forms.user import UserEditForm
 from intranet3.log import INFO_LOG
 from intranet3 import helpers as h
+from intranet3.api.preview import Preview
 
 
 LOG = INFO_LOG(__name__)
@@ -83,9 +84,9 @@ class Edit(BaseView):
             user.is_graphic_designer = form.is_graphic_designer.data
 
             if form.avatar.data:
-                from intranet3.api.preview import Preview
                 preview = Preview(self.request)
-                preview.swap_avatar(destination='users', img=user.id)
+                if not preview.swap_avatar(type='users', id=user.id):
+                    self.flash(self._(u"No preview to swap"))
 
             self.flash(self._(u"User data saved"))
             LOG(u"User data saved")

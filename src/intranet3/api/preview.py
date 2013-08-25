@@ -4,7 +4,7 @@ import mimetypes
 import base64
 
 from pyramid.httpexceptions import HTTPBadRequest, HTTPOk
-from pyramid.view import view_config
+from pyramid.view import view_config, view_defaults
 from pyramid.response import Response
 
 from intranet3.utils.views import ApiView
@@ -13,11 +13,17 @@ from intranet3 import helpers as h
 
 class Preview(object):
     
+    DESTINATIONS = {
+        'users' : 'users',
+        'teams': 'teams',
+    }
+    
     def __init__(self, request):
         self.request = request
+     
         
-    def avatar_path(self, img, settings, src):
-        return os.path.join(settings['AVATAR_PATH'], src, str(img))
+    def avatar_path(self, directory, id):
+        return os.path.join(self.request.registry.settings['AVATAR_PATH'], directory, str(id))
         
     def file_write(self, path, data):
         try:
@@ -39,23 +45,30 @@ class Preview(object):
                 return ''
         return data
     
-    def swap_avatar(self, destination, img):
+    def swap_avatar(self, type, id):
+        directory = self.DESTINATIONS[type]
         user_id = self.request.user.id
-        path_temp = self.avatar_path(user_id, self.request.registry.settings, 'previews')
-        path = self.avatar_path(img, self.request.registry.settings, destination)
+        preview_path = self.avatar_path('previews', user_id)
+        destination_path = self.avatar_path(directory, id)
         
-        if os.path.exists(path):
-            os.remove(path)
+        if os.path.exists(destination_path):
+            os.remove(destination_path)
             
         try:
-            os.rename(path_temp, path)
+            os.rename(preview_path, destination_path)
         except OSError:
-            return -1
+            return False
         
-        return 0
-        
-
+        return True
+  
+    
+@view_config(route_name='api_preview', renderer='json')
 class PreviewApi(ApiView):
+    
+    DIMENTIONS = {
+        'team': (77, 77),
+        'user': (100, 100),
+    }
     
     def _response(self, data):
         if data is None:
@@ -64,14 +77,12 @@ class PreviewApi(ApiView):
             response = Response(data)
             response.headers['Content-Type'] = 'image/png'
             return response
-            
-    @view_config(route_name='api_upload_preview', request_method='GET')
+    
     def get(self):
         filename = str(self.request.user.id)
         path_temp = os.path.join(self.settings['AVATAR_PATH'], 'previews', filename)
         return self._response(open(path_temp, 'rb').read())
     
-    @view_config(route_name='api_upload_preview', request_method='POST', renderer='json')        
     def post(self):
         preview = Preview(self.request)
         
@@ -79,12 +90,7 @@ class PreviewApi(ApiView):
         if type_pv not in [u'team', u'user']:
             raise HTTPBadRequest('Expect type = team or user')
         
-        if type_pv=='team':
-            width = 77
-            height = 77
-        elif type_pv=='user':
-            width = 100
-            height = 100
+        width, height = self.DIMENTIONS[type_pv]
             
         res = dict(status='error', msg='', file={})
         file = self.request.POST['file']
@@ -97,22 +103,11 @@ class PreviewApi(ApiView):
             preview.file_write(os.path.join(self.settings['AVATAR_PATH'], 'previews', filename), data)
             res['status'] = 'ok'
             res['file'] = {
-                'url': self.request.route_url('api_upload_preview'),
+                'url': self.request.route_url('api_preview'),
                 'filename': filename,
                 'mime': mimetype,
                 'size': size
             }
             
         return res
-        
-    @view_config(route_name='api_preview', request_method='GET', renderer='json')
-    def swap_preview(self):
-        destination = self.request.matchdict.get('destination')
-        img = self.request.matchdict.get('img')
-        preview = Preview(self.request)
-        result = preview.swap_avatar(destination, img)
-        if result == 0:
-            return HTTPOk("OK")
-        else:
-            raise HTTPBadRequest('No such file or directory')
 
