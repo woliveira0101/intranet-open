@@ -52,6 +52,7 @@ App.controller('oneCtrl', function($scope, $http, $dialog) {
           }
         });
       d.open('/static/partials/team.html', 'teamCtrl');
+
   };
 
   $scope.save = function(team){
@@ -80,17 +81,20 @@ App.controller('oneCtrl', function($scope, $http, $dialog) {
 
 });
 
-App.controller('teamCtrl', function($scope, $http, dialog, $callerScope, team) {
+App.controller('teamCtrl', function($scope, $http, $timeout, dialog, $callerScope, team) {
   $scope.team = angular.copy(team || {users:[], name: ''});
+  $scope.swap_with_preivew = false;
 
   $scope.add = function(){
     $scope.form_submitted = true;
     if($scope.teamForm.$invalid) return;
 
     $http.post('/api/teams', {
-      name: $scope.team.name
+      name: $scope.team.name,
+      swap_with_preview: $scope.swap_with_preivew
     }).success(function(data){
         $scope.team.id = data.id;
+        $scope.team.img = data.img;
         $callerScope.teams.push($scope.team);
         dialog.close();
     });
@@ -102,15 +106,39 @@ App.controller('teamCtrl', function($scope, $http, dialog, $callerScope, team) {
     if($scope.teamForm.$invalid) return;
 
     $http.put('/api/teams/' + team.id, {
-      name: $scope.team.name
+      name: $scope.team.name,
+      swap_with_preview: $scope.swap_with_preivew
     }).success(function(data){
         team.name = $scope.team.name;
+        team.img = team.img + '?v=1';
+        dialog.close();
     });
 
-    dialog.close();
   };
 
   $scope.close = function(){
     dialog.close();
-  }
+  };
+
+  $timeout(function(){
+    var $btn = $('#upload-btn');
+
+    var up = new Uploader($btn, {
+      url: '/api/preview?type=team',
+      onLoad: function(e) {
+        $('#my-avatar img').attr('src',e.file.url);
+      },
+      onComplete: function(e) {
+        $scope.swap_with_preivew = true;
+        $scope.$apply();
+      },
+      onProgress: function(e) {},
+      onAdd: function(e) {},
+      onError: function(e) {}
+    });
+
+  }, 100);
+
+  return false;
+
 });

@@ -90,6 +90,7 @@ def main(global_config, **settings):
     pyramid_config.add_forbidden_view(forbidden_view)
 
     pyramid_config.add_static_view('static', 'static', cache_max_age=3600)
+    pyramid_config.add_static_view('thumbs', settings['AVATAR_PATH'], cache_max_age=3600)
 
     pyramid_config.add_route('api_my_bugs', '/api/bugs')
     pyramid_config.add_route('api_time_collection', '/api/times')

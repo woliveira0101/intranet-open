@@ -19,8 +19,8 @@
 		    <dl>
 			    <dt>Image:</dt>
 			    <dd id="my-avatar">
-				    <img src="" />
-				    <a href="#" data-href="{{ request.route_url('api_preview', _query={'type':'user'}) }}" id="upload-btn" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
+				    <img ng-src="{{ team.img }}" />
+				    <a href="#" id="upload-btn" ng-click="uploader()"></a>
 			    </dd>
 		    </dl>
 	    </div>
@@ -34,31 +34,3 @@
     </form>
   </div>
 </div>
-
-<script>
-	$(function() {
-		var $btn = $('#upload-btn');
-		var href = $btn.attr('data-href');
-		$btn.show();
-
-		var up = new Uploader($btn, {
-			url:href,
-			onAdd: function(e) {
-				$('#upload-progress').show().css('width','0%');
-			},
-			onProgress: function(e) {
-				$('#upload-progress').css('width',parseInt(e.loaded/e.total*100,10)+'%');
-			},
-			onLoad: function(e) {
-				$('#my-avatar img').attr('src',e.file.url+'?t='+(new Date().getTime()));
-				$('input#avatar').attr('value',1);
-			},
-			onComplete: function(e) {
-				$('#upload-progress').hide();
-			},
-			onError: function(e) {
-			}
-		});
-		return false;
-	});
-</script>

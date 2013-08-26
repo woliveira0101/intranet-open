@@ -3,7 +3,7 @@ import os
 import mimetypes
 import base64
 
-from pyramid.httpexceptions import HTTPBadRequest, HTTPOk
+from pyramid.httpexceptions import HTTPBadRequest, HTTPNotFound
 from pyramid.view import view_config, view_defaults
 from pyramid.response import Response
 
@@ -14,8 +14,8 @@ from intranet3 import helpers as h
 class Preview(object):
     
     DESTINATIONS = {
-        'users' : 'users',
-        'teams': 'teams',
+        'users' : 'user',
+        'teams': 'team',
     }
     
     def __init__(self, request):
@@ -56,7 +56,8 @@ class Preview(object):
             
         try:
             os.rename(preview_path, destination_path)
-        except OSError:
+        except OSError as e:
+            import ipdb; ipdb.set_trace()
             return False
         
         return True
@@ -103,11 +104,10 @@ class PreviewApi(ApiView):
             preview.file_write(os.path.join(self.settings['AVATAR_PATH'], 'previews', filename), data)
             res['status'] = 'ok'
             res['file'] = {
-                'url': self.request.route_url('api_preview'),
+                'url': '/thumbs/previews/%s' % filename,
                 'filename': filename,
                 'mime': mimetype,
                 'size': size
             }
             
         return res
-

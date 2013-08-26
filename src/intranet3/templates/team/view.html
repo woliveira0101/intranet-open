@@ -1,6 +1,7 @@
 {% extends "templates/_base.html" %}
 
 {% block head_script %}
+	<script src="{{ request.static_path('intranet3:static/js/vendor/jquery.form.min.js') }}"></script>
     <script src="{{ request.static_path('intranet3:static/js/vendor/angular.min.js') }}"></script>
     <script src="{{ request.static_path('intranet3:static/js/vendor/angular-dragdrop.js') }}"></script>
     <script src="{{ request.static_path('intranet3:static/js/vendor/ui-bootstrap-0.5.0.min.js') }}"></script>

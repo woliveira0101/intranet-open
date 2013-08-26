@@ -63,7 +63,7 @@
                         <dt>{% trans %}Image{% endtrans %}:</dt>
                         <dd id="my-avatar">
                             <img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" />
-                            <a href="#" data-href="{{ request.route_url('api_preview', _query={'type':'user'}) }}" id="upload-btn" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
+                            <a href="#" id="upload-btn"></a>
                             <div id="upload-progress"></div>
                         </dd>
                     </dl>
@@ -116,11 +116,9 @@
 
     $(function() {
 	    var $btn = $('#upload-btn');
-	    var href = $btn.attr('data-href');
-	    $btn.show();
 
 	    var up = new Uploader($btn, {
-		    url:href,
+		    url: '/api/preview?type=user',
 		    onAdd: function(e) {
 			    $('#upload-progress').show().css('width','0%');
 		    },

@@ -42,11 +42,9 @@ class Teams(ApiView):
             preview = Preview(self.request)
             if not preview.swap_avatar(type='teams', id=team.id):
                 raise HTTPBadRequest('No preview to swap')
-        
-        return dict(
-            id=team.id,
-        )
-        
+
+        return team.to_dict()
+
 
 @view_config(route_name='api_team', renderer='json')
 class Team(ApiView):

@@ -11,7 +11,11 @@ class Team(Base):
     id = Column(Integer, primary_key=True, nullable=False, index=True)
     name = Column(String(255), unique=True, nullable=False)
     team_members = orm.relationship('TeamMember', backref='team', lazy='dynamic')
-    
+
+    @property
+    def avatar_url(self):
+        return '/thumbs/team/%s' % self.id
+
     @property
     def users(self):
         return [tm.user_id for tm in self.team_members]
@@ -20,8 +24,9 @@ class Team(Base):
         team_dict = {
             'id': self.id,
             'name': self.name,
-            'users': self.users
-            }
+            'users': self.users,
+            'img': self.avatar_url,
+        }
             
         return team_dict
     
