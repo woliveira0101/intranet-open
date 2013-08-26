@@ -199,7 +199,7 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin,
         ticket_choice = form.ticket_choice.data
 
         uber_query = self._prepare_uber_query_for_sprint(
-            sprint, bugs,ticket_choice
+            sprint, bugs, ticket_choice
         )
         entries = uber_query.all()
 
