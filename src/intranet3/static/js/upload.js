@@ -1,6 +1,7 @@
-(function() {
+var Uploader = (function() {
     var initializing = false, fnTest = /xyz/.test(function() { xyz;
     }) ? /\b_super\b/ : /.*/;
+
     this.Class = function() {
     };
 
@@ -360,7 +361,6 @@
                 var str = iframe.contents().find('body').html();
                 
                 var res = eval("("+str+")");
-                console.log()
                 if (res.status == 'ok'&&res.file) {
                     s.fireEvent('load', {
                         id:e.id,
@@ -404,31 +404,8 @@
     });
 
     Uploader.isModern = (function() {var i = $('<input type="file" />');         return 'multiple' in i.get(0);    })();
+    return Uploader
 
-    $(function() {
-        var $btn = $('#upload-btn');
-        var href = $btn.attr('data-href');
-        $btn.show();
-        var up = new Uploader($btn, {
-            url:href,
-            onAdd: function(e) {
-                $('#upload-progress').show().css('width','0%');
-            },
-            onProgress: function(e) {
-                $('#upload-progress').css('width',parseInt(e.loaded/e.total*100,10)+'%');
-            },
-            onLoad: function(e) {
-                $('#my-avatar img').attr('src',e.file.url+'?t='+(new Date().getTime()));
-                $('input#avatar').attr('value',1);
-            },
-            onComplete: function(e) {
-                $('#upload-progress').hide();
-            },
-            onError: function(e) {
-                
-            }
-        });
-        return false;
-    });
 
 })();
+

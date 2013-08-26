@@ -1,6 +1,5 @@
 var App = angular.module('teams', ['ngDragDrop', 'ui.bootstrap']);
 $.fn.hasScrollBar = function() {
-  console.log('a');
   return this.get(0).scrollHeight > this.height();
 };
 var resetScrolls = function(){
