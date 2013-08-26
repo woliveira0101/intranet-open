@@ -17,10 +17,12 @@ locale = Locale('en', 'US')
 
 @view_config(route_name='employee_table_absences')
 class Absences(BaseView):
-    WEEKDAYS = locale.days['stand-alone']['narrow']
+    WEEKDAYS = None
 
     def weekday(self, date):
         weekday = date.weekday()
+        if not self.WEEKDAYS:
+            self.WEEKDAYS = locale.days['stand-alone']['narrow']
         return self.WEEKDAYS[weekday]
 
     def necessary_data(self, start, end):
