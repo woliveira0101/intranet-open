@@ -1,5 +1,6 @@
 from sqlalchemy import orm, Column, ForeignKey
 from sqlalchemy.types import Enum, String, Integer
+from pyramid.decorator import reify
 
 from intranet3.utils.encryption import encrypt, decrypt
 from intranet3.models import Base, User, DBSession
@@ -99,6 +100,10 @@ class Tracker(Base):
         """ Returns url for create new bug in project """
         constructor = self.NEW_BUG_URL_CONSTRUCTORS[self.type]
         return constructor(self.url, project_selector, component_selector)
+
+    @reify
+    def logins_mapping(self):
+        return TrackerCredentials.get_logins_mapping(self)
 
 
 class TrackerCredentials(Base):

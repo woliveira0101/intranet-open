@@ -179,7 +179,8 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
         params = dict(
             ctype='csv',
             status_whiteboard_type='regexp',
-            status_whiteboard='s=%s(?!\S)' % sprint_name,
+            #status_whiteboard='s=%s' % sprint_name,
+            status_whiteboard='s=%s(?!\S)' % sprint_name, # this regexp desn't work with our bugzilla
             bug_status=[
                 'NEW',
                 'ASSIGNED',

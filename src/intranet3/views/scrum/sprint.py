@@ -279,11 +279,12 @@ class Edit(BaseView):
         sprint = Sprint.query.get(sprint_id)
         form = SprintForm(self.request.POST, obj=sprint)
         if self.request.method == 'POST' and form.validate():
-            project_id = int(form.project_id.data)
+            project_id = form.project_id.data
             project = Project.query.get(project_id)
             sprint.name = form.name.data
             sprint.client_id = project.client_id
             sprint.project_id = project.id
+            sprint.bugs_project_ids = map(int, form.bugs_project_ids.data)
             sprint.start = form.start.data
             sprint.end = form.end.data
             sprint.goal = form.goal.data
@@ -304,12 +305,12 @@ class Add(BaseView):
     def dispatch(self):
         form = SprintForm(self.request.POST)
         if self.request.method == 'POST' and form.validate():
-            project_id = int(form.project_id.data)
-            project = Project.query.get(project_id)
+            project = Project.query.get(int(form.project_id.data))
             sprint = Sprint(
                 name=form.name.data,
                 client_id=project.client_id,
                 project_id=project.id,
+                bugs_project_ids = map(int, form.bugs_project_ids.data),
                 start=form.start.data,
                 end=form.end.data,
                 goal=form.goal.data,

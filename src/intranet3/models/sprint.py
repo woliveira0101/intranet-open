@@ -2,6 +2,7 @@ import datetime
 
 from sqlalchemy.types import String, Integer, Date, DateTime, Text, Float
 from sqlalchemy import Column, ForeignKey
+from sqlalchemy.dialects import postgresql
 
 from intranet3.models import Base
 from intranet3.log import WARN_LOG, INFO_LOG, DEBUG_LOG
@@ -17,6 +18,7 @@ class Sprint(Base):
     name = Column(String, nullable=False)
     client_id = Column(Integer, ForeignKey('client.id'), nullable=False, index=True)
     project_id = Column(Integer, ForeignKey('project.id'), nullable=False, index=True)
+    bugs_project_ids = Column(postgresql.ARRAY(Integer))
     start = Column(Date, nullable=False)
     end = Column(Date, nullable=False)
 
@@ -30,6 +32,7 @@ class Sprint(Base):
     worked_hours = Column(Float, nullable=False, default=0.0)
 
     retrospective_note = Column(Text, nullable=False, default='')
+
 
     @property
     def velocity(self):

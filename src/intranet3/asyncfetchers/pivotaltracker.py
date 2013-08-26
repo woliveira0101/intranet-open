@@ -236,7 +236,10 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
                 owner_name = ''
 
             points = story.find('estimate')
-            points = 0 if not points else points.text
+            try:
+                points = points.text
+            except AttributeError:
+                points = 0
 
             if not points:
                 points = 0

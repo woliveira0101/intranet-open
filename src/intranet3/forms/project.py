@@ -15,12 +15,12 @@ class ProjectForm(wtf.Form):
     coordinator_id = wtf.SelectField(_(u"Coordinator"), validators=[], choices=UserChoices(empty=True))
     tracker_id = wtf.SelectField(_(u"Tracker"), validators=[validators.Required()], choices=EntityChoices(Tracker, lambda tracker: tracker.name))
     status = wtf.SelectField(_(u"Status"), validators=[validators.Required()], choices=STATUS)
-    turn_off_selectors = wtf.BooleanField(_(u"Turn off selectors"), validators=[])
+    turn_off_selectors = wtf.BooleanField(_(u"Turn off selectors"), validators=[], default=True)
     project_selector = wtf.TextField(_(u"Project selector"), validators=[])
     component_selector = wtf.TextField(_(u"Component selector"), validators=[])
     version_selector = wtf.TextField(_(u"Version selector"), validators=[])
     ticket_id_selector = wtf.TextField(_(u"Ticket ID selector"), validators=[])
-    active = wtf.BooleanField(_(u"Active"), validators=[])
+    active = wtf.BooleanField(_(u"Active"), validators=[], default=True)
     google_card = wtf.TextField(_(u"Link to project card in google docs"), validators=[])
     google_wiki = wtf.TextField(_(u"Link to project wiki in google sites"), validators=[])
     mailing_url = wtf.TextField(_(u"Link to mailing group"), validators=[])
@@ -69,17 +69,52 @@ class ProjectChoices(EntityChoices):
         self.skip_inactive = skip_inactive
         self.client = client
         self.a_filter = additional_filter
-    
-    def __iter__(self):
-        if self.empty:
-            yield '', self.empty_title
-        query = DBSession.query(Project.id, Client.name, Project.name)\
-                .filter(Project.client_id==Client.id)
+
+    def get_projects_query(self):
+        query = DBSession.query(Project.id, Client.name, Project.name) \
+            .filter(Project.client_id==Client.id)
         if self.client:
             query = query.filter(Project.client_id==self.client.id)
         if self.skip_inactive:
             query = query.filter(Project.active==True)
         query = query.order_by(Client.name, Project.name)
         query = self.a_filter(query).distinct()
+        return query
+
+    def __iter__(self):
+        if self.empty:
+            yield '', self.empty_title
+        query = self.get_projects_query()
         for project_id, client_name, project_name in query:
             yield str(project_id), u'%s / %s' % (client_name, project_name)
+
+
+class ScrumProjectChoices(ProjectChoices):
+
+    def get_projects_query(self):
+        query = DBSession.query(Project.id, Client.name, Project.name, Project.tracker_id) \
+            .filter(Project.client_id==Client.id)
+        if self.client:
+            query = query.filter(Project.client_id==self.client.id)
+        if self.skip_inactive:
+            query = query.filter(Project.active==True)
+        query = query.order_by(Client.name, Project.name)
+        query = self.a_filter(query).distinct()
+        query = query.filter(Project.tracker_id.in_([1,10,12,13,9]))
+        return query
+
+    def __iter__(self):
+        if self.empty:
+            yield '', self.empty_title
+        query = self.get_projects_query()
+        for project_id, client_name, project_name, tracker_id in query:
+            yield str(project_id), u'%s / %s' % (client_name, project_name)
+
+class ScrumBugsProjectChoices(ScrumProjectChoices):
+
+    def __iter__(self):
+        if self.empty:
+            yield '', self.empty_title
+        query = self.get_projects_query()
+        for project_id, client_name, project_name, tracker_id in query:
+            yield (str(project_id), str(tracker_id)), u'%s / %s' % (client_name, project_name)

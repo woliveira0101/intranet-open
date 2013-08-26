@@ -4,6 +4,7 @@ import base64
 import mimetypes
 
 from pyramid.view import view_config
+from pyramid.exceptions import Forbidden
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from pyramid.response import Response
 
@@ -21,14 +22,12 @@ LOG = INFO_LOG(__name__)
 @view_config(route_name='user_list', permission='freelancer')
 class List(BaseView):
     def get(self):
-        users = User.query.filter(User.is_active==True)\
+        res = User.query.filter(User.is_active==True)\
                           .filter(User.is_not_client())\
-                          .filter(User.freelancer==False)\
                           .order_by(User.name).all()
-        freelancers = User.query.filter(User.is_active==True)\
-                                .filter(User.is_not_client())\
-                                .filter(User.freelancer==True)\
-                                .order_by(User.name).all()
+
+        users = [user for user in res if not user.freelancer]
+        freelancers = [user for user in res if user.freelancer]
 
         clients = []
         if self.request.has_perm('admin'):
@@ -60,6 +59,8 @@ class Edit(BaseView):
 
         if user_id and self.request.has_perm('admin'):
             user = User.query.get(user_id)
+        elif user_id:
+            raise Forbidden()
         else:
             user = self.request.user
         form = UserEditForm(self.request.POST, obj=user)
