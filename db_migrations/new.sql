@@ -16,6 +16,7 @@ CREATE TABLE team_members (
 	FOREIGN KEY(user_id) REFERENCES "user" (id)
 );
 -- teams
+
 -- add bugs_project_ids
 ALTER TABLE sprint DROP COLUMN IF EXISTS bugs_project_ids;
 ALTER TABLE sprint ADD COLUMN bugs_project_ids INTEGER;
@@ -26,4 +27,3 @@ FROM sprint s2;
 
 ALTER TABLE sprint ALTER COLUMN bugs_project_ids TYPE INTEGER[] USING array[project_id]::INTEGER[];
 -- add bugs_project_ids
-ALTER TABLE "user" DROP COLUMN freelancer;

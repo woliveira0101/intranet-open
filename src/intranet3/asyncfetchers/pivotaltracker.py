@@ -252,7 +252,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
                 reporter=story.find('requested_by').text,
                 owner=owner_name,
                 status=story.find('current_state').text,
-                project_name=self.tracker.name,
+                project_name=story.find('project_id').text,
                 opendate=story.find('created_at').text,
                 changeddate=story.find('updated_at').text,
                 whiteboard={'p': points}

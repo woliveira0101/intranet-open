@@ -25,7 +25,7 @@ class Client(Base):
     note        = Column(String, nullable=True)
 
     projects = orm.relationship('Project', backref='client', lazy='dynamic')
-    coordinator = orm.relationship('User', backref='client')
+    coordinator = orm.relationship('User')
 
     @reify
     def active(self):
