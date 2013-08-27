@@ -2,6 +2,11 @@
 import os
 import mimetypes
 import base64
+import urllib
+import string
+
+from random import choice
+from hashlib import md5
 
 from pyramid.httpexceptions import HTTPBadRequest, HTTPNotFound
 from pyramid.view import view_config
@@ -133,6 +138,14 @@ class ImageApi(ApiView):
                 LOG(e)
         return None
 
+    def gravatar(self):
+        random_str = 'teams'.join(choice(string.letters + string.digits) for i in xrange(10))
+        hash = md5(random_str).hexdigest()
+        params = urllib.urlencode({'s': '128', 'd': 'retro'}, doseq=True)
+        uri = 'http://www.gravatar.com/avatar/%s?%s'% (hash, params)
+
+        return urllib.urlopen(uri ).read()
+
     def _response(self, data):
         response = Response(data)
         response.headers['Content-Type'] = 'image/png'
@@ -144,9 +157,13 @@ class ImageApi(ApiView):
         if type_ not in ('previews', 'teams', 'users'):
             raise HTTPNotFound()
 
+
         path = os.path.join(self.settings['AVATAR_PATH'], type_, id_)
         data = self._file_read(path)
         if data is None:
+            if type_ == "teams":
+                return self._response(self.gravatar())
+
             path = self.ANONYMONUS[type_]
             data = self._file_read(path)
         return self._response(data)
