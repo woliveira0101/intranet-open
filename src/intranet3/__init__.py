@@ -157,6 +157,10 @@ def run():
     from intranet3 import cron
     if not config.get('CRON_DISABLE'):
         cron.run_cron_tasks()
+    
+    for directory in ['users', 'teams', 'previews']:
+        if not os.path.exists(os.path.join(settings['AVATAR_PATH'], directory)):
+            os.makedirs(os.path.join(settings['AVATAR_PATH'], directory))
 
     full_config_path = os.path.abspath(config_file_path)
     server_config = ConfigParser.ConfigParser()
