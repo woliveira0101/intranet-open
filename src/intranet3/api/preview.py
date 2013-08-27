@@ -119,7 +119,7 @@ class ImageApi(ApiView):
     ANONYMONUS = {
         'users': os.path.normpath(os.path.join(os.path.dirname(__file__),'..','static','img','anonymous.png')),
         'previews': os.path.normpath(os.path.join(os.path.dirname(__file__),'..','static','img','anonymous.png')),
-        'teams': os.path.normpath(os.path.join(os.path.dirname(__file__),'..','static','img','anonymous.png')),
+        'teams': os.path.normpath(os.path.join(os.path.dirname(__file__),'..','static','img','anonymous_team.png')),
     }
 
     def _file_read(self, path):
