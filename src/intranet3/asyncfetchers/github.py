@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Github connector
-"""
+# coding: utf-8
 import json
 import re
 from intranet3.asyncfetchers import base
@@ -17,6 +14,7 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 class GithubBug(base.Bug):
     _project_name = None
     _component_name = None
+    _severity = None
     url = None
 
     def __init__(self, *args, **kwargs):
@@ -29,6 +27,17 @@ class GithubBug(base.Bug):
         return self.url
 
     @property
+    def severity(self):
+        return self._severity
+    @severity.setter
+    def severity(self, value):
+        labels = [l.get('name') for l in value]
+        if u"enhancement" in labels:
+            self._severity = 'enhancement'
+        else:
+            self._severity = ''
+
+    @property
     def project_name(self):
         return self._project_name
     @project_name.setter
@@ -38,7 +47,7 @@ class GithubBug(base.Bug):
             self._project_name = m.group(2)
         else:
             self._project_name = value
-    
+   
     @property
     def component_name(self):
         return self._component_name
@@ -56,14 +65,14 @@ github_converter = Converter(
     desc='title',
     reporter=lambda d: d['user']['login'],
     owner=lambda d: d['assignee']['login'],
-    priority=lambda d: 'none',
-    severity=lambda d: 'none',
+    priority=lambda d: '',
+    severity=lambda d: d['labels'],
     status=lambda d: 'assigned',
     resolution=lambda d: 'none',
     project_name=lambda d: d['html_url'],
     component_name=lambda d: d['html_url'],
     url=lambda d: d['html_url'],
-    deadline=lambda d: d['milestone']['due_on'] or 'none',
+    deadline=lambda d: d['milestone']['due_on'] if d['milestone'] is not None else '',
     opendate=lambda d: parse(d.get('created_at', '')),
     changeddate=lambda d: parse(d.get('updated_at', '')),
     dependson=lambda d: {},
@@ -72,21 +81,23 @@ github_converter = Converter(
 
 
 def _fetcher_function(resolved, single):
-    #@cached_bug_fetcher(lambda: u'resolved-%s-single-%s' % (resolved, single))
+    @cached_bug_fetcher(lambda: u'resolved-%s-single-%s' % (resolved, single))
     def fetcher(self):
         if resolved:
             # Github doesn't have open resolved
             self.success()
             return
-        params = self.common_url_params()
-        # params.update(self.single_user_params() if single else self.all_users_params())
+
+        params = self.common_url_params() if single else self.all_users_params()
         url = serialize_url(self.tracker.url + 'issues?', **params)
+
         self.fetch(url)
     return fetcher
 
 
 def _query_fetcher_function(resolved):
-    def fetcher(self, ticket_ids, project_selector, component_selector):
+    def fetcher(self, ticket_ids, project_selector, component_selector,
+                version):
         if resolved:
             # bitbucked doesn't have resolved not-closed
             self.success()
@@ -96,10 +107,11 @@ def _query_fetcher_function(resolved):
             # query not supported by bitbucket - we will do it manually later
             self.wanted_ticket_ids = ticket_ids
         else:
-            # project selector is not supported in bitbucket
-            if component_selector:
-                params.update(component=component_selector)
-        url = serialize_url(self.tracker.url + 'issues?', **params)
+            if project_selector and component_selector:
+                uri = self.tracker.url + "repos/%s/%s/issues?" % (project_selector, component_selector[0])
+                url = serialize_url(uri, **params)
+            else:
+                url = serialize_url(self.tracker.url + 'issues?', **params)
         self.fetch(url)
     return fetcher
 
@@ -109,7 +121,6 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
     get_converter = lambda self: github_converter
     
     def parse(self, data):
-        # import ipdb;ipdb.set_trace()                         # BREAK HERE
         converter = self.get_converter()
         json_data = json.loads(data)
         for bug_desc in json_data:
@@ -124,19 +135,18 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
         
     def common_url_params(self):
         return dict(
-            limit='50',
-            status='open',
+            state='open',
             format='json'
         )
 
     def single_user_params(self):
         return dict(
-            responsible=self.login
+            filter='assigned'
         )
 
     def all_users_params(self):
         return dict(
-            responsible=self.login_mapping.keys()
+            filter='subscribed'
         )
 
     fetch_user_tickets = _fetcher_function(resolved=False, single=True)
@@ -161,6 +171,3 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             self.fail(e)
         else:
             self.success()
-
-    # def resolved(self, bug):
-    #     pass
