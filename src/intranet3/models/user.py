@@ -45,7 +45,7 @@ class User(Base):
     name = Column(String, nullable=False)
     admin = Column(Boolean, default=False, nullable=False)
     freelancer = Column(Boolean, default=False, nullable=False)
-
+    
     is_active = Column(Boolean, default=True, nullable=False)
     is_programmer = Column(Boolean, default=False, nullable=False)
     is_frontend_developer = Column(Boolean, default=False, nullable=False)
@@ -188,7 +188,7 @@ class User(Base):
     def is_not_client(cls):
         # used in queries i.e. User.query.filter(User.is_not_client()).filter(...
         # <@ = http://www.postgresql.org/docs/8.3/static/functions-array.html
-        return User.groups.op('<@')('{user, freelancer, admin, scrum}')
+        return User.groups.op('<@')('{user, admin, scrum}')
 
     @classmethod
     def is_client(cls):

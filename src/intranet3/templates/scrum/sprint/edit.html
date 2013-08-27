@@ -7,7 +7,8 @@
     <form action="{{ request.url_for('/scrum/sprint/edit', sprint_id=sprint.id) }}" method="post" accept-charset="utf-8">
         {{ csrf_field }}
         {{ form_field(form.name, _('Name')) }}
-        {{ form_field(form.project_id, _('Project'), size='10') }}
+        {{ form_field(form.project_id, _('Project')) }}
+        {{ form_field(form.bugs_project_ids, _('Bugs projects'), size='10') }}
         {{ form_field(form.start, _('Start date'), class='datepicker') }}
         {{ form_field(form.end, _('End date'), class='datepicker') }}
         {{ form_field(form.goal, _('Goal'), cols='80', rows='8') }}
@@ -17,6 +18,3 @@
         </div>
     </form>
 {% endblock %}
-
-{% block more_script %}
-{% endblock more_script %}

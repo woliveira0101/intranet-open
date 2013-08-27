@@ -495,7 +495,7 @@ class MissedHours(CronView):
                 "user" u
             WHERE
                 t.deleted = FALSE AND
-                NOT ( 'freelancer' = ANY(u.groups) ) AND
+                NOT ( u.freelancer ) AND
                 t.user_id = u.id AND
                 u.is_active = true AND (
                    (u.start_full_time_work IS NOT NULL AND t.date >= u.start_full_time_work AND t.date >= :date_start) OR
@@ -545,7 +545,7 @@ class MissedHours(CronView):
             WHERE
                 t.user_id = u.id AND
                 t.deleted = FALSE AND
-                NOT ( 'freelancer' = ANY(u.groups) ) AND
+                NOT ( u.freelancer ) AND
                 u.is_active = true AND (
                   (u.start_full_time_work IS NOT NULL AND t.date >= u.start_full_time_work AND t.date >= :date_start) OR
                   (u.start_full_time_work IS NULL AND t.date >= :date_start)

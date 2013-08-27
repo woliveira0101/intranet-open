@@ -70,6 +70,8 @@ def main(global_config, **settings):
             perm = [ 'g:%s' % g for g in user.groups ]
             if user.is_coordinator:
                 perm.append('g:coordinator')
+            if user.freelancer:
+                perm.append('g:freelancer')
         return perm
 
     engine = engine_from_config(settings, 'sqlalchemy.')

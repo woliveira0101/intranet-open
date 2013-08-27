@@ -29,6 +29,10 @@
                 <td>{{ user.user_groups }}</td>
             </tr>
             <tr>
+                <td>{% trans %}Freelancer{% endtrans %}</td>
+                <td>{% if user.freelancer %}✔{% endif %}</td>
+            </tr>
+            <tr>
                 <td>{% trans %}Programmer{% endtrans %}:</td>
                 <td>{% if user.is_programmer %}✔{% endif %}</td>
             </tr>

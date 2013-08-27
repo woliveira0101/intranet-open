@@ -19,6 +19,7 @@ class TrackerChoices(object):
 class ClientForm(wtf.Form):
     """ Client form """
     name = wtf.TextField(_(u"Client name"), validators=[wtf.validators.Required()])
+    active = wtf.BooleanField(_(u"Active"), validators=[])
     coordinator_id = wtf.SelectField(u"Coordinator", validators=[], choices=UserChoices(empty=True))
     google_card = wtf.TextField(_(u"Link to project card in google docs"), validators=[])
     google_wiki = wtf.TextField(_(u"Link to project wiki in google sites"), validators=[])

@@ -128,7 +128,7 @@ class PerClientPerEmployeeExcel(BaseView):
               p.client_id = c.id AND
               t.user_id = u.id AND
               t.deleted = false
-        GROUP BY c.id, c.name, u.id, u.name, date_trunc('month', t.date)
+        GROUP BY c.id, c.name, u.id, u.email, date_trunc('month', t.date)
         ORDER BY date_trunc('month', t.date)
         """).all()
 
