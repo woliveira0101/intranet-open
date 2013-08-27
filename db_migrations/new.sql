@@ -1,4 +1,3 @@
-ALTER TABLE "user" DROP COLUMN freelancer;
 -- add bugs_project_ids
 ALTER TABLE sprint DROP COLUMN IF EXISTS bugs_project_ids;
 ALTER TABLE sprint ADD COLUMN bugs_project_ids INTEGER;

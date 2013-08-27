@@ -82,11 +82,18 @@ class Edit(BaseView):
                 user.levels = reduce(lambda x,y:x|y,[int(x) for x in form.level.data])
             if self.request.has_perm('admin'):
                 user.is_active = form.is_active.data
-                user.groups = form.groups.data
+                groups = form.groups.data
+                if "freelancer" in groups:
+                    groups.remove('freelancer')
+                    user.freelancer = True
+                else:
+                    user.freelancer = False
+                user.groups = groups
                 user.start_full_time_work = form.start_full_time_work.data or None
             user.is_programmer = form.is_programmer.data
             user.is_frontend_developer = form.is_frontend_developer.data
             user.is_graphic_designer = form.is_graphic_designer.data
+
 
             if form.avatar.data:
                 self._change_avatar(user.id)
@@ -97,6 +104,9 @@ class Edit(BaseView):
                 return HTTPFound(location=self.request.url_for('/user/edit', user_id=user_id))
             else:
                 return HTTPFound(location=self.request.url_for('/user/edit'))
+
+        if user.freelancer:
+            form.groups.data = user.groups + ['freelancer']
         return dict(id=user.id, user=user, form=form)
 
 

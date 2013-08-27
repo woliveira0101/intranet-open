@@ -90,7 +90,7 @@
                   {% if request.user %}
                       <li class="user-area">
                       {% trans %}Logged in as{% endtrans %}
-                      {% if request.is_user_in_group('freelancer') %}
+                      {% if request.user.freelancer %}
                           <em>Freelancer</em> <a id="username" href="{{ request.url_for('/user/edit') }}">{{ request.user.name }}</a>
                       {% elif request.is_user_in_group('client') %}
                           <em>Client</em> <a id="username">{{ request.user.name }}</a>
