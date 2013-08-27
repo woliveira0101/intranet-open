@@ -82,7 +82,7 @@ App.controller('oneCtrl', function($scope, $http, $dialog) {
 });
 
 App.controller('teamCtrl', function($scope, $http, $timeout, dialog, $callerScope, team) {
-  $scope.team = angular.copy(team || {users:[], name: ''});
+  $scope.team = angular.copy(team || {users:[], name: '', img: '/api/images/teams/0'});
   $scope.swap_with_preivew = false;
 
   $scope.add = function(){
@@ -98,7 +98,6 @@ App.controller('teamCtrl', function($scope, $http, $timeout, dialog, $callerScop
         $callerScope.teams.push($scope.team);
         dialog.close();
     });
-
   };
 
   $scope.edit = function(){
@@ -110,7 +109,7 @@ App.controller('teamCtrl', function($scope, $http, $timeout, dialog, $callerScop
       swap_with_preview: $scope.swap_with_preivew
     }).success(function(data){
         team.name = $scope.team.name;
-        team.img = team.img + '?v=1';
+        team.img = team.img + '?t=' + (new Date().getTime());
         dialog.close();
     });
 
@@ -126,7 +125,7 @@ App.controller('teamCtrl', function($scope, $http, $timeout, dialog, $callerScop
     var up = new Uploader($btn, {
       url: '/api/preview?type=team',
       onLoad: function(e) {
-        $('#my-avatar img').attr('src',e.file.url);
+        $('#my-avatar img').attr('src',e.file.url+'?t='+(new Date().getTime()));
       },
       onComplete: function(e) {
         $scope.swap_with_preivew = true;
