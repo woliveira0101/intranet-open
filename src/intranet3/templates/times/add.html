@@ -6,3 +6,10 @@
     {% include "templates/times/_addform.html" %}
     {% endwith %}
 {% endblock %}
+
+{% block tail_script %}
+    <script type="text/javascript" >
+           var types = {{ form.PREDEFINED_TICKET_IDS | tojson | safe }};
+    </script>
+    <script type="text/javascript" src="{{ request.static_path('intranet3:static/js/times.js') }}"></script>
+{% endblock %}
