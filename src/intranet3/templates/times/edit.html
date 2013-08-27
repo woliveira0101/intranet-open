@@ -2,14 +2,41 @@
 
 {% block content %}
     <h2 class="content-header">{% trans date=date.strftime('%d.%m.%Y') %}Edit time entry for {{ date }}{% endtrans %}</h2>
-    <form action="{{ request.url_for('/times/edit', timeentry_id=timeentry_id, next=next) }}" method="post" accept-charset="utf-8">
+    <form class="add-time-form" action="{{ request.url_for('/times/edit', timeentry_id=timeentry_id, next=next) }}" method="post" accept-charset="utf-8">
         {{ csrf_field }}
         {{ form_field(form.project_id, 'Project') }}
         {{ form_field(form.time, 'Time as a float value', class='time_entry_time') }}
-        {{ form_field(form.ticket_id, 'Ticket identifier on the tracker') }}
+        {% with field = form.ticket_id %}
+        <div>
+            <dl>
+                <dt>{{ field.label }}</dt>
+                <dd>
+                    {% if field.errors %}
+                    <ul class="errors">
+                        {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="description">{% trans %}Ticket identifier on the tracker or predefined one{% endtrans %}</div>
+                    {{ field()|safe }}
+                    <select id="ticket-type">
+                        <option value="M0">{% trans %}Ticket id{% endtrans %}</option>
+                    </select>
+                </dd>
+            </dl>
+        </div>
+        {% endwith %}
         {{ form_field(form.description, 'Time entry description', class='time_entry_description') }}
         <div class="buttons">
             <input class="btn" type="submit" value="{% trans %}Save{% endtrans %}"/>
         </div>
     </form> 
+{% endblock %}
+
+{% block tail_script %}
+    <script type="text/javascript" >
+           var types = {{ form.PREDEFINED_TICKET_IDS | tojson | safe }};
+    </script>
+    <script type="text/javascript" src="{{ request.static_path('intranet3:static/js/times.js') }}"></script>
 {% endblock %}
