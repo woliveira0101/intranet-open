@@ -92,7 +92,6 @@ def main(global_config, **settings):
     pyramid_config.add_forbidden_view(forbidden_view)
 
     pyramid_config.add_static_view('static', 'static', cache_max_age=3600)
-    pyramid_config.add_static_view('thumbs', settings['AVATAR_PATH'], cache_max_age=3600)
 
     pyramid_config.add_route('api_my_bugs', '/api/bugs')
     pyramid_config.add_route('api_time_collection', '/api/times')
@@ -101,6 +100,8 @@ def main(global_config, **settings):
     pyramid_config.add_route('api_teams', '/api/teams')
     pyramid_config.add_route('api_users', '/api/users')
     pyramid_config.add_route('api_preview', '/api/preview')
+    pyramid_config.add_route('api_images', '/api/images/{type:\w+}/{id:\d+}')
+
     pyramid_config.add_renderer('.html', 'pyramid_jinja2.renderer_factory')
     pyramid_config.add_renderer(None, 'intranet3.utils.renderer.renderer_factory')
     pyramid_config.add_translation_dirs('intranet3:locale/')
@@ -132,6 +133,10 @@ def main(global_config, **settings):
     else:
         venusian_ingore = None
     pyramid_config.scan(ignore=venusian_ingore)
+
+    pyramid_config.add_settings({
+        'TEMPLATE_DIR': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates'),
+    })
 
 
     app = pyramid_config.make_wsgi_app()

@@ -1,6 +1,7 @@
 import datetime
 import calendar
 import json
+import os
 
 from pyramid.httpexceptions import HTTPException, HTTPBadRequest, HTTPForbidden, HTTPMethodNotAllowed, HTTPNotFound 
 from pyramid.i18n import TranslationStringFactory, get_localizer
@@ -32,6 +33,13 @@ class View(object):
 
 
 class BaseView(View):
+    def get_raw_template(self, path):
+        path = os.path.join(self.request.registry.settings['TEMPLATE_DIR'], path)
+        with open(path, 'r') as f:
+            template = f.read()
+            template = unicode(template, 'utf8')
+            return template
+
     def _note_presence(self):
         """
         Check if request IP equals database-stored office IP.

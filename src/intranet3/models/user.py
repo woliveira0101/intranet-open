@@ -145,7 +145,7 @@ class User(Base):
 
     @property
     def avatar_url(self):
-        return '/thumbs/user/%s' % self.id
+        return '/api/images/users/%s' % self.id
 
     def get_location(self, short=False):
         if short:

@@ -7,4 +7,7 @@ LOG = INFO_LOG(__name__)
 @view_config(route_name='team_view', permission='admin')
 class View(BaseView):
     def get(self):
-        return {}
+        template = self.get_raw_template('team/teams.html')
+        return {
+            'template': template,
+        }

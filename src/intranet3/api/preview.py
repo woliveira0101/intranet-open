@@ -4,18 +4,20 @@ import mimetypes
 import base64
 
 from pyramid.httpexceptions import HTTPBadRequest, HTTPNotFound
-from pyramid.view import view_config, view_defaults
+from pyramid.view import view_config
 from pyramid.response import Response
 
 from intranet3.utils.views import ApiView
 from intranet3 import helpers as h
+from intranet3.log import INFO_LOG
+LOG = INFO_LOG(__name__)
 
 
 class Preview(object):
     
     DESTINATIONS = {
-        'users' : 'user',
-        'teams': 'team',
+        'users' : 'users',
+        'teams': 'teams',
     }
     
     def __init__(self, request):
@@ -57,7 +59,6 @@ class Preview(object):
         try:
             os.rename(preview_path, destination_path)
         except OSError as e:
-            import ipdb; ipdb.set_trace()
             return False
         
         return True
@@ -104,10 +105,48 @@ class PreviewApi(ApiView):
             preview.file_write(os.path.join(self.settings['AVATAR_PATH'], 'previews', filename), data)
             res['status'] = 'ok'
             res['file'] = {
-                'url': '/thumbs/previews/%s' % filename,
+                'url': '/api/images/previews/%s' % filename,
                 'filename': filename,
                 'mime': mimetype,
                 'size': size
             }
             
         return res
+
+
+@view_config(route_name='api_images', renderer='json')
+class ImageApi(ApiView):
+    ANONYMONUS = {
+        'users': os.path.normpath(os.path.join(os.path.dirname(__file__),'..','static','img','anonymous.png')),
+        'previews': os.path.normpath(os.path.join(os.path.dirname(__file__),'..','static','img','anonymous.png')),
+        'teams': os.path.normpath(os.path.join(os.path.dirname(__file__),'..','static','img','anonymous.png')),
+    }
+
+    def _file_read(self, path):
+        if os.path.exists(path):
+            try:
+                f = open(path)
+                data = f.read()
+                f.close()
+                return data
+            except IOError as e:
+                LOG(e)
+        return None
+
+    def _response(self, data):
+        response = Response(data)
+        response.headers['Content-Type'] = 'image/png'
+        return response
+
+    def get(self):
+        type_ = self.request.matchdict.get('type')
+        id_ = self.request.matchdict.get('id')
+        if type_ not in ('previews', 'teams', 'users'):
+            raise HTTPNotFound()
+
+        path = os.path.join(self.settings['AVATAR_PATH'], type_, id_)
+        data = self._file_read(path)
+        if data is None:
+            path = self.ANONYMONUS[type_]
+            data = self._file_read(path)
+        return self._response(data)

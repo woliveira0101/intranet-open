@@ -18,7 +18,7 @@
 		</ul>
 	</div>
 	<div ng-app="teams">
-		<ng-include src="'/static/partials/teams.html'"></ng-include>
+		{{ template | safe }}
 	</div>
 </div>
 {% endblock %}

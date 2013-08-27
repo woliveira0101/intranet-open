@@ -14,7 +14,7 @@ class Team(Base):
 
     @property
     def avatar_url(self):
-        return '/thumbs/team/%s' % self.id
+        return '/api/images/teams/%s' % self.id
 
     @property
     def users(self):
