@@ -83,7 +83,7 @@ github_converter = Converter(
 
 
 def _fetcher_function(resolved, single):
-    #@cached_bug_fetcher(lambda: u'resolved-%s-single-%s' % (resolved, single))
+    @cached_bug_fetcher(lambda: u'resolved-%s-single-%s' % (resolved, single))
     def fetcher(self):
         if resolved:
             # Github doesn't have open resolved
