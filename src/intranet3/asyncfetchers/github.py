@@ -1,6 +1,7 @@
 # coding: utf-8
 import json
 import re
+
 from intranet3.asyncfetchers import base
 from intranet3.helpers import Converter, serialize_url
 from dateutil.parser import parse
@@ -12,12 +13,12 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 
 
 class GithubBug(base.Bug):
-    _project_name = None
-    _component_name = None
-    _severity = None
-    url = None
-
     def __init__(self, *args, **kwargs):
+        self._project_name = None
+        self._component_name = None
+        self._severity = None
+        self.url = None
+
         if 'url' in kwargs:
             self.url = kwargs['url']
             del kwargs['url']
@@ -64,7 +65,7 @@ github_converter = Converter(
     id='number',
     desc='title',
     reporter=lambda d: d['user']['login'],
-    owner=lambda d: d['assignee']['login'],
+    owner=lambda d:  d['assignee']['login'] if d['assignee'] else '',
     priority=lambda d: '',
     severity=lambda d: d['labels'],
     status=lambda d: 'assigned',
@@ -87,10 +88,12 @@ def _fetcher_function(resolved, single):
             # Github doesn't have open resolved
             self.success()
             return
+        
+        params = self.common_url_params()
+        extra = self.single_user_params() if single else self.all_users_params()
+        params.update(extra)
 
-        params = self.common_url_params() if single else self.all_users_params()
         url = serialize_url(self.tracker.url + 'issues?', **params)
-
         self.fetch(url)
     return fetcher
 
@@ -102,6 +105,7 @@ def _query_fetcher_function(resolved):
             # bitbucked doesn't have resolved not-closed
             self.success()
             return
+  
         params = self.common_url_params()
         if ticket_ids:
             # query not supported by bitbucket - we will do it manually later
@@ -110,9 +114,8 @@ def _query_fetcher_function(resolved):
             if project_selector and component_selector:
                 uri = self.tracker.url + "repos/%s/%s/issues?" % (project_selector, component_selector[0])
                 url = serialize_url(uri, **params)
-            else:
-                url = serialize_url(self.tracker.url + 'issues?', **params)
-        self.fetch(url)
+                self.fetch(url)
+
     return fetcher
 
 
@@ -124,10 +127,13 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
         converter = self.get_converter()
         json_data = json.loads(data)
         for bug_desc in json_data:
-            yield self.bug_class(
-                tracker=self.tracker,
-                **converter(bug_desc)
-            )
+            # Filter bugs
+            convertered_data = converter(bug_desc)
+            if convertered_data['owner'] in self.login_mapping.keys():
+                yield self.bug_class(
+                    tracker=self.tracker,
+                    **convertered_data
+                )
 
     def fetch(self, url):
         headers = self.get_headers()
