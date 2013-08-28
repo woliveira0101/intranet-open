@@ -24,8 +24,8 @@
         <li class="nav-one active"><a href="#report">{% trans %}Time entries{% endtrans %}</a></li>
         <li class="nav-two"><a href="#participation-of-workers">{% trans %}Breakdown by person{% endtrans %}</a></li>
     </ul>
-    <div class="list-wrap">
-        <ul id="report"><li>
+    <div class="list-wrap tab-content">
+        <ul class="tab-pane active" id="report"><li>
             {% if rows %}
                 <table class="table table-bordered table-hover project_times">
                     <thead>
@@ -82,7 +82,7 @@
                 <b>{% trans %}No results{% endtrans %}</b>
             {% endif %}
         </li></ul>
-        <ul id="participation-of-workers" class="hide"><li>
+        <ul class="tab-pane" id="participation-of-workers" class="hide"><li>
             <table class="participation-of-workers table table-bordered table-hover">
                 <thead>
                 <tr>
@@ -120,8 +120,10 @@
     </div>
 </div>
 <script type="text/javascript">
+    $('.nav-tabs a').click(function (e) {
+        $(this).tab("show");
+    })
     $(function(){
-        $("#results-tabs").organicTabs();
         $('tr.clickable').click(function(){
             var $clicked_row = $(this);
             var $rows = $('.'+this.id);
