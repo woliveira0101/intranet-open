@@ -63,6 +63,7 @@ class GithubBug(base.Bug):
 
 github_converter = Converter(
     id='number',
+    number='id',
     desc='title',
     reporter=lambda d: d['user']['login'],
     owner=lambda d:  d['assignee']['login'] if d['assignee'] else '',
@@ -82,7 +83,7 @@ github_converter = Converter(
 
 
 def _fetcher_function(resolved, single):
-    @cached_bug_fetcher(lambda: u'resolved-%s-single-%s' % (resolved, single))
+    #@cached_bug_fetcher(lambda: u'resolved-%s-single-%s' % (resolved, single))
     def fetcher(self):
         if resolved:
             # Github doesn't have open resolved
@@ -96,7 +97,6 @@ def _fetcher_function(resolved, single):
         url = serialize_url(self.tracker.url + 'issues?', **params)
         self.fetch(url)
     return fetcher
-
 
 def _query_fetcher_function(resolved):
     def fetcher(self, ticket_ids, project_selector, component_selector,
@@ -126,6 +126,7 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
     def parse(self, data):
         converter = self.get_converter()
         json_data = json.loads(data)
+
         for bug_desc in json_data:
             # Filter bugs
             convertered_data = converter(bug_desc)
@@ -134,6 +135,7 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
                     tracker=self.tracker,
                     **convertered_data
                 )
+
 
     def fetch(self, url):
         headers = self.get_headers()
@@ -152,7 +154,7 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
 
     def all_users_params(self):
         return dict(
-            filter='subscribed'
+            filter='all'
         )
 
     fetch_user_tickets = _fetcher_function(resolved=False, single=True)
@@ -171,7 +173,8 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             for bug in self.parse(data):
                 if has_wanted and bug.id not in self.wanted_ticket_ids:
                     continue # manually skip unwanted tickets
-                self.bugs[bug.id] = bug
+
+                self.bugs[bug.number] = bug
         except BaseException as e:
             EXCEPTION(u"Could not parse tracker response")
             self.fail(e)
