@@ -141,3 +141,36 @@ App.controller('teamCtrl', function($scope, $http, $timeout, dialog, $callerScop
   return false;
 
 });
+
+App.controller('teamSprintCtrl', function($scope, $http){
+  $scope.teams = [];
+  $scope.users = [];
+  $scope.isReady = false;
+  $scope.disableButton = false;
+  
+  $scope.getTeams = function(){
+
+    $http.get('/api/users').success(function(data){
+        $scope.users = data;
+
+        $http.get('/api/teams').success(function(data){
+          $scope.teams = data;
+          _.each($scope.teams, function(team){
+            team.users = _.filter($scope.users, function(user){
+              return team.users.indexOf(user.id) !== -1;
+            });
+          });
+        });
+
+        $scope.isReady = true;
+    });
+  };
+
+  $scope.chooseTeam = function(team_id){
+    console.log('chooseTeam' + team_id);
+    $scope.disableButton = true;
+    var team = _.find($scope.teams, function(team){ return team.id == team_id;});
+    team.dirty = true;
+  };
+
+});

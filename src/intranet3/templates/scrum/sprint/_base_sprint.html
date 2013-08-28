@@ -43,6 +43,11 @@
     {% else %}
         <li><a href="{{ request.url_for('/scrum/sprint/show', sprint_id=sprint.id) }}">{% trans %}Tasks{% endtrans %}</a></li>
     {% endif %}
+    {% if page == 'team' %}
+        <li class="active"><a>{% trans %}Team{% endtrans %}</a></li>
+    {% else %}
+        <li><a href="{{ request.url_for('/scrum/sprint/team', sprint_id=sprint.id) }}">{% trans %}Team{% endtrans %}</a></li>
+    {% endif %}
     {% if page == 'board' %}
         <li class="btn_fullscreen">
             <div class="btn go_fullscreen">Fullscreen</div>

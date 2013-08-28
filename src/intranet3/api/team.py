@@ -119,4 +119,3 @@ class Users(ApiView):
                           .order_by(User.name)
                           
         return [{'id': u.id, 'name': u.name, 'img': u.avatar_url} for u in users];
-

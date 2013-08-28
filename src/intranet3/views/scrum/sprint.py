@@ -347,3 +347,18 @@ class Delete(BaseView):
             back_url=self.request.url_for('/scrum/sprint/list'),
             form=form
         )
+
+@view_config(route_name='scrum_sprint_team', permission='scrum')
+class Team(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
+    def get(self):
+        sprint = self.v['sprint']
+        bugs = self._fetch_bugs(sprint)
+        sw = SprintWrapper(sprint, bugs, self.request)
+
+        template = self.get_raw_template('scrum/team_list.html')
+
+        return dict(
+            sprint=sprint,
+            info=sw.get_info(),
+            template=template,
+        )

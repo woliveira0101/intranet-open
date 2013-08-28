@@ -33,6 +33,7 @@ class Sprint(Base):
 
     retrospective_note = Column(Text, nullable=False, default='')
 
+    team_id = Column(Integer, ForeignKey('teams.id'), nullable=True, index=True)
 
     @property
     def velocity(self):

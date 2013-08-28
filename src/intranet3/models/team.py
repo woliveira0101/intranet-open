@@ -3,7 +3,7 @@ from sqlalchemy import Column, ForeignKey, orm
 from sqlalchemy.types import Integer, String
 from sqlalchemy.schema import UniqueConstraint
 
-from intranet3.models import Base, User
+from intranet3.models import Base
 
 class Team(Base):
     __tablename__ = 'teams'
