@@ -22,3 +22,6 @@ twistd.pid
 *.DS_Store
 
 venv
+node_modules
+bower_components
+js/build
