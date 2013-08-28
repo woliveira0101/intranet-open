@@ -88,7 +88,7 @@ def _fetcher_function(resolved, single):
             # Github doesn't have open resolved
             self.success()
             return
-        
+
         params = self.common_url_params()
         extra = self.single_user_params() if single else self.all_users_params()
         params.update(extra)
@@ -114,8 +114,8 @@ def _query_fetcher_function(resolved):
             if project_selector and component_selector:
                 uri = self.tracker.url + "repos/%s/%s/issues?" % (project_selector, component_selector[0])
                 url = serialize_url(uri, **params)
-                self.fetch(url)
-
+        
+        self.fetch(url)
     return fetcher
 
 
