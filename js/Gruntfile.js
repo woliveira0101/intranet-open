@@ -49,7 +49,7 @@ module.exports = function(grunt) {
         options: {
           compile: true
         },
-        src: FILES['APP_LESS'],
+        src: FILES['VENDOR_CSS'].concat(FILES['APP_LESS']),
         dest: FILES['STATIC'] + '/css/app.css'
       },
       // recess:compress minifies the resulting css, too - production
@@ -58,7 +58,7 @@ module.exports = function(grunt) {
           compile: true,
           compress: true
         },
-        src: FILES['APP_LESS'],
+        src: FILES['VENDOR_CSS'].concat(FILES['APP_LESS']),
         dest: FILES['STATIC'] + '/css/app.css'
       }
     },

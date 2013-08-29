@@ -22,6 +22,9 @@ module.exports = {
   VENDOR_LESS: [
     'bower_components/bootstrap/less/bootstrap.less'
   ],
+  VENDOR_CSS: [
+    'assets/css/**/*.css'
+  ],
    // Our things
   APP_JS: [
     'assets/js/src/**/*.js',
