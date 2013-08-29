@@ -15,7 +15,7 @@
                 <div class="team thumbnail">
                     {% for m in sprint.team.team_members %}
                     <div class="user">
-                        <img src="{{ m.user.avatar_url }}">{{ m.user.name}}
+                        <img src="{{ m.user.avatar_url }}"><a href="{{ request.url_for('/user/view') }}?user_id={{ m.user.id }}">{{ m.user.name}}</a>
                     </div>
                     {% endfor %}
                 </div>
