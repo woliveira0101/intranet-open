@@ -2,24 +2,25 @@
 
 {% set page = 'team' %}
 
-{% block head_script %}
-    <script src="{{ request.static_path('intranet3:static/js/vendor/jquery.form.min.js') }}"></script>
-    <script src="{{ request.static_path('intranet3:static/js/vendor/angular.min.js') }}"></script>
-    <script src="{{ request.static_path('intranet3:static/js/vendor/angular-dragdrop.js') }}"></script>
-    <script src="{{ request.static_path('intranet3:static/js/vendor/ui-bootstrap-0.5.0.min.js') }}"></script>
-    <script src="{{ request.static_path('intranet3:static/js/vendor/ui-bootstrap-tpls-0.5.0.min.js') }}"></script>
-    <script src="{{ request.static_path('intranet3:static/js/teams.js') }}"></script>
-    <script src="{{ request.static_path('intranet3:static/js/upload.js') }}"></script>
-{% endblock %}
-
 {% block body %}
-<div class="row-fluid" ng-app="teams" ng-controller="teamSprintCtrl">
-    {% if not sprint.team_id %}
-    <div class="float_left" style="margin-right: 20px;">
-        <button class="btn btn-primary" ng-model="assign_team" ng-click="getTeams()">{% trans %}Assign team to sprint{% endtrans %}</button>
-    </div>
-    <div class="float_left">
-    {{ template | safe }}
+<div class="row-fluid">
+    {% if sprint.team_id %}
+    <div id="selectTeam" class="float_left">
+        <h2>{{ sprint.team.name }}</h2>
+        <div class="icon_team">
+            <img src="{{ sprint.team.avatar_url }}">
+        </div>
+        <div class="team-box">
+            <div class="desc_team">
+                <div class="team thumbnail">
+                    {% for m in sprint.team.team_members %}
+                    <div class="user">
+                        <img src="{{ m.user.avatar_url }}">{{ m.user.name}}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+         </div>
     </div>
     {% endif %}
 </div>

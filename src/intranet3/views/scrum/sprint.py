@@ -284,6 +284,7 @@ class Edit(BaseView):
             sprint.name = form.name.data
             sprint.client_id = project.client_id
             sprint.project_id = project.id
+            sprint.team_id=form.team_id.data
             sprint.bugs_project_ids = map(int, form.bugs_project_ids.data)
             sprint.start = form.start.data
             sprint.end = form.end.data
@@ -310,6 +311,7 @@ class Add(BaseView):
                 name=form.name.data,
                 client_id=project.client_id,
                 project_id=project.id,
+                team_id=form.team_id.data,
                 bugs_project_ids = map(int, form.bugs_project_ids.data),
                 start=form.start.data,
                 end=form.end.data,
@@ -355,10 +357,9 @@ class Team(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         bugs = self._fetch_bugs(sprint)
         sw = SprintWrapper(sprint, bugs, self.request)
 
-        template = self.get_raw_template('scrum/team_list.html')
 
         return dict(
             sprint=sprint,
             info=sw.get_info(),
-            template=template,
+
         )

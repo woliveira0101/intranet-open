@@ -1,7 +1,7 @@
 import datetime
 
 from sqlalchemy.types import String, Integer, Date, DateTime, Text, Float
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, orm
 from sqlalchemy.dialects import postgresql
 
 from intranet3.models import Base
@@ -34,6 +34,7 @@ class Sprint(Base):
     retrospective_note = Column(Text, nullable=False, default='')
 
     team_id = Column(Integer, ForeignKey('teams.id'), nullable=True, index=True)
+    team = orm.relationship('Team', backref='Sprint')
 
     @property
     def velocity(self):
