@@ -23,11 +23,11 @@ module.exports = function(grunt) {
           separator: '\n;\n'
         },
         src: FILES['VENDOR_JS'],
-        dest: 'build/static/js/vendor.js'
+        dest: FILES['STATIC'] + '/js/vendor.js'
       },
       app_js: {
         src: FILES['APP_JS'],
-        dest: 'build/static/js/app.js'
+        dest: FILES['STATIC'] + '/js/app.js'
       }
     },
     uglify: {
@@ -36,12 +36,12 @@ module.exports = function(grunt) {
       },
       vendor: {
         src: FILES['VENDOR_JS'],
-        dest: 'build/static/js/vendor.js'
+        dest: FILES['STATIC'] + '/js/vendor.js'
       },
       app: {
         // we have to run ngmin first
         src: FILES['NGMINNED_APP'],
-        dest: 'build/static/js/app.js'
+        dest: FILES['STATIC'] + '/js/app.js'
       }
     },
     recess: {
@@ -49,9 +49,8 @@ module.exports = function(grunt) {
         options: {
           compile: true
         },
-        files: {
-          'build/static/css/app.css': FILES['APP_LESS']
-        }
+        src: FILES['APP_LESS'],
+        dest: FILES['STATIC'] + '/css/app.css'
       },
       // recess:compress minifies the resulting css, too - production
       compress: {
@@ -59,9 +58,8 @@ module.exports = function(grunt) {
           compile: true,
           compress: true
         },
-        files: {
-          'build/static/css/app.css': FILES['APP_LESS']
-        }
+        src: FILES['APP_LESS'],
+        dest: FILES['STATIC'] + '/css/app.css'
       }
     },
     watch: {

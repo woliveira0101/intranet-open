@@ -24,4 +24,5 @@ twistd.pid
 venv
 node_modules
 bower_components
-js/build
+src/intranet3/static/css
+src/intranet3/static/js

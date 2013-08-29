@@ -11,7 +11,8 @@ var BOWER_JS = [
   'bower_components/spectrum/spectrum.js'
 ];
 
-var PARTIALS = 'build/static/js/partials.js';
+var STATIC = '../src/intranet3/static/';
+var PARTIALS = STATIC + '/js/partials.js';
 
 module.exports = {
    // Other vendors
@@ -30,5 +31,6 @@ module.exports = {
     'assets/less/*.less'
   ],
   NGMINNED_APP: 'build/ngminned/app.js',
-  PARTIALS: PARTIALS
+  PARTIALS: PARTIALS,
+  STATIC: STATIC
 };
