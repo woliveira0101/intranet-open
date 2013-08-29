@@ -19,8 +19,6 @@
 {% endblock body %}
 
 {% block tail_script %}
-<script type="text/javascript" src="{{ request.static_path('intranet3:static/js/vendor/jquery.flot.min.js') }}"></script>
-<script type="text/javascript" src="{{ request.static_path('intranet3:static/js/sprint.js') }}"></script>
 <script type="text/javascript">
     $(function(){
         var BUGS_DATA = {{ charts_data | safe }};

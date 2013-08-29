@@ -9,7 +9,18 @@ module.exports = function(grunt) {
       options: {
         force: true
       },
-      src: ['build/*']
+      src: [
+        FILES['STATIC'] + 'js',
+        FILES['STATIC'] + 'css'
+      ]
+    },
+    copy: {
+      jquery_ui: {
+          expand: true,
+          cwd: FILES['JQUERY_UI'],
+          src: '**',
+          dest: FILES['STATIC'] + 'css/images'
+      }
     },
     ngmin: {
       app: {
@@ -73,8 +84,9 @@ module.exports = function(grunt) {
       }
     },
     ngtemplates: {
-      myapp: {
+      intranet: {
          options:    {
+           base: 'assets/partials',
            htmlmin: {}
          },
          src: 'assets/partials/*.html',
@@ -95,7 +107,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-angular-templates');
 
   // Default task(s).
-  grunt.registerTask('dev', ['clean', 'ngtemplates', 'concat', 'recess:concat', 'watch']);
-  grunt.registerTask('prod', ['clean', 'ngtemplates', 'ngmin', 'recess:compress', 'uglify']);
+  grunt.registerTask('dev', ['clean', 'ngtemplates', 'concat', 'recess:concat', 'copy:jquery_ui', 'watch']);
+  grunt.registerTask('prod', ['clean', 'ngtemplates', 'ngmin', 'recess:compress', 'copy:jquery_ui', 'uglify']);
 
 };

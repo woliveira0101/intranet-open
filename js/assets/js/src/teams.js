@@ -1,4 +1,4 @@
-var App = angular.module('teams', ['ngDragDrop', 'ui.bootstrap']);
+var App = angular.module('intranet', ['ngDragDrop', 'ui.bootstrap']);
 $.fn.hasScrollBar = function() {
   return this.get(0).scrollHeight > this.height();
 };
@@ -51,7 +51,7 @@ App.controller('oneCtrl', function($scope, $http, $dialog) {
             team: function() {return team}
           }
         });
-      d.open('/static/partials/team.html', 'teamCtrl');
+      d.open('team.html', 'teamCtrl');
 
   };
 
