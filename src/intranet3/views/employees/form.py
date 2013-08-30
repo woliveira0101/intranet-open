@@ -209,12 +209,12 @@ ${name}""", **kwargs)
         kwargs.pop('self')
         body = body(**kwargs)
         return EmailSender.send(
-            config['MANAGER_EMAIL'],
+            config['ACCOUNTANT_EMAIL'],
             topic,
             body,
             cc=self.request.user.email,
             sender_name=self.request.user.name,
-            replay_to=','.join([self.request.user.email, config['ACCOUNTANT_EMAIL']]),
+            replay_to=','.join([self.request.user.email]),
         )
 
     def dispatch(self):

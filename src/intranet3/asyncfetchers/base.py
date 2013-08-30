@@ -31,9 +31,11 @@ class Bug(object):
                  tracker, id, desc, reporter, owner, priority, severity,
                  status, resolution, project_name, component_name, deadline,
                  opendate, changeddate,
-                 dependson=_marker, blocked=_marker, whiteboard='', version=''):
+                 dependson=_marker, blocked=_marker, whiteboard='', version='',
+                 number=None):
         self.time = 0.0
         self.tracker = tracker
+        self.number = number  # Unique number for github
         self.id = str(id)
         self.desc = desc
         self.reporter = reporter

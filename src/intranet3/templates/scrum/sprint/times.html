@@ -2,10 +2,6 @@
 
 {% set page = 'times' %}
 
-{% block head_script %}
-    <script src="{{ request.static_path('intranet3:static/js/vendor/organictabs.js') }}"></script>
-{% endblock %}
-
 {% block body %}
     <div class="tickets_report sprint">
         <form action="{{ request.url_for('/scrum/sprint/times') }}" method="GET" accept-charset="utf-8">

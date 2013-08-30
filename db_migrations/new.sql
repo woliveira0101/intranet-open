@@ -31,3 +31,12 @@ ALTER TABLE sprint ALTER COLUMN bugs_project_ids TYPE INTEGER[] USING array[proj
 -- add team_id
 ALTER TABLE sprint ADD COLUMN team_id INTEGER;
 -- add team_id
+
+-- add github to tracker.type
+BEGIN;
+ALTER type tracker_type_enum RENAME to old__tracker_type_enum;
+CREATE type tracker_type_enum as enum ('bugzilla', 'trac', 'cookie_trac', 'igozilla', 'bitbucket', 'rockzilla', 'pivotaltracker', 'harvest', 'unfuddle', 'github');
+ALTER TABLE tracker ALTER COLUMN type TYPE tracker_type_enum USING type::text::tracker_type_enum;
+DROP type old__tracker_type_enum;
+COMMIT;
+-- add github to tracker.type
