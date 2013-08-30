@@ -1,4 +1,4 @@
-(function(){
+$(document).ready(function(){
     (function(){
         // when user choose Edition1 project, we show him checbox button to add times to harvest application.
         var $project_id = $('#project_id');
@@ -53,4 +53,4 @@
             }
         })
     })();
-})();
+});
