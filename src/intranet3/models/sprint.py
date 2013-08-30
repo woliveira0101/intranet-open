@@ -34,7 +34,7 @@ class Sprint(Base):
     retrospective_note = Column(Text, nullable=False, default='')
 
     team_id = Column(Integer, ForeignKey('teams.id'), nullable=True, index=True)
-    team = orm.relationship('Team', backref='Sprint')
+    team = orm.relationship('Team')
 
     @property
     def velocity(self):
