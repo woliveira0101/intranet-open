@@ -18,6 +18,7 @@ TRACKER_TYPES["rockzilla"] = u"SteepRockZilla"
 TRACKER_TYPES["pivotaltracker"] = u"PivotalTracker"
 TRACKER_TYPES["harvest"] = u"Harvest"
 TRACKER_TYPES["unfuddle"] = u"Unfuddle"
+TRACKER_TYPES["github"] = u"Github"
 
 trackers_login_validators = {
     'all': {

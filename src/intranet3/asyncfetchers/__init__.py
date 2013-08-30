@@ -7,6 +7,7 @@ from intranet3.asyncfetchers.rockzilla import RockzillaFetcher
 from intranet3.asyncfetchers.pivotaltracker import PivotalTrackerFetcher
 from intranet3.asyncfetchers.fake import FakeFetcher
 from intranet3.asyncfetchers.unfuddle import UnfuddleFetcher
+from intranet3.asyncfetchers.github import GithubFetcher
 
 FETCHERS = {
     'bugzilla': BugzillaFetcher,
@@ -18,6 +19,7 @@ FETCHERS = {
     'pivotaltracker': PivotalTrackerFetcher,
     'harvest': FakeFetcher,
     'unfuddle': UnfuddleFetcher,
+    'github': GithubFetcher,
 }
 
 def get_fetcher(tracker, credentials, login_mapping):
