@@ -1,8 +1,10 @@
 import wtforms as wtf
 from wtforms import validators
 from wtforms.widgets.core import html_params, HTMLString, text_type, escape
+
 from pyramid.i18n import TranslationStringFactory
-from intranet3.models import Project, Sprint
+
+from intranet3.models import DBSession, Project, Sprint, Team
 
 from intranet3.forms.project import ScrumProjectChoices, ScrumBugsProjectChoices
 
@@ -19,6 +21,7 @@ class SprintProjectsWidget(wtf.widgets.Select):
         options['data-tracker_id'] = tracker_id
         return HTMLString('<option %s>%s</option>' % (html_params(**options), escape(text_type(label))))
 
+
 class SprintProjectsField(wtf.SelectMultipleField):
     widget = SprintProjectsWidget(multiple=True)
 
@@ -34,6 +37,7 @@ class SprintProjectsField(wtf.SelectMultipleField):
                 if d not in values:
                     raise ValueError(self.gettext("'%(value)s' is not a valid choice for this field") % dict(value=d))
 
+
 class SprintListFilterForm(wtf.Form):
     project_id = wtf.SelectField(_(u'Project'), validators=[])
     limit = wtf.IntegerField(_(u'Limit'), default=10)
@@ -48,13 +52,19 @@ class SprintListFilterForm(wtf.Form):
         )
 
 
+class TeamChoices(object):
+
+    def __iter__(self):
+        teams = DBSession.query(Team.id, Team.name).order_by(Team.name)
+        for team in teams:
+            yield str(team.id), team.name
+
 class SprintForm(wtf.Form):
     name = wtf.TextField(_(u"Sprint name"), validators=[validators.Required()])
     bugs_project_ids = SprintProjectsField(_(u"Bugs projects"), choices=ScrumBugsProjectChoices(skip_inactive=True), validators=[validators.Required()])
     project_id = wtf.SelectField(_(u"Project"), choices=ScrumProjectChoices(skip_inactive=True), validators=[validators.Required()])
+    team_id = wtf.SelectField(_(u"Team"), choices=TeamChoices(), validators=[validators.Required()])
     start  = wtf.DateField(_(u"Start date"), format='%d/%m/%Y', validators=[])
     end  = wtf.DateField(_(u"End date"), format='%d/%m/%Y', validators=[])
     goal = wtf.TextAreaField(_(u'Goal'), validators=[])
     retrospective_note = wtf.TextAreaField(_(u'Retrospective note'), validators=[])
-
-

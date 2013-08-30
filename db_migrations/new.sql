@@ -27,3 +27,7 @@ FROM sprint s2;
 
 ALTER TABLE sprint ALTER COLUMN bugs_project_ids TYPE INTEGER[] USING array[project_id]::INTEGER[];
 -- add bugs_project_ids
+
+-- add team_id
+ALTER TABLE sprint ADD COLUMN team_id INTEGER;
+-- add team_id

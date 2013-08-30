@@ -8,6 +8,7 @@
         {{ csrf_field }}
         {{ form_field(form.name, _('Name')) }}
         {{ form_field(form.project_id, _('Project')) }}
+        {{ form_field(form.team_id, _('Team')) }}
         {{ form_field(form.bugs_project_ids, _('Bugs projects'), size='10') }}
         {{ form_field(form.start, _('Start date'), class='datepicker') }}
         {{ form_field(form.end, _('End date'), class='datepicker') }}

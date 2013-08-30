@@ -3,7 +3,7 @@ from sqlalchemy import Column, ForeignKey, orm
 from sqlalchemy.types import Integer, String
 from sqlalchemy.schema import UniqueConstraint
 
-from intranet3.models import Base, User
+from intranet3.models import Base
 
 class Team(Base):
     __tablename__ = 'teams'
@@ -37,5 +37,6 @@ class TeamMember(Base):
     id = Column(Integer, nullable=False, index=True, primary_key=True)
     team_id = Column(Integer, ForeignKey('teams.id'), nullable=False, index=True)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False, index=True)
+    user = orm.relationship('User')
     
     __table_args__ = (UniqueConstraint('team_id', 'user_id', name='team_members_team_id_user_id_unique'), {})

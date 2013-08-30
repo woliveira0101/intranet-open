@@ -284,6 +284,7 @@ class Edit(BaseView):
             sprint.name = form.name.data
             sprint.client_id = project.client_id
             sprint.project_id = project.id
+            sprint.team_id=form.team_id.data
             sprint.bugs_project_ids = map(int, form.bugs_project_ids.data)
             sprint.start = form.start.data
             sprint.end = form.end.data
@@ -310,6 +311,7 @@ class Add(BaseView):
                 name=form.name.data,
                 client_id=project.client_id,
                 project_id=project.id,
+                team_id=form.team_id.data,
                 bugs_project_ids = map(int, form.bugs_project_ids.data),
                 start=form.start.data,
                 end=form.end.data,
@@ -346,4 +348,18 @@ class Delete(BaseView):
             url=self.request.url_for('/scrum/sprint/delete', sprint_id=sprint.id),
             back_url=self.request.url_for('/scrum/sprint/list'),
             form=form
+        )
+
+@view_config(route_name='scrum_sprint_team', permission='scrum')
+class Team(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
+    def get(self):
+        sprint = self.v['sprint']
+        bugs = self._fetch_bugs(sprint)
+        sw = SprintWrapper(sprint, bugs, self.request)
+
+
+        return dict(
+            sprint=sprint,
+            info=sw.get_info(),
+
         )

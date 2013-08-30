@@ -1,0 +1,27 @@
+{% extends "templates/scrum/sprint/_base_sprint.html" %}
+
+{% set page = 'team' %}
+
+{% block body %}
+<div class="row-fluid">
+    {% if sprint.team_id %}
+    <div id="selectTeam" class="float_left">
+        <h2>{{ sprint.team.name }}</h2>
+        <div class="icon_team">
+            <img src="{{ sprint.team.avatar_url }}">
+        </div>
+        <div class="team-box">
+            <div class="desc_team">
+                <div class="team thumbnail">
+                    {% for m in sprint.team.team_members %}
+                    <div class="user">
+                        <img src="{{ m.user.avatar_url }}"><a href="{{ request.url_for('/user/view') }}?user_id={{ m.user.id }}">{{ m.user.name}}</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+         </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
