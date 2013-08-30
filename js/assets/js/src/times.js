@@ -18,6 +18,7 @@ $(document).ready(function(){
         });
     })();
     (function(){
+        if( typeof types === 'undefined') return;
         // add select tag Ticket type for predefined ticket ids like M0, M1, M2 etc.
         var $ticket_desc = $('#description');
         var $ticket_type = $('#ticket-type');
