@@ -100,7 +100,7 @@ class Project(Base):
         """
         ticket_ids = [
             int(v.strip()) for v in self.ticket_id_selector.split(',')
-        ] if self.ticket_id_selector else None
+        ] if self.ticket_id_selector else []
 
         components = [
             v.strip() for v in self.component_selector.split(',')
