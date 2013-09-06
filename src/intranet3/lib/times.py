@@ -109,21 +109,21 @@ class TimesReportMixin(object):
         elif ticket_choice == 'meetings_only':
             meeting_ids = [t['value'] for t in TimeEntryForm.PREDEFINED_TICKET_IDS]
             uber_query = uber_query.filter(TimeEntry.ticket_id.in_(meeting_ids))
-        '''
-        elif ticket_choice == 'all':
-            if bugs:
-                or_list = []
-                for bug in bugs:
-                    or_list.append(
-                        and_(
-                            TimeEntry.ticket_id==bug.id,
-                            TimeEntry.project_id==bug.project.id
-                        )
-                    )
-                uber_query = uber_query.filter(or_(*or_list))
-            else:
-                uber_query = uber_query.filter(TimeEntry.ticket_id.in_([]))
-        '''
+
+        #elif ticket_choice == 'all':
+        #    if bugs:
+        #        or_list = []
+        #        for bug in bugs:
+        #            or_list.append(
+        #                and_(
+        #                    TimeEntry.ticket_id==bug.id,
+        #                    TimeEntry.project_id==bug.project.id
+        #                )
+        #            )
+        #        uber_query = uber_query.filter(or_(*or_list))
+        #    else:
+        #        uber_query = uber_query.filter(TimeEntry.ticket_id.in_([]))
+
         uber_query = uber_query.order_by(
             Client.name, Project.name, TimeEntry.ticket_id, User.name
         )

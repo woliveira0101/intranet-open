@@ -136,14 +136,16 @@ class SprintWrapper(object):
         return points
 
     def get_worked_hours(self):
-        bugs_ids = [(int(bug.project_id), bug.id) for bug in self.bugs]
-        if not self.bugs:
-            return [], 0
-        bug_ids_cond = or_(*[ and_(TimeEntry.project_id==p_id, TimeEntry.ticket_id==b_id)  for p_id, b_id in bugs_ids ])
+        # DEPRECIATED:
+        #bugs_ids = [(int(bug.project_id), bug.id) for bug in self.bugs]
+        #if not self.bugs:
+        #    return [], 0
+        #
+        #bug_ids_cond = or_(*[ and_(TimeEntry.project_id==p_id, TimeEntry.ticket_id==b_id)  for p_id, b_id in bugs_ids ])
 
         entries = self.session.query(User, func.sum(TimeEntry.time))\
                               .filter(TimeEntry.user_id==User.id)\
-                              .filter(bug_ids_cond)\
+                              .filter(TimeEntry.project_id==self.sprint.project_id) \
                               .filter(TimeEntry.added_ts>=self.sprint.start)\
                               .filter(TimeEntry.added_ts<=self.sprint.end)\
                               .filter(TimeEntry.deleted==False)\
