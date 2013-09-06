@@ -1,5 +1,5 @@
 #!/bin/bash
 find . -iname '*.orig' | xargs rm -v
 find . -iname '*.pyc' | xargs rm -v
-${buildout:bin-directory}/timeout.sh -t 2 -i 1 -d 1 ${buildout:bin-directory}/less-monitor -p2 -c -f -x -d src/intranet3/static/less -o ${watch_sh:relative_output_dir}
+cd js; ../bin/bower install; ../bin/grunt prod; cd ..;
 tar zcvf intranet3-`date +%Y%m%d_%H%M%S`.tar.gz src etc db_migrations bootstrap.py buildout.cfg deploy.cfg devel.cfg setup.py README.md
