@@ -1,6 +1,8 @@
 import datetime
 import calendar
 
+from netaddr import AddrFormatError, IPAddress, IPNetwork, IPRange
+
 from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden, HTTPNotFound
 
 from intranet3 import models
@@ -30,6 +32,33 @@ class View(object):
         self.v = {}
 
 
+def _check_ip(remote_addr, office_ip):
+    """
+    Checks if `remote_addr` belongs to `office_ip`
+
+        Keyword arguments:
+        remote_addr -- user IPAddress
+        office_ip -- office IPAddress or IPNetwork
+
+        `office_ip`:
+        127.0.0.1/26 -- IPNetwork
+        127.0.0.1-127.0.1.255 -- IPAddress range
+        127.0.0.1 -- IPAddress
+    """
+    try:
+        remote_addr = IPAddress(remote_addr)
+
+        if '-' in office_ip:
+            start, end = office_ip.split('-')
+            return remote_addr in IPRange(start, end)
+        elif '/' in office_ip:
+            return remote_addr in IPNetwork(office_ip)
+        else:
+            return remote_addr == IPAddress(office_ip)
+    except AddrFormatError:
+        return False
+
+
 class BaseView(View):
     def _note_presence(self):
         """
@@ -43,7 +72,7 @@ class BaseView(View):
             return
         current_ip = self.request.remote_addr
         for office_ip in office_ips:
-            if current_ip.startswith(office_ip):
+            if _check_ip(current_ip, office_ip):
                 presence = models.PresenceEntry(url=self.request.url, user_id=self.request.user.id)
                 self.session.add(presence)
                 LOG(u'Noticed presence of user %s (%s)' % (self.request.user.email, current_ip))
