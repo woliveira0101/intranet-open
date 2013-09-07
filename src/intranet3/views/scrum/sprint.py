@@ -284,7 +284,7 @@ class Edit(BaseView):
             sprint.name = form.name.data
             sprint.client_id = project.client_id
             sprint.project_id = project.id
-            sprint.team_id=form.team_id.data
+            sprint.team_id = form.team_id.data or None
             sprint.bugs_project_ids = map(int, form.bugs_project_ids.data)
             sprint.start = form.start.data
             sprint.end = form.end.data
@@ -311,7 +311,7 @@ class Add(BaseView):
                 name=form.name.data,
                 client_id=project.client_id,
                 project_id=project.id,
-                team_id=form.team_id.data,
+                team_id=form.team_id.data or None,
                 bugs_project_ids = map(int, form.bugs_project_ids.data),
                 start=form.start.data,
                 end=form.end.data,

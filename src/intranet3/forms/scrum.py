@@ -56,6 +56,7 @@ class TeamChoices(object):
 
     def __iter__(self):
         teams = DBSession.query(Team.id, Team.name).order_by(Team.name)
+        yield '', u'-- None --'
         for team in teams:
             yield str(team.id), team.name
 
@@ -63,7 +64,7 @@ class SprintForm(wtf.Form):
     name = wtf.TextField(_(u"Sprint name"), validators=[validators.Required()])
     bugs_project_ids = SprintProjectsField(_(u"Bugs projects"), choices=ScrumBugsProjectChoices(skip_inactive=True), validators=[validators.Required()])
     project_id = wtf.SelectField(_(u"Project"), choices=ScrumProjectChoices(skip_inactive=True), validators=[validators.Required()])
-    team_id = wtf.SelectField(_(u"Team"), choices=TeamChoices(), validators=[validators.Required()])
+    team_id = wtf.SelectField(_(u"Team"), choices=TeamChoices())
     start  = wtf.DateField(_(u"Start date"), format='%d/%m/%Y', validators=[])
     end  = wtf.DateField(_(u"End date"), format='%d/%m/%Y', validators=[])
     goal = wtf.TextAreaField(_(u'Goal'), validators=[])
