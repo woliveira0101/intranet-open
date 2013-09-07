@@ -3,10 +3,11 @@ $.fn.hasScrollBar = function() {
   return this.get(0).scrollHeight > this.height();
 };
 var resetScrolls = function(){
-  var teams = $('.team-box ul'),
-    users = $('.box-users ul');
-  var scrollTeams = teams.hasScrollBar(),
-    scrollUsers = users.hasScrollBar();
+  var teams = $('.team-box ul');
+  var users = $('.box-users ul');
+  var scrollTeams = teams.hasScrollBar();
+  var scrollUsers = users.hasScrollBar();
+
   if (scrollTeams) {
     teams.addClass('scroll');
   }
@@ -29,8 +30,8 @@ App.controller('oneCtrl', function($scope, $http, $dialog) {
             return team.users.indexOf(user.id) !== -1;
           });
         });
+        resetScrolls()
       });
-    resetScrolls()
   });
 
 
