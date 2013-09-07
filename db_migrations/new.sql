@@ -30,6 +30,7 @@ ALTER TABLE sprint ALTER COLUMN bugs_project_ids TYPE INTEGER[] USING array[proj
 
 -- add team_id
 ALTER TABLE sprint ADD COLUMN team_id INTEGER;
+ALTER TABLE sprint ADD CONSTRAINT sprint_team_id_fkey FOREIGN KEY (team_id) REFERENCES teams (id);
 -- add team_id
 
 -- add github to tracker.type
