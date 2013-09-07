@@ -68,6 +68,31 @@ def make_admin(config_path):
     session.add(user)
     transaction.commit()
 
+def migrate(config_path):
+    from intranet3 import config
+    import os
+    import re
+    new_dirs = ('users', 'teams', 'previews')
+    path = config['AVATAR_PATH']
+    images = os.listdir(path)
+    images = [image for image in images if image not in new_dirs]
+
+    for directory in new_dirs:
+        if not os.path.exists(os.path.join(path, directory)):
+            os.makedirs(os.path.join(path, directory))
+
+    for image in images:
+        image_path = os.path.join(path, image)
+        if image.startswith('temp_'):
+            print 'Deleting: %s' % image_path
+            os.remove(image_path)
+        else:
+            new_image = re.match('u(\d+)', image).groups()[0]
+            new_image_path = os.path.join(path, 'users', new_image)
+            print 'Moving: %s - > %s' % (image_path, new_image_path)
+            os.rename(image_path, new_image_path)
+
+
 def remove(config_path):
     from intranet3.models import *
     user_login = sys.argv[-1]
