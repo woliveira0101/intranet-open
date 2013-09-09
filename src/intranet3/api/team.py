@@ -118,4 +118,4 @@ class Users(ApiView):
                           .filter(User.freelancer==False)\
                           .order_by(User.name)
                           
-        return [{'id': u.id, 'name': u.name, 'img': u.avatar_url} for u in users];
+        return [{'id': u.id, 'name': u.name, 'img': u.avatar_url} for u in users]

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*
 import os
+import datetime
 import mimetypes
 import base64
 import urllib
@@ -67,7 +68,7 @@ class Preview(object):
             return False
         
         return True
-  
+
     
 @view_config(route_name='api_preview', renderer='json')
 class PreviewApi(ApiView):
@@ -84,12 +85,36 @@ class PreviewApi(ApiView):
             response = Response(data)
             response.headers['Content-Type'] = 'image/png'
             return response
-    
+
+    def gravatar(self):
+        random_str = 'teams'.join(choice(string.letters + string.digits) for i in xrange(10))
+        hash = md5(random_str).hexdigest()
+        params = urllib.urlencode({'s': '128', 'd': 'retro'}, doseq=True)
+        uri = 'http://www.gravatar.com/avatar/%s?%s'% (hash, params)
+
+        return urllib.urlopen(uri ).read()
+
     def get(self):
         filename = str(self.request.user.id)
         path_temp = os.path.join(self.settings['AVATAR_PATH'], 'previews', filename)
-        return self._response(open(path_temp, 'rb').read())
-    
+
+        # if there is no team's avatar, create gravatar:
+        data = None
+        is_file = os.path.isfile(path_temp)
+        if is_file:
+            modified = datetime.datetime.fromtimestamp(os.path.getmtime(path_temp))
+            modifed = (datetime.datetime.now() - modified).seconds
+
+            if modifed < 10:
+                data = open(path_temp, 'rb').read()
+
+        if not data:
+            data = self.gravatar()
+            Preview(self.request).file_write(path_temp, data)
+
+        return self._response(data)
+
+
     def post(self):
         preview = Preview(self.request)
         
@@ -138,14 +163,6 @@ class ImageApi(ApiView):
                 LOG(e)
         return None
 
-    def gravatar(self):
-        random_str = 'teams'.join(choice(string.letters + string.digits) for i in xrange(10))
-        hash = md5(random_str).hexdigest()
-        params = urllib.urlencode({'s': '128', 'd': 'retro'}, doseq=True)
-        uri = 'http://www.gravatar.com/avatar/%s?%s'% (hash, params)
-
-        return urllib.urlopen(uri ).read()
-
     def _response(self, data):
         response = Response(data)
         response.headers['Content-Type'] = 'image/png'
@@ -161,9 +178,6 @@ class ImageApi(ApiView):
         path = os.path.join(self.settings['AVATAR_PATH'], type_, id_)
         data = self._file_read(path)
         if data is None:
-            if type_ == "teams":
-                return self._response(self.gravatar())
-
             path = self.ANONYMONUS[type_]
             data = self._file_read(path)
         return self._response(data)

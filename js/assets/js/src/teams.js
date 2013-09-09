@@ -83,7 +83,7 @@ App.controller('oneCtrl', function($scope, $http, $dialog) {
 });
 
 App.controller('teamCtrl', function($scope, $http, $timeout, dialog, $callerScope, team) {
-  $scope.team = angular.copy(team || {users:[], name: '', img: '/api/images/teams/0'});
+  $scope.team = angular.copy(team || {users:[], name: '', img: '/api/preview?type=team'});
   $scope.swap_with_preivew = false;
 
   $scope.add = function(){
