@@ -8,7 +8,7 @@ from intranet3.lib.bugs import Bugs
 from intranet3.utils.views import ApiView
 
 
-@view_config(route_name='api_my_bugs', renderer='json', permission='client_or_freelancer')
+#@view_config(route_name='api_my_bugs', renderer='json', permission='client_or_freelancer')
 class BugsCollection(ApiView):
 
     def get(self):

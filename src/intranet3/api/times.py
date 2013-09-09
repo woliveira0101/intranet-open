@@ -19,7 +19,7 @@ from intranet3.views.times import GetTimeEntriesMixin
 from intranet3.schemas.times import AddEntrySchema, EditEntrySchema
 
 
-@view_config(route_name='api_time_collection', renderer='json', permission='freelancer')
+#@view_config(route_name='api_time_collection', renderer='json', permission='freelancer')
 class TimeCollection(GetTimeEntriesMixin, ApiView):
 
     def _entries_serializer(self, objs):
@@ -108,7 +108,7 @@ class TimeCollection(GetTimeEntriesMixin, ApiView):
         return HTTPCreated('OK')
 
 
-@view_config(route_name='api_time', renderer='json', permission='freelancer')
+#@view_config(route_name='api_time', renderer='json', permission='freelancer')
 class Time(ApiView):
 
     def protect(self):

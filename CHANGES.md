@@ -1,6 +1,24 @@
 New release
 ===========
 
+0.9.0 (09-09-2013)
+===============
+- support for multiproject sprints
+- add basic REST API (bugs and times endpoints disabled)
+- Grunt for assets controling
+- better IP control (now you can specify range like '192.168.1.1 - 192.168.1.120'
+- removed organic tabs
+- add basic teams feature 
+- add github connector
+- freelancer unification
+- now user in group scrum can add sprints
+- client's & project's active field 
+
+- fix for sprint points for pivotaltracker
+- client's backlog fix
+
+(')
+
 0.8.12 (12-08-2013)
 ===============
 - unfuddle connector enhancements and fixes
