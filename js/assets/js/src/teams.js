@@ -92,7 +92,7 @@ App.controller('teamCtrl', function($scope, $http, $timeout, dialog, $callerScop
 
     $http.post('/api/teams', {
       name: $scope.team.name,
-      swap_with_preview: $scope.swap_with_preivew
+      swap_with_preview: true
     }).success(function(data){
         $scope.team.id = data.id;
         $scope.team.img = data.img;
