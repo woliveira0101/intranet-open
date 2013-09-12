@@ -1,6 +1,10 @@
 New release
 ===========
 
+0.9.1 (12-09-2013)
+===============
+- better scrum board column mapping for pivotaltracker
+
 0.9.0 (09-09-2013)
 ===============
 - support for multiproject sprints
