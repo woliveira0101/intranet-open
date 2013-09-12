@@ -94,8 +94,10 @@ def initials(name, letters=1):
             first = name[0][0].upper()
             last = name[-1][:letters].capitalize()
             return '%s.%s' % (first, last)
-        else:
+        elif len(name) == 1:
             return name[0][:letters+1].capitalize()
+        else:
+            return ''
 
 
 def int_or_float(value):

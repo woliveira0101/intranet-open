@@ -263,7 +263,6 @@ class SelectorMapping(object):
                     self.by_component_version[(project_name, component_name, version)] = project.id
 
     def match(self, id_, project, component, version=None):
-        # import ipdb;ipdb.set_trace()                         # BREAK HERE
         if id_ in self.by_ticket_id:
             return self.by_ticket_id[id_]
 

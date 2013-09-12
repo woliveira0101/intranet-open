@@ -11,7 +11,7 @@ from intranet3 import memcache
 LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
 
-ISSUE_STATE_RESOLVED = ['delivered', 'finished', 'rejected']
+ISSUE_STATE_RESOLVED = ['finished']
 ISSUE_STATE_UNRESOLVED = ['started','unstarted','unscheduled', 'accepted']
 
 
@@ -31,8 +31,7 @@ class PivotalTrackerBug(Bug):
         return 'NEW'
 
     def is_unassigned(self):
-        result = (self.owner.name == '')
-        return result
+        return self.status in ('unstarted', 'rejected')
 
 
 pivotaltracker_converter = Converter(

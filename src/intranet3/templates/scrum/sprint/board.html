@@ -11,7 +11,7 @@
         {% if bug.blocked %}
             <i data-original-title="{{ ' '.join(bug.blocked.keys()) }}" class="icon-exclamation-sign icon-red"></i>
         {% endif %}
-        {% if not bug.is_unassigned() %}
+        {% if not bug.is_unassigned() and bug.owner.name %}
             <div class="assignee" data-original-title="{{ bug.owner.name }}">{{ bug.owner.name | initials(3) }}</div>
         {% endif %}
         <div class="desc_ticket">{{ bug.desc }}</div>

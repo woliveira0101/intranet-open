@@ -25,6 +25,8 @@ class BugUglyAdapter(object):
 
         if self._bug.project.client_id == 20:
             return self._bug.get_status() == 'VERIFIED' and self._bug.get_resolution() == 'DEPLOYED'
+        elif self._bug.project.tracker.type == 'pivotaltracker':
+            return self._bug.status in ('delivered', 'accepted')
         else:
             return self._bug.get_status() == 'CLOSED' or self._bug.get_status() == 'VERIFIED'
 
