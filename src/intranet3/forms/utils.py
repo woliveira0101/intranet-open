@@ -1,4 +1,5 @@
 import datetime
+import dateutil.parser as dparser
 
 import wtforms as wtf
 from wtforms import widgets
@@ -9,6 +10,18 @@ from intranet3.models import DBSession, User
 
 _ = TranslationStringFactory('intranet3')
 
+class TimeField(wtf.TextField):
+    """
+    TimeField, which stores a `datetime.time`.
+    """
+    def process_formdata(self, valuelist):
+        if valuelist:
+            date_str = ' '.join(valuelist)
+            try:
+                self.data = dparser.parse(date_str).time() #konwersja 12h -> 24h
+            except ValueError:
+                self.data = None
+                raise ValueError(self.gettext('Not a valid time value'))
 
 class StarredPasswordField(wtf.PasswordField):
 
