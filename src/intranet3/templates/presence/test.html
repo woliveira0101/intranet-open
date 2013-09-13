@@ -1,0 +1,27 @@
+    <div id='floatBox'>
+        <div id="floatDiv">
+                <table class="table table-bordered presence" id="late">
+                    <caption><span class="badge">Late today</span></caption>
+                    <thead>
+
+                        <tr>
+                            <th>{% trans %}User{% endtrans %}</th>
+                            <th>{% trans %}From{% endtrans %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_id, name, late_from in late %}
+                        <tr class="{% if user_id == request.user.id %}current_user {% endif %}">
+                            <td class="">
+                                <span class="name">{{ name }}</span>
+                            </td>
+                            <td>{{ late_from.strftime('%H:%M:%S') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+        </div>
+        <div id="floatBar">
+        <center><caption><span class="badge">Late today</span></caption></center>
+        </div>
+    </div>

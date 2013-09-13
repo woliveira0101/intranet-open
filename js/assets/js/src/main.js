@@ -1,5 +1,4 @@
 (function($){
-
     /**
      * Add method to format string
      */
@@ -137,6 +136,21 @@
 
     /* DOM ready */
     $(function(){
+
+
+        $.get('/presence/test').success(function(html){
+            $('#right_column_content').append(html);
+        });
+
+        $('#floatBar').live('click', function() {
+            if($('#floatDiv').css('display') == 'none') {
+                $('#floatDiv').fadeIn();
+            } else {
+                $('#floatDiv').fadeOut();
+            }
+        });
+
+
         $.tablesorter.addParser({
             // set a unique id
             id: 'priority',
@@ -631,6 +645,8 @@
             $this.hide();
         });
     });
+
+
 })(jQuery);
 
 // IH - intranet helpers

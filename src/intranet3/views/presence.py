@@ -99,6 +99,33 @@ class List(BaseView):
             justification=excuses.presence_status(date, self.request.user.id),
         )
 
+@view_config(route_name='presence_test')
+class Test(BaseView):
+    def get(self):
+        date = self.request.GET.get('date')
+        if date:
+            date = datetime.datetime.strptime(date, '%d.%m.%Y')
+        else:
+            date = datetime.date.today()
+        date = datetime.date(2013, 9, 9) # USUNĄĆ PO TESTACH NA SZTYWNO USTAWIONĄ DATĘ
+        start_date = datetime.datetime.combine(date, day_start)
+        end_date = datetime.datetime.combine(date, day_end)
+
+        late = self.session.query(User.id, User.name, Late.added_ts)\
+                            .filter(User.id==Late.user_id)\
+                            .filter(Late.added_ts>=start_date)\
+                            .filter(Late.added_ts<=end_date)\
+                            .group_by(User.id, User.name, Late.added_ts)\
+                            .order_by(User.name)
+
+        return dict(
+            date=date,
+            prev_date=h.previous_day(date),
+            next_date=h.next_day(date),
+            justification=excuses.presence_status(date, self.request.user.id),
+            late=((user_id, user_name, late_from) for (user_id, user_name, late_from) in late),
+        )
+
 
 @view_config(route_name='presence_full')
 class Full(BaseView):

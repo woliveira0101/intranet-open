@@ -12,49 +12,7 @@
             });
         });
     </script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
-    <script>
-        $(document).ready(function() {
-            $('#floatBar').click(function() {
-                if($('#floatDiv').css('display') == 'none') {
-                    $('#floatDiv').fadeIn();
-                } else {
-                    $('#floatDiv').fadeOut();
-                }
-            });
-        });
-    </script>
 
-
-    <style type="text/css">
-
-   #floatBar {
-        position: fixed;
-        bottom: 2%;
-        margin-top: 2%;
-        width: 10%;
-        height: 20px;
-        cursor: pointer;
-        right: 2%;
-        color: #000;
-    }
-
-   #floatDiv {
-        color: #000;
-        position:fixed;
-        margin-top: 5%;
-        bottom: 5%;
-       	overflow-y: auto;
-        overflow-x: hidden;
-        width: 10%;
-        right: 2%;
-        height: 20%;
-        display: None;
-        padding: 5px 5px 5px 5px;
-
-    }
-
-    </style>
 {% endblock %}
 
 {% block body %}
@@ -217,33 +175,5 @@
             </table>
         </div>
     </div>
-
-    <div id="floatDiv">
-            <table class="table table-bordered presence" id="late">
-                <caption><span class="badge">Late today</span></caption>
-                <thead>
-
-                    <tr>
-                        <th>{% trans %}User{% endtrans %}</th>
-                        <th>{% trans %}From{% endtrans %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user_id, name, late_from in late %}
-                    <tr class="{% if user_id == request.user.id %}current_user {% endif %}">
-                        <td class="">
-                            <span class="name">{{ name }}</span>
-                        </td>
-                        <td>{{ late_from.strftime('%H:%M:%S') }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-    </div>
-    <div id="floatBar">
-    <center><caption><span class="badge">Late today</span></caption></center>
-    </div>
-
-</div>
 
 {% endblock body %}
