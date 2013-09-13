@@ -17,6 +17,7 @@ var BOWER_JS = [
 var BOWER_CSS = [
   BOWER_COMPONENTS + 'jquery-ui/themes/smoothness/*.css',
   BOWER_COMPONENTS + 'spectrum/spectrum.css',
+  BOWER_COMPONENTS + 'bootstrap/bootstrap.css'
 ];
 
 var STATIC = '../src/intranet3/static/';
