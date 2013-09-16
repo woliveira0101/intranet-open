@@ -67,7 +67,10 @@ class LateApplication(BaseView):
                 date=date,
                 explanation=explanation,
                 justified=True,
+                late_start=form.late_start.data,
+                late_end=form.late_end.data
             )
+
             self.session.add(late)
             topic = self._(u'${email} - Late ${date}',
                 email=self.request.user.email,
