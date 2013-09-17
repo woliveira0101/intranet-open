@@ -13,7 +13,7 @@
                         <td class="">
                             <span class="name" ng-bind="user.name"></span>
                         </td>
-                        <td>10</td>
+                        <td>{{set_time(user.late_from) | date:'HH:mm:ss'}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -22,3 +22,6 @@
     <caption><span ng-click="show()" class="badge">Late today</span></caption>
     </div>
 </div>
+
+
+        <!--{{user.late_from | date:'HH:mm:ss'}}-->

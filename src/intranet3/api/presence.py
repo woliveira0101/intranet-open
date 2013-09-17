@@ -23,7 +23,7 @@ class PresenceApi(ApiView):
             date = datetime.datetime.strptime(date, '%d.%m.%Y')
         else:
             date = datetime.date.today()
-        date = datetime.date(2013, 9, 10) # USUNĄĆ PO TESTACH NA SZTYWNO USTAWIONĄ DATĘ
+        date = datetime.date(2013, 9, 6) # USUNĄĆ PO TESTACH NA SZTYWNO USTAWIONĄ DATĘ
         start_date = datetime.datetime.combine(date, day_start)
         end_date = datetime.datetime.combine(date, day_end)
 
@@ -33,11 +33,9 @@ class PresenceApi(ApiView):
                             .filter(Late.added_ts<=end_date)\
                             .group_by(User.id, User.name, Late.added_ts)\
                             .order_by(User.name)
-
         return dict(
-            justification=excuses.presence_status(date, self.request.user.id),
             late=[
-                dict(id=user_id, name=user_name)
+                dict(id=user_id, name=user_name, late_from=late_from.strftime("%Y-%m-%d %H:%M:%S"))
                 for user_id, user_name, late_from in late
             ],
             user_id=self.request.user.id,
