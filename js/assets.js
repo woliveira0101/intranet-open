@@ -12,12 +12,18 @@ var BOWER_JS = [
   BOWER_COMPONENTS + 'modernizr/modernizr.js',
   BOWER_COMPONENTS + 'underscore/underscore.js',
   BOWER_COMPONENTS + 'spectrum/spectrum.js',
-  BOWER_COMPONENTS + 'datejs/build/date-en-US.js'
+  //TIMEPICKER
+  BOWER_COMPONENTS + 'bootstrap-timepicker/js/bootstrap-timepicker.min.js',
+  //DATEJS
+  BOWER_COMPONENTS + 'datejs/build/date.js'
 ];
 
 var BOWER_CSS = [
   BOWER_COMPONENTS + 'jquery-ui/themes/smoothness/*.css',
   BOWER_COMPONENTS + 'spectrum/spectrum.css',
+  BOWER_COMPONENTS + 'bootstrap/bootstrap.css',
+  //TIMEPICKER CSS
+  BOWER_COMPONENTS + 'bootstrap-timepicker/css/bootstrap-timepicker.min.css'
 ];
 
 var STATIC = '../src/intranet3/static/';

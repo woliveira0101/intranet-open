@@ -2,7 +2,7 @@ import datetime
 from collections import defaultdict
 
 from sqlalchemy import Column, ForeignKey, orm
-from sqlalchemy.types import String, Integer, Boolean, Date, DateTime, Text, Enum
+from sqlalchemy.types import String, Integer, Boolean, Date, DateTime, Text, Enum, Time
 
 from intranet3.models import Base, DBSession, User
 
@@ -17,6 +17,8 @@ class Late(Base):
     justified = Column(Boolean, nullable=True, index=True)
     review = Column(String, nullable=True, index=True)
     deleted = Column(Boolean, nullable=False, default=False, index=True)
+    late_start = Column(Time, index=True, nullable=False, default=None)
+    late_end = Column(Time, index=True, nullable=False, default=None)
 
 
 class WrongTime(Base):
