@@ -1,6 +1,8 @@
 # coding: utf-8
 import json
 import re
+from functools import partial
+from intranet3 import memcache
 
 from intranet3.asyncfetchers import base
 from intranet3.helpers import Converter, serialize_url
@@ -60,6 +62,27 @@ class GithubBug(base.Bug):
         else:
             self._component_name = value
 
+    def get_status(self):
+        try:
+            label = self.label[0]['name']
+            if label == 'to do':
+                return 'NEW'
+            elif label == 'to verify':
+                return 'RESOLVED'
+            elif label == 'completed':
+                return 'CLOSED'
+        except IndexError:
+            return ''
+
+    def is_unassigned(self):
+        try:
+            label = self.label[0]['name']
+            if label == 'in process':
+                return False
+            else:
+                return True
+        except IndexError:
+            return True
 
 github_converter = Converter(
     id='number',
@@ -78,7 +101,8 @@ github_converter = Converter(
     opendate=lambda d: parse(d.get('created_at', '')),
     changeddate=lambda d: parse(d.get('updated_at', '')),
     dependson=lambda d: {},
-    blocked=lambda d: {}
+    blocked=lambda d: {},
+    label=lambda d: d['labels'] if d != [] else None # bierzemy nazwę pierwszej etykiety
 )
 
 
@@ -122,7 +146,12 @@ def _query_fetcher_function(resolved):
 class GithubFetcher(BasicAuthMixin, BaseFetcher):
     bug_class = GithubBug
     get_converter = lambda self: github_converter
-    
+
+    MILESTONES_KEY = 'milestones_map'
+    MILESTONES_TIMEOUT = 60*3
+    get_milestones = True
+    milestone_url = None
+
     def parse(self, data):
         converter = self.get_converter()
         json_data = json.loads(data)
@@ -136,11 +165,60 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
                     **convertered_data
                 )
 
+    def get_data(self, callback):
+        if self.get_milestones:
+            data = memcache.get(self.MILESTONES_KEY)
+            if not data:
+                self.fetch_data(callback)
+                return
+            else:
+                self.get_milestones = False
+        callback()
+
+    def fetch_data(self, callback):
+        headers = self.get_headers()
+        url = str(self.milestone_url)
+        self.request(
+            url,
+            headers,
+            partial(self.responded, on_success=partial(self.parse_data, callback)),
+        )
+
+    def parse_data(self, callback, data):
+        milestone_map = {}
+        json_data = json.loads(data)
+        for milestone in json_data:
+            milestone_map[milestone['title']] = str(milestone['number'])
+
+        memcache.set(
+            self.MILESTONES_KEY,
+            milestone_map,
+            timeout=self.MILESTONES_TIMEOUT
+        )
+        self.get_milestones = False
+        callback()
 
     def fetch(self, url):
-        headers = self.get_headers()
-        self.request(url, headers, self.responded)
-        
+        if self.get_milestones:
+            self_callback = partial(self.fetch, url)
+            self.get_data(self_callback)
+        else:
+            headers = self.get_headers()
+            self.request(
+                url,
+                headers,
+                partial(self.responded)
+            )
+
+    def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
+        base_url = '%srepos/%s/%s/' % (self.tracker.url, project_id, component_id)
+        self.milestone_url = base_url + 'milestones'
+        if self.get_milestones:
+            self.get_data(partial(self.fetch_scrum, sprint_name, project_id, component_id))
+        else:
+            scrum_url = base_url + 'issues?milestone=' + memcache.get(self.MILESTONES_KEY)[sprint_name]
+            self.fetch(scrum_url.encode('utf-8'))
+
     def common_url_params(self):
         return dict(
             state='open',

@@ -159,7 +159,7 @@ class Bugs(object):
         fetchers = []
         for project, tracker, creds in entries:
             fetcher = get_fetcher(tracker, creds, tracker.logins_mapping)
-            fetcher.fetch_scrum(sprint.name, project.project_selector)
+            fetcher.fetch_scrum(sprint.name, project.project_selector, project.component_selector)
             fetchers.append(fetcher)
             if tracker.type in ('bugzilla', 'rockzilla', 'igozilla'):
                 break
