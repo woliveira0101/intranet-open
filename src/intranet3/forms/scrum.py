@@ -41,7 +41,7 @@ class SprintProjectsField(wtf.SelectMultipleField):
 class SprintListFilterForm(wtf.Form):
     project_id = wtf.SelectField(_(u'Project'), validators=[])
     limit = wtf.IntegerField(_(u'Limit'), default=10)
-    active_only = wtf.BooleanField(_(u'Active only'), default=False)
+    active_only = wtf.BooleanField(_(u'Active only'), default=True)
 
     def __init__(self, *args, **kwargs):
         super(SprintListFilterForm, self).__init__(*args, **kwargs)

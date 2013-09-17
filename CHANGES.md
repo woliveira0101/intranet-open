@@ -1,5 +1,6 @@
 New release
 ===========
+-default show active sprints only
 
 0.9.0 (09-09-2013)
 ===============
