@@ -1,0 +1,24 @@
+<div id='floatBox' ng-controller="wstalCtrl">
+    <div id="floatDiv" ng-show="show_box">
+            <table class="table table-bordered presence" id="late">
+                <caption><span class="badge">Late today</span></caption>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>From</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="user in late" class={{set_current_user(user.id)}}>
+                        <td class="">
+                            <span class="name" ng-bind="user.name"></span>
+                        </td>
+                        <td>10</td>
+                    </tr>
+                </tbody>
+            </table>
+    </div>
+    <div id="floatBar">
+    <caption><span ng-click="show()" class="badge">Late today</span></caption>
+    </div>
+</div>

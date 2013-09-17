@@ -137,7 +137,7 @@
     /* DOM ready */
     $(function(){
 
-
+/*
         $.get('/presence/test').success(function(html){
             $('#right_column_content').append(html);
         });
@@ -149,7 +149,7 @@
                 $('#floatDiv').fadeOut();
             }
         });
-
+*/
 
         $.tablesorter.addParser({
             // set a unique id

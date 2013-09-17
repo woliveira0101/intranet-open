@@ -11,7 +11,8 @@ var BOWER_JS = [
   BOWER_COMPONENTS + 'datejs/build/date-en-US.js',
   BOWER_COMPONENTS + 'modernizr/modernizr.js',
   BOWER_COMPONENTS + 'underscore/underscore.js',
-  BOWER_COMPONENTS + 'spectrum/spectrum.js'
+  BOWER_COMPONENTS + 'spectrum/spectrum.js',
+  BOWER_COMPONENTS + 'datejs/build/date-en-US.js'
 ];
 
 var BOWER_CSS = [
