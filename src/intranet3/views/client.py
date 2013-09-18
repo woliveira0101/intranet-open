@@ -12,7 +12,7 @@ LOG = INFO_LOG(__name__)
 WARN = WARN_LOG(__name__)
 
 
-@view_config(route_name='client_view', permission='coordinator')
+@view_config(route_name='client_view', permission='scrum')
 class View(BaseView):
     """ View an existing client """
     def get(self):
@@ -35,7 +35,7 @@ class Counter():
         return str(self.index)
 
 
-@view_config(route_name='client_map', permission='coordinator')
+@view_config(route_name='client_map', permission='scrum')
 class Map(BaseView):
     """ Map clients/projects/selectors """
     def get(self):
