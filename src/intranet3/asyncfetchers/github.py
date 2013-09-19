@@ -15,6 +15,9 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 
 
 class GithubBug(base.Bug):
+
+    SCRUM_LABELS = ['to do', 'to verify', 'completed', 'in process']
+
     def __init__(self, *args, **kwargs):
         self._project_name = None
         self._component_name = None
@@ -25,6 +28,11 @@ class GithubBug(base.Bug):
             self.url = kwargs['url']
             del kwargs['url']
         super(GithubBug, self).__init__(*args, **kwargs)
+
+        self.bug_labels = filter( # część wspólna dostępnych labeli i labeli buga
+            lambda label: label in self.SCRUM_LABELS,
+            [label['name'] for label in self.labels]
+        )
 
     def get_url(self):
         return self.url
@@ -63,20 +71,23 @@ class GithubBug(base.Bug):
             self._component_name = value
 
     def get_status(self):
-        try:
-            label = self.label[0]['name']
-            if label == 'to do':
-                return 'NEW'
-            elif label == 'to verify':
-                return 'RESOLVED'
-            elif label == 'completed':
-                return 'CLOSED'
-        except IndexError:
-            return ''
+        if self.status == 'closed':
+            return 'CLOSED'
+        else:
+            try:
+                label = self.bug_labels[0]
+                if label == 'to do':
+                    return 'NEW'
+                elif label == 'to verify':
+                    return 'RESOLVED'
+                elif label == 'completed':
+                    return 'CLOSED'
+            except IndexError:
+                return ''
 
     def is_unassigned(self):
         try:
-            label = self.label[0]['name']
+            label = self.bug_labels[0]
             if label == 'in process':
                 return False
             else:
@@ -92,7 +103,7 @@ github_converter = Converter(
     owner=lambda d:  d['assignee']['login'] if d['assignee'] else '',
     priority=lambda d: '',
     severity=lambda d: d['labels'],
-    status=lambda d: 'assigned',
+    status=lambda d: d['state'],
     resolution=lambda d: 'none',
     project_name=lambda d: d['html_url'],
     component_name=lambda d: d['html_url'],
@@ -102,7 +113,7 @@ github_converter = Converter(
     changeddate=lambda d: parse(d.get('updated_at', '')),
     dependson=lambda d: {},
     blocked=lambda d: {},
-    label=lambda d: d['labels'] if d != [] else None # bierzemy nazwę pierwszej etykiety
+    labels=lambda d: d['labels'] if d != [] else None
 )
 
 
@@ -147,10 +158,14 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
     bug_class = GithubBug
     get_converter = lambda self: github_converter
 
-    MILESTONES_KEY = 'milestones_map'
+    MILESTONES_KEY = 'milestones_map' #klucz do mapowania nazwa_milestonea -> numer milestonea
     MILESTONES_TIMEOUT = 60*3
-    get_milestones = True
-    milestone_url = None
+
+    def __init__(self, *args, **kwargs):
+        super(GithubFetcher, self).__init__(*args, **kwargs)
+        self.milestones = None
+        self.issues_types_left = ['close', 'open']
+
 
     def parse(self, data):
         converter = self.get_converter()
@@ -165,26 +180,21 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
                     **convertered_data
                 )
 
-    def get_data(self, callback):
-        if self.get_milestones:
-            data = memcache.get(self.MILESTONES_KEY)
-            if not data:
-                self.fetch_data(callback)
+    def fetch_milestones(self, callback, url):
+        if self.milestones is None:
+            self.milestones = memcache.get(self.MILESTONES_KEY)
+            if self.milestones is None:
+                url = str(url)
+                self.request(
+                    url,
+                    self.get_headers(),
+                    partial(self.responded, on_success=partial(self.parse_milestones, callback)),
+                )
                 return
             else:
-                self.get_milestones = False
-        callback()
+                callback()
 
-    def fetch_data(self, callback):
-        headers = self.get_headers()
-        url = str(self.milestone_url)
-        self.request(
-            url,
-            headers,
-            partial(self.responded, on_success=partial(self.parse_data, callback)),
-        )
-
-    def parse_data(self, callback, data):
+    def parse_milestones(self, callback, data):
         milestone_map = {}
         json_data = json.loads(data)
         for milestone in json_data:
@@ -195,29 +205,46 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             milestone_map,
             timeout=self.MILESTONES_TIMEOUT
         )
-        self.get_milestones = False
+        self.milestones = milestone_map
         callback()
 
     def fetch(self, url):
-        if self.get_milestones:
-            self_callback = partial(self.fetch, url)
-            self.get_data(self_callback)
+        self_callback = partial(self.fetch, url)
+        if self.milestones is None:
+            self.fetch_milestones(self_callback, url)
         else:
-            headers = self.get_headers()
             self.request(
                 url,
-                headers,
+                self.get_headers(),
                 partial(self.responded)
             )
 
     def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
         base_url = '%srepos/%s/%s/' % (self.tracker.url, project_id, component_id)
-        self.milestone_url = base_url + 'milestones'
-        if self.get_milestones:
-            self.get_data(partial(self.fetch_scrum, sprint_name, project_id, component_id))
+        milestones_url = ''.join((base_url, 'milestones'))
+        issues_url = ''.join((base_url, 'issues?'))
+
+        if self.milestones is None:
+            self.fetch_milestones(partial(self.fetch_scrum, sprint_name, project_id, component_id), milestones_url)
         else:
-            scrum_url = base_url + 'issues?milestone=' + memcache.get(self.MILESTONES_KEY)[sprint_name]
-            self.fetch(scrum_url.encode('utf-8'))
+            opened_bugs_url = serialize_url(
+                issues_url,
+                **dict(
+                        milestone = memcache.get(self.MILESTONES_KEY)[sprint_name],
+                        state = 'open'
+                )
+            )
+
+            closed_bugs_url = serialize_url(
+                issues_url,
+                **dict(
+                        milestone = memcache.get(self.MILESTONES_KEY)[sprint_name],
+                        state = 'closed'
+                )
+            )
+
+            self.fetch(opened_bugs_url)
+            self.fetch(closed_bugs_url)
 
     def common_url_params(self):
         return dict(
@@ -257,4 +284,6 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             EXCEPTION(u"Could not parse tracker response")
             self.fail(e)
         else:
-            self.success()
+            self.issues_types_left.pop()
+            if len(self.issues_types_left) == 0:
+                self.success()

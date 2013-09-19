@@ -32,7 +32,7 @@ class Bug(object):
                  status, resolution, project_name, component_name, deadline,
                  opendate, changeddate,
                  dependson=_marker, blocked=_marker, whiteboard='', version='',
-                 number=None, label=None):
+                 number=None, labels=None):
         self.time = 0.0
         self.tracker = tracker
         self.number = number  # Unique number for github
@@ -52,7 +52,7 @@ class Bug(object):
         self.changeddate = changeddate
         self.dependson = {} if dependson is _marker else dependson
         self.blocked = {} if blocked is _marker else blocked
-        self.label = label
+        self.labels = labels
 
         if isinstance(whiteboard, basestring):
             self.whiteboard = parse_whiteboard(whiteboard)
@@ -107,7 +107,7 @@ class Bug(object):
             'opendate': self.opendate.strftime('%Y-%m-%d'),
             'changeddate': self.changeddate.strftime('%Y-%m-%d'),
             'deadline': self.deadline,
-            'label' : self.label
+            'labels' : self.labels
         }
 
         if self.project:

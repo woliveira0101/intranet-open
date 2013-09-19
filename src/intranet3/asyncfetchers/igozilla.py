@@ -69,7 +69,7 @@ class IgozillaFetcher(BugzillaFetcher):
             headers['Cookie'][0] += '; Bugzilla_login=%s; Bugzilla_logincookie=%s' % (self.auth_login, self.auth_token)
         return headers
 
-    def fetch_scrum(self, sprint_name, project_id=None):
+    def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
         self.fetch_auth_token(partial(BugzillaFetcher.fetch_scrum, self, sprint_name, project_id))
 
     @cached_bug_fetcher(lambda: u'user')
