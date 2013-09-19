@@ -26,7 +26,6 @@ class List(BaseView):
             date = datetime.datetime.strptime(date, '%d.%m.%Y')
         else:
             date = datetime.date.today()
-        date = datetime.date(2013, 9, 6) # USUNĄĆ PO TESTACH NA SZTYWNO USTAWIONĄ DATĘ
         start_date = datetime.datetime.combine(date, day_start)
         end_date = datetime.datetime.combine(date, day_end)
 

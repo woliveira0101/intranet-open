@@ -41,5 +41,5 @@ class PresenceApi(ApiView):
                     id=user_id,
                     name=user_name
                 )
-                for user_id, user_name in absences],
+                for user_id, user_name in absences]
         )
