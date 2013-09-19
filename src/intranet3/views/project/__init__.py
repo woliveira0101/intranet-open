@@ -65,7 +65,7 @@ class Edit(BaseView):
         project_id = self.request.GET.get('project_id')
         project =  Project.query.get(project_id)
         form = ProjectForm(self.request.POST, obj=project)
-        if self.request.method == 'POST' and (form.validate() or self.request.has_perm('client')):
+        if self.request.method == 'POST' and form.validate():
             SelectorMapping.invalidate_for(project.tracker_id)
             project.working_agreement = form.working_agreement.data
             project.definition_of_done = form.definition_of_done.data
