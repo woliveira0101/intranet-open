@@ -3,14 +3,8 @@ import datetime
 from babel.core import Locale
 from pyramid.view import view_config
 
-from intranet3.models import User, Late
-from intranet3.utils import excuses
+from intranet3.models import User, Late, Absence
 from intranet3.utils.views import ApiView
-
-
-day_start = datetime.time(0, 0, 0)
-day_end = datetime.time(23, 59, 59)
-hour_9 = datetime.time(9, 0, 0)
 
 locale = Locale('en', 'US')
 
@@ -23,34 +17,29 @@ class PresenceApi(ApiView):
             date = datetime.datetime.strptime(date, '%d.%m.%Y')
         else:
             date = datetime.date.today()
-        date = datetime.date(2013, 9, 6) # USUNĄĆ PO TESTACH NA SZTYWNO USTAWIONĄ DATĘ
-        start_date = datetime.datetime.combine(date, day_start)
-        end_date = datetime.datetime.combine(date, day_end)
-
-        late = self.session.query(User.id, User.name, Late.added_ts)\
+        late = self.session.query(User.id, User.name,  Late.late_start, Late.late_end)\
                             .filter(User.id==Late.user_id)\
-                            .filter(Late.added_ts>=start_date)\
-                            .filter(Late.added_ts<=end_date)\
-                            .group_by(User.id, User.name, Late.added_ts)\
+                            .filter(Late.date == date)\
+                            .order_by(User.name)
+        absences = self.session.query(User.id, User.name)\
+                            .filter(User.id == Absence.user_id)\
+                            .filter(Absence.date_start <= date)\
+                            .filter(Absence.date_end >= date)\
                             .order_by(User.name)
         return dict(
-            late=[
-                dict(id=user_id, name=user_name, late_from=late_from.strftime("%Y-%m-%d %H:%M:%S"))
-                for user_id, user_name, late_from in late
+            lates=[
+                dict(
+                    id=user_id,
+                    name=user_name,
+                    late_start=late_start.isoformat()[:5] if late_start else None,
+                    late_end=late_end.isoformat()[:5] if late_end else None
+                )
+                for user_id, user_name, late_start, late_end in late
             ],
-            user_id=self.request.user.id,
+            absences=[
+                dict(
+                    id=user_id,
+                    name=user_name
+                )
+                for user_id, user_name in absences],
         )
-
-        #
-        # late = self.session.query(User.id, User.name, Late.added_ts)\
-        #                     .filter(User.id==Late.user_id)\
-        #                     .filter(Late.added_ts>=start_date)\
-        #                     .filter(Late.added_ts<=end_date)\
-        #                     .group_by(User.id, User.name, Late.added_ts)\
-        #                     .order_by(User.name)
-        #
-        # return dict(
-        #     date=date,
-        #     justification=excuses.presence_status(date, self.request.user.id),
-        #     late=[(user_id, user_name, late_from) for (user_id, user_name, late_from) in late],
-        # )

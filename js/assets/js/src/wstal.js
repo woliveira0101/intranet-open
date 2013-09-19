@@ -2,17 +2,15 @@
 angular.module('intranet').controller('wstalCtrl', function($scope, $http) {
     $scope.show_box = false;
     $http.get('/api/presence').success(function(data){
-        console.log(data);
-        $scope.late = data.late;
-        $scope.user_id = data.user_id;
+        $scope.lates = _.filter(data.lates, function(user){
+            return user.id !== G.user.id;
+        });
+        $scope.absences = data.absences;
     });
     $scope.show = function(){
-    $scope.show_box = ! $scope.show_box;
-    }
-    $scope.set_current_user = function(id){
-        if (id == $scope.user_id) return "current_user";
-    }
-    $scope.set_time = function(str_time){
-        return Date.parse(str_time);
+        $scope.show_box = ! $scope.show_box;
+    };
+    $scope.set_time = function(time_str){
+        return Date.parse(time_str)
     }
 });

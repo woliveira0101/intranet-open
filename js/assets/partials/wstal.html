@@ -1,20 +1,26 @@
 <div id='floatBox' ng-controller="wstalCtrl">
     <div id="floatDiv" ng-show="show_box">
             <table class="table table-bordered presence" id="late">
-                <caption><span class="badge">Late today</span></caption>
                 <thead>
                     <tr>
                         <th>User</th>
                         <th>From</th>
+                        <th> To </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="user in late" class={{set_current_user(user.id)}}>
+                    <tr class='late-light' ng-repeat="user in lates">
                         <td class="">
                             <span class="name" ng-bind="user.name"></span>
                         </td>
-                        <td>{{set_time(user.late_from) | date:'HH:mm:ss'}}</td>
+                        <td>{{ user.late_start  && (set_time(user.late_start) | date:'HH:mm') || '-'}}</td>
+                        <td>{{ user.late_end  && (set_time(user.late_end) | date:'HH:mm') || '-'}}</td>
                     </tr>
+                <tr ng-repeat="user in absences">
+                    <td colspan='3' class="">
+                        <span class="name" ng-bind="user.name"></span>
+                    </td>
+                </tr>
                 </tbody>
             </table>
     </div>
@@ -22,6 +28,3 @@
     <caption><span ng-click="show()" class="badge">Late today</span></caption>
     </div>
 </div>
-
-
-        <!--{{user.late_from | date:'HH:mm:ss'}}-->
