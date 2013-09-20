@@ -175,7 +175,7 @@ class ProjectField(BaseView):
             raise HTTPNotFound
         md = markdown.Markdown()
         result = md.convert(result)
-        result = '<h2 class="content-header">%s</h2>%s' % (header, result)
+        result = '<h2 class="content-header">%s</h2><div class="markdown">%s</div>' % (header, result)
         return Response(result)
 
 
