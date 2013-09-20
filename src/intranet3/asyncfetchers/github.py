@@ -16,7 +16,7 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 
 class GithubBug(base.Bug):
 
-    SCRUM_LABELS = ['to do', 'to verify', 'completed', 'in process']
+    SCRUM_LABELS = ['to verify', 'in process']
 
     def __init__(self, *args, **kwargs):
         self._project_name = None
@@ -29,7 +29,7 @@ class GithubBug(base.Bug):
             del kwargs['url']
         super(GithubBug, self).__init__(*args, **kwargs)
 
-        self.bug_labels = filter( # część wspólna dostępnych labeli i labeli buga
+        self.scrum_labels = filter( # część wspólna dostępnych labeli i labeli buga
             lambda label: label in self.SCRUM_LABELS,
             [label['name'] for label in self.labels]
         )
@@ -75,19 +75,15 @@ class GithubBug(base.Bug):
             return 'CLOSED'
         else:
             try:
-                label = self.bug_labels[0]
-                if label == 'to do':
-                    return 'NEW'
-                elif label == 'to verify':
+                label = self.scrum_labels[0]
+                if label == 'to verify':
                     return 'RESOLVED'
-                elif label == 'completed':
-                    return 'CLOSED'
             except IndexError:
-                return ''
+                return 'NEW'
 
     def is_unassigned(self):
         try:
-            label = self.bug_labels[0]
+            label = self.scrum_labels[0]
             if label == 'in process':
                 return False
             else:
@@ -113,7 +109,7 @@ github_converter = Converter(
     changeddate=lambda d: parse(d.get('updated_at', '')),
     dependson=lambda d: {},
     blocked=lambda d: {},
-    labels=lambda d: d['labels'] if d != [] else None
+    labels=lambda d: d['labels']
 )
 
 
@@ -230,7 +226,7 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             opened_bugs_url = serialize_url(
                 issues_url,
                 **dict(
-                        milestone = memcache.get(self.MILESTONES_KEY)[sprint_name],
+                        milestone = self.milestones.get(sprint_name),
                         state = 'open'
                 )
             )
@@ -238,7 +234,7 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             closed_bugs_url = serialize_url(
                 issues_url,
                 **dict(
-                        milestone = memcache.get(self.MILESTONES_KEY)[sprint_name],
+                        milestone = self.milestones.get(sprint_name),
                         state = 'closed'
                 )
             )
