@@ -4,6 +4,7 @@ import datetime
 from pyramid.view import view_config
 from pyramid.response import Response
 
+from intranet3 import memcache
 from intranet3 import config
 from intranet3 import helpers as h
 from intranet3.utils.views import BaseView
@@ -95,6 +96,7 @@ class LateApplication(BaseView):
             event_id = calendar.addEvent(event)
 
             if deferred:
+                memcache.clear()
                 LOG(u"Late added")
                 if event_id:
                     return Response(self._(u'Request added. Calendar entry added'))
@@ -229,6 +231,7 @@ ${name}""", **kwargs)
                 days = h.get_working_days(form.popup_date_start.data, form.popup_date_end.data)
                 left -= days
         if self.request.method == 'POST' and form.validate():
+            memcache.clear()
             response = u''
             date_start = form.popup_date_start.data
             date_end = form.popup_date_end.data
