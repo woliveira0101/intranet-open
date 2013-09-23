@@ -45,7 +45,8 @@ class User(Base):
     name = Column(String, nullable=False)
     admin = Column(Boolean, default=False, nullable=False)
     freelancer = Column(Boolean, default=False, nullable=False)
-    
+    employment_contract = Column(Boolean, default=False, nullable=False)
+
     is_active = Column(Boolean, default=True, nullable=False)
     is_programmer = Column(Boolean, default=False, nullable=False)
     is_frontend_developer = Column(Boolean, default=False, nullable=False)
@@ -72,6 +73,7 @@ class User(Base):
         default=lambda: datetime.date.today() + datetime.timedelta(days=365 * 30),
     )
     description = Column(String, nullable=True, default=None)
+
 
     presences = orm.relationship('PresenceEntry', backref='user', lazy='dynamic')
     credentials = orm.relationship('TrackerCredentials', backref='user', lazy='dynamic')
@@ -195,7 +197,6 @@ class User(Base):
         # used in queries i.e. User.query.filter(User.is_client()).filter(...
         # <@ = http://www.postgresql.org/docs/8.3/static/functions-array.html
         return User.groups.op('<@')('{client}')
-
 
 class Leave(Base):
     __tablename__ = 'leave'
