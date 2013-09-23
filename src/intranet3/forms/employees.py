@@ -135,7 +135,7 @@ class AbsentApplicationForm(wtf.Form):
 
     def validate_popup_type(self, field):
         if field.data == u'l4' and not self.request.user.employment_contract:
-            raise ValidationError(_(u"You can't submit absence."))
+            raise ValidationError(_(u"Only user on employment contract can submit L4 absence."))
         if self.popup_date_start.data and self.popup_date_end.data and field.data not in (u'inne', u'okolicznosciowe', u'l4'):
             mandated, used, left = user_leave(self.request, self.popup_date_start.data.year)
             days = h.get_working_days(self.popup_date_start.data, self.popup_date_end.data)
