@@ -16,17 +16,15 @@ class PresenceApi(ApiView):
 
     def _remove_blacklisted(self, data):
         blacklist = self.request.user.notify_blacklist
-        if not blacklist:
-            return data
         return dict(
             lates=[
                 late for late in data['lates']
-                if (late and late.get('id') not in blacklist)
-            ] if data['lates'] else [],
+                if late['id'] not in blacklist
+            ],
             absences=[
                 absence for absence in data['absences']
-                if (absence and absence.get('id') not in blacklist)
-            ] if data['absences'] else [],
+                if absence['id'] not in blacklist
+            ],
         )
 
     def get(self):
@@ -38,36 +36,35 @@ class PresenceApi(ApiView):
         current_data_late = memcache.get(
             MEMCACHED_NOTIFY_KEY % date.strftime('%d.%m.%Y')
         )
+
         if current_data_late is not None:
             result_dict = self._remove_blacklisted(current_data_late)
             return result_dict
 
-        late = self.session.query(
+        late_query = self.session.query(
             User.id,
             User.name,
             Late.late_start,
             Late.late_end,
-        )\
-            .filter(User.id == Late.user_id)\
-            .filter(Late.date == date)\
-            .order_by(User.name)
+        )
+        late_query = late_query.filter(User.id == Late.user_id)\
+                               .filter(Late.date == date)\
+                               .order_by(User.name)
+
         absences = self.session.query(User.id, User.name)\
-            .filter(User.id == Absence.user_id)\
-            .filter(Absence.date_start <= date)\
-            .filter(Absence.date_end >= date)\
-            .order_by(User.name)
+                               .filter(User.id == Absence.user_id)\
+                               .filter(Absence.date_start <= date)\
+                               .filter(Absence.date_end >= date)\
+                               .order_by(User.name)
 
         current_data_late = dict(
             lates=[
                 dict(
                     id=user_id,
                     name=user_name,
-                    late_start=late_start.isoformat()[:5]
-                    if late_start else None,
-                    late_end=late_end.isoformat()[:5]
-                    if late_end else None
-                )
-                for user_id, user_name, late_start, late_end in late
+                    start=start and start.isoformat()[:5] or None,
+                    end=end and end.isoformat()[:5] or None,
+                )for user_id, user_name, start, end in late_query
             ],
             absences=[
                 dict(
