@@ -65,10 +65,14 @@ class Edit(BaseView):
         project_id = self.request.GET.get('project_id')
         project =  Project.query.get(project_id)
         form = ProjectForm(self.request.POST, obj=project)
-        if self.request.method == 'POST' and form.validate():
-            SelectorMapping.invalidate_for(project.tracker_id)
+        # hack, when user has no permision coordinator (that means that he has only scrum perms)
+        # we do not validate the form
+        if self.request.method == 'POST' and (not self.request.has_perm('coordinator') or form.validate()):
             project.working_agreement = form.working_agreement.data
             project.definition_of_done = form.definition_of_done.data
+            project.definition_of_ready = form.definition_of_ready.data
+            project.continuous_integration_url = form.continuous_integration_url.data
+            project.backlog_url = form.backlog_url.data
             if self.request.has_perm('coordinator'):
                 project.name = form.name.data
                 coordinator_id = int(form.coordinator_id.data) if form.coordinator_id.data.isdigit() else None
@@ -83,15 +87,12 @@ class Edit(BaseView):
                 project.google_card = form.google_card.data
                 project.google_wiki = form.google_wiki.data
                 project.mailing_url = form.mailing_url.data
-                project.definition_of_ready = form.definition_of_ready.data
-                project.continuous_integration_url = form.continuous_integration_url.data
-                project.backlog_url = form.backlog_url.data
                 project.status = form.status.data
 
             self.flash(self._(u"Project saved"))
             LOG(u"Project saved")
             SelectorMapping.invalidate_for(project.tracker_id)
-            return HTTPFound(location=self.request.url_for('/client/view', client_id=project.client_id))
+            return HTTPFound(location=self.request.url_for('/project/edit', project_id=project.id))
         return dict(project_id=project.id, form=form)
 
 

@@ -12,7 +12,7 @@ LOG = INFO_LOG(__name__)
 WARN = WARN_LOG(__name__)
 
 
-@view_config(route_name='client_view', permission='scrum')
+@view_config(route_name='client_view', permission='coordinator')
 class View(BaseView):
     """ View an existing client """
     def get(self):
