@@ -175,7 +175,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
 
     fetch_all_bugs_for_query = _query_fetcher_function()
 
-    def fetch_scrum(self, sprint_name, project_id=None):
+    def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
         params = dict(
             ctype='csv',
             status_whiteboard_type='regexp',

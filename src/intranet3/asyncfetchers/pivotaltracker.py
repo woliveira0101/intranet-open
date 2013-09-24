@@ -190,7 +190,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
             state=','.join(ISSUE_STATE_RESOLVED),
         ))
 
-    def fetch_scrum(self, sprint_name, project_id=None):
+    def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
         self.fetch('stories', filters=dict(
             label=sprint_name,
         ))

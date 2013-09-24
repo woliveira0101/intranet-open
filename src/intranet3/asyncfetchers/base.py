@@ -32,7 +32,7 @@ class Bug(object):
                  status, resolution, project_name, component_name, deadline,
                  opendate, changeddate,
                  dependson=_marker, blocked=_marker, whiteboard='', version='',
-                 number=None):
+                 number=None, labels=None):
         self.time = 0.0
         self.tracker = tracker
         self.number = number  # Unique number for github
@@ -52,6 +52,7 @@ class Bug(object):
         self.changeddate = changeddate
         self.dependson = {} if dependson is _marker else dependson
         self.blocked = {} if blocked is _marker else blocked
+        self.labels = labels
 
         if isinstance(whiteboard, basestring):
             self.whiteboard = parse_whiteboard(whiteboard)
@@ -106,6 +107,7 @@ class Bug(object):
             'opendate': self.opendate.strftime('%Y-%m-%d'),
             'changeddate': self.changeddate.strftime('%Y-%m-%d'),
             'deadline': self.deadline,
+            'labels' : self.labels
         }
 
         if self.project:
@@ -284,7 +286,7 @@ class BaseFetcher(object):
         """ Start recursively fetching dependons for ticket ids """
         raise NotImplementedError()
 
-    def fetch_scrum(self, sprint_name, project_id):
+    def fetch_scrum(self, sprint_name, project_id, component_id=None):
         raise NotImplementedError()
 
     def isReady(self):
