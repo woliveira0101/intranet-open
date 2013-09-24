@@ -241,7 +241,7 @@ class Bugs(object):
             """ % (condition, )
             query = DBSession.query('ticket_id', 'project_id', 'time').from_statement(sql).params(**params)
 
-            for bug in bugs.itervalues():
+            for bug in orig_bugs:
                 bug.sprint_time = 0.0
 
             for bug_id, project_id, time in query:
