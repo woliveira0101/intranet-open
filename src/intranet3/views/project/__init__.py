@@ -59,7 +59,7 @@ class Add(BaseView):
         return dict(client=client, form=form)
 
 
-@view_config(route_name='project_edit', permission='coordinator')
+@view_config(route_name='project_edit', permission='scrum')
 class Edit(BaseView):
     def dispatch(self):
         project_id = self.request.GET.get('project_id')
@@ -67,25 +67,26 @@ class Edit(BaseView):
         form = ProjectForm(self.request.POST, obj=project)
         if self.request.method == 'POST' and form.validate():
             SelectorMapping.invalidate_for(project.tracker_id)
-            project.name = form.name.data
-            coordinator_id = int(form.coordinator_id.data) if form.coordinator_id.data.isdigit() else None
-            project.coordinator_id = coordinator_id
-            project.tracker_id = form.tracker_id.data
-            project.turn_off_selectors = form.turn_off_selectors.data
-            project.project_selector = form.project_selector.data
-            project.component_selector = form.component_selector.data
-            project.version_selector = form.version_selector.data
-            project.ticket_id_selector = form.ticket_id_selector.data
-            project.active = form.active.data
-            project.google_card = form.google_card.data
-            project.google_wiki = form.google_wiki.data
-            project.mailing_url = form.mailing_url.data
             project.working_agreement = form.working_agreement.data
             project.definition_of_done = form.definition_of_done.data
-            project.definition_of_ready = form.definition_of_ready.data
-            project.continuous_integration_url = form.continuous_integration_url.data
-            project.backlog_url = form.backlog_url.data
-            project.status = form.status.data
+            if self.request.has_perm('coordinator'):
+                project.name = form.name.data
+                coordinator_id = int(form.coordinator_id.data) if form.coordinator_id.data.isdigit() else None
+                project.coordinator_id = coordinator_id
+                project.tracker_id = form.tracker_id.data
+                project.turn_off_selectors = form.turn_off_selectors.data
+                project.project_selector = form.project_selector.data
+                project.component_selector = form.component_selector.data
+                project.version_selector = form.version_selector.data
+                project.ticket_id_selector = form.ticket_id_selector.data
+                project.active = form.active.data
+                project.google_card = form.google_card.data
+                project.google_wiki = form.google_wiki.data
+                project.mailing_url = form.mailing_url.data
+                project.definition_of_ready = form.definition_of_ready.data
+                project.continuous_integration_url = form.continuous_integration_url.data
+                project.backlog_url = form.backlog_url.data
+                project.status = form.status.data
 
             self.flash(self._(u"Project saved"))
             LOG(u"Project saved")

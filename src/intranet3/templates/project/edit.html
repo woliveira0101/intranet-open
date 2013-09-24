@@ -7,28 +7,33 @@
         </ul>
     </div>
     <form class="box box_edit_project" action="{{ request.url_for('/project/edit', project_id=project_id) }}" method="post" accept-charset="utf-8">
-        {{ csrf_field }}
-        {{ form_field(form.name, _('Project friendly name')) }}
-        {{ form_field(form.coordinator_id) }}
-        {{ form_field(form.tracker_id, _('Tracker for given project')) }}
-        {{ form_field(form.status, '') }}
-        {{ form_field(form.turn_off_selectors, _('Turn selectors off')) }}
-        <div class="selectors">
-            {{ form_field(form.project_selector, _('Name of a project on selected tracker (or empty for all projects on a given tracker)')) }}
-            {{ form_field(form.component_selector, _('Name of a component on selected tracker (or empty for all components on a given tracker)')) }}
-            {{ form_field(form.version_selector, _('Comma-separated list of  versions on selected tracker (or empty for all components on a given tracker)')) }}
-            {{ form_field(form.ticket_id_selector, _('Comma-separated list of ticket IDs')) }}
-        </div>
-        {{ form_field(form.active, _('Inactive projects are not shown in some dropdowns')) }}
-        {{ form_field(form.google_card, _('Link to project card in google docs')) }}
-        {{ form_field(form.google_wiki, _('Link to project wiki in google sites')) }}
-        {{ form_field(form.mailing_url, _('Mailing group')) }}
+        {% if request.has_perm('coordinator') %}
+            {{ csrf_field }}
+            {{ form_field(form.name, _('Project friendly name')) }}
+            {{ form_field(form.coordinator_id) }}
+            {{ form_field(form.tracker_id, _('Tracker for given project')) }}
+            {{ form_field(form.status, '') }}
+            {{ form_field(form.turn_off_selectors, _('Turn selectors off')) }}
+            <div class="selectors">
+                {{ form_field(form.project_selector, _('Name of a project on selected tracker (or empty for all projects on a given tracker)')) }}
+                {{ form_field(form.component_selector, _('Name of a component on selected tracker (or empty for all components on a given tracker)')) }}
+                {{ form_field(form.version_selector, _('Comma-separated list of  versions on selected tracker (or empty for all components on a given tracker)')) }}
+                {{ form_field(form.ticket_id_selector, _('Comma-separated list of ticket IDs')) }}
+            </div>
+            {{ form_field(form.active, _('Inactive projects are not shown in some dropdowns')) }}
+            {{ form_field(form.google_card, _('Link to project card in google docs')) }}
+            {{ form_field(form.google_wiki, _('Link to project wiki in google sites')) }}
+            {{ form_field(form.mailing_url, _('Mailing group')) }}
 
-        {{ form_field(form.continuous_integration_url, _('Continuous integration url')) }}
-        {{ form_field(form.backlog_url, _('Backlog url')) }}
+            {{ form_field(form.continuous_integration_url, _('Continuous integration url')) }}
+            {{ form_field(form.backlog_url, _('Backlog url')) }}
+            {{ form_field(form.working_agreement, _('Markdown'), class="span8", rows="10")}}
+            {{ form_field(form.definition_of_done, _('Markdown'), class="span8", rows="10") }}
+            {{ form_field(form.definition_of_ready, _('Markdown'), class="span8", rows="10") }}
+        {% endif %}
         {{ form_field(form.working_agreement, _('Markdown'), class="span8", rows="10")}}
         {{ form_field(form.definition_of_done, _('Markdown'), class="span8", rows="10") }}
-        {{ form_field(form.definition_of_ready, _('Markdown'), class="span8", rows="10") }}
+
         <div class="buttons">
             <input class="btn btn-primary" type="submit" value="{% trans %}Save{% endtrans %}"/>
         </div>
