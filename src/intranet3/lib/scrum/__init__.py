@@ -17,6 +17,7 @@ class BugUglyAdapter(object):
 
     def __init__(self, bug):
         self._bug = bug
+        self._bug_tracker_type = bug.tracker.type # after saving to memcached
 
     def __getattr__(self, item):
         return getattr(self._bug, item)
@@ -25,7 +26,7 @@ class BugUglyAdapter(object):
 
         if self._bug.project.client_id == 20:
             return self._bug.get_status() == 'VERIFIED' and self._bug.get_resolution() == 'DEPLOYED'
-        elif self._bug.project.tracker.type == 'pivotaltracker':
+        elif self._bug_tracker_type == 'pivotaltracker':
             return self._bug.status in ('delivered', 'accepted')
         else:
             return self._bug.get_status() == 'CLOSED' or self._bug.get_status() == 'VERIFIED'
