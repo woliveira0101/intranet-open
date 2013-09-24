@@ -29,10 +29,14 @@ class GithubBug(base.Bug):
             del kwargs['url']
         super(GithubBug, self).__init__(*args, **kwargs)
 
-        self.scrum_labels = filter( # część wspólna dostępnych labeli i labeli buga
-            lambda label: label in self.SCRUM_LABELS,
-            [label['name'] for label in self.labels]
-        )
+        label_names = [label['name'] for label in self.labels]
+        self.scrum_labels = [label for label in label_names if label in self.SCRUM_LABELS]
+
+        # label with number will be scrum points
+        digit_labels = [ label for label in label_names if label.isdigit()]
+
+        if digit_labels:
+            self.whiteboard = dict(p=int(digit_labels[0]))
 
     def get_url(self):
         return self.url
@@ -40,6 +44,7 @@ class GithubBug(base.Bug):
     @property
     def severity(self):
         return self._severity
+
     @severity.setter
     def severity(self, value):
         labels = [l.get('name') for l in value]
@@ -51,6 +56,7 @@ class GithubBug(base.Bug):
     @property
     def project_name(self):
         return self._project_name
+
     @project_name.setter
     def project_name(self, value):
         m = re.match('(.*?)github.com/(.*?)/(.*?)($|/.*)', value)
@@ -62,6 +68,7 @@ class GithubBug(base.Bug):
     @property
     def component_name(self):
         return self._component_name
+
     @component_name.setter
     def component_name(self, value):
         m = re.match('(.*?)github.com/(.*?)/(.*?)($|/.*)', value)
@@ -170,11 +177,10 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
         for bug_desc in json_data:
             # Filter bugs
             convertered_data = converter(bug_desc)
-            if convertered_data['owner'] in self.login_mapping.keys():
-                yield self.bug_class(
-                    tracker=self.tracker,
-                    **convertered_data
-                )
+            yield self.bug_class(
+                tracker=self.tracker,
+                **convertered_data
+            )
 
     def fetch_milestones(self, callback, url):
         if self.milestones is None:
