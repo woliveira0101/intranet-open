@@ -350,7 +350,7 @@ class Delete(BaseView):
             form=form
         )
 
-@view_config(route_name='scrum_sprint_team', permission='scrum')
+@view_config(route_name='scrum_sprint_team', permission='client')
 class Team(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
         sprint = self.v['sprint']
