@@ -1,6 +1,12 @@
-New release
-===========
--default show active sprints only
+
+0.9.2 (24-09-2013)
+===============
+- show active sprints by default
+- illnes absence only avaliable for employment contract employee
+- avatar upload button fix
+- teams tab avaliable for client, add tooltip to user there
+- scrum user has ability to edit scrum fields in project
+- github support for scrum board
 
 0.9.1 (12-09-2013)
 ===============
