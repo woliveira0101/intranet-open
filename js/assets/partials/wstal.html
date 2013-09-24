@@ -1,5 +1,5 @@
 <div id='floatBox' ng-controller="wstalCtrl">
-    <div id="floatDiv" ng-show="show_box">
+    <div class="a_popup" id="floatDiv" ng-show="show_box">
             <table class="table table-bordered presence" id="late">
                 <thead>
                     <tr>
@@ -25,6 +25,11 @@
             </table>
     </div>
     <div id="floatBar">
-    <caption><span ng-click="show()" class="badge">Late today</span></caption>
+        <caption>
+            <span ng-click="show()" class="badge">Late today</span>
+        </caption>
+        </caption>
+            <span ng-click="openModal()" class="badge">Settings</span>
+        </caption>
     </div>
 </div>

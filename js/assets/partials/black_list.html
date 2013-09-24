@@ -1,0 +1,14 @@
+<div>
+  <div class="modal-header">
+    <button class="close" aria-hidden="true" ng-click="close()">×</button>
+    <h3>Test</h3>
+  </div>
+  <div class="modal-body">
+      <select class="multiselect" data-placeholder="Select Products"
+            ng-model="productSelection" ng-options="item.name for item in data"
+            multiple="multiple" multiselect-dropdown >
+
+            </select>
+      <p>Selection: {{productSelection}}</p>
+  </div>
+</div>

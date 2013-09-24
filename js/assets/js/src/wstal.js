@@ -1,5 +1,7 @@
 
-angular.module('intranet').controller('wstalCtrl', function($scope, $http) {
+var App = angular.module('intranet');
+
+App.controller('wstalCtrl', function($scope, $http, $dialog) {
     $scope.show_box = false;
     $scope.from = 'From';
     $scope.to = 'To';
@@ -15,5 +17,23 @@ angular.module('intranet').controller('wstalCtrl', function($scope, $http) {
     };
     $scope.set_time = function(time_str){
         return Date.parse(time_str)
-    }
+    };
+    $scope.openModal = function(){
+      var d = $dialog.dialog({
+          resolve: {
+            $callerScope: function() {return $scope}
+          }
+        });
+      d.open('black_list.html', 'blackListCtrl');
+    };
+});
+
+App.controller('blackListCtrl', function($scope, $http, $timeout, dialog, $callerScope) {
+  $scope.lates = $callerScope.lates;
+  $scope.absences = $callerScope.absences;
+  $scope.data = _.extend($scope.lates, $scope.absences)
+  console.log($scope.data);
+  $scope.close = function(){
+    dialog.close();
+  };
 });
