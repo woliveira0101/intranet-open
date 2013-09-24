@@ -89,6 +89,8 @@ class Edit(BaseView):
             user.is_programmer = form.is_programmer.data
             user.is_frontend_developer = form.is_frontend_developer.data
             user.is_graphic_designer = form.is_graphic_designer.data
+            if self.request.has_perm('admin'):
+                user.employment_contract = form.employment_contract.data
 
 
             if form.avatar.data:

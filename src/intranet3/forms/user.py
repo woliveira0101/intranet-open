@@ -17,7 +17,8 @@ class UserEditForm(wtf.Form):
         if isinstance(obj, User):
             kwargs['level'] = obj.levels_list
         super(UserEditForm,self).process(formdata,obj,**kwargs)
-    
+
+    employment_contract = wtf.BooleanField(_(u"Employment contract"), validators=[])
     is_active = wtf.BooleanField(_(u"Is active"), validators=[])
     is_programmer = wtf.BooleanField(_(u"Is programmer"), validators=[])
     is_frontend_developer = wtf.BooleanField(_(u"Is frontend developer"), validators=[])

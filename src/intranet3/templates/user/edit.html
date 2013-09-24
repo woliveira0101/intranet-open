@@ -47,6 +47,7 @@
                         </dl>
                     </div>
                     {% endwith %}
+                    {{ form_field(form.employment_contract, _('Employment contract')) }}
                 {% endif %}
                 {{ form_field(form.description, _('Any additional description')) }}
                 {{ form.avatar }}
