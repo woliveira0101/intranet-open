@@ -113,9 +113,16 @@ class Team(ApiView):
 @view_config(route_name='api_users', renderer='json')
 class Users(ApiView):
     def get(self):
-        users = User.query.filter(User.is_active==True)\
-                          .filter(User.is_not_client())\
-                          .filter(User.freelancer==False)\
-                          .order_by(User.name)
-                          
-        return [{'id': u.id, 'name': u.name, 'img': u.avatar_url} for u in users]
+        if self.request.GET.get('full') == '1':
+            users = User.query.order_by(User.name)
+            return [u.to_dict(full=True) for u in users]
+        else:
+            users = User.query.filter(User.is_not_client())\
+                              .filter(User.freelancer==False)\
+                              .order_by(User.name)
+
+            if not self.request.has_perm('admin'):
+                users = users.filter(User.is_active==True)
+            return [u.to_dict() for u in users]
+
+

@@ -86,6 +86,7 @@ class Edit(BaseView):
                     user.freelancer = False
                 user.groups = groups
                 user.start_full_time_work = form.start_full_time_work.data or None
+                user.stop_work = form.stop_work.data or None
             user.is_programmer = form.is_programmer.data
             user.is_frontend_developer = form.is_frontend_developer.data
             user.is_graphic_designer = form.is_graphic_designer.data

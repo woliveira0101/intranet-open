@@ -29,6 +29,7 @@ class UserEditForm(wtf.Form):
     
     start_work  = wtf.DateField(_(u"Start work"), format='%d/%m/%Y', validators=[])
     start_full_time_work  = wtf.DateField(_(u"Start full time work"), format='%d/%m/%Y', validators=[validators.Optional()])
+    stop_work = wtf.DateField(_(u"Stop work"), format='%d/%m/%Y', validators=[validators.Optional()])
     description = wtf.TextField(_(u"Description"), validators=[validators.Optional()])
     location = wtf.SelectField(
         _(u"Office location"),

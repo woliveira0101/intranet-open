@@ -1,0 +1,113 @@
+<div ng-controller="usersCtrl">
+    <div class="span">
+        <form class="form-horizontal">
+         <div class="row">
+            <input type="text" name='name' value="" autocomplete="on" placeholder="Employee's name">
+            <input type="text" class="datepicker" name='start_work' value="" placeholder="Start work">
+            <input type="text" class="datepicker" name='stop_work' value="" placeholder="Stop work">
+             </div>
+
+             <div class="row">
+
+            Group<select id="group" multiple>
+                    <option value='{{ group_id }}' ></option>
+                </select>
+            Location<select id="location" multiple>
+                    <option value='{{ location_id }}' >{{ location_name }}</option>
+            </select>
+            Team<select id="team" multiple>
+                    <option name='{{ team_id }}' value="{{team_id}}">{{ team_name }}</option>
+            </select>
+         </div>
+        </form>
+    </div>
+    <div class="tabs">
+    <ul class="nav nav-tabs">
+       <li class="active"><a href="#employees" data-toggle="tab">Employees ({{users.length}})</a></li>
+        <li class=""><a href="#freelances" data-toggle="tab">Freelancers</a></li>
+        <!--{% if request.has_perm('admin') %}-->
+        <li class=""><a href="#clients" data-toggle="tab">Clients</a></li>
+        <li class=""><a href="#inactive" data-toggle="tab">Inactive</a></li>
+    </ul>
+    <div class="tab-content">
+
+        <div class="tab-pane fade in active" id="employees">
+            <table id='oo' class="table table-bordered table-hover user-list width_auto ">
+            <thead>
+                <th class="lp">&nbsp;</th>
+                <th class="avatar">&nbsp;</th>
+                <th class="name">Employee's name</th>
+                <th class="contact">Contact</th>
+                <th class="role">Role</th>
+                <th class="calendars">Calendars</th>
+                <th>Start work</th>
+            </thead>
+            <tbody>
+            <tr ng-repeat="user in users" xmlns="http://www.w3.org/1999/html">
+                <td class="counter"></td>
+                <td class="email"><img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" /></td>
+                <td class="name">
+                    <div ng-show="request.has_perm('admin')"> {{user.name}} ( {{user.location_short}} )</div>
+                    <div ng-show="not request.has_perm('admin')"><a href="{{ request.url_for('/user/view', user_id=user.id) }}">{{ user.name }} ( {{user.location_short}} )</a></div>
+                </td>
+                <td class="contact-info">
+                    <a href="mailto:{{ user.email }}">{{ user.email }}</a><br/><br/>
+                        <label ng-show="user.phone">Cellphone:<br/><span>{{ user.phone }}</span><br/></label>
+                        <label ng-show="user.phone_on_desk">Deskphone:<br/><span>{{ user.phone_on_desk }}</span><br/></label>
+                        <label ng-show="user.skype">Skype:<br/><span>{{ user.skype }}</span><br/></label>
+                        <label ng-show="user.irc">IRC:<br/><span>{{ user.irc }}</span><br/></label>
+                </td>
+                <td>
+                    <span ng-show="user.freelancer">Freelancer<br/></span>
+                    <span ng-show="user.is_programmer">Programer<br/></span>
+                    <span ng-show="user.is_frontend_developer">Frontend developer<br/></span>
+                    <span ng-show="user.is_graphic_designer">Graphic designer<br/></span>
+                    <span ng-show="user.levels_html">{{user.levels_html}}</span>
+                </td>
+                <td></td>
+                <td>{{user.start_work}}</td>
+            </tr>
+
+            </tbody>
+         </table>
+        </div>
+
+        <div class="tab-pane fade" id="freelances">
+
+        </div>
+        <div class="tab-pane fade" id="clients">
+
+        </div>
+
+        <div class="tab-pane fade" id="inactive">
+
+        </div>
+    </div>
+</div>
+
+
+    <button ng-click="filter()">filter</button>
+    <div class="row">
+        <div class="span4">
+        <ul>
+            <li ng-repeat="user in users">{{user.name}}</li>
+        </ul>
+        </div>
+        <div class="span4">
+                    <ul>
+            <li ng-repeat="user in employees()">{{user.name}}</li>
+        </ul>
+        </div>
+                <div class="span4">
+                    <ul>
+            <li ng-repeat="user in filtered_out_users">{{user.name}}</li>
+        </ul>
+        </div>
+    </div>
+
+</div>
+<script>
+$("select").multiselect({
+   selectedText: "# of # selected"
+});
+</script>

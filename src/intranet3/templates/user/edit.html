@@ -48,6 +48,7 @@
                     </div>
                     {% endwith %}
                     {{ form_field(form.employment_contract, _('Employment contract')) }}
+                    {{ form_field(form.stop_work, _('Stop work'), class='datepicker') }}
                 {% endif %}
                 {{ form_field(form.description, _('Any additional description')) }}
                 {{ form.avatar }}

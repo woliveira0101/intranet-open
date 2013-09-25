@@ -72,6 +72,7 @@ class User(Base):
         Date, nullable=False,
         default=lambda: datetime.date.today() + datetime.timedelta(days=365 * 30),
     )
+    stop_work = Column(Date, nullable=True, default=None)
     description = Column(String, nullable=True, default=None)
 
 
@@ -197,6 +198,36 @@ class User(Base):
         # used in queries i.e. User.query.filter(User.is_client()).filter(...
         # <@ = http://www.postgresql.org/docs/8.3/static/functions-array.html
         return User.groups.op('<@')('{client}')
+
+    def to_dict(self, full=False):
+        result =  {
+            'id': self.id,
+            'name': self.name,
+            'img': self.avatar_url
+        }
+        if full:
+            result.update({
+            'email': self.email,
+            'freelancer': self.freelancer,
+            'is_client': 'client' in self.groups,
+            'is_programmer': self.is_programmer,
+            'is_frontend_developer': self.is_frontend_developer,
+            'is_graphic_designer': self.is_graphic_designer,
+            'levels_html': self.levels_html,
+            'tasks_link': self.tasks_link,
+            'availability_link': self.availability_link,
+            'skype': self.skype,
+            'irc': self.irc,
+            'phone': self.phone,
+            'phone_on_desk': self.phone_on_desk,
+            'location': self.location,
+            'location_short': self.LOCATIONS[self.location][1],
+            'start_work': self.start_work.strftime('%d/%m/%Y') if self.start_work else '',
+            'stop_work': self.stop_work.strftime('%d/%m/%Y') if self.stop_work else '',
+            'groups': self.groups,
+            'avatar_url': '/api/images/users/%s' % self.id
+            })
+        return result
 
 class Leave(Base):
     __tablename__ = 'leave'
