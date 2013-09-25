@@ -5,6 +5,14 @@ App.controller('wstalCtrl', function($scope, $http, $dialog) {
     $scope.show_box = false;
     $scope.from = 'From';
     $scope.to = 'To';
+    $http.get('/api/users').success(function(data){
+        $scope.users = _.filter(data, function(user){
+            return user.id !== G.user.id;
+        });
+    });
+    $http.get('/api/blacklist').success(function(data){
+        $scope.blacklist = data;
+    });
     $http.get('/api/presence').success(function(data){
         $scope.lates = _.filter(data.lates, function(user){
             return user.id !== G.user.id;
@@ -24,16 +32,30 @@ App.controller('wstalCtrl', function($scope, $http, $dialog) {
             $callerScope: function() {return $scope}
           }
         });
-      d.open('black_list.html', 'blackListCtrl');
+      d.open('blacklist.html', 'blackListCtrl');
     };
 });
 
 App.controller('blackListCtrl', function($scope, $http, $timeout, dialog, $callerScope) {
-  $scope.lates = $callerScope.lates;
-  $scope.absences = $callerScope.absences;
-  $scope.data = _.extend($scope.lates, $scope.absences)
-  console.log($scope.data);
-  $scope.close = function(){
+    $scope.users = $callerScope.users;
+    $scope.blacklist = $callerScope.blacklist;
+    $http.get('/api/users').success(function(data){
+    $scope.users = _.filter(data, function(user){
+            return user.id !== G.user.id;
+    });
+    });
+    $scope.close = function(){
     dialog.close();
-  };
+    };
+    $scope.edit = function(){
+      $http.post('/api/blacklist', {
+          blacklist:$scope.blacklist,
+          lates:$callerScope.lates, absences:$callerScope.absences
+      }).success(function(data){
+          $callerScope.blacklist = data.blacklist;
+          $callerScope.lates = data.lates;
+          $callerScope.absences = data.absences;
+          dialog.close();
+      });
+    };
 });

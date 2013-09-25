@@ -104,6 +104,7 @@ def main(global_config, **settings):
     pyramid_config.add_route('api_preview', '/api/preview')
     pyramid_config.add_route('api_images', '/api/images/{type:\w+}/{id:\d+}')
     pyramid_config.add_route('api_presence', 'api/presence')
+    pyramid_config.add_route('api_blacklist', 'api/blacklist')
 
     pyramid_config.add_renderer('.html', 'pyramid_jinja2.renderer_factory')
     pyramid_config.add_renderer(None, 'intranet3.utils.renderer.renderer_factory')

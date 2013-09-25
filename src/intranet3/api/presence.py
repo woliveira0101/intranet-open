@@ -1,13 +1,10 @@
 # coding: utf-8
 import datetime
-from babel.core import Locale
 from pyramid.view import view_config
 
 from intranet3.models import User, Late, Absence
 from intranet3.utils.views import ApiView
 from intranet3 import memcache
-
-locale = Locale('en', 'US')
 
 MEMCACHED_NOTIFY_KEY = 'notify-%s'
 

@@ -1,0 +1,20 @@
+<div>
+  <div class="modal-header">
+    <button class="close" aria-hidden="true" ng-click="close()">×</button>
+    <h3 id='black_list_header' >Black List</h3>
+  </div>
+  <div class="modal-body">
+      <div class='black_list_select'>
+          <select
+                ng-model='blacklist'
+                ng-options='item.id as item.name for item in users'
+                multiple>
+
+          </select>
+      </div>
+      <p>Selection: {{blacklist}}</p>
+      <div class="pull-right">
+        <button class="btn btn-primary" type="submit" ng-click="edit()">Submit</button>
+      </div>
+  </div>
+</div>
