@@ -1,7 +1,7 @@
 # coding: utf-8
 from pyramid.view import view_config
 from intranet3.utils.views import ApiView
-from intranet3 import memcache
+
 
 @view_config(route_name='api_blacklist', renderer='json')
 class BlacklistApi(ApiView):
@@ -21,5 +21,5 @@ class BlacklistApi(ApiView):
         )
 
     def return_users(self, name_list, blacklist):
-        list = self.request.json.get(name_list)
-        return [i for i in list if (i['id'] not in blacklist)]
+        lists = self.request.json.get(name_list)
+        return [i for i in lists if (i['id'] not in blacklist)]

@@ -8,21 +8,9 @@ from intranet3 import memcache
 
 MEMCACHED_NOTIFY_KEY = 'notify-%s'
 
+
 @view_config(route_name='api_presence', renderer='json')
 class PresenceApi(ApiView):
-
-    def _remove_blacklisted(self, data):
-        blacklist = self.request.user.notify_blacklist
-        return dict(
-            lates=[
-                late for late in data['lates']
-                if late['id'] not in blacklist
-            ],
-            absences=[
-                absence for absence in data['absences']
-                if absence['id'] not in blacklist
-            ],
-        )
 
     def get(self):
         date = self.request.GET.get('date')
@@ -33,10 +21,11 @@ class PresenceApi(ApiView):
         current_data_late = memcache.get(
             MEMCACHED_NOTIFY_KEY % date.strftime('%d.%m.%Y')
         )
+        blacklist = self.request.user.notify_blacklist
 
         if current_data_late is not None:
-            result_dict = self._remove_blacklisted(current_data_late)
-            return result_dict
+            current_data_late.update(dict(blacklist=blacklist))
+            return current_data_late
 
         late_query = self.session.query(
             User.id,
@@ -69,7 +58,7 @@ class PresenceApi(ApiView):
                     name=user_name
                 )
                 for user_id, user_name in absences
-            ],
+            ]
         )
 
         memcache.add(
@@ -77,5 +66,5 @@ class PresenceApi(ApiView):
             current_data_late,
             60*60*24,
         )
-        result_dict = self._remove_blacklisted(current_data_late)
-        return result_dict
+        current_data_late.update(dict(blacklist=blacklist))
+        return current_data_late
