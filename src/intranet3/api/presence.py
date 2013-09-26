@@ -24,7 +24,7 @@ class PresenceApi(ApiView):
         blacklist = self.request.user.notify_blacklist
 
         if current_data_late is not None:
-            current_data_late.update(dict(blacklist=blacklist))
+            current_data_late['blacklist'] = blacklist
             return current_data_late
 
         late_query = self.session.query(
@@ -66,5 +66,5 @@ class PresenceApi(ApiView):
             current_data_late,
             60*60*24,
         )
-        current_data_late.update(dict(blacklist=blacklist))
+        current_data_late['blacklist'] = blacklist
         return current_data_late
