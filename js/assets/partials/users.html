@@ -1,24 +1,29 @@
 <div ng-controller="usersCtrl">
-    <div class="span">
+    <div class="row-fluid">
         <form class="form-horizontal">
          <div class="row">
-            <input type="text" name='name' value="" autocomplete="on" placeholder="Employee's name">
-            <input type="text" class="datepicker" name='start_work' value="" placeholder="Start work">
-            <input type="text" class="datepicker" name='stop_work' value="" placeholder="Stop work">
-             </div>
-
-             <div class="row">
-
-            Group<select id="group" multiple>
-                    <option value='{{ group_id }}' ></option>
-                </select>
-            Location<select id="location" multiple>
-                    <option value='{{ location_id }}' >{{ location_name }}</option>
+             <input ng-model="search.name"  type="text" placeholder="Employee's name">
+             <input type="text" ng-model="search.start_work" data-date-format="dd/mm/yyyy" placeholder="Start work" bs-datepicker>
+             <input type="text" ng-model="search.stop_work" data-date-format="dd/mm/yyyy" placeholder="Stop work" bs-datepicker>
+         </div>
+         <div class="row">
+            Group<select
+                 ng-model="search.group" multiple title="Choose one of the group"
+                 ng-options="group for group in groups"
+                 data-style="btn-primary" bs-select>
             </select>
-            Team<select id="team" multiple>
-                    <option name='{{ team_id }}' value="{{team_id}}">{{ team_name }}</option>
+            Location<select
+                 ng-model="search.location" multiple title="Choose one of the location"
+                 ng-options="c for c in [1,2,3,4,5,6]"
+                 data-style="btn-primary" bs-select>
+            </select>
+            Team<select
+                 ng-model="search.team" multiple title="Choose one of the team"
+                 ng-options="c for c in [1,2,3,4,5,6]"
+                 data-style="btn-primary" bs-select>
             </select>
          </div>
+            WYNIK: {{ search }}
         </form>
     </div>
     <div class="tabs">
@@ -43,12 +48,11 @@
                 <th>Start work</th>
             </thead>
             <tbody>
-            <tr ng-repeat="user in users" xmlns="http://www.w3.org/1999/html">
+            <tr ng-repeat="user in employees() | my_filter:search">
                 <td class="counter"></td>
                 <td class="email"><img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" /></td>
                 <td class="name">
-                    <div ng-show="request.has_perm('admin')"> {{user.name}} ( {{user.location_short}} )</div>
-                    <div ng-show="not request.has_perm('admin')"><a href="{{ request.url_for('/user/view', user_id=user.id) }}">{{ user.name }} ( {{user.location_short}} )</a></div>
+                    <div> {{user.name}} ( {{user.location_short}} )</div>
                 </td>
                 <td class="contact-info">
                     <a href="mailto:{{ user.email }}">{{ user.email }}</a><br/><br/>
@@ -64,7 +68,10 @@
                     <span ng-show="user.is_graphic_designer">Graphic designer<br/></span>
                     <span ng-show="user.levels_html">{{user.levels_html}}</span>
                 </td>
-                <td></td>
+                <td>
+                    <a ng-show="user.availability_link" href="{{ user.availability_link }}">Avability</a><br/>
+                    <a ng-show="user.tasks_link" href="{{ user.tasks_link }}">Tasks</a>
+                </td>
                 <td>{{user.start_work}}</td>
             </tr>
 
@@ -106,8 +113,8 @@
     </div>
 
 </div>
-<script>
-$("select").multiselect({
-   selectedText: "# of # selected"
-});
-</script>
+<!--<script>-->
+<!--$("select").multiselect({-->
+   <!--selectedText: "# of # selected"-->
+<!--});-->
+<!--</script>-->

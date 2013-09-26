@@ -6,17 +6,23 @@ var BOWER_JS = [
   BOWER_COMPONENTS + 'bootstrap/js/bootstrap-tooltip.js',
   BOWER_COMPONENTS + 'bootstrap/js/*.js',
   BOWER_COMPONENTS + 'angular/angular.js',
-  BOWER_COMPONENTS + 'angular-bootstrap/ui-bootstrap.min.js',
-  BOWER_COMPONENTS + 'angular-bootstrap/ui-bootstrap-tpls.min.js',
-  BOWER_COMPONENTS + 'datejs/build/date-en-US.js',
-  BOWER_COMPONENTS + 'modernizr/modernizr.js',
-  BOWER_COMPONENTS + 'underscore/underscore.js',
-  BOWER_COMPONENTS + 'spectrum/spectrum.js'
+    BOWER_COMPONENTS + 'angular-strap/dist/angular-strap.js',
+    BOWER_COMPONENTS + 'angular-bootstrap/ui-bootstrap.min.js',
+    BOWER_COMPONENTS + 'angular-bootstrap/ui-bootstrap-tpls.min.js',
+    BOWER_COMPONENTS + 'datejs/build/date-en-US.js',
+    BOWER_COMPONENTS + 'modernizr/modernizr.js',
+    BOWER_COMPONENTS + 'underscore/underscore.js',
+    BOWER_COMPONENTS + 'spectrum/spectrum.js',
+    BOWER_COMPONENTS + 'bootstrap-select/bootstrap-select.js',
+    BOWER_COMPONENTS + 'bootstrap-datepicker/js/bootstrap-datepicker.js',
+
 ];
 
 var BOWER_CSS = [
   BOWER_COMPONENTS + 'jquery-ui/themes/smoothness/*.css',
   BOWER_COMPONENTS + 'spectrum/spectrum.css',
+  BOWER_COMPONENTS + 'bootstrap-select/bootstrap-select.css',
+  BOWER_COMPONENTS + 'bootstrap-datepicker/css/datepicker.css',
 ];
 
 var STATIC = '../src/intranet3/static/';

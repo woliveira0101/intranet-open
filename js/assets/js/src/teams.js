@@ -1,4 +1,5 @@
-var App = angular.module('intranet', ['ngDragDrop', 'ui.bootstrap']);
+var App = angular.module('intranet', ['ngDragDrop', 'ui.bootstrap', '$strap.directives']);
+
 $.fn.hasScrollBar = function() {
   return this.get(0).scrollHeight > this.height();
 };
