@@ -11,15 +11,5 @@ class BlacklistApi(ApiView):
 
     def post(self):
         blacklist = self.request.json.get('blacklist')
-        absences = self.return_users('absences', blacklist)
-        lates = self.return_users('lates', blacklist)
         self.request.user.notify_blacklist = blacklist
-        return dict(
-            blacklist=blacklist,
-            absences=absences,
-            lates=lates
-        )
-
-    def return_users(self, name_list, blacklist):
-        lists = self.request.json.get(name_list)
-        return [i for i in lists if (i['id'] not in blacklist)]
+        return dict()
