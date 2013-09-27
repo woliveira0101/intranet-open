@@ -200,7 +200,6 @@ class User(Base):
         return User.groups.op('<@')('{client}')
 
     def to_dict(self, full=False):
-        from intranet3.models import TeamMember
         result =  {
             'id': self.id,
             'name': self.name,
@@ -227,8 +226,8 @@ class User(Base):
             'start_work': self.start_work.strftime('%d/%m/%Y') if self.start_work else '',
             'stop_work': self.stop_work.strftime('%Y/%m/%d') if self.stop_work else '',
             'groups': self.groups,
+            'levels': self.levels,
             'avatar_url': '/api/images/users/%s' % self.id,
-            'team': [str(team.team_id) for team in DBSession.query(TeamMember).filter(TeamMember.user_id == self.id).all()]
             })
         return result
 

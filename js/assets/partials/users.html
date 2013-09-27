@@ -1,35 +1,32 @@
 <div ng-controller="usersCtrl">
     <div class="row-fluid">
         <form class="form-horizontal">
-         <div class="row">
-             <input ng-model="search.name"  type="text" placeholder="Employee's name">
-             <input type="text" ng-model="search.start_work" data-date-format="dd/mm/yyyy" placeholder="Start work" bs-datepicker>
-             <input type="text" ng-model="search.stop_work" data-date-format="dd/mm/yyyy" placeholder="Stop work" bs-datepicker>
-         </div>
-         <div class="row">
-            Group<select
-                 ng-model="search.group" multiple title="Choose one of the group"
-                 ng-options="group for group in groups"
-                 data-style="btn-primary" bs-select>
-            </select>
-            Location<select
-                 ng-model="search.locations" multiple title="Choose one of the location"
-                 ng-options="c.id as c.name for c in location"
-                 data-style="btn-primary" bs-select>
-            </select>
-            Team<select
-                 ng-model="search.team" multiple title="Choose one of the team"
-                 ng-options="team.id as team.name for team in teams"
-                 data-style="btn-primary" bs-select>
-            </select>
-         </div>
-            {{teams}}
-
-
-            WYNIK: {{ search }}
+             <div class="row">
+                 <input ng-model="search.name"  type="text" placeholder="Employee's name">
+                 <input type="text" ng-model="search.start_work" data-date-format="dd/mm/yyyy" placeholder="Start work" bs-datepicker>
+                 <input type="text" ng-model="search.stop_work" data-date-format="dd/mm/yyyy" placeholder="Stop work" bs-datepicker>
+             </div>
+             <div class="row" ng-show="teams">
+                Group<select
+                     ng-model="search.group" multiple title="Choose one of the group"
+                     ng-options="group.id as group.name for group in groups"
+                     bs-select>
+                </select>
+                Location<select
+                     ng-model="search.locations" multiple title="Choose one of the location"
+                     ng-options="c.id as c.name for c in location"
+                     bs-select>
+                </select>
+                Team<select
+                     ng-model="search.team" multiple title="Choose one of the team"
+                     ng-options="team.id as team.name for team in teams"
+                     bs-select>
+                </select>
+             </div>
         </form>
     </div>
     <div class="tabs">
+
     <ul class="nav nav-tabs">
        <li class="active"><a href="#employees" data-toggle="tab">Employees ({{users.length}})</a></li>
         <li class=""><a href="#freelances" data-toggle="tab">Freelancers</a></li>
@@ -37,8 +34,8 @@
         <li class=""><a href="#clients" data-toggle="tab">Clients</a></li>
         <li class=""><a href="#inactive" data-toggle="tab">Inactive</a></li>
     </ul>
-    <div class="tab-content">
 
+    <div class="tab-content">
         <div class="tab-pane fade in active" id="employees">
             <table id='oo' class="table table-bordered table-hover user-list width_auto ">
             <thead>
@@ -51,68 +48,42 @@
                 <th>Start work</th>
             </thead>
             <tbody>
-            <tr ng-repeat="user in employees() | my_filter:search">
-                <td class="counter"></td>
-                <td class="email"><img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" /></td>
-                <td class="name">
-                    <div> {{user.name}} ( {{user.location_short}} )</div>
-                </td>
-                <td class="contact-info">
-                    <a href="mailto:{{ user.email }}">{{ user.email }}</a><br/><br/>
-                        <label ng-show="user.phone">Cellphone:<br/><span>{{ user.phone }}</span><br/></label>
-                        <label ng-show="user.phone_on_desk">Deskphone:<br/><span>{{ user.phone_on_desk }}</span><br/></label>
-                        <label ng-show="user.skype">Skype:<br/><span>{{ user.skype }}</span><br/></label>
-                        <label ng-show="user.irc">IRC:<br/><span>{{ user.irc }}</span><br/></label>
-                </td>
-                <td>
-                    <span ng-show="user.freelancer">Freelancer<br/></span>
-                    <span ng-show="user.is_programmer">Programer<br/></span>
-                    <span ng-show="user.is_frontend_developer">Frontend developer<br/></span>
-                    <span ng-show="user.is_graphic_designer">Graphic designer<br/></span>
-                    <span ng-show="user.levels_html">{{user.levels_html}}</span>
-                </td>
-                <td>
-                    <a ng-show="user.availability_link" href="{{ user.availability_link }}">Avability</a><br/>
-                    <a ng-show="user.tasks_link" href="{{ user.tasks_link }}">Tasks</a>
-                </td>
-                <td>{{user.start_work}}</td>
-            </tr>
+                <tr ng-repeat="user in employees() | my_filter:search:teams_to_user">
+                    <td class="counter"></td>
+                    <td class="email"><img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" /></td>
+                    <td class="name">
+                        <div> {{user.name}} ( {{user.location_short}} )</div>
+                    </td>
+                    <td class="contact-info">
+                        <a href="mailto:{{ user.email }}">{{ user.email }}</a><br/><br/>
+                            <label ng-show="user.phone">Cellphone:<br/><span>{{ user.phone }}</span><br/></label>
+                            <label ng-show="user.phone_on_desk">Deskphone:<br/><span>{{ user.phone_on_desk }}</span><br/></label>
+                            <label ng-show="user.skype">Skype:<br/><span>{{ user.skype }}</span><br/></label>
+                            <label ng-show="user.irc">IRC:<br/><span>{{ user.irc }}</span><br/></label>
+                    </td>
+                    <td>
+                        <span ng-show="user.freelancer">Freelancer<br/></span>
+                        <span ng-show="user.is_programmer">Programer<br/></span>
+                        <span ng-show="user.is_frontend_developer">Frontend developer<br/></span>
+                        <span ng-show="user.is_graphic_designer">Graphic designer<br/></span>
+                        <span ng-show="user.levels_html">{{user.levels_html}}</span>
+                    </td>
+                    <td>
+                        <a ng-show="user.availability_link" href="{{ user.availability_link }}">Avability</a><br/>
+                        <a ng-show="user.tasks_link" href="{{ user.tasks_link }}">Tasks</a>
+                    </td>
+                    <td>{{user.start_work}}</td>
+                </tr>
 
             </tbody>
          </table>
         </div>
-
         <div class="tab-pane fade" id="freelances">
-
         </div>
         <div class="tab-pane fade" id="clients">
-
         </div>
-
         <div class="tab-pane fade" id="inactive">
-
         </div>
     </div>
 </div>
-
-
-    <button ng-click="filter()">filter</button>
-    <div class="row">
-        <div class="span4">
-        <ul>
-            <li ng-repeat="user in users">{{user.name}}</li>
-        </ul>
-        </div>
-        <div class="span4">
-                    <ul>
-            <li ng-repeat="user in employees()">{{user.name}}</li>
-        </ul>
-        </div>
-                <div class="span4">
-                    <ul>
-            <li ng-repeat="user in filtered_out_users">{{user.name}}</li>
-        </ul>
-        </div>
-    </div>
-
 </div>
