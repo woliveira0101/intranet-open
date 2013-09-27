@@ -5,7 +5,7 @@ from pyramid.httpexceptions import HTTPBadRequest, HTTPCreated, HTTPOk, HTTPNotF
 from sqlalchemy.exc import IntegrityError
 
 from intranet3.utils.views import ApiView
-from intranet3.models import Team as Team_m, TeamMember, User
+from intranet3.models import Team as Team_m, TeamMember, User, DBSession
 from intranet3.schemas.team import TeamAddSchema, TeamUpdateSchema
 from intranet3.utils.decorators import has_perm
 from intranet3.api.preview import Preview
@@ -120,7 +120,6 @@ class Users(ApiView):
             users = User.query.filter(User.is_not_client())\
                               .filter(User.freelancer==False)\
                               .order_by(User.name)
-
             if not self.request.has_perm('admin'):
                 users = users.filter(User.is_active==True)
             return [u.to_dict() for u in users]

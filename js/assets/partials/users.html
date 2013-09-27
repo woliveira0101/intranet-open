@@ -13,16 +13,19 @@
                  data-style="btn-primary" bs-select>
             </select>
             Location<select
-                 ng-model="search.location" multiple title="Choose one of the location"
-                 ng-options="c for c in [1,2,3,4,5,6]"
+                 ng-model="search.locations" multiple title="Choose one of the location"
+                 ng-options="c.id as c.name for c in location"
                  data-style="btn-primary" bs-select>
             </select>
             Team<select
                  ng-model="search.team" multiple title="Choose one of the team"
-                 ng-options="c for c in [1,2,3,4,5,6]"
+                 ng-options="team.id as team.name for team in teams"
                  data-style="btn-primary" bs-select>
             </select>
          </div>
+            {{teams}}
+
+
             WYNIK: {{ search }}
         </form>
     </div>
@@ -113,8 +116,3 @@
     </div>
 
 </div>
-<!--<script>-->
-<!--$("select").multiselect({-->
-   <!--selectedText: "# of # selected"-->
-<!--});-->
-<!--</script>-->

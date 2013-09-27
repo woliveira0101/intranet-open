@@ -8,10 +8,21 @@ App.controller('usersCtrl', function($scope, $http, $dialog) {
       name: '',
       start_work: null,
       stop_work: null,
-      location: '',
+      locations: [],
       group:'',
-      team: ''
+      team: []
     };
+
+    $scope.location=[
+        {
+            id:'poznan',
+            name:'Poznań'
+        },
+        {
+            id:'wroclaw',
+            name:'Wrocław'
+        }
+    ]
 
     $scope.groups = [
             ('1', 'INTERN'),
@@ -32,35 +43,31 @@ App.controller('usersCtrl', function($scope, $http, $dialog) {
             ('cron', 'cron'),
             ('admin', 'admin'),
         ]
-$scope.teams = [
-  {
-    "id": "1",
-    "name": "gyhjtygj"
-  },
-  {
-    "id": "2",
-    "name": "tyjtyj"
-  },
-  {
-    "id": "3",
-    "name": "tyjty"
-  }
-]
+
+//    $scope.teams = function(){
+//        var teames = []
+//        for (var i = 0; i< $scope.users.length ; i++){
+//            debugger;
+//            teames = _.union(teames,$scope.users[i].team);
+//        };
+//        return teames;
+//
+//    };
 
     $http.get('/api/users?full=1').success(function(data){
            $scope.users = data;
-
-
     });
+
+    $http.get('/api/teams').success(function(data){
+        $scope.teams = data;
+    });
+
     $scope.employees = function(){
         return _.filter($scope.users, function(user){
             if (user.is_active)
                 return user;
         });
     };
-
-    console.log($scope.search);
-
 
     $scope.filter = function(){
         var user;
@@ -73,13 +80,6 @@ $scope.teams = [
         }
     };
 
-//    $scope.my_filter = function(elem){
-//        if(elem.name == 'Malwina Nowakowska'){
-//            return true;
-//        }
-//
-//    };
-
 
 
 });
@@ -87,13 +87,12 @@ App.filter('my_filter', function() {
     return function(users, my_form) {
         return _.filter(users, function(user){
             if ((((user.name.toLowerCase()).indexOf(my_form.name.toLowerCase())) != -1) &&
-                true
+                (!my_form.start_work || (Date.parseExact(user.start_work, "d/M/yyyy") < my_form.start_work)) &&
+                (!my_form.stop_work || (new Date(user.stop_work) < my_form.stop_work)) &&
+                (my_form.locations.length == 0 || (my_form.locations.indexOf(user.location) != -1)) &&
+                (!my_form.team.length == 0)
                 )
                 return user;
         });
-//      if (((input.name).indexOf(my_form.name)) != 1){
-//                return true;
-//            }
-
     }
   });
