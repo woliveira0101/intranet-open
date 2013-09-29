@@ -17,7 +17,7 @@
 </div>
 
 <div id="right_column">
-  <div id="right_column_content">
+  <div id="right_column_content" ng-app="intranet">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}

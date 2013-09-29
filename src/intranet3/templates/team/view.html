@@ -1,14 +1,5 @@
 {% extends "templates/_base.html" %}
 
 {% block content %}
-<div>
-	<div class="tabs">
-		<ul class="nav nav-tabs">
-			<li class="title">{% trans %}Teams{% endtrans %}</li>
-		</ul>
-	</div>
-	<div ng-app="intranet">
-		{{ template | safe }}
-	</div>
-</div>
+<ng-include src="'teams.html'"></ng-include>
 {% endblock %}
