@@ -9,6 +9,6 @@
 
 {% block tail_script %}
     <script type="text/javascript" >
-           var types = {{ form.PREDEFINED_TICKET_IDS | tojson | safe }};
+           var types = {{ form.PREDEFINED_TICKET_IDS | tojson }};
     </script>
 {% endblock %}

@@ -24,7 +24,6 @@ class Team(Base):
         team_dict = {
             'id': self.id,
             'name': self.name,
-            'users': self.users,
             'img': self.avatar_url,
         }
             

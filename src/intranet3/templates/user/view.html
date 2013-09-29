@@ -77,10 +77,6 @@
                 <td>{% if user.start_work %}{{ user.start_work.strftime('%d/%m/%Y') or ''}}{% else %}{% endif %}</td>
             </tr>
             <tr>
-                <td>{% trans %}Levels{% endtrans %}:</td>
-                <td>{{ user.levels_html}}</td>
-            </tr>
-            <tr>
                 <td>{% trans %}Description{% endtrans %}:</td>
                 <td>{{ user.description or ''}}</td>
             </tr>

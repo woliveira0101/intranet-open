@@ -20,25 +20,27 @@ INFO = ERROR_LOG(__name__)
 
 GOOGLE_ACCESS_TOKEN_MEMCACHE_KEY = 'google-access-token-userid-%s'
 
-levels = [
-    ('1', 'INTERN'),
-    ('2', 'P1'),
-    ('4', 'P2'),
-    ('8', 'P3'),
-    ('16', 'P4'),
-    ('32', 'FED'),
-    ('64', 'ADMIN'),
-    ('128', 'Expert zew.'),
-    ('256', 'Android Dev'),
-    ('512', 'Tester'),
-    ('1024', 'CEO\'s Assistant'),
-    ('2048', 'CEO'),
-]
-
 
 class User(Base):
     __tablename__ = 'user'
     LOCATIONS = {'poznan': (u'Poznań', 'P'), 'wroclaw': (u'Wrocław', 'W')}
+    LEVELS = [
+        ('INTERN', 'INTERN'),
+        ('P1', 'P1'),
+        ('P2', 'P2'),
+        ('P3', 'P3'),
+        ('P4', 'P4'),
+        ('FED', 'FED'),
+        ('ADMIN', 'Admin'),
+        ('EXT EXPERT', 'External Expert'),
+        ('ANDROID', 'Android Dev'),
+        ('PROGRAMMER', 'Programmer'),
+        ('GRAPHIC', 'Graphic designer'),
+        ('FRONTEND', 'Frontend'),
+        ('TESTER', 'Tester'),
+        ('CEO A', 'CEO\'s Assistant'),
+        ('CEO', 'CEO'),
+    ]
 
     id = Column(Integer, primary_key=True, nullable=False, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
@@ -48,11 +50,13 @@ class User(Base):
     employment_contract = Column(Boolean, default=False, nullable=False)
 
     is_active = Column(Boolean, default=True, nullable=False)
+
     is_programmer = Column(Boolean, default=False, nullable=False)
     is_frontend_developer = Column(Boolean, default=False, nullable=False)
     is_graphic_designer = Column(Boolean, default=False, nullable=False)
     levels = Column(Integer, nullable=False, default=0)
 
+    roles = Column(postgresql.ARRAY(String))
     availability_link = Column(String, nullable=True, default=None)
     tasks_link = Column(String, nullable=True, default=None)
     skype = Column(String, nullable=True, default=None)
@@ -156,26 +160,6 @@ class User(Base):
         else:
             return self.LOCATIONS[self.location][0]
     
-    @property
-    def levels_list(self):
-        l = []
-        i = 1
-        while i <= self.levels:
-            if self.levels & i:
-                l.append(i)
-            i=i * 2
-        return l
-    
-    @property
-    def levels_html(self):
-        if not self.levels:
-            return ''
-
-        l = []
-        for mask,label in levels:
-            if self.levels & int(mask):
-                l.append(label)
-        return ', '.join(l)
 
     def get_client(self):
         from intranet3.models import Client
@@ -206,29 +190,25 @@ class User(Base):
             'img': self.avatar_url
         }
         if full:
+            location = self.LOCATIONS[self.location]
             result.update({
             'email': self.email,
             'is_active': self.is_active,
             'freelancer': self.freelancer,
             'is_client': 'client' in self.groups,
-            'is_programmer': self.is_programmer,
-            'is_frontend_developer': self.is_frontend_developer,
-            'is_graphic_designer': self.is_graphic_designer,
-            'levels_html': self.levels_html,
             'tasks_link': self.tasks_link,
             'availability_link': self.availability_link,
             'skype': self.skype,
             'irc': self.irc,
             'phone': self.phone,
             'phone_on_desk': self.phone_on_desk,
-            'location': self.location,
-            'location_short': self.LOCATIONS[self.location][1],
-            'start_work': self.start_work.strftime('%d/%m/%Y') if self.start_work else '',
-            'stop_work': self.stop_work.strftime('%Y/%m/%d') if self.stop_work else '',
+            'location': (self.location, location[0], location[1]),
+            'start_work': self.start_work.isoformat() if self.start_work else None,
+            'stop_work': self.stop_work.isoformat() if self.stop_work else None,
             'groups': self.groups,
-            'levels': self.levels,
+            'roles': self.roles,
             'avatar_url': '/api/images/users/%s' % self.id,
-            })
+        })
         return result
 
 class Leave(Base):

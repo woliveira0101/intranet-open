@@ -1,5 +1,9 @@
 var App = angular.module('intranet', ['ngDragDrop', 'ui.bootstrap', '$strap.directives']);
 
+App.run(function($rootScope) {
+  $rootScope.G = G;
+});
+
 $.fn.hasScrollBar = function() {
   return this.get(0).scrollHeight > this.height();
 };
@@ -22,7 +26,7 @@ App.controller('oneCtrl', function($scope, $http, $dialog) {
   $scope.users = [];
 
   $http.get('/api/users').success(function(data){
-      $scope.users = data;
+      $scope.users = data.users;
 
       $http.get('/api/teams').success(function(data){
         $scope.teams = data;

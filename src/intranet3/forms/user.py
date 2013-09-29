@@ -6,26 +6,18 @@ import wtforms as wtf
 from wtforms import validators
 from pyramid.i18n import TranslationStringFactory
 
-from intranet3.models.user import levels, User
+from intranet3.models.user import User
 
 _ = TranslationStringFactory('intranet3')
 
 class UserEditForm(wtf.Form):
     """ Admin edits freelancer's profile """
-    
-    def process(self, formdata=None, obj=None, **kwargs):
-        if isinstance(obj, User):
-            kwargs['level'] = obj.levels_list
-        super(UserEditForm,self).process(formdata,obj,**kwargs)
 
     employment_contract = wtf.BooleanField(_(u"Employment contract"), validators=[])
     is_active = wtf.BooleanField(_(u"Is active"), validators=[])
-    is_programmer = wtf.BooleanField(_(u"Is programmer"), validators=[])
-    is_frontend_developer = wtf.BooleanField(_(u"Is frontend developer"), validators=[])
-    is_graphic_designer = wtf.BooleanField(_(u"Is graphic designer"), validators=[])
 
     avatar = wtf.HiddenField()
-    level = wtf.SelectMultipleField(_(u'Role'), validators=[], choices=levels)
+    roles = wtf.SelectMultipleField(_(u'Role'), validators=[], choices=User.LEVELS)
     
     start_work  = wtf.DateField(_(u"Start work"), format='%d/%m/%Y', validators=[])
     start_full_time_work  = wtf.DateField(_(u"Start full time work"), format='%d/%m/%Y', validators=[validators.Optional()])

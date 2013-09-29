@@ -70,28 +70,49 @@ def make_admin(config_path):
 
 def migrate(config_path):
     from intranet3 import config
-    import os
-    import re
-    new_dirs = ('users', 'teams', 'previews')
-    path = config['AVATAR_PATH']
-    images = os.listdir(path)
-    images = [image for image in images if image not in new_dirs]
+    from intranet3.models import *
 
-    for directory in new_dirs:
-        if not os.path.exists(os.path.join(path, directory)):
-            os.makedirs(os.path.join(path, directory))
 
-    for image in images:
-        image_path = os.path.join(path, image)
-        if image.startswith('temp_'):
-            print 'Deleting: %s' % image_path
-            os.remove(image_path)
-        else:
-            new_image = re.match('u(\d+)', image).groups()[0]
-            new_image_path = os.path.join(path, 'users', new_image)
-            print 'Moving: %s - > %s' % (image_path, new_image_path)
-            os.rename(image_path, new_image_path)
+    def levels_list(self):
+        l = []
+        i = 1
+        while i <= self.levels:
+            if self.levels& i:
+                l.append(i)
+            i=i * 2
+        return l
 
+    levels = dict([
+        ('1', 'INTERN'),
+        ('2', 'P1'),
+        ('4', 'P2'),
+        ('8', 'P3'),
+        ('16', 'P4'),
+        ('32', 'FED'),
+        ('64', 'ADMIN'),
+        ('128', 'EXT EXPERT'),
+        ('256', 'ANDROID'),
+        ('512', 'TESTER'),
+        ('1024', 'CEO A'),
+        ('2048', 'CEO'),
+    ])
+
+    users = DBSession.query(User).all()
+    for user in users:
+        roles = [levels[str(l)] for l in levels_list(user)]
+
+        if user.is_programmer:
+            roles.append('PROGRAMMER')
+
+        if user.is_frontend_developer:
+            roles.append('FRONTEND')
+
+        if user.is_graphic_designer:
+            roles.append('GRAPHIC')
+
+        user.roles = roles
+
+    transaction.commit()
 
 def remove(config_path):
     from intranet3.models import *

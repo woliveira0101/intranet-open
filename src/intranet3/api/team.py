@@ -8,6 +8,7 @@ from intranet3.utils.views import ApiView
 from intranet3.models import Team as Team_m, TeamMember, User, DBSession
 from intranet3.schemas.team import TeamAddSchema, TeamUpdateSchema
 from intranet3.utils.decorators import has_perm
+from intranet3 import helpers as h
 from intranet3.api.preview import Preview
 
 
@@ -15,7 +16,16 @@ from intranet3.api.preview import Preview
 class Teams(ApiView):
 
     def get(self):
-        return [t.to_dict() for t in Team_m.query.all()]
+        teams = self.session.query(Team_m, TeamMember.user_id)\
+                            .filter(TeamMember.team_id==Team_m.id)
+        teams = h.groupby(teams, lambda x: x[0], lambda x: x[1])
+        result = []
+        for team, members in teams.iteritems():
+            team = team.to_dict()
+            team['users'] = members
+            result.append(team)
+
+        return result
 
     @has_perm('admin')
     def post(self):
@@ -113,15 +123,23 @@ class Team(ApiView):
 @view_config(route_name='api_users', renderer='json')
 class Users(ApiView):
     def get(self):
-        if self.request.GET.get('full') == '1':
-            users = User.query.order_by(User.name)
-            return [u.to_dict(full=True) for u in users]
+        full = self.request.GET.get('full') == '1'
+        inactive = self.request.GET.get('inactive') == '1'
+
+        users = User.query.order_by(User.name)
+
+        if not (self.request.has_perm('admin') and inactive):
+            users = users.filter(User.is_active==True)
+
+        if full:
+            return dict(
+                users=[u.to_dict(full=True) for u in users],
+            )
         else:
-            users = User.query.filter(User.is_not_client())\
-                              .filter(User.freelancer==False)\
-                              .order_by(User.name)
-            if not self.request.has_perm('admin'):
-                users = users.filter(User.is_active==True)
-            return [u.to_dict() for u in users]
+            users = users.filter(User.is_not_client())\
+                         .filter(User.freelancer==False)
+            return dict(
+                users=[u.to_dict() for u in users],
+            )
 
 

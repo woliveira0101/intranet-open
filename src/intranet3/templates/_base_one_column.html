@@ -28,10 +28,16 @@
       var G = (function(){
           var G = {};
           {% if request.user %}
-            var user_id = {{ request.user.id }} ;
             G.user = {
-              id: user_id
+              id: {{ request.user.id }},
+              groups: {{ request.user.groups | tojson }},
+              has_perm: function(perm){
+                // yeah, I know this is wrong
+                // works for admin permissions only
+                return _.indexOf(this.groups, perm) >= 0;
+              }
             };
+            G.ROLES = {{ request.user.LEVELS | tojson }};
           {% endif %}
           return G;
       })();

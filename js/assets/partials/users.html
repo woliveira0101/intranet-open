@@ -1,4 +1,4 @@
-<div ng-controller="usersCtrl">
+<div ng-controller="usersCtrl" id="employees">
     <div class="row-fluid">
         <form class="form-horizontal">
              <div class="row">
@@ -6,19 +6,19 @@
                  <input type="text" ng-model="search.start_work" data-date-format="dd/mm/yyyy" placeholder="Start work" bs-datepicker>
                  <input type="text" ng-model="search.stop_work" data-date-format="dd/mm/yyyy" placeholder="Stop work" bs-datepicker>
              </div>
-             <div class="row" ng-show="teams">
-                Group<select
-                     ng-model="search.group" multiple title="Choose one of the group"
-                     ng-options="group.id as group.name for group in groups"
+             <div class="row below">
+                <select
+                     ng-model="search.roles" multiple title="Choose role"
+                     ng-options="role.id as role.name for role in roles"
                      bs-select>
                 </select>
-                Location<select
-                     ng-model="search.locations" multiple title="Choose one of the location"
-                     ng-options="c.id as c.name for c in location"
+                <select
+                     ng-model="search.locations" multiple title="Choose location"
+                     ng-options="c.id as c.name for c in locations"
                      bs-select>
                 </select>
-                Team<select
-                     ng-model="search.team" multiple title="Choose one of the team"
+                <select
+                     ng-model="search.teams" multiple title="Choose team"
                      ng-options="team.id as team.name for team in teams"
                      bs-select>
                 </select>
@@ -28,18 +28,16 @@
     <div class="tabs">
 
     <ul class="nav nav-tabs">
-       <li class="active"><a href="#employees" data-toggle="tab">Employees ({{users.length}})</a></li>
-        <li class=""><a href="#freelances" data-toggle="tab">Freelancers</a></li>
-        <!--{% if request.has_perm('admin') %}-->
-        <li class=""><a href="#clients" data-toggle="tab">Clients</a></li>
-        <li class=""><a href="#inactive" data-toggle="tab">Inactive</a></li>
+       <li class="active"><a data-toggle="tab" ng-click="set_tab('employees')">Employees ({{ get_employees().length }})</a></li>
+        <li class=""><a data-toggle="tab" ng-click="set_tab('freelancers')">Freelancers ({{ get_freelancers().length }})</a></li>
+        <li class=""><a data-toggle="tab" ng-click="set_tab('clients')">Clients ({{ get_clients().length }})</a></li>
+        <li ng-show="G.user.has_perm('admin')" class=""><a data-toggle="tab" ng-click="set_tab('inactive')">Inactive ({{ get_inactive().length }})</a></li>
     </ul>
 
     <div class="tab-content">
-        <div class="tab-pane fade in active" id="employees">
+        <div class="tab-pane fade in active">
             <table id='oo' class="table table-bordered table-hover user-list width_auto ">
             <thead>
-                <th class="lp">&nbsp;</th>
                 <th class="avatar">&nbsp;</th>
                 <th class="name">Employee's name</th>
                 <th class="contact">Contact</th>
@@ -48,11 +46,10 @@
                 <th>Start work</th>
             </thead>
             <tbody>
-                <tr ng-repeat="user in employees() | my_filter:search:teams_to_user">
-                    <td class="counter"></td>
+                <tr ng-repeat="user in get_users()">
                     <td class="email"><img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" /></td>
                     <td class="name">
-                        <div> {{user.name}} ( {{user.location_short}} )</div>
+                        <div><a ng-href="/user/view?user_id={{ user.id }}">{{user.name}}</a> ( {{user.location[2] }} )</div>
                     </td>
                     <td class="contact-info">
                         <a href="mailto:{{ user.email }}">{{ user.email }}</a><br/><br/>
@@ -62,11 +59,7 @@
                             <label ng-show="user.irc">IRC:<br/><span>{{ user.irc }}</span><br/></label>
                     </td>
                     <td>
-                        <span ng-show="user.freelancer">Freelancer<br/></span>
-                        <span ng-show="user.is_programmer">Programer<br/></span>
-                        <span ng-show="user.is_frontend_developer">Frontend developer<br/></span>
-                        <span ng-show="user.is_graphic_designer">Graphic designer<br/></span>
-                        <span ng-show="user.levels_html">{{user.levels_html}}</span>
+                        <div ng-repeat="role in user.roles">{{ to_pretty_role(role) }}</div>
                     </td>
                     <td>
                         <a ng-show="user.availability_link" href="{{ user.availability_link }}">Avability</a><br/>
@@ -77,12 +70,6 @@
 
             </tbody>
          </table>
-        </div>
-        <div class="tab-pane fade" id="freelances">
-        </div>
-        <div class="tab-pane fade" id="clients">
-        </div>
-        <div class="tab-pane fade" id="inactive">
         </div>
     </div>
 </div>

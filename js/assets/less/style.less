@@ -1949,8 +1949,30 @@ i.pointer {
         }
     }
 }
-.row {
-  margin-left: -10px;
-  margin-top: 5px;
-  *zoom: 1;
+
+#employees {
+  table thead tr {
+    th:nth-child(1) {
+      width: 100px;
+    }
+    th:nth-child(2) {
+      width: 200px;
+    }
+    th:nth-child(3) {
+      width: 200px;
+    }
+    th:nth-child(4) {
+      width: 100px;
+    }
+  }
+  .below {
+    margin-top: 10px;
+
+  }
+}
+
+.dropdown-menu {
+  .check-mark {
+    margin-top: -1.5px !important;
+  }
 }

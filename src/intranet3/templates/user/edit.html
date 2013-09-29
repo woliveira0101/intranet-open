@@ -14,10 +14,7 @@
                     {{ form_field(form.is_active, _('Uncheck if no longer works here')) }}
                     {{ form_field(form.groups, _('Privilages for views, by default new employees get user and freelancers')) }}
                 {% endif %}
-                {{ form_field(form.is_programmer, _('Check if freelancer is a programmer')) }}
-                {{ form_field(form.is_frontend_developer, _('Check if freelancer is a frontend developer')) }}
-                {{ form_field(form.is_graphic_designer, _('Check if freelancer is a graphic designer')) }}
-                {{ form_field(form.level, 'Role') }}
+                {{ form_field(form.roles, 'Role') }}
 
                 {{ form_field(form.availability_link, _('Link to Google Calendar with working hours')) }}
                 {{ form_field(form.tasks_link, _('Link to Google calendar with booked tasks')) }}

@@ -71,7 +71,7 @@ def do_dictsort(value, case_sensitive=False, by='key', attribute=None):
     return sorted(value.items(), key=sort_func)
 
 def tojson(dict_):
-    return json.dumps(dict_)
+    return Markup(json.dumps(dict_))
 
 
 def is_true(value):
