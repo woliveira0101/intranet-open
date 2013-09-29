@@ -1787,28 +1787,40 @@ i.pointer {
     }
 }
 .box-teams {
-    width: 360px;
+    overflow: hidden;
     > h2 {
         float: left;
     }
     > .btn {
-        float: right;
         margin-top: 10px;
-        margin-right: 18px;
+        margin-left: 18px;
     }
     .alert {
         background-color: #fff;
         border: 1px solid #ddd;
         color: #333;
+        width: 40px;
+        float: left;
     }
     .alert-success {
         background-color:#dff0d8;
         border-color:#d6e9c6;
         color:#468847;
     }
+    .icon-arrow-left {
+      float: right;
+      margin-top: 14px;
+      cursor: pointer;
+    }
 }
 .box-users {
     width: 425px;
+    margin-left: 10px;
+    float: right;
+    .users-hide {
+      cursor: pointer;
+      margin: 7px;
+    }
 }
 .icon_team {
     float: left;
@@ -1824,10 +1836,7 @@ i.pointer {
     }
 }
 .desc_team {
-    float: left;
-    min-height: 126px;
     .thumbnail {
-        width: 220px;
         border: 2px dashed #ddd;
     }
     img {
@@ -1847,6 +1856,9 @@ i.pointer {
     font-size: 13px;
     font-weight: bold;
     padding-bottom: 15px;
+    i {
+      cursor: pointer;
+    }
 }
 .team-box {
     margin-bottom: 20px;
@@ -1861,15 +1873,11 @@ i.pointer {
         margin-bottom: 10px;
         padding-bottom: 10px;
         overflow: hidden;
-        width: 342px;
         &:last-child {
             margin-bottom: 0;
             padding-bottom: 0;
             border: none;
         }
-    }
-    .btn-danger, .btn-success{
-        margin-top: 5px;
     }
     .alert {
         padding: 0;
@@ -1888,13 +1896,21 @@ i.pointer {
             right: 3px;
         }
     }
+    button.close {
+      display: none;
+    }
+    .show_x {
+      button.close {
+        display: block;
+      }
+    }
+    .team {
+      overflow: hidden;
+    }
 }
 .users-input-search {
     margin-top: 12px;
     margin-bottom: 15px;
-    input {
-        width: 381px;
-    }
 }
 .teams-input-search {
     margin-top: 5px;

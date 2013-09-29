@@ -76,7 +76,7 @@ module.exports = function(grunt) {
     watch: {
       js: {
         files: FILES['APP_JS'].concat(FILES['PARTIALS_SRC']),
-        tasks: 'concat'
+        tasks: ['ngtemplates', 'concat']
       },
       less: {
         files: FILES['APP_LESS'],

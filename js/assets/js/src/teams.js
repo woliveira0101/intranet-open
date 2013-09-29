@@ -21,9 +21,10 @@ var resetScrolls = function(){
   }
 };
 
-App.controller('oneCtrl', function($scope, $http, $dialog) {
+App.controller('oneCtrl', function($scope, $http, $dialog, $timeout) {
   $scope.teams = [];
   $scope.users = [];
+  $scope.show_users = false;
 
   $http.get('/api/users').success(function(data){
       $scope.users = data.users;
@@ -82,6 +83,13 @@ App.controller('oneCtrl', function($scope, $http, $dialog) {
       $http.delete('/api/teams/' + team.id);
       var index = $scope.teams.indexOf(team);
       $scope.teams.splice(index, 1)
+    }
+  };
+
+  $scope.toggle_users = function(){
+    $scope.show_users = !$scope.show_users;
+    if($scope.show_users){
+      $timeout(resetScrolls, 100);
     }
   };
 
