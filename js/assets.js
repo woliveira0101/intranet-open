@@ -25,7 +25,7 @@ var BOWER_CSS = [
 ];
 
 var STATIC = '../src/intranet3/static/';
-var PARTIALS = 'tmp/partials_tmp.js';
+var PARTIALS_DEST = 'tmp/partials_tmp.js';
 var NGMINNED_APP = 'tmp/ngminned_app.js';
 
 module.exports = {
@@ -43,12 +43,13 @@ module.exports = {
    // Our things
   APP_JS: [
     'assets/js/src/**/*.js',
-    PARTIALS
+    PARTIALS_DEST
   ],
   APP_LESS: [
     'assets/less/*.less'
   ],
   NGMINNED_APP: NGMINNED_APP,
-  PARTIALS: PARTIALS,
+  PARTIALS_DEST: PARTIALS_DEST,
+  PARTIALS_SRC: ['assets/partials/**/*.html'],
   STATIC: STATIC
 };

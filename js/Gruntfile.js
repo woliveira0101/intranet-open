@@ -75,7 +75,7 @@ module.exports = function(grunt) {
     },
     watch: {
       js: {
-        files: FILES['APP_JS'],
+        files: FILES['APP_JS'].concat(FILES['PARTIALS_SRC']),
         tasks: 'concat'
       },
       less: {
@@ -89,8 +89,8 @@ module.exports = function(grunt) {
            base: 'assets/partials',
            htmlmin: {}
          },
-         src: 'assets/partials/*.html',
-         dest: FILES['PARTIALS']
+         src: FILES['PARTIALS_SRC'],
+         dest: FILES['PARTIALS_DEST']
       }
     }
   });
