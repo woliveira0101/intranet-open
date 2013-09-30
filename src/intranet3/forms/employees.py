@@ -61,7 +61,7 @@ class LateApplicationForm(BaseForm):
 
     def validate_popup_date(self, field):
         if field.data <= datetime.date.today():
-            raise ValidationError(_(u'Date have to be form future'))
+            raise ValidationError(_(u'Date have to be from future'))
 
         date = field.data
         user_id = self.user.id

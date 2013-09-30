@@ -3,7 +3,8 @@
             <table class="table table-bordered presence" id="late">
                 <thead>
                     <tr ng-show="!(get_lates().length == 0 && get_absences().length == 0)">
-                        <th ng-show="!(get_lates().length == 0 && get_absences().length == 0)">User</th>
+                        <th></th>
+                        <th>User</th>
                         <th ng-show="get_lates().length != 0">From</th>
                         <th ng-show="get_lates().length == 0"></th>
                         <th ng-show="get_lates().length != 0">To</th>

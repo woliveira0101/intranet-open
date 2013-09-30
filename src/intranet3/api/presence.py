@@ -22,7 +22,6 @@ class PresenceApi(ApiView):
             MEMCACHED_NOTIFY_KEY % date.strftime('%d.%m.%Y')
         )
         blacklist = self.request.user.notify_blacklist
-
         if current_data_late is not None:
             current_data_late['blacklist'] = blacklist
             return current_data_late
@@ -60,7 +59,6 @@ class PresenceApi(ApiView):
                 for user_id, user_name in absences
             ]
         )
-
         memcache.add(
             MEMCACHED_NOTIFY_KEY % date.strftime('%d.%m.%Y'),
             current_data_late,
