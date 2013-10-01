@@ -38,6 +38,11 @@
               <i class="icon-edit" ng-click="openModal(team)"></i>
               <i class="icon-remove icon-red" ng-show="!team.dirty" ng-click="deleteTeam(team)"></i>
               <i class="icon-ok icon-green" ng-show="team.dirty" ng-click="save(team)"></i>
+              <span class="float_right">
+                <span ng-repeat="project in team.projects" style="float: right; margin-right: 20px">
+                  <a href="/client/view?client_id={{ project.client.id }}">{{ project.client.name }}</a> / <a href="/project/edit?project_id={{ project.id }}">{{ project.name }}</a>
+                </span>
+              </span>
             </div>
             <div class="icon_team">
               <img ng-src="{{ team.img }}">

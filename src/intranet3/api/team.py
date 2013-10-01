@@ -5,7 +5,7 @@ from pyramid.httpexceptions import HTTPBadRequest, HTTPCreated, HTTPOk, HTTPNotF
 from sqlalchemy.exc import IntegrityError
 
 from intranet3.utils.views import ApiView
-from intranet3.models import Team as Team_m, TeamMember, User, DBSession
+from intranet3.models import Team as Team_m, TeamMember, User, Sprint, Project, Client
 from intranet3.schemas.team import TeamAddSchema, TeamUpdateSchema
 from intranet3.utils.decorators import has_perm
 from intranet3 import helpers as h
@@ -18,14 +18,43 @@ class Teams(ApiView):
     def get(self):
         teams = self.session.query(Team_m, TeamMember.user_id)\
                             .filter(TeamMember.team_id==Team_m.id)
-        teams = h.groupby(teams, lambda x: x[0], lambda x: x[1])
+
+        team_to_project = self.session.query(Team_m.id, Project, Client)\
+                                      .filter(Sprint.team_id==Team_m.id)\
+                                      .filter(Sprint.project_id==Project.id)\
+                                      .filter(Project.client_id==Client.id)\
+                                      .order_by(Sprint.end.desc())
+
+        teams = h.groupby(
+            teams,
+            lambda x: x[0],
+            lambda x: x[1]
+        )
+        team_to_project = h.groupby(
+            team_to_project,
+            lambda x: x[0],
+            lambda x: x[1:]
+        )
         result = []
         for team, members in teams.iteritems():
             team = team.to_dict()
             team['users'] = members
+            projects = team_to_project.get(team['id'], [])[:2] # two most recent projects
+            team['projects'] = [
+                dict(
+                    id=project.id,
+                    name=project.name,
+                    client=dict(
+                        id=client.id,
+                        name=client.name,
+                    ),
+                ) for project, client in projects
+            ]
             result.append(team)
 
-        return result
+        return dict(
+            teams=result
+        )
 
     @has_perm('admin')
     def post(self):
