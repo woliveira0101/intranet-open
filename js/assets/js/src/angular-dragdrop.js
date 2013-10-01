@@ -148,7 +148,6 @@ var jqyoui = angular.module('ngDragDrop', []).service('ngDragDropService', ['$ti
     this.mutateDroppable = function(scope, dropSettings, dragSettings, dropModel, dragItem, jqyoui_pos) {
       var dropModelValue = scope.$eval(dropModel);
       var abort = this.callCallback(scope, dropSettings['onBeforeDrop'], [dropModelValue, dragItem]);
-      console.log(abort);
 
       if(abort === false) return
 

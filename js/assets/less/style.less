@@ -1821,6 +1821,9 @@ i.pointer {
       cursor: pointer;
       margin: 7px;
     }
+    h2.title {
+      float: left
+    }
 }
 .icon_team {
     float: left;
@@ -1909,14 +1912,18 @@ i.pointer {
       overflow: hidden;
     }
 }
-.users-input-search {
-    margin-top: 12px;
-    margin-bottom: 15px;
-}
-.teams-input-search {
-    margin-top: 5px;
+.teams-input-search, .users-input-search {
+    display: inline;
+    margin-left: 20px;
     input {
-        width: 281px;
+        width: 200px;
+        margin-top: 10px;
+    }
+    span {
+      margin-top: 10px;
+    }
+    .team-less {
+      margin: 15px 0 0 10px;
     }
 }
 .users {

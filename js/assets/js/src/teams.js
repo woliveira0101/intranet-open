@@ -24,6 +24,7 @@ var resetScrolls = function(){
 App.controller('oneCtrl', function($scope, $http, $dialog, $timeout) {
   $scope.teams = [];
   $scope.users = [];
+  $scope.teamless = false;
   $scope.show_users = false;
 
   $http.get('/api/users').success(function(data){
@@ -91,6 +92,18 @@ App.controller('oneCtrl', function($scope, $http, $dialog, $timeout) {
     if($scope.show_users){
       $timeout(resetScrolls, 100);
     }
+  };
+
+  $scope.get_users = function(){
+    if(!$scope.teamless){
+      return $scope.users;
+    }
+    var users_in_teams = _.flatten(_.map($scope.teams, function(team){
+      return team.users;
+    }));
+    return _.filter($scope.users, function(user){
+      return _.indexOf(users_in_teams, user) === -1;
+    });
   };
 
 });
