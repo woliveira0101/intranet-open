@@ -49,7 +49,7 @@ App.controller('oneCtrl', function($scope, $http, $dialog, $timeout) {
         _.each($scope.teams, function(team){
           team.users = _.filter($scope.users, function(user){
             return team.users.indexOf(user.id) !== -1;
-          });
+          }); 
         });
         resetScrolls()
       });

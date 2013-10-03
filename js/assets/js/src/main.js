@@ -337,7 +337,7 @@
                 }
             };
         })();
-
+        
         $('[class^="x-user-tooltip-"]').each(function(){
             $item = $(this);
             var uid = $item.prop('class').match(/x-user-tooltip-(\d+)/)[1];
@@ -349,6 +349,7 @@
                 });
             }
         });
+        
         $(document).mousemove(function(e){
             usertooltip.pos(e.pageX,e.pageY);
         });

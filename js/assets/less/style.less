@@ -439,7 +439,48 @@ form {
     margin: 6px 0 0 5px;
   }
 }
-/* Users tooltip */
+
+.users-tooltip-container {
+    width: 400px;
+    opacity: 1.0 !important;
+}
+
+#users-tooltip-angular {
+    overflow: hidden;
+    max-width: 400px;
+    margin:8px 0 0 8px;
+    padding:8px;
+    border-radius:5px;
+    box-shadow:0 0 8px #888;
+    background:#fff;
+    font-size: 11px;
+    color: black;
+    text-align: left;
+    img {
+        width:100px;
+        float:left;
+        margin:0 8px 8px 0;
+    }
+    h3 {
+        font-weight:bold;
+        font-size:16px;
+        margin:0 0 8px;
+    }
+    .form {
+        float:left;
+        width:250px;
+    }
+    .form-line {
+        clear:both;
+        label {
+            float:left;
+            display: block;
+            width:70px;
+            font-size: 11px;
+        }
+    }
+}
+
 #users-tootip {
     display:none;
     position:absolute;
@@ -1223,7 +1264,7 @@ form.box_edit_user dl dt {
         text-align:left;
         float: left;
         min-width: 138px;
-        &:hover { 
+        &:hover {
             .desc_ticket {
                 height: auto;
             }
@@ -1759,8 +1800,6 @@ i.pointer {
 .frame_team {
     .box {
         margin-right: 20px;
-        min-height: 570px;
-        max-height: 570px;
     }
     input {
         margin-bottom: 0;
@@ -1769,8 +1808,6 @@ i.pointer {
         margin: 0;
         padding: 0;
         list-style: none;
-        min-height: 460px;
-        max-height: 460px;
         overflow-y: auto;
     }
     .users {
@@ -1784,6 +1821,14 @@ i.pointer {
         .users {
             width: 104%;
         }
+    }
+    .add-on-icon {
+        float: left;
+        margin-left: 20px;
+    }
+    #add-on-input {
+        float: left;
+        margin-right: 10px;
     }
 }
 .box-teams {
@@ -1922,9 +1967,12 @@ i.pointer {
     span {
       margin-top: 10px;
     }
-    .team-less {
-      margin: 15px 0 0 10px;
-    }
+}
+.team-less {
+  margin: -3px 0 0 20px;
+  input {
+    margin-top: -1px;
+  }
 }
 .users {
     margin-top: 10px;
@@ -1956,7 +2004,7 @@ i.pointer {
         img {
             margin: 0;
         }
-    }   
+    }
     .desc_team {
         .user:last-child {
             border: none;
