@@ -4,14 +4,28 @@ App.run(function($rootScope) {
   $rootScope.G = G;
 });
 
+var calculateHeight = function() {
+  maxHeight = $(window).height();
+  $('.frame_team').css('max-height', maxHeight - 50);
+  $('.frame_team ul').css('max-height', maxHeight - 215);
+  $('.frame_team .box').css('max-height', maxHeight - 50);
+  $('.team-box > ul').css('max-height', maxHeight - 248);
+}
+$( window ).resize(function() {
+  calculateHeight();
+});
+
 $.fn.hasScrollBar = function() {
   return this.get(0).scrollHeight > this.height();
 };
+
 var resetScrolls = function(){
   var teams = $('.team-box ul');
   var users = $('.box-users ul');
   var scrollTeams = teams.hasScrollBar();
   var scrollUsers = users.hasScrollBar();
+
+  calculateHeight();
 
   if (scrollTeams) {
     teams.addClass('scroll');
@@ -35,7 +49,7 @@ App.controller('oneCtrl', function($scope, $http, $dialog, $timeout) {
         _.each($scope.teams, function(team){
           team.users = _.filter($scope.users, function(user){
             return team.users.indexOf(user.id) !== -1;
-          });
+          }); 
         });
         resetScrolls()
       });
@@ -73,6 +87,7 @@ App.controller('oneCtrl', function($scope, $http, $dialog, $timeout) {
   };
 
   $scope.deleteUser = function (item, team){
+    $('.tooltip').remove();
     var index = team.users.indexOf(item);
     team.users.splice(index, 1);
     team.dirty = true;
@@ -104,6 +119,10 @@ App.controller('oneCtrl', function($scope, $http, $dialog, $timeout) {
     return _.filter($scope.users, function(user){
       return _.indexOf(users_in_teams, user) === -1;
     });
+  };
+
+  $scope.get_filtered_users = function(){
+    return $filter('filter')($scope.get_users(), 'userSearch');
   };
 
 });

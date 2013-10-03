@@ -8,8 +8,8 @@
     <div ng-show="show_users" class="box box-users">
       <h2 class="title"><i ng-click="toggle_users()" class="icon-arrow-right users-hide"></i>Users</h2>
       <div class="input-prepend users-input-search">
-        <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" ng-model="userSearch">
+        <span class="add-on add-on-icon"><i class="icon-search"></i></span>
+        <input id="add-on-input" type="text" ng-model="userSearch">
       </div>
       <div class="team-less">
         Teamless: <input type="checkbox" ng-model="teamless">
@@ -18,12 +18,12 @@
       <ul class="users" data-drop="true" ng-model='users'>
         <li data-drag="true"
             data-jqyoui-options="{revert: 'invalid', helper: 'clone'}"
-            ng-repeat="item in get_users() | filter:userSearch"
-            ng-model="users"
+            ng-repeat="item in (filtered_users = (get_users() | filter:userSearch))"
+            ng-model="filtered_users"
             jqyoui-draggable="{index: {{$index}},animate:false,placeholder:'keep'}"
             user-id="{{ item.id }}"
             ng-hide="!item.name"><img ng-src="{{ item.img }}">{{item.name}}</li>
-      </ul>
+      </ul> 
     </div>
     <div class="box box-teams">
       <h2 class="title">Teams</h2>
@@ -57,7 +57,7 @@
                    jqyoui-droppable="{multiple:true,onBeforeDrop:'onBeforeDrop'}"
                    data-jqyoui-options="teamOptions"
                   >
-                <div class="alert user"
+                <div class="alert user x-user-tooltip-141"
                      ng-repeat="item in team.users"
                      data-drag="true"
                      data-jqyoui-options="{revert: 'invalid'}"
@@ -66,7 +66,10 @@
                      ng-class="overclass"
                      ng-mouseover="overclass = 'show_x'"
                      ng-mouseleave="overclass = 'hide_x'"
-                     user-id="{{ item.id }}"><img ng-src="{{ item.img }}">
+                     user-id="{{ item.id }}"
+                     user-tooltip="item">
+                     <!-- bs-tooltip="item.name"> -->
+                     <img ng-src="{{ item.img }}">
                   <button type="button" class="close" ng-click="deleteUser(item, team)">&times;</button></div>
                 <div class="help_text">Przeciągnij tutaj użytkownika</div>
               </div>
