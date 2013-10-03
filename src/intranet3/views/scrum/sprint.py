@@ -150,11 +150,23 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         bugs = move_blocked_to_the_end(bugs)
         tracker = Tracker.query.get(sprint.project.tracker_id)
         sw = SprintWrapper(sprint, bugs, self.request)
-        return dict(
+        res = dict(
             tracker=tracker,
             bugs=sw.bugs,
             info=sw.get_info(),
         )
+        update_info = self.change_date(res['info'])
+        res['info'].update(date_range=update_info)
+        return res
+
+    def change_date(self, data):
+        start = self.reverse_date(data['start'])
+        end = self.reverse_date(data['end'])
+        return ' - '.join([start, end])
+
+    def reverse_date(self, date):
+        res = date.split('-')
+        return '-'.join([res[2], res[1], res[0]])
 
 
 @view_config(route_name='scrum_sprint_board', permission='client')
