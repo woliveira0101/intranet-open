@@ -274,7 +274,7 @@
             firstDay: 1
         });
 
-        usertooltip = (function(){
+        var usertooltip = (function(){
             var users = {}, isShow = false, x = 0, y = 0, xhr = null;
             var get = function(uid,fn){
                 if(xhr){

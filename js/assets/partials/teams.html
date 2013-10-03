@@ -23,7 +23,7 @@
             jqyoui-draggable="{index: {{$index}},animate:false,placeholder:'keep'}"
             user-id="{{ item.id }}"
             ng-hide="!item.name"><img ng-src="{{ item.img }}">{{item.name}}</li>
-      </ul> 
+      </ul>
     </div>
     <div class="box box-teams">
       <h2 class="title">Teams</h2>
@@ -57,7 +57,7 @@
                    jqyoui-droppable="{multiple:true,onBeforeDrop:'onBeforeDrop'}"
                    data-jqyoui-options="teamOptions"
                   >
-                <div class="alert user x-user-tooltip-141"
+                <div class="alert user"
                      ng-repeat="item in team.users"
                      data-drag="true"
                      data-jqyoui-options="{revert: 'invalid'}"
@@ -68,7 +68,6 @@
                      ng-mouseleave="overclass = 'hide_x'"
                      user-id="{{ item.id }}"
                      user-tooltip="item">
-                     <!-- bs-tooltip="item.name"> -->
                      <img ng-src="{{ item.img }}">
                   <button type="button" class="close" ng-click="deleteUser(item, team)">&times;</button></div>
                 <div class="help_text">Przeciągnij tutaj użytkownika</div>
