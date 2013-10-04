@@ -14,8 +14,6 @@ var BOWER_JS = [
   BOWER_COMPONENTS + 'spectrum/spectrum.js',
   //TIMEPICKER
   BOWER_COMPONENTS + 'bootstrap-timepicker/js/bootstrap-timepicker.min.js',
-  //DATEJS
-  BOWER_COMPONENTS + 'datejs/build/date.js'
 ];
 
 var BOWER_CSS = [

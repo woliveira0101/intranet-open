@@ -1,7 +1,37 @@
 
 var App = angular.module('intranet');
 
+function updateLists($scope) {
+    $scope.whitelist = _.filter($scope.users, function(user){
+       return $scope.blacklistIds.indexOf(user.id) < 0;
+    });
+    $scope.blacklist = _.filter($scope.users, function(user){
+       return $scope.blacklistIds.indexOf(user.id) >= 0;
+    });
+}
+
 App.controller('wstalCtrl', function($scope, $http, $dialog) {
+    $("#dialogRemovalConfirmation").dialog({
+      autoOpen: false,
+      resizable: false,
+      modal: true,
+      closeText: "x",
+      buttons: {
+        "Add to black list": function() {
+            $scope.delete($scope.blacklistProposal.id);
+            $scope.$apply();
+            $(this).dialog("close");
+        },
+        Cancel: function() {
+            $(this).dialog("close");
+        }
+      },
+      open: function(event, ui) {
+        $('.ui-dialog-titlebar-close', ui.dialog).text('x');
+        $('#proposalName').text(($scope.blacklistProposal.name));
+      }
+    });
+
     $scope.show_box = false;
 
     $http.get('/api/users').success(function(data){
@@ -11,19 +41,19 @@ App.controller('wstalCtrl', function($scope, $http, $dialog) {
     $http.get('/api/presence').success(function(data){
         $scope.lates = data.lates;
         $scope.absences = data.absences;
-        $scope.blacklist = data.blacklist;
+        $scope.blacklistIds = data.blacklist;
     });
 
 
     $scope.get_lates = function(){
         return _.filter($scope.lates, function(user){
-           return $scope.blacklist.indexOf(user.id) < 0;
+           return $scope.blacklistIds.indexOf(user.id) < 0;
         });
     };
 
     $scope.get_absences = function(){
         return _.filter($scope.absences, function(user){
-           return $scope.blacklist.indexOf(user.id) < 0;
+           return $scope.blacklistIds.indexOf(user.id) < 0;
         });
     };
 
@@ -38,6 +68,8 @@ App.controller('wstalCtrl', function($scope, $http, $dialog) {
     };
 
     $scope.openModal = function(){
+        updateLists($scope);
+
         var d = $dialog.dialog({
             resolve: {
                 $callerScope: function() {return $scope}
@@ -46,25 +78,68 @@ App.controller('wstalCtrl', function($scope, $http, $dialog) {
         d.open('blacklist.html', 'blackListCtrl');
     };
 
+    $scope.openRemovalConfirmation = function(user) {
+        $scope.blacklistProposal = user;
+        $("#dialogRemovalConfirmation").dialog("open")
+    }
+
     $scope.delete = function(user_id){
-        $scope.blacklist.push(user_id);
+        $scope.blacklistIds.push(user_id);
     };
 
 });
 
 App.controller('blackListCtrl', function($scope, $http, $timeout, dialog, $callerScope) {
     $scope.users = $callerScope.users;
+    $scope.blacklistIds = $callerScope.blacklistIds;
     $scope.blacklist = $callerScope.blacklist;
+    $scope.whitelist = $callerScope.whitelist;
+    $scope.selectedBlack = [];
+    $scope.selectedWhite = [];
 
     $scope.close = function(){
         dialog.close();
     };
 
     $scope.edit = function(){
-        $callerScope.blacklist = $scope.blacklist;
+        $callerScope.blacklistIds = $scope.blacklistIds;
         dialog.close();
         $http.post('/api/blacklist', {
-            blacklist:$scope.blacklist
+            blacklist:$scope.blacklistIds
         })
     };
+
+    $scope.allWhite = function() {
+        $scope.whitelist = $scope.users;
+        $scope.blacklist = [];
+        $scope.blacklistIds = [];
+        $scope.selectedBlack = [];
+    }
+
+    $scope.allBlack = function() {
+        $scope.blacklist = $scope.users;
+        $scope.whitelist = [];
+        $scope.blacklistIds = $scope.blacklist.map(function (item) {
+            return item.id;
+        });
+        $scope.selectedWhite = [];
+    }
+
+    $scope.selectedToWhite = function() {
+        for (i = 0; i < $scope.selectedBlack.length; i++) {
+            delete $scope.blacklistIds[$scope.blacklistIds.indexOf($scope.selectedBlack[i])];
+        }
+
+        updateLists($scope);
+        $scope.selectedBlack = [];
+    }
+
+    $scope.selectedToBlack = function() {
+        for (i = 0; i < $scope.selectedWhite.length; i++) {
+            $scope.blacklistIds[$scope.blacklistIds.length] = $scope.selectedWhite[i];
+        }
+
+        updateLists($scope);
+        $scope.selectedWhite = [];
+    }
 });

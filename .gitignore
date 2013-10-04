@@ -27,3 +27,5 @@ bower_components
 src/intranet3/static/css
 src/intranet3/static/js
 js/tmp
+
+*.directory

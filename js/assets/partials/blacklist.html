@@ -1,20 +1,41 @@
 <div>
   <div class="modal-header">
     <button class="close" aria-hidden="true" ng-click="close()">×</button>
-    <h3 id='black_list_header' >Black List</h3>
+    <h3 id='black_list_header'>Settings</h3>
   </div>
+
   <div class="modal-body">
+
       <div class='black_list_select'>
+          <h4 id='black_list_header'>Users</h4>
           <select
-                ng-model='blacklist'
-                ng-options='item.id as item.name for item in users'
+                ng-model='selectedWhite'
+                ng-options='item.id as item.name for item in whitelist'
                 multiple>
 
           </select>
       </div>
-      <p>Selection: {{blacklist}}</p>
-      <div class="pull-right">
-        <button class="btn btn-primary" type="submit" ng-click="edit()">Submit</button>
+
+      <div id="black_list_controls">
+        <input type="button" value=">>" ng-click="allBlack()" />
+        <input type="button" value=">" ng-click="selectedToBlack()" />
+        <input type="button" value="<" ng-click="selectedToWhite()" />
+        <input type="button" value="<<" ng-click="allWhite()" />
       </div>
+
+      <div class='black_list_select'>
+          <h4 id='black_list_header'>Black List</h4>
+          <select
+                ng-model='selectedBlack'
+                ng-options='item.id as item.name for item in blacklist'
+                multiple>
+
+          </select>
+      </div>
+
+    <div class="pull-right">
+      <button class="btn btn-primary" type="submit" ng-click="edit()">Submit</button>
+    </div>
+
   </div>
 </div>

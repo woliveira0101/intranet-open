@@ -66,6 +66,7 @@ def main(global_config, **settings):
         if userid == 0: ## cron userid
             perm = ['g:cron']
         else:
+            print userid
             user = User.query.get(userid)
             perm = [ 'g:%s' % g for g in user.groups ]
             if user.is_coordinator:
@@ -169,7 +170,7 @@ def run():
     from intranet3 import cron
     if not config.get('CRON_DISABLE'):
         cron.run_cron_tasks()
-    
+
     for directory in ['users', 'teams', 'previews']:
         if not os.path.exists(os.path.join(settings['AVATAR_PATH'], directory)):
             os.makedirs(os.path.join(settings['AVATAR_PATH'], directory))
