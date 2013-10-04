@@ -34,7 +34,7 @@
     {% if entries.count() %}
     <tbody>
         {% for tracker, entry in entries %}
-        <tr{% if entry.deleted %} class="deleted"{% endif %}>
+        <tr>{% if entry.deleted %} class="deleted"{% endif %}>
             <td>{{ entry.project.client.name }} / {{ entry.project.name }}</td>
             <td class="time">
                 {% if entry.user_id == request.user.id and not entry.deleted %}

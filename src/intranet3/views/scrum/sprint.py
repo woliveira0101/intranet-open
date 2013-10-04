@@ -149,6 +149,11 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
         bugs = move_blocked_to_the_end(bugs)
         tracker = Tracker.query.get(sprint.project.tracker_id)
+        login_list = tracker.logins_mapping
+        for bug in bugs:
+            name = bug.owner.name
+            login = '%s@stxnext.pl' % name.lower().replace(' ', '.')
+            bug.owner.id = login_list.get(login).id
         sw = SprintWrapper(sprint, bugs, self.request)
         res = dict(
             tracker=tracker,
