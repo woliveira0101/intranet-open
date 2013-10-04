@@ -15,7 +15,7 @@ class Client(Base):
     color = Column(String, nullable=False, default='')
     google_card = Column(String, nullable=True)
     google_wiki = Column(String, nullable=True)
-    selector    = Column(String, nullable=True) 
+    selector    = Column(String, nullable=True)
     street      = Column(String, nullable=True)
     city        = Column(String, nullable=True)
     postcode    = Column(String, nullable=True)

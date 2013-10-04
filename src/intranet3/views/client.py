@@ -7,6 +7,7 @@ from intranet3.models import Client, Project
 from intranet3.log import INFO_LOG, WARN_LOG
 from intranet3.forms.client import ClientForm, ClientAddForm
 from intranet3.forms.common import DeleteForm
+from intranet3.helpers import groupby
 
 LOG = INFO_LOG(__name__)
 WARN = WARN_LOG(__name__)
@@ -39,20 +40,22 @@ class Counter():
 class Map(BaseView):
     """ Map clients/projects/selectors """
     def get(self):
-        active_only = self.request.GET.get('active_only', '1')
         active_projects_only = self.request.GET.get('active_projects_only', '1')
-        clients = self.session.query(Client).order_by(Client.name)
-        if active_only=='1':
-             clients = clients.outerjoin(Project)\
-                              .filter((Project.active==True) | (Project.client_id==None))
+
+        clients = self.session.query(Client, Project)\
+                .filter(Client.id==Project.client_id)
+
+        if active_projects_only == '1':
+            clients = clients.filter(Project.active==True)
+
+        clients = groupby(clients, keyfunc=lambda x: x[0], part=lambda x: x[1]).items()
+        clients = sorted(clients, key=lambda x: x[0].name)
 
         return dict(
             clients=clients,
-            active_only=active_only,
             active_projects_only=active_projects_only,
             counter=Counter()
         )
-
 
 @view_config(route_name='client_add', permission='admin')
 class Add(BaseView):
