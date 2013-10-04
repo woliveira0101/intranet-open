@@ -28,5 +28,3 @@ src/intranet3/static/js
 js/tmp
 
 *.directory
-*.gitignore
-intranet.sql
