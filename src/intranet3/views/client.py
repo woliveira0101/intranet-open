@@ -40,13 +40,16 @@ class Map(BaseView):
     """ Map clients/projects/selectors """
     def get(self):
         active_only = self.request.GET.get('active_only', '1')
+        active_projects_only = self.request.GET.get('active_projects_only', '1')
         clients = self.session.query(Client).order_by(Client.name)
         if active_only=='1':
              clients = clients.outerjoin(Project)\
                               .filter((Project.active==True) | (Project.client_id==None))
+
         return dict(
             clients=clients,
             active_only=active_only,
+            active_projects_only=active_projects_only,
             counter=Counter()
         )
 
