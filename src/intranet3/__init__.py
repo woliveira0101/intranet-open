@@ -66,7 +66,6 @@ def main(global_config, **settings):
         if userid == 0: ## cron userid
             perm = ['g:cron']
         else:
-            print userid
             user = User.query.get(userid)
             perm = [ 'g:%s' % g for g in user.groups ]
             if user.is_coordinator:
