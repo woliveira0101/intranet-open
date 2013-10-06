@@ -35,7 +35,7 @@ App.controller('wstalCtrl', function($scope, $http, $dialog) {
     $scope.show_box = false;
 
     $http.get('/api/users').success(function(data){
-        $scope.users = data;
+        $scope.users = data.users;
     });
 
     $http.get('/api/presence').success(function(data){

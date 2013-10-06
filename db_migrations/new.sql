@@ -2,4 +2,4 @@ ALTER TABLE "user" ADD COLUMN roles VARCHAR[] DEFAULT '{}';
 ALTER TABLE "user" ADD COLUMN stop_work DATE DEFAULT NULL;
 ALTER TABLE late ADD COLUMN late_start TIME;
 ALTER TABLE late ADD COLUMN late_end TIME;
-ALTER TABLE "user" ADD COLUMN notify_blacklist integer ARRAY;
+ALTER TABLE "user" ADD COLUMN notify_blacklist integer ARRAY DEFAULT '{}';

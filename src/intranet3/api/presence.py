@@ -19,7 +19,7 @@ class PresenceApi(ApiView):
         else:
             date = datetime.date.today()
         current_data_late = memcache.get(
-            MEMCACHED_NOTIFY_KEY % date.strftime('%d.%m.%Y')
+            MEMCACHED_NOTIFY_KEY % date
         )
         blacklist = self.request.user.notify_blacklist
         if current_data_late is not None:
@@ -60,7 +60,7 @@ class PresenceApi(ApiView):
             ]
         )
         memcache.add(
-            MEMCACHED_NOTIFY_KEY % date.strftime('%d.%m.%Y'),
+            MEMCACHED_NOTIFY_KEY % date,
             current_data_late,
             60*60*24,
         )

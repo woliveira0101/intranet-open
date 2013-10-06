@@ -60,9 +60,6 @@ class LateApplicationForm(BaseForm):
         super(LateApplicationForm, self).__init__(*args, **kwargs)
 
     def validate_popup_date(self, field):
-        if field.data <= datetime.date.today():
-            raise ValidationError(_(u'Date have to be from future'))
-
         date = field.data
         user_id = self.user.id
         late = Late.query.filter(Late.date==date)\
@@ -70,6 +67,17 @@ class LateApplicationForm(BaseForm):
                          .filter(Late.deleted==False).first()
         if late:
             raise ValidationError(_(u'You already have application in this date'))
+
+        if date < datetime.date.today():
+            start_date = datetime.datetime.combine(date, day_start)
+            end_date = datetime.datetime.combine(date, day_end)
+            work_start = DBSession.query(func.min(PresenceEntry.ts)) \
+                .filter(PresenceEntry.user_id==self.user.id) \
+                .filter(PresenceEntry.ts>=start_date) \
+                .filter(PresenceEntry.ts<=end_date).one()[0]
+
+            if not work_start or work_start.time() < hour_9:
+                raise ValidationError(_(u'You don\'t have late on this date !'))
 
 class WrongTimeJustificationForm(BaseForm):
 

@@ -12,6 +12,8 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout) {
       teams: []
     };
 
+    console.log('b');
+
     $scope.locations = [
         {
             id:'poznan',
