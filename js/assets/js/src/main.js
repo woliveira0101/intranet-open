@@ -1,5 +1,4 @@
 (function($){
-
     /**
      * Add method to format string
      */
@@ -137,6 +136,7 @@
 
     /* DOM ready */
     $(function(){
+
         $.tablesorter.addParser({
             // set a unique id
             id: 'priority',
@@ -632,6 +632,8 @@
             $this.hide();
         });
     });
+
+
 })(jQuery);
 
 // IH - intranet helpers

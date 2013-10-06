@@ -11,6 +11,7 @@ from intranet3.lib.employee import user_leave
 from .times import EmployeeChoices
 from intranet3.models import ( DBSession, User, TimeEntry, PresenceEntry,
                                WrongTime, Late, WrongTime )
+from .utils import TimeField
 
 _ = TranslationStringFactory('intranet3')
 day_start = datetime.time(0, 0, 0)
@@ -49,9 +50,10 @@ class LateJustificationForm(BaseForm):
         if late:
             raise ValidationError(_(u'You already have justification in this date'))
 
-
-
 class LateApplicationForm(BaseForm):
+
+    late_start = TimeField(_(u'Start Time'))
+    late_end = TimeField(_(u'End Time'))
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
@@ -59,7 +61,7 @@ class LateApplicationForm(BaseForm):
 
     def validate_popup_date(self, field):
         if field.data <= datetime.date.today():
-            raise ValidationError(_(u'Date have to be form future'))
+            raise ValidationError(_(u'Date have to be from future'))
 
         date = field.data
         user_id = self.user.id

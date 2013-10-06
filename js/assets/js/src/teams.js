@@ -45,7 +45,9 @@ App.controller('oneCtrl', function($scope, $http, $dialog, $timeout) {
       $scope.users = data.users;
 
       $http.get('/api/teams').success(function(data){
-        $scope.teams = data.teams;
+        $scope.teams = _.sortBy(data.teams, function(team){
+            return team.name;
+        });
         _.each($scope.teams, function(team){
           team.users = _.filter($scope.users, function(user){
             return team.users.indexOf(user.id) !== -1;

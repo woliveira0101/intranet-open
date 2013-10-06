@@ -1,0 +1,62 @@
+<div id='floatBox' ng-controller="wstalCtrl">
+    <div id="latesTodayWrapper">
+        <div id="floatDiv" ng-show="show_box">
+            <table class="table table-bordered presence" id="late" ng-show="!(get_lates().length == 0 && get_absences().length == 0)">
+                <thead>
+                    <tr>
+                        <th class="lates-column-close">
+                        </th>
+                        <th class="lates-column-user" ng-show="get_lates().length != 0">User</th>
+                        <th class="lates-column-from" ng-show="get_lates().length != 0">From</th>
+                        <th class="lates-column-to" ng-show="get_lates().length != 0">To</th>
+                        <th class="lates-column-wide" ng-show="get_lates().length == 0">User</th>
+                    </tr>
+                </thead>
+            </table>
+            <div id="latesTodayContentWrapper">
+                <table class="table table-bordered presence" id="late">
+                    <tbody>
+                        <tr ng-show="get_lates().length == 0 && get_absences().length == 0">
+                            <td colspan='3' class="lates-column-wide" id="empty_box">
+                                E M P T Y !
+                            </td>
+                        </tr>
+                        <tr class='late-light' ng-repeat="user in get_lates()">
+                            <td>
+                                <button class="close" aria-hidden="true" ng-click="openRemovalConfirmation(user)">×</button>
+                            </td>
+                            <td class="lates-column-user">
+                                <span class="name" ng-bind="user.name"></span>
+                            </td>
+                            <td class="lates-column-from">{{ user.start  && (set_time(user.start) | date:'HH:mm') || '-'}}</td>
+                            <td class="lates-column-to">{{ user.end  && (set_time(user.end) | date:'HH:mm') || '-'}}</td>
+                        </tr>
+                    <tr ng-repeat="user in get_absences()">
+                        <td>
+                            <button class="close" aria-hidden="true" ng-click="openRemovalConfirmation(user)">×</button>
+                        </td>
+                        <td colspan='3' class="lates-column-wide">
+                            <span class="name" ng-bind="user.name"></span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="floatBar">
+        <span ng-click="show()" class="badge">Late today</span>
+        <span ng-click="openModal()" ng-show="show_box" class="badge">Settings</span>
+    </div>
+
+
+    <div id="dialogRemovalConfirmation" title="Add this person to black list?">
+      <p>
+        Are you sure you want to add <b id="proposalName"></b> to your black list? <br />
+        <h6>
+            <span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>
+            Remember that you can adjust your black list later in the settings.
+        </h6>
+      </p>
+    </div>
+</div>

@@ -89,6 +89,8 @@ class User(Base):
 
     groups = Column(postgresql.ARRAY(String))
 
+    notify_blacklist = Column(postgresql.ARRAY(Integer), default=[])
+
     refresh_token = Column(String, nullable=False)
     _access_token = None
 
