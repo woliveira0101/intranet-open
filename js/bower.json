@@ -16,7 +16,7 @@
     "fancybox": "http://fancybox.googlecode.com/files/jquery.fancybox-1.3.4.zip",
     "angular-strap": "~0.7.6",
     "bootstrap-timepicker": "~0.2.3",
-    "bootstrap-select": "~1.3.3",
+    "bootstrap-select": "~1.3.3"
   },
   "devDependencies": {},
   "resolutions": {
