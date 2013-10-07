@@ -14,7 +14,6 @@ var BOWER_JS = [
   BOWER_COMPONENTS + 'underscore/underscore.js',
   BOWER_COMPONENTS + 'spectrum/spectrum.js',
   BOWER_COMPONENTS + 'bootstrap-select/bootstrap-select.js',
-  BOWER_COMPONENTS + 'bootstrap-datepicker/js/bootstrap-datepicker.js',
   BOWER_COMPONENTS + 'bootstrap-timepicker/js/bootstrap-timepicker.min.js',
 ];
 
