@@ -1,3 +1,9 @@
+0.9.3 (24-09-2013)
+===============
+- absence / lates support 
+- teams enhancemets
+- users list enhancements
+
 
 0.9.2 (24-09-2013)
 ===============
