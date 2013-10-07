@@ -29,7 +29,9 @@
     {% endif %}
     {% endwith %}
     {% block content %}<!-- main content area -->{% endblock %}
-    <div ng-include src="'wstal.html'"></div>
+    {% if request.has_perm('view') %}
+        <div ng-include src="'wstal.html'"></div>
+    {% endif %}
 
   </div>
 
