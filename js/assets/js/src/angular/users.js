@@ -53,7 +53,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout) {
           });
         });
 
-        $scope.search.teams = [1]; <!--szczuczka aby wymusić odświeżenie -- spowodowane kiepska implementacja dyrektywy bs-select  -->
+        $scope.search.teams = [1]; //szczuczka aby wymusić odświeżenie -- spowodowane kiepska implementacja dyrektywy bs-select
         $timeout(function(){
           $scope.search.teams = [];
         }, 0);
