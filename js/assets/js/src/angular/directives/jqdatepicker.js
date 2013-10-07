@@ -1,3 +1,5 @@
+var App = angular.module('intranet');
+
 App.directive('jqdatepicker', function() {
   return {
     require: 'ngModel',

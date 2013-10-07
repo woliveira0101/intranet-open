@@ -1,3 +1,5 @@
+var App = angular.module('intranet');
+
 App.controller('usersCtrl', function($scope, $http, $dialog, $timeout) {
     $scope.users = [];
     $scope.tab = 'employees';

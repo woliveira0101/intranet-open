@@ -1,3 +1,5 @@
+var App = angular.module('intranet');
+
 App.run(function($rootScope) {
   $rootScope.G = G;
 });

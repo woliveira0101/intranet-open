@@ -1,3 +1,5 @@
+var App = angular.module('intranet');
+
 function updateLists($scope) {
     $scope.whitelist = _.filter($scope.users, function(user){
        return $scope.blacklistIds.indexOf(user.id) < 0;
