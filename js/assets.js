@@ -45,6 +45,7 @@ module.exports = {
   JQUERY_UI: BOWER_COMPONENTS + 'jquery-ui/themes/smoothness/images',
    // Our things
   APP_JS: [
+    'assets/js/src/angular/app.js',
     'assets/js/src/**/*.js',
     PARTIALS_DEST
   ],
