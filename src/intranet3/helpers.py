@@ -234,8 +234,9 @@ def groupby(a_list, keyfunc=lambda x: x, part=lambda x: x):
     result = {}
     for e in a_list:
         to_append = part(e)
+        values = result.setdefault(keyfunc(e), [])
         if to_append is not None:
-            result.setdefault(keyfunc(e), []).append(to_append)
+            values.append(to_append)
 
     return result
 

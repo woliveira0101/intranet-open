@@ -17,7 +17,7 @@ class Teams(ApiView):
 
     def get(self):
         teams = self.session.query(Team_m, TeamMember.user_id)\
-                            .filter(TeamMember.team_id==Team_m.id)
+                            .outerjoin(TeamMember)
 
         team_to_project = self.session.query(Team_m.id, Project, Client)\
                                       .filter(Sprint.team_id==Team_m.id)\
