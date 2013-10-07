@@ -13,7 +13,7 @@ bitbucket_ticket_url = lambda tracker_url, ticket_id: '%s/issues/%s' % (tracker_
 
 def bugzilla_new_ticket_url(tracker_url, project_selector, component_selector):
     params = {}
-    
+
     if project_selector:
         params['product'] = project_selector
     if component_selector:
@@ -24,7 +24,7 @@ def bugzilla_new_ticket_url(tracker_url, project_selector, component_selector):
 
 def trac_new_ticket_url(tracker_url, project_selector, component_selector):
     params = {}
-    
+
     if project_selector:
         params['client_name'] = project_selector
     if component_selector:
@@ -58,10 +58,16 @@ def github_ticket_url(tracker_url, ticket_id):
 def github_new_ticket_url(tracker_url, project_selector, component_selector):
     return tracker_url
 
+def jira_ticket_url(tracker_url, ticket_id):
+    return tracker_url
+
+def jira_new_ticket_url(tracker_url, project_selector, component_selector):
+    return tracker_url
+
 class Tracker(Base):
     """ Tracker model """
     __tablename__ = 'tracker'
-    
+
     URL_CONSTRUCTORS = {
         'trac': trac_ticket_url,
         'cookie_trac': trac_ticket_url,
@@ -72,8 +78,9 @@ class Tracker(Base):
         'pivotaltracker': pivotaltracker_ticket_url,
         'unfuddle': unfuddle_ticket_url,
         'github': github_ticket_url,
+        'jira': jira_ticket_url,
     }
-    
+
     NEW_BUG_URL_CONSTRUCTORS = {
         'trac': trac_new_ticket_url,
         'cookie_trac': trac_new_ticket_url,
@@ -84,24 +91,25 @@ class Tracker(Base):
         'pivotaltracker': pivotaltracker_new_ticket_url,
         'unfuddle': unfuddle_new_ticket_url,
         'github': github_new_ticket_url,
+        'jira': jira_new_ticket_url,
     }
 
 
     id = Column(Integer, primary_key=True, nullable=False, index=True)
-    
+
     type = Column(Enum("bugzilla", "trac", "cookie_trac", "igozilla", "bitbucket", "rockzilla", "pivotaltracker", "harvest", 'unfuddle', 'github', name='tracker_type_enum'), nullable=False)
     name = Column(String, nullable=False, unique=True)
     url = Column(String, nullable=False, unique=True)
     mailer = Column(String, nullable=True, unique=True)
-    
+
     credentials = orm.relationship('TrackerCredentials', backref='tracker', lazy='dynamic')
     projects = orm.relationship('Project', backref='tracker', lazy='dynamic')
 
     def get_bug_url(self, id):
         """ Calculate URL for bug 'id' on this tracker """
-        constructor = self.URL_CONSTRUCTORS[self.type] 
+        constructor = self.URL_CONSTRUCTORS[self.type]
         return constructor(self.url, id)
-    
+
     def get_new_bug_url(self, project_selector, component_selector):
         """ Returns url for create new bug in project """
         constructor = self.NEW_BUG_URL_CONSTRUCTORS[self.type]
@@ -115,7 +123,7 @@ class Tracker(Base):
 class TrackerCredentials(Base):
     """ Credentials for given tracker for given user """
     __tablename__ = 'tracker_credentials'
-    
+
     tracker_id = Column(Integer, ForeignKey(Tracker.id), nullable=False, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False, primary_key=True, index=True)
     login = Column(String, nullable=False)

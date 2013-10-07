@@ -1,2 +1,4 @@
 ALTER TABLE "user" ADD COLUMN roles VARCHAR[] DEFAULT '{}';
 ALTER TABLE "user" ADD COLUMN stop_work DATE DEFAULT NULL;
+
+ALTER TYPE tracker_type_enum ADD VALUE 'jira';

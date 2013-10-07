@@ -8,6 +8,7 @@ from intranet3.asyncfetchers.pivotaltracker import PivotalTrackerFetcher
 from intranet3.asyncfetchers.fake import FakeFetcher
 from intranet3.asyncfetchers.unfuddle import UnfuddleFetcher
 from intranet3.asyncfetchers.github import GithubFetcher
+from intranet3.asyncfetchers.jira import JiraFetcher
 
 FETCHERS = {
     'bugzilla': BugzillaFetcher,
@@ -20,6 +21,7 @@ FETCHERS = {
     'harvest': FakeFetcher,
     'unfuddle': UnfuddleFetcher,
     'github': GithubFetcher,
+    'jira': JiraFetcher,
 }
 
 def get_fetcher(tracker, credentials, login_mapping):

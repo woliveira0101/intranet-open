@@ -19,6 +19,7 @@ TRACKER_TYPES["pivotaltracker"] = u"PivotalTracker"
 TRACKER_TYPES["harvest"] = u"Harvest"
 TRACKER_TYPES["unfuddle"] = u"Unfuddle"
 TRACKER_TYPES["github"] = u"Github"
+TRACKER_TYPES["jira"] = u"Jira"
 
 trackers_login_validators = {
     'all': {
@@ -37,7 +38,7 @@ class TrackerForm(wtf.Form):
     name = wtf.TextField(_(u'Tracker friendly name'), validators=[validators.Required()])
     url = wtf.TextField(_(u'Tracker URL'), validators=[validators.Required(), validators.URL()])
     mailer = wtf.TextField(_(u'Mailer email'), validators=[validators.Optional(), validators.Email()])
-    
+
 class TrackerLoginForm(wtf.Form):
     """ Tracker login form """
     login = wtf.TextField(_(u'Login'), validators=[validators.Required()])
