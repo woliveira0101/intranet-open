@@ -18,6 +18,9 @@ App.controller('wstalCtrl', function($scope, $http, $dialog) {
             $scope.delete($scope.blacklistProposal.id);
             $scope.$apply();
             $(this).dialog("close");
+            $http.post('/api/blacklist', {
+              blacklist: $scope.blacklistIds
+            })
         },
         Cancel: function() {
             $(this).dialog("close");
