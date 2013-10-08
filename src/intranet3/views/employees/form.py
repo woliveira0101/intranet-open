@@ -248,6 +248,7 @@ ${name}""", **kwargs)
                 type=type,
                 remarks=remarks,
             )
+            memcache.delete(MEMCACHED_NOTIFY_KEY % date_start)
             self.session.add(absence)
 
             if absence.type != 'inne':
