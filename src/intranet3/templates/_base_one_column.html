@@ -76,8 +76,7 @@
                       <li class="dropdown">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown">{% trans %}Quick links{% endtrans %}<b class="caret"></b></a>
                       <ul class="dropdown-menu">
-                        <li><a class="a_popup" href="{{ request.url_for('/employees/form/late_justification') }}">{% trans %}Excuse lateness{% endtrans %}</a></li>
-                        <li><a class="a_popup" href="{{ request.url_for('/employees/form/late_application') }}">{% trans %}Lateness request{% endtrans %}</a></li>
+                        <li><a class="a_popup" href="{{ request.url_for('/employees/form/late_application') }}">{% trans %}Lateness form{% endtrans %}</a></li>
                         <li><a class="a_popup" href="{{ request.url_for('/employees/form/wrong_time_justification') }}">{% trans %}Excuse wrong time entry{% endtrans %}</a></li>
                         <li><a class="a_popup" href="{{ request.url_for('/employees/form/absence_application') }}">{% trans %}Submit absence/holiday{% endtrans %}</a></li>
                       </ul>

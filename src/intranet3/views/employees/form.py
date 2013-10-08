@@ -4,6 +4,7 @@ import datetime
 from pyramid.view import view_config
 from pyramid.response import Response
 
+from intranet3 import memcache
 from intranet3 import config
 from intranet3 import helpers as h
 from intranet3.utils.views import BaseView
@@ -18,6 +19,7 @@ from intranet3.forms.employees import (LateJustificationForm,
 from intranet3.lib.employee import user_leave
 from intranet3.models import Late, WrongTime, Absence, Holiday, TimeEntry
 from intranet3.log import INFO_LOG
+from intranet3.api.presence import MEMCACHED_NOTIFY_KEY
 
 LOG = INFO_LOG(__name__)
 
@@ -57,49 +59,55 @@ class LateApplication(BaseView):
         form = LateApplicationForm(user=self.request.user)
         return dict(form=form)
 
+    def _send_email(self, date, explanation):
+        topic = self._(u'${email} - Late ${date}',
+                       email=self.request.user.email,
+                       date=date.strftime('%d.%m.%Y')
+        )
+        deferred = EmailSender.send(
+            config['COMPANY_MAILING_LIST'],
+            topic,
+            explanation,
+            sender_name=self.request.user.name,
+            replay_to=self.request.user.email,
+        )
+        return deferred
+
+    def _add_event(self, date, explanation):
+        datehour9 = datetime.datetime.combine(date, hour9)
+        calendar = cal.Calendar(self.request.user)
+        event = cal.Event(
+            datehour9,
+            datehour9+cal.onehour,
+            self._(u'Late'),
+            explanation,
+        )
+        event_id = calendar.addEvent(event)
+        return event_id
+
     def post(self):
         form = LateApplicationForm(self.request.POST, user=self.request.user)
         if form.validate():
             date = form.popup_date.data
             explanation = form.popup_explanation.data
+            in_future = date > datetime.date.today()
             late = Late(
                 user_id=self.request.user.id,
                 date=date,
                 explanation=explanation,
-                justified=True,
+                justified=in_future, #justifed only when date is in future
+                late_start=form.late_start.data,
+                late_end=form.late_end.data
             )
+
             self.session.add(late)
-            topic = self._(u'${email} - Late ${date}',
-                email=self.request.user.email,
-                date=date.strftime('%d.%m.%Y')
-            )
-            deferred = EmailSender.send(
-                config['COMPANY_MAILING_LIST'],
-                topic,
-                form.popup_explanation.data,
-                sender_name=self.request.user.name,
-                replay_to=self.request.user.email,
-            )
-            datehour9 = datetime.datetime.combine(date, hour9)
+            memcache.delete(MEMCACHED_NOTIFY_KEY % date)
 
-            calendar = cal.Calendar(self.request.user)
-            event = cal.Event(
-                datehour9,
-                datehour9+cal.onehour,
-                self._(u'Late'),
-                explanation,
-            )
-            event_id = calendar.addEvent(event)
+            debug = self.request.registry.settings['DEBUG'] == 'True'
+            if in_future and not debug:
+                event_id = self._add_event(date, explanation)
 
-            if deferred:
-                LOG(u"Late added")
-                if event_id:
-                    return Response(self._(u'Request added. Calendar entry added'))
-                else:
-                    return Response(self._(u'Request added. Calendar entry has <b class="red">NOT</b> beed added'))
-
-            else:
-                return Response(self._(u'There was problem with sending email - request has not been added, please conntact administrator'))
+            return Response(self._(u'Entry added'))
 
         return dict(form=form)
 
@@ -226,6 +234,7 @@ ${name}""", **kwargs)
                 days = h.get_working_days(form.popup_date_start.data, form.popup_date_end.data)
                 left -= days
         if self.request.method == 'POST' and form.validate():
+            memcache.clear()
             response = u''
             date_start = form.popup_date_start.data
             date_end = form.popup_date_end.data

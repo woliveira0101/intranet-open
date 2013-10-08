@@ -11,7 +11,7 @@
 
         <form action="{{ request.url_for('/times/tickets/report') }}"
               method="GET"
-              data-alt_action="{{ request.url_for("/times/tickets/excel") }}"
+              data-alt_action="{{ request.url_for('/times/tickets/excel') }}"
               data-alt_method="GET"
               accept-charset="utf-8"
               class="{% if request.is_user_in_group('client') %}client{% endif %}">

@@ -14,7 +14,7 @@ var BOWER_JS = [
   BOWER_COMPONENTS + 'underscore/underscore.js',
   BOWER_COMPONENTS + 'spectrum/spectrum.js',
   BOWER_COMPONENTS + 'bootstrap-select/bootstrap-select.js',
-  BOWER_COMPONENTS + 'bootstrap-datepicker/js/bootstrap-datepicker.js',
+  BOWER_COMPONENTS + 'bootstrap-timepicker/js/bootstrap-timepicker.min.js',
 ];
 
 var BOWER_CSS = [
@@ -22,6 +22,8 @@ var BOWER_CSS = [
   BOWER_COMPONENTS + 'spectrum/spectrum.css',
   BOWER_COMPONENTS + 'bootstrap-select/bootstrap-select.css',
   BOWER_COMPONENTS + 'bootstrap-datepicker/css/datepicker.css',
+  BOWER_COMPONENTS + 'bootstrap/bootstrap.css',
+  BOWER_COMPONENTS + 'bootstrap-timepicker/css/bootstrap-timepicker.min.css'
 ];
 
 var STATIC = '../src/intranet3/static/';
@@ -42,6 +44,7 @@ module.exports = {
   JQUERY_UI: BOWER_COMPONENTS + 'jquery-ui/themes/smoothness/images',
    // Our things
   APP_JS: [
+    'assets/js/src/angular/app.js',
     'assets/js/src/**/*.js',
     PARTIALS_DEST
   ],

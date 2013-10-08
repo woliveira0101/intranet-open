@@ -8,7 +8,7 @@
             </ul>
         </div>
         <div id="user_edit_form">
-            <form class="user_profile box box_edit_user" method="post" accept-charset="utf-8">
+            <form class="user_profile box box_edit_user" action="{{ request.path_qs }}" method="post" accept-charset="utf-8">
                 {{ csrf_field }}
                 {% if request.has_perm('admin') %}
                     {{ form_field(form.is_active, _('Uncheck if no longer works here')) }}

@@ -1,4 +1,4 @@
-var App = angular.module('intranet', ['ngDragDrop', 'ui.bootstrap', '$strap.directives']);
+var App = angular.module('intranet');
 
 App.run(function($rootScope) {
   $rootScope.G = G;
@@ -10,7 +10,7 @@ var calculateHeight = function() {
   $('.frame_team ul').css('max-height', maxHeight - 215);
   $('.frame_team .box').css('max-height', maxHeight - 50);
   $('.team-box > ul').css('max-height', maxHeight - 248);
-}
+};
 $( window ).resize(function() {
   calculateHeight();
 });
@@ -49,7 +49,7 @@ App.controller('oneCtrl', function($scope, $http, $dialog, $timeout) {
         _.each($scope.teams, function(team){
           team.users = _.filter($scope.users, function(user){
             return team.users.indexOf(user.id) !== -1;
-          }); 
+          });
         });
         resetScrolls()
       });

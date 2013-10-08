@@ -1,12 +1,12 @@
-App = angular.module('intranet');
+var App = angular.module('intranet');
 
 App.controller('usersCtrl', function($scope, $http, $dialog, $timeout) {
     $scope.users = [];
     $scope.tab = 'employees';
     $scope.search = {
       name: '',
-      start_work: null,
-      stop_work: null,
+      start_work: '',
+      stop_work: '',
       locations: [],
       roles: [],
       teams: []
@@ -39,7 +39,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout) {
     $http.get('/api/users?full=1&inactive=1').success(function(data){
       $scope.users = data.users;
       $http.get('/api/teams').success(function(data){
-        $scope.teams = data;
+        $scope.teams = data.teams;
         $scope.teams_to_user = {};
         $scope.user_to_teams = {};
         _.each(data, function(team){
@@ -55,7 +55,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout) {
           });
         });
 
-        $scope.search.teams = [1]; <!--szczuczka aby wymusić odświeżenie -- spowodowane kiepska implementacja dyrektywy bs-select  -->
+        $scope.search.teams = [1]; //szczuczka aby wymusić odświeżenie -- spowodowane kiepska implementacja dyrektywy bs-select
         $timeout(function(){
           $scope.search.teams = [];
         }, 0);
