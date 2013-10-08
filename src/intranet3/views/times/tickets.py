@@ -172,13 +172,6 @@ class Report(TimesReportMixin, BaseView):
         tickets_id = ','.join([str(e[2]) for e in entries])
         trackers_id = ','.join([str(e[4].id) for e in entries])
         rows, entries_sum = HTMLRow.from_ordered_data(entries, group_by, bigger_than)
-        update_info = form.data['date_range']
-        str_date = ' - '.join(
-            [
-                update_info[0].strftime('%d-%m-%Y'),
-                update_info[1].strftime('%d-%m-%Y')
-            ]
-        )
         return dict(
             rows=rows,
             entries_sum=entries_sum,
@@ -186,6 +179,8 @@ class Report(TimesReportMixin, BaseView):
             participation_of_workers=participation_of_workers,
             participation_of_workers_sum=sum([time[1] for time in participation_of_workers]),
             trackers_id=trackers_id, tickets_id=tickets_id,
-            str_date=str_date,
+            str_date=self._sprint_daterange(start_date, end_date),
         )
 
+    def _sprint_daterange(self, st, end):
+        return '%s - %s' % (st.strftime('%d-%m-%Y'), end.strftime('%d-%m-%Y'))
