@@ -207,7 +207,6 @@ form ul {
     box-sizing: border-box;
     border-radius: 5px;
     margin-left: 148px;
-    overflow: auto;
 }
 #right_column_content:after {
     visibility: hidden;
@@ -564,23 +563,16 @@ table.bugs-list tbody tr.other-projects td {
         margin-bottom: 1px;
     }
     td {
-        background: #fff !important;
+        border: 0px;
+        border-bottom: 1px solid #999 !important;
     }
     .current_user td {
         border-bottom: 1px solid #EED3D7;
         background: #ddd;
         font-weight: bold;
     }
-    .late td {
-        background: #F55 !important;
-    }
-    .late-light td {
-        background: #FEE !important;
-    }
     .current_user.late {
         td {
-            border: 1px solid #B94A48;
-            border-right: none;
             &:last-child {
                 border-right: 1px solid #B94A48;
             }
@@ -598,11 +590,71 @@ table.bugs-list tbody tr.other-projects td {
             display: inline;
         }
     }
-    .current_user.late-light td {
-        background: #FEE;
+    .late-record:hover td {
+        background: #BAA175 !important;
     }
-    tr:hover td {
-        background: #ddd !important;
+    .late-record:nth-of-type(even) td {
+        background-color: #FFF6E8;
+    }
+    .late-record:nth-of-type(odd) td {
+        background-color: #FFE8C2;
+    }
+
+    .absence-record:hover td {
+        background: #C2C08C !important;
+    }
+    .absence-record:nth-of-type(even) td {
+        background-color: #FAFFE6;
+    }
+    .absence-record:nth-of-type(odd) td {
+        background-color: #FFFDC2;
+    }
+}
+
+#latesTodayWrapper {
+    color: #000;
+    position:fixed;
+    margin-top: 5%;
+    bottom: 2%;
+    right: 5px;
+    padding: 5px 15px 5px 5px;
+
+    thead {
+        position: fixed;
+    }
+    tbody {
+        padding-top: 20px;
+    }
+    .lates-column-close {
+        width: 15px;
+    }
+    .lates-column-user {
+        width: 130px;
+    }
+    .lates-column-from {
+        width: 25px;
+    }
+    .lates-column-to {
+        width: 25px;
+    }
+    .lates-column-header {
+        width: 180px;
+        text-align: center;
+        padding: 2px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        background: #DDD;
+    }
+    #latesTodayContentWrapper {
+        overflow-x: hidden;
+        overflow-y: auto;
+        max-height: 250px;
+        margin-top: 22px;
+        margin-bottom: 5px;
+
+        .table {
+            margin-bottom: 0px;
+        }
     }
 }
 
@@ -2070,47 +2122,6 @@ i.pointer {
     }
 }
 
-#latesTodayWrapper {
-    color: #000;
-    position:fixed;
-    margin-top: 5%;
-    bottom: 2%;
-    right: 5px;
-    padding: 5px 15px 5px 5px;
-
-    thead {
-        position: fixed;
-    }
-    tbody {
-        padding-top: 20px;
-    }
-    .lates-column-close {
-        width: 15px;
-    }
-    .lates-column-user {
-        width: 130px;
-    }
-    .lates-column-from {
-        width: 25px;
-    }
-    .lates-column-to {
-        width: 25px;
-    }
-    .lates-column-wide {
-        width: 180px;
-    }
-    #latesTodayContentWrapper {
-        overflow-x: hidden;
-        overflow-y: auto;
-        max-height: 250px;
-        margin-top: 22px;
-
-        .table {
-            margin-bottom: 0px;
-        }
-    }
-}
-
 .overflow_visible {
   overflow: visible;
 }
@@ -2172,10 +2183,6 @@ i.pointer {
   overflow-y: auto;
   text-align: center;
   float: left;
-}
-
-#empty_box {
-  text-align: center;
 }
 
 #new-lates {

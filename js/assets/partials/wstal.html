@@ -17,11 +17,14 @@
                 <table class="table table-bordered presence" id="late">
                     <tbody>
                         <tr ng-show="get_lates().length == 0 && get_absences().length == 0">
-                            <td colspan='3' class="lates-column-wide" id="empty_box">
+                            <td colspan='4' class="lates-column-header" id="empty_box">
                                 E M P T Y !
                             </td>
                         </tr>
-                        <tr class='late-light' ng-repeat="user in get_lates()" data-placement="left" bs-tooltip="user.explanation">
+                        <tr ng-show="get_lates().length > 0" class="late-light">
+                            <td colspan="4" class="lates-column-header">LATES</td>
+                        </tr>
+                        <tr class='late-record' ng-repeat="user in get_lates()" data-placement="left" bs-tooltip="user.explanation">
                             <td>
                                 <button class="close" aria-hidden="true" ng-click="openRemovalConfirmation(user)">×</button>
                             </td>
@@ -31,13 +34,19 @@
                             <td class="lates-column-from">{{ user.start  && (set_time(user.start) | date:'HH:mm') || '-'}}</td>
                             <td class="lates-column-to">{{ user.end  && (set_time(user.end) | date:'HH:mm') || '-'}}</td>
                         </tr>
-                    <tr ng-repeat="user in get_absences()" data-placement="left" bs-tooltip="user.remarks">
+
+                    <tr ng-show="get_absences().length > 0">
+                        <td colspan="4" class="lates-column-header">ABSENCES</td>
+                    </tr>
+                    <tr class="absence-record" ng-repeat="user in get_absences()" data-placement="left" bs-tooltip="user.remarks">
                         <td>
                             <button class="close" aria-hidden="true" ng-click="openRemovalConfirmation(user)">×</button>
                         </td>
-                        <td colspan='3' class="lates-column-wide">
+                        <td>
                             <span class="name" ng-bind="user.name"></span>
                         </td>
+                        <td class="lates-column-from">{{ user.start  && (set_time(user.start) | date:'MM.dd') || '-'}}</td>
+                        <td class="lates-column-to">{{ user.end  && (set_time(user.end) | date:'MM.dd') || '-'}}</td>
                     </tr>
                     </tbody>
                 </table>

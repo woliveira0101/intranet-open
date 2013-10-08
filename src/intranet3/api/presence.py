@@ -37,11 +37,17 @@ class PresenceApi(ApiView):
                                .filter(Late.date == date)\
                                .order_by(User.name)
 
-        absences = self.session.query(User.id, User.name, Absence.remarks)\
-                               .filter(User.id == Absence.user_id)\
-                               .filter(Absence.date_start <= date)\
-                               .filter(Absence.date_end >= date)\
-                               .order_by(User.name)
+        absences = self.session.query(
+            User.id,
+            User.name,
+            Absence.date_start,
+            Absence.date_end,
+            Absence.remarks
+        )
+        absences = absences.filter(User.id == Absence.user_id)\
+                           .filter(Absence.date_start <= date)\
+                           .filter(Absence.date_end >= date)\
+                           .order_by(User.name)
 
         current_data_late = dict(
             lates=[
@@ -57,15 +63,17 @@ class PresenceApi(ApiView):
                 dict(
                     id=user_id,
                     name=user_name,
+                    start=date_start and date_start.strftime('%d/%m') or None,
+                    end=date_end and date_end.strftime('%d/%m') or None,
                     remarks=remarks
                 )
-                for user_id, user_name, remarks in absences
+                for user_id, user_name, date_start, date_end, remarks in absences
             ]
         )
         memcache.add(
             MEMCACHED_NOTIFY_KEY % date,
             current_data_late,
-            60*60*24,
+            60 * 60 * 24,
         )
         current_data_late['blacklist'] = blacklist
         return current_data_late

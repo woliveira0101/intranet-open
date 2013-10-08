@@ -76,7 +76,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout) {
         var f_roles = $scope.search.roles;
         var u_roles = user.roles;
         var intersection = _.intersection(f_roles, u_roles);
-        return f_roles.length === intersection.length;
+        return intersection.length > 0 || f_roles.length === 0;
       });
 
       filtered_users = _.filter(filtered_users, function(user){
