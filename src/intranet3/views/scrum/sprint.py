@@ -149,29 +149,16 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
         bugs = move_blocked_to_the_end(bugs)
         tracker = Tracker.query.get(sprint.project.tracker_id)
-        login_list = tracker.logins_mapping
-        for bug in bugs:
-            name = bug.owner.name
-            login = '%s@stxnext.pl' % name.lower().replace(' ', '.')
-            bug.owner.id = login_list.get(login).id
         sw = SprintWrapper(sprint, bugs, self.request)
-        res = dict(
+        return dict(
             tracker=tracker,
             bugs=sw.bugs,
             info=sw.get_info(),
+            str_date=self._sprint_daterange(sprint.start, sprint.end),
         )
-        update_info = self.change_date(res['info'])
-        res['info'].update(date_range=update_info)
-        return res
 
-    def change_date(self, data):
-        start = self.reverse_date(data['start'])
-        end = self.reverse_date(data['end'])
-        return ' - '.join([start, end])
-
-    def reverse_date(self, date):
-        res = date.split('-')
-        return '-'.join([res[2], res[1], res[0]])
+    def _sprint_daterange(self, st, end):
+        return '%s - %s' % (st.strftime('%d-%m-%Y'), end.strftime('%d-%m-%Y'))
 
 
 @view_config(route_name='scrum_sprint_board', permission='client')
