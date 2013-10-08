@@ -168,11 +168,7 @@ class Report(TimesReportMixin, BaseView):
         )
 
         entries = uber_query.all()
-        participants = {}
         participation_of_workers = self._get_participation_of_workers(entries)
-        for i in entries:
-            if not participants.get(i.User.name):
-                participants[i.User.name] = i.User.id
         tickets_id = ','.join([str(e[2]) for e in entries])
         trackers_id = ','.join([str(e[4].id) for e in entries])
         rows, entries_sum = HTMLRow.from_ordered_data(entries, group_by, bigger_than)
@@ -190,7 +186,6 @@ class Report(TimesReportMixin, BaseView):
             participation_of_workers=participation_of_workers,
             participation_of_workers_sum=sum([time[1] for time in participation_of_workers]),
             trackers_id=trackers_id, tickets_id=tickets_id,
-            participants=participants,
             str_date=str_date,
         )
 

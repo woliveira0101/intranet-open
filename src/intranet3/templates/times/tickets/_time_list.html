@@ -94,12 +94,12 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for client, time, time_percent in participation_of_workers %}
+                {% for user, time, time_percent in participation_of_workers %}
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td>{{ client }}</td>
+                        <td>{{ user.name }}</td>
                         <td>
-                            <a href="{{ request.url_for('/times/tickets/report', users=participants[client], projects=form.data.projects, date_range=str_date, group_by_client=form.data.group_by_client, group_by_project=form.data.group_by_project, group_by_bugs=form.data.group_by_bugs, group_by_user=form.data.group_by_user, ticket_choice=form.data.ticket_choice ,bigger_than=form.data.bigger_than)}}">
+                            <a href="{{ request.url_for('/times/tickets/report', users=user.id, projects=form.data.projects, date_range=str_date, group_by_client=form.data.group_by_client, group_by_project=form.data.group_by_project, group_by_bugs=form.data.group_by_bugs, group_by_user=form.data.group_by_user, ticket_choice=form.data.ticket_choice ,bigger_than=form.data.bigger_than)}}">
                                 {{ time }}
                             </a>
                         </td>
