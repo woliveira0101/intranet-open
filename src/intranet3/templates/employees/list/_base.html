@@ -32,7 +32,7 @@
 
 {% macro filters_form(form, action=None) -%}
 <div class="filters form_late">
-    <form method="GET" {% if action %} action="{{ action }}"{% endif %}>
+    <form method="GET" action="{{ action or request.path_qs }}">
         {{ form_field(form.user_id, _('Pracownik'), class='datepicker') }}
         {{ form_field(form.date_start, _('format dd-mm-yyyy'), class='datepicker-GET') }}
         {{ form_field(form.date_end, _('format dd-mm-yyyy'), class='datepicker-GET') }}
