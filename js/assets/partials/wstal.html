@@ -6,10 +6,9 @@
                     <tr>
                         <th class="lates-column-close">
                         </th>
-                        <th class="lates-column-user" ng-show="get_lates().length != 0">User</th>
-                        <th class="lates-column-from" ng-show="get_lates().length != 0">From</th>
-                        <th class="lates-column-to" ng-show="get_lates().length != 0">To</th>
-                        <th class="lates-column-wide" ng-show="get_lates().length == 0">User</th>
+                        <th class="lates-column-user">User</th>
+                        <th class="lates-column-from">From</th>
+                        <th class="lates-column-to">To</th>
                     </tr>
                 </thead>
             </table>
@@ -42,7 +41,7 @@
                         <td>
                             <button class="close" aria-hidden="true" ng-click="openRemovalConfirmation(user)">×</button>
                         </td>
-                        <td>
+                        <td class="lates-column-user">
                             <span class="name" ng-bind="user.name"></span>
                         </td>
                         <td class="lates-column-from">{{ user.start  && (set_time(user.start) | date:'MM.dd') || '-'}}</td>
