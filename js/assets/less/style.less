@@ -557,14 +557,18 @@ table.bugs-list tbody tr.other-projects td {
         padding: 0 10px;
       }
   }
-/* Presence */
+
 .presence {
+    border: 0px;
     caption {
         margin-bottom: 1px;
     }
     td {
         border: 0px;
         border-bottom: 1px solid #999 !important;
+    }
+    th {
+        background: #D8BDA8 !important;
     }
     .current_user td {
         border-bottom: 1px solid #EED3D7;
@@ -616,7 +620,7 @@ table.bugs-list tbody tr.other-projects td {
     position:fixed;
     margin-top: 5%;
     bottom: 2%;
-    right: 5px;
+    right: 20px;
     padding: 5px 15px 5px 5px;
 
     thead {
@@ -644,12 +648,13 @@ table.bugs-list tbody tr.other-projects td {
         font-weight: bold;
         letter-spacing: 2px;
         background: #DDD;
+        border-top: 1px solid #AAA;
     }
     #latesTodayContentWrapper {
         overflow-x: hidden;
         overflow-y: auto;
         max-height: 250px;
-        margin-top: 22px;
+        margin-top: 24px;
         margin-bottom: 5px;
 
         .table {
@@ -2113,7 +2118,7 @@ i.pointer {
     margin-top: 1%;
     width: 220px;
     height: 10px;
-    right: 1px;
+    right: 15px;
     color: #000;
     text-align: center;
     margin-right: 20px;
@@ -2188,14 +2193,41 @@ i.pointer {
   float: left;
 }
 
-#new-lates {
+#new-lates-button {
     float: right;
+    display: inline-table;
+
+    #lates-quantity {
+        background-color: #EBAC3B;
+    }
+    #absences-quantity {
+        background-color: #ACC20D;
+    }
+    #new-quantity {
+        background-color: red;
+        cursor: pointer;
+    }
+}
+
+#new-lates-button div {
+    float: left;
     margin-top: -1px;
     border-radius: 15px;
-    background-color: red;
     width: 15px;
     padding: 2px;
     color: white;
     font-weight: bold;
-    cursor: pointer;
+}
+
+.new-late-label {
+    color: red;
+}
+
+.whats-this {
+    background: #DDD;
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-top: 15px;
+    margin-left: 5px;
 }

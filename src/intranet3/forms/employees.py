@@ -52,8 +52,8 @@ class LateJustificationForm(BaseForm):
 
 class LateApplicationForm(BaseForm):
 
-    late_start = TimeField(_(u'Start Time'))
-    late_end = TimeField(_(u'End Time'))
+    late_start = TimeField(_(u'From'))
+    late_end = TimeField(_(u'To'))
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')

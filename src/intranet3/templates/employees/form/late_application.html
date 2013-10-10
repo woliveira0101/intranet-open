@@ -5,8 +5,8 @@
     <form action="{{ request.url_for('/employees/form/late_application') }}" method="post" accept-charset="utf-8">
         {{ csrf_field }}
         {{ form_field(form.popup_date, 'Format DD/MM/RRRR', class='datepicker') }}
-        {{ late_form_field(form.late_start, 'Format HH:MM', 'timepicker1', id='timepicker1', type='text', class='input-small') }}
-        {{ late_form_field(form.late_end, 'Format HH:MM', 'timepicker2', id='timepicker2', type='text', class='input-small') }}
+        {{ late_form_field(form.late_start, 'Format HH:MM', 'timepicker1', id='timepicker1', type='text', class='input-small', explanation='Time of leaving work (absent since day start if empty)') }}
+        {{ late_form_field(form.late_end, 'Format HH:MM', 'timepicker2', id='timepicker2', type='text', class='input-small', explanation='Time of going back to work (absent till day end if empty)') }}
         {{ form_field(form.popup_explanation, 'Wyjaśnienie') }}
 
         <div class="buttons">
@@ -26,6 +26,9 @@
 
          timepicker1.timepicker({ defaultTime: false, showMeridian: false });
          timepicker2.timepicker({ defaultTime: false, showMeridian: false });
+
+         $('.whats-this').tooltip();
+
          block1.addClass('invisible');
          block2.addClass('invisible');
          checkbox1.click( function() {

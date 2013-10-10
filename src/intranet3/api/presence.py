@@ -29,6 +29,7 @@ class PresenceApi(ApiView):
         late_query = self.session.query(
             User.id,
             User.name,
+            Late.id,
             Late.late_start,
             Late.late_end,
             Late.explanation,
@@ -40,6 +41,7 @@ class PresenceApi(ApiView):
         absences = self.session.query(
             User.id,
             User.name,
+            Absence.id,
             Absence.date_start,
             Absence.date_end,
             Absence.remarks
@@ -54,20 +56,22 @@ class PresenceApi(ApiView):
                 dict(
                     id=user_id,
                     name=user_name,
+                    late_id=late_id,
                     start=start and start.isoformat()[:5] or None,
                     end=end and end.isoformat()[:5] or None,
                     explanation=explanation,
-                )for user_id, user_name, start, end, explanation in late_query
+                )for user_id, user_name, late_id, start, end, explanation in late_query
             ],
             absences=[
                 dict(
                     id=user_id,
                     name=user_name,
+                    absence_id=absence_id,
                     start=date_start and date_start.strftime('%d/%m') or None,
                     end=date_end and date_end.strftime('%d/%m') or None,
                     remarks=remarks
                 )
-                for user_id, user_name, date_start, date_end, remarks in absences
+                for user_id, user_name, absence_id, date_start, date_end, remarks in absences
             ]
         )
         memcache.add(

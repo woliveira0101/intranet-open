@@ -1,4 +1,13 @@
 (function($){
+
+    function set_lates_heigth() {
+        $('#latesTodayContentWrapper').css('max-height', $(window).height() - 100);
+    }
+
+    $(window).resize(function() {
+        set_lates_heigth();
+    })
+
     /**
      * Add method to format string
      */
@@ -136,6 +145,7 @@
 
     /* DOM ready */
     $(function(){
+        set_lates_heigth();
 
         $.tablesorter.addParser({
             // set a unique id
@@ -337,7 +347,7 @@
                 }
             };
         })();
-        
+
         $('[class^="x-user-tooltip-"]').each(function(){
             $item = $(this);
             var uid = $item.prop('class').match(/x-user-tooltip-(\d+)/)[1];
@@ -349,7 +359,7 @@
                 });
             }
         });
-        
+
         $(document).mousemove(function(e){
             usertooltip.pos(e.pageX,e.pageY);
         });
@@ -482,7 +492,7 @@
 
         /**
          * TYPEAHEAD FOR SELECTS
-         * 
+         *
          * Usage: just add typeAheadSelect class to your select control, and
          * let the magic happen!
          */

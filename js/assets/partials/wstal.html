@@ -6,9 +6,15 @@
                     <tr>
                         <th class="lates-column-close">
                         </th>
-                        <th class="lates-column-user">User</th>
-                        <th class="lates-column-from">From</th>
-                        <th class="lates-column-to">To</th>
+                        <th class="lates-column-user">
+                            <span data-placement="bottom" bs-tooltip="'User first name and last name'">User</span>
+                        </th>
+                        <th class="lates-column-from">
+                            <span data-placement="bottom" bs-tooltip="'<b>For late today:</b> time of leaving work (absent since day start if empty)<br /><b>For off today:</b> first day of absence'">From</span>
+                        </th>
+                        <th class="lates-column-to">
+                            <span data-placement="bottom" bs-tooltip="'<b>For late today:</b> time of going back to work (absent till day end if empty)<br /><b>For off today:</b> last day of absence'">To</span>
+                        </th>
                     </tr>
                 </thead>
             </table>
@@ -21,7 +27,7 @@
                             </td>
                         </tr>
                         <tr ng-show="get_lates().length > 0" class="late-light">
-                            <td colspan="4" class="lates-column-header">LATES</td>
+                            <td colspan="4" class="lates-column-header">LATE TODAY</td>
                         </tr>
                         <tr class='late-record' ng-repeat="user in get_lates()" data-placement="left" bs-tooltip="user.explanation">
                             <td>
@@ -29,13 +35,14 @@
                             </td>
                             <td class="lates-column-user">
                                 <span class="name" ng-bind="user.name"></span>
+                                <span class="new-late-label" ng-show="newLatesIds.indexOf(user.late_id) != -1">(NEW)</span>
                             </td>
                             <td class="lates-column-from">{{ user.start  && (set_time(user.start) | date:'HH:mm') || '-'}}</td>
                             <td class="lates-column-to">{{ user.end  && (set_time(user.end) | date:'HH:mm') || '-'}}</td>
                         </tr>
 
                     <tr ng-show="get_absences().length > 0">
-                        <td colspan="4" class="lates-column-header">ABSENCES</td>
+                        <td colspan="4" class="lates-column-header">OFF TODAY</td>
                     </tr>
                     <tr class="absence-record" ng-repeat="user in get_absences()" data-placement="left" bs-tooltip="user.remarks">
                         <td>
@@ -43,6 +50,7 @@
                         </td>
                         <td class="lates-column-user">
                             <span class="name" ng-bind="user.name"></span>
+                            <span class="new-late-label" ng-show="newAbsencesIds.indexOf(user.absence_id) != -1">(NEW)</span>
                         </td>
                         <td class="lates-column-from">{{ user.start  && (set_time(user.start) | date:'MM.dd') || '-'}}</td>
                         <td class="lates-column-to">{{ user.end  && (set_time(user.end) | date:'MM.dd') || '-'}}</td>
@@ -53,9 +61,15 @@
         </div>
     </div>
     <div id="floatBar">
-        <div ng-show="newLatesQuantity > 0" ng-click="show()" id="new-lates">{{ newLatesQuantity }}</div>
-        <span ng-click="show()" class="badge">Late today</span>
-        <span ng-click="openModal()" ng-show="show_box" class="badge">Settings</span>
+        <div id="new-lates-button">
+            <div id="lates-quantity" title="Total lates quantity">{{ get_lates().length }}</div>
+            <div id="absences-quantity" title="Total absences quantity">{{ get_absences().length }}</div>
+            <div ng-show="newLatesQuantity > 0" ng-click="show()" id="new-quantity" title="New lates and absences quantity">{{ newLatesQuantity }}</div>
+        </div>
+        <div ng-click="show()" class="badge" title="Click to show the list of lates and absences">
+            Late today
+        </div>
+        <span ng-click="openModal()" ng-show="show_box" class="badge" title="Click to configure your black list">Settings</span>
     </div>
 
 
