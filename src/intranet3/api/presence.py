@@ -36,6 +36,7 @@ class PresenceApi(ApiView):
         )
         late_query = late_query.filter(User.id == Late.user_id)\
                                .filter(Late.date == date)\
+                               .filter(Late.deleted == False)\
                                .order_by(User.name)
 
         absences = self.session.query(
@@ -47,6 +48,7 @@ class PresenceApi(ApiView):
             Absence.remarks
         )
         absences = absences.filter(User.id == Absence.user_id)\
+                            .filter(Absence.deleted == False)\
                            .filter(Absence.date_start <= date)\
                            .filter(Absence.date_end >= date)\
                            .order_by(User.name)

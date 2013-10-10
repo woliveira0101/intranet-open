@@ -116,7 +116,7 @@ App.controller('wstalCtrl', function($scope, $http, $dialog, $timeout) {
                 saveToLocalStorage($scope);
 
                 firstFetchToday = false;
-                $timeout(tick, 2000);
+                $timeout(tick, 60000);
                 $('.tooltip').remove();
             });
         })();
