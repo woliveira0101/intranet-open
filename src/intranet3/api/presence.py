@@ -33,6 +33,7 @@ class PresenceApi(ApiView):
             Late.late_start,
             Late.late_end,
             Late.explanation,
+            Late.work_from_home
         )
         late_query = late_query.filter(User.id == Late.user_id)\
                                .filter(Late.date == date)\
@@ -62,7 +63,9 @@ class PresenceApi(ApiView):
                     start=start and start.isoformat()[:5] or None,
                     end=end and end.isoformat()[:5] or None,
                     explanation=explanation,
-                )for user_id, user_name, late_id, start, end, explanation in late_query
+                    work_from_home=work_from_home
+                )for user_id, user_name, late_id, start, end,
+                        explanation, work_from_home in late_query
             ],
             absences=[
                 dict(

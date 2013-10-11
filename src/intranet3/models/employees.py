@@ -19,6 +19,7 @@ class Late(Base):
     deleted = Column(Boolean, nullable=False, default=False, index=True)
     late_start = Column(Time, index=True, nullable=False, default=None)
     late_end = Column(Time, index=True, nullable=False, default=None)
+    work_from_home = Column(Boolean, index=False, nullable=False, default=False)
 
 
 class WrongTime(Base):

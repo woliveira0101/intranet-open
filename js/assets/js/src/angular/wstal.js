@@ -125,7 +125,15 @@ App.controller('wstalCtrl', function($scope, $http, $dialog, $timeout) {
 
     $scope.get_lates = function(){
         return _.filter($scope.lates, function(user){
-           return $scope.blacklistIds.indexOf(user.id) < 0;
+           return $scope.blacklistIds.indexOf(user.id) < 0 &&
+                    !user.work_from_home;
+        });
+    };
+
+    $scope.get_work_from_home = function(){
+        return _.filter($scope.lates, function(user){
+           return $scope.blacklistIds.indexOf(user.id) < 0 &&
+                    user.work_from_home;
         });
     };
 

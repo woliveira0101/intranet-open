@@ -97,7 +97,8 @@ class LateApplication(BaseView):
                 explanation=explanation,
                 justified=in_future, #justifed only when date is in future
                 late_start=form.late_start.data,
-                late_end=form.late_end.data
+                late_end=form.late_end.data,
+                work_from_home=form.work_from_home.data
             )
 
             self.session.add(late)
