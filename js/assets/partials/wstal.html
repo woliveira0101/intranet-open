@@ -1,7 +1,7 @@
 <div id='floatBox' ng-controller="wstalCtrl">
     <div id="latesTodayWrapper">
         <div id="floatDiv" ng-show="show_box">
-            <table class="table table-bordered presence" id="late" ng-show="!(get_lates().length == 0 && get_absences().length == 0 && get_work_from_home().length == 0)">
+            <!-- <table class="table table-bordered presence" id="late" ng-show="!(get_lates().length == 0 && get_absences().length == 0 && get_work_from_home().length == 0)">
                 <thead>
                     <tr>
                         <th class="lates-column-close">
@@ -10,25 +10,25 @@
                             <span data-placement="bottom" bs-tooltip="'User first name and last name'">User</span>
                         </th>
                         <th class="lates-column-from">
-                            <span data-placement="bottom" bs-tooltip="'<b>For late today:</b> time of leaving work (absent since day start if empty)<br /><b>For off today:</b> first day of absence'">From</span>
                         </th>
                         <th class="lates-column-to">
-                            <span data-placement="bottom" bs-tooltip="'<b>For late today:</b> time of going back to work (absent till day end if empty)<br /><b>For off today:</b> last day of absence'">To</span>
                         </th>
                     </tr>
                 </thead>
-            </table>
+            </table> -->
             <div id="latesTodayContentWrapper">
                 <table class="table table-bordered presence" id="late">
                     <tbody>
                         <tr ng-show="get_lates().length == 0 && get_absences().length == 0 && get_work_from_home().length == 0">
-                            <td colspan='4' class="lates-column-header" id="empty_box">
+                            <td colspan='4' class="lates-column-header-empty" id="empty_box">
                                 E M P T Y !
                             </td>
                         </tr>
 
                         <tr ng-show="get_work_from_home().length > 0" class="late-light">
-                            <td colspan="4" class="lates-column-header">WORK FROM HOME</td>
+                            <td colspan="2" class="lates-column-header">WORK FROM HOME</td>
+                            <td class="lates-column-header-date"><span bs-tooltip="'Time of leaving office (absent since day start if empty)'">From</span></td>
+                            <td class="lates-column-header-date"><span bs-tooltip="'Time of going back to office (absent till day end if empty)'">To</span></td>
                         </tr>
                         <tr class='work-from-home-record' ng-repeat="user in get_work_from_home()" data-placement="left" bs-tooltip="user.explanation">
                             <td>
@@ -43,7 +43,9 @@
                         </tr>
 
                         <tr ng-show="get_lates().length > 0" class="late-light">
-                            <td colspan="4" class="lates-column-header">NOT PRESENT TODAY</td>
+                            <td colspan="2" class="lates-column-header">OUT OF OFFICE</td>
+                            <td class="lates-column-header-date"><span bs-tooltip="'Time of leaving office (absent since day start if empty)'">From</span></td>
+                            <td class="lates-column-header-date"><span bs-tooltip="'Time of going back to office (absent till day end if empty)'">To</span></td>
                         </tr>
                         <tr class='late-record' ng-repeat="user in get_lates()" data-placement="left" bs-tooltip="user.explanation">
                             <td>
@@ -59,7 +61,9 @@
 
 
                         <tr ng-show="get_absences().length > 0">
-                            <td colspan="4" class="lates-column-header">ABSENCE / HOLIDAY</td>
+                            <td colspan="2" class="lates-column-header">ABSENCE / HOLIDAY</td>
+                            <td class="lates-column-header-date"><span bs-tooltip="'First day of absence'">From</span></td>
+                            <td class="lates-column-header-date"><span bs-tooltip="'Last day of absence'">To</span></td>
                         </tr>
                         <tr class="absence-record" ng-repeat="user in get_absences()" data-placement="left" bs-tooltip="user.remarks">
                             <td>
@@ -80,12 +84,12 @@
     <div id="floatBar">
         <div id="new-lates-button">
             <div id="work-from-home-quantity" title="Total work from home quantity">{{ get_work_from_home().length }}</div>
-            <div id="lates-quantity" title="Total not present quantity">{{ get_lates().length }}</div>
+            <div id="lates-quantity" title="Total out of office quantity">{{ get_lates().length }}</div>
             <div id="absences-quantity" title="Total absences/holiday quantity">{{ get_absences().length }}</div>
             <div ng-show="newLatesQuantity > 0" ng-click="show()" id="new-quantity" title="New lates and absences quantity">{{ newLatesQuantity }}</div>
         </div>
         <div ng-click="show()" class="badge" title="Click to show the list of lates and absences">
-            Not present today
+            Out of office today
         </div>
         <span ng-click="openModal()" ng-show="show_box" class="badge" title="Click to configure your black list">Settings</span>
     </div>

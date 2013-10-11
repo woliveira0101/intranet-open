@@ -1,7 +1,7 @@
 {% extends "templates/employees/form/_base.html" %}
 
 {% block content %}
-    <h2 class="content-header">Not present in office request</h2>
+    <h2 class="content-header">Out of office request</h2>
     <form action="{{ request.url_for('/employees/form/late_application') }}" method="post" accept-charset="utf-8">
         {{ csrf_field }}
         {{ form_field(form.popup_date, 'Format DD/MM/RRRR', class='datepicker') }}
