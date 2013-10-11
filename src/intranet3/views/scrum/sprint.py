@@ -122,6 +122,20 @@ class BaseSprintView(BaseView):
             sprint_id = self.request.GET.get('sprint_id')
             sprint = Sprint.query.get(sprint_id)
         project = Project.query.get(sprint.project_id)
+
+
+        sprints = [s for s in session.query(Sprint)
+                            .filter(Sprint.start<=datetime.date.today())
+                            .filter(Sprint.end>=datetime.date.today())
+        ]
+        total_worked_hours = sum([s.worked_hours for s in sprints])
+        total_anchieved_points = sum([s.achieved_points for s in sprints])
+
+        sprint.mean_velocity = sum([s.velocity for s in sprints])\
+                                 / len(sprints) if len(sprints) else 0.0
+        sprint.total_velocity = total_anchieved_points / total_worked_hours\
+                                 * 8.0 if total_worked_hours else 0.0
+
         self.v['project'] = project
         self.v['sprint'] = sprint
 
