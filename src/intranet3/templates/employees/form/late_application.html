@@ -5,8 +5,8 @@
     <form action="{{ request.url_for('/employees/form/late_application') }}" method="post" accept-charset="utf-8">
         {{ csrf_field }}
         {{ form_field(form.popup_date, 'Format DD/MM/RRRR', class='datepicker') }}
-        {{ late_form_field(form.late_start, 'Format HH:MM', 'timepicker1', id='timepicker1', type='text', class='input-small', explanation='Time of leaving work (absent since day start if empty)') }}
-        {{ late_form_field(form.late_end, 'Format HH:MM', 'timepicker2', id='timepicker2', type='text', class='input-small', explanation='Time of going back to work (absent till day end if empty)') }}
+        {{ late_form_field(form.late_start, 'Format HH:MM', 'timepicker1', id='timepicker1', type='text', class='input-small', explanation='Time when person leaves office') }}
+        {{ late_form_field(form.late_end, 'Format HH:MM', 'timepicker2', id='timepicker2', type='text', class='input-small', explanation='Time when person comes to office') }}
         {{ form_field(form.work_from_home) }}
         {{ form_field(form.popup_explanation, 'Wyjaśnienie') }}
 
