@@ -64,7 +64,7 @@ class GithubBug(base.Bug):
             self._project_name = m.group(2)
         else:
             self._project_name = value
-   
+
     @property
     def component_name(self):
         return self._component_name
@@ -143,7 +143,7 @@ def _query_fetcher_function(resolved):
             # bitbucked doesn't have resolved not-closed
             self.success()
             return
-  
+
         params = self.common_url_params()
         if ticket_ids:
             # query not supported by bitbucket - we will do it manually later
@@ -152,7 +152,7 @@ def _query_fetcher_function(resolved):
             if project_selector and component_selector:
                 uri = self.tracker.url + "repos/%s/%s/issues?" % (project_selector, component_selector[0])
                 url = serialize_url(uri, **params)
-        
+
         self.fetch(url)
     return fetcher
 
@@ -211,23 +211,20 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
         callback()
 
     def fetch(self, url):
-        self_callback = partial(self.fetch, url)
-        if self.milestones is None:
-            self.fetch_milestones(self_callback, url)
-        else:
-            self.request(
-                url,
-                self.get_headers(),
-                partial(self.responded)
-            )
+        self.request(
+            url,
+            self.get_headers(),
+            partial(self.responded)
+        )
 
     def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
         base_url = '%srepos/%s/%s/' % (self.tracker.url, project_id, component_id)
         milestones_url = ''.join((base_url, 'milestones'))
         issues_url = ''.join((base_url, 'issues?'))
-
         if self.milestones is None:
             self.fetch_milestones(partial(self.fetch_scrum, sprint_name, project_id, component_id), milestones_url)
+        elif self.milestones == {}:
+            return self.fail('No milestones')
         else:
             opened_bugs_url = serialize_url(
                 issues_url,
@@ -285,7 +282,11 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
         except BaseException as e:
             EXCEPTION(u"Could not parse tracker response")
             self.fail(e)
-        else:
+            return
+
+        if self.milestones:
             self.issues_types_left.pop()
             if len(self.issues_types_left) == 0:
                 self.success()
+        else:
+            self.success()
