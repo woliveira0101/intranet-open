@@ -16,7 +16,7 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 
 
 class BugzillaBug(Bug):
-    
+
     def get_url(self, number=None):
         number = number if number else self.id
         return self.tracker.url + '/show_bug.cgi?id=%(id)s' % {'id': number}
@@ -90,28 +90,29 @@ def _query_fetcher_function(**conditions):
         url = '%s/buglist.cgi' % self.tracker.url
         self.fetch_post(url, params)
     return fetcher
-    
+
 
 class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
     """ Fetcher for Bugzilla bugs """
-    
+
     redirect_support = True
-    
+    SPRINT_REGEX = 's=%s(?!\S)'
+
     COLUMNS = ('bug_severity', 'assigned_to', 'version',
             'bug_status', 'resolution', 'product', 'op_sys', 'short_desc',
             'reporter', 'opendate', 'changeddate', 'component', 'deadline',
             'bug_severity', 'product', 'priority', 'status_whiteboard')
-    
+
     COLUMNS_COOKIE = 'COLUMNLIST=' + "%20".join(COLUMNS)
-    
+
     bug_class = BugzillaBug
     get_converter = lambda self: bugzilla_converter
-    
+
     def get_headers(self):
         headers = super(BugzillaFetcher, self).get_headers()
         headers['Cookie'] = [self.COLUMNS_COOKIE]
         return headers
-    
+
     def fetch(self, url):
         headers = self.get_headers()
         self.request(url, headers, self.responded)
@@ -131,11 +132,11 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             ctype='csv',
             emailassigned_to1='1'
         )
-        
+
     def resolved_common_url_params(self):
         return {
             'bug_status':['RESOLVED', 'VERIFIED'],
-            'ctype':'csv', 
+            'ctype':'csv',
             'emailreporter1':'1',
             'field0-0-0':'resolution',
             'type0-0-0':'notequals',
@@ -147,28 +148,28 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             emailtype1='exact',
             email1=self.login
         )
-        
+
     def all_users_params(self):
         return dict(
             emailtype1='regexp',
             email1='(' + '|'.join(self.login_mapping.keys()) + ')'
         )
-        
+
     fetch_user_tickets = _fetcher_function(resolved=False, single=True)
     """ Start fetching tickets for current user """
-    
+
     fetch_all_tickets = _fetcher_function(resolved=False, single=False)
     """ Start fetching tickets for all users in mapping """
-    
+
     fetch_user_resolved_tickets = _fetcher_function(resolved=True, single=True)
-        
+
     fetch_all_resolved_tickets = _fetcher_function(resolved=True, single=False)
-                                                   
+
     fetch_bugs_for_query = _query_fetcher_function(
         bug_status=['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED',
                     'WAITING']
     )
-        
+
     fetch_resolved_bugs_for_query = _query_fetcher_function(
         bug_status=['RESOLVED', 'VERIFIED']
     )
@@ -179,8 +180,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
         params = dict(
             ctype='csv',
             status_whiteboard_type='regexp',
-            #status_whiteboard='s=%s' % sprint_name,
-            status_whiteboard='s=%s(?!\S)' % sprint_name, # this regexp desn't work with our bugzilla
+            status_whiteboard=self.SPRINT_REGEX % sprint_name,
             bug_status=[
                 'NEW',
                 'ASSIGNED',
@@ -212,7 +212,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
                 self.parse_response_of_bug_titles_and_depends_on
             ),
         )
-    
+
     def fetch_dependons_for_ticket_ids(self, ticket_ids):
         params = dict(
             ctype='xml',
@@ -232,7 +232,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
                 self.parse_response_of_dependons_for_ticket_ids,
             ),
         )
-    
+
     def _parse_xml_response(self, data, bug_callback, success_callback):
         """ Parse xml """
         try:
@@ -249,7 +249,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             self.failed(e)
         else:
             success_callback()
-            
+
     def parse_response_of_bug_titles_and_depends_on(self, data):
         """ Parse response for query of bug titles and depends on """
         def handle(bug):
@@ -263,12 +263,12 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
                 'is_bug': is_bug,
                 'severity': getattr(bug.find('bug_severity'),'text', '')
             }
-        
+
         self._parse_xml_response(data, handle, self.success)
-    
+
     def get_severity(self, bug):
         return getattr(bug.find('bug_severity'), 'text', '')
-    
+
     def is_bug(self, bug):
         """
         Check if given XML bug definition adheres to "bug" definition
@@ -278,7 +278,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
         resolution = getattr(bug.find('resolution'), 'text', '')
         return (not severity in ('enhancement high', 'enhancement medium',
                 'enhancement low')) and (not resolution == 'INVALID')
-            
+
     def parse_response_of_dependons_for_ticket_ids(self, data):
         """ Parse response for query of depends on """
         dependsons = []
@@ -291,15 +291,15 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
                     id = item.text
                     if not self.bugs.get(id) and id:
                         dependsons.append(id)
-        
+
         def on_success():
             if not dependsons:
                 self.success()
             else:
                 self.fetch_dependons_for_ticket_ids(dependsons)
-                
+
         self._parse_xml_response(data, handle, on_success)
-    
+
     def update_bugs_statuses(self, xml):
         for bug in xml.findall('bug'):
             bug_id = bug.find('bug_id').text
@@ -310,7 +310,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
                     status in ('CLOSED', 'RESOLVED', 'VERIFIED')
             if description:
                 self.dependson_and_blocked_status[bug_id]['desc'] = description
-    
+
     def parse_dependson_and_blocked_bugs_xml(self, data):
         try:
             # igozilla returns iso-8859-2, but does not declare it
@@ -325,7 +325,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
         else:
             self.update_depensons_and_blocked_status()
             self.success()
-    
+
     def get_status_of_dependson_and_blocked_bugs(self):
         bug_ids = self.dependson_and_blocked_status.keys()
         if bug_ids:
@@ -345,7 +345,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             )
         else:
             self.success()
-    
+
     def parse_xml(self, data):
         try:
             # igozilla returns iso-8859-2, but does not declare it
@@ -367,7 +367,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
 
                         if results:
                             setattr(obj, key, results)
-                            
+
         except BaseException, e:
             self.failed(e)
         else:
@@ -392,7 +392,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             field=['blocked', 'dependson', 'bug_id']
         )
         self.fetch_post(url, params, partial(self.xml_response, self.parse_xml))
-    
+
     def received(self, data):
         """ Called when server returns whole response body """
         try:
