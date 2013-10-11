@@ -39,7 +39,7 @@ class BugUglyAdapter(object):
     def velocity(self):
         if self.is_closed():
             points = float(self.whiteboard.get('p', 0.0))
-            return (points / self.sprint_time * 8.0) if self.sprint_time else 0.0
+            return (points / self.time * 8.0) if self.time else 0.0
         return None
 
     @classmethod
