@@ -95,7 +95,7 @@ class LateApplication(BaseView):
                 user_id=self.request.user.id,
                 date=date,
                 explanation=explanation,
-                justified=in_future, #justifed only when date is in future
+                justified=in_future or None, #justifed only when date is in future
                 late_start=form.late_start.data,
                 late_end=form.late_end.data,
                 work_from_home=form.work_from_home.data

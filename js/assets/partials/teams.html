@@ -22,7 +22,16 @@
             ng-model="filtered_users"
             jqyoui-draggable="{index: {{$index}},animate:false,placeholder:'keep'}"
             user-id="{{ item.id }}"
-            ng-hide="!item.name"><img ng-src="{{ item.img }}">{{item.name}}</li>
+            ng-hide="!item.name">
+          <img class="user-avatar" ng-src="{{ item.img }}">
+          <div class="user-name-outer">
+            <div class="user-name-middle">
+              <div class="user-name-inner">
+                {{item.name}}
+              </div>
+            </div>
+          </div>
+        </li>
       </ul>
     </div>
     <div class="box box-teams">
@@ -36,20 +45,29 @@
       <div class="clear"></div>
       <div class="team-box">
         <ul>
-          <li ng-repeat="team in teams | filter:teamSearch">
+          <li ng-repeat="team in teams | filter:teamSearch | orderBy:'workedHoursLastMonth':true">
             <div class="name_team">{{ team.name }}
               <i class="icon-edit" ng-click="openModal(team)"></i>
               <i class="icon-remove icon-red" ng-show="!team.dirty" ng-click="deleteTeam(team)"></i>
               <i class="icon-ok icon-green" ng-show="team.dirty" ng-click="save(team)"></i>
-              <span class="float_right">
-                <span ng-repeat="project in team.projects" style="float: right; margin-right: 20px">
-                  <a href="/client/view?client_id={{ project.client.id }}">{{ project.client.name }}</a> / <a href="/project/edit?project_id={{ project.id }}">{{ project.name }}</a>
-                </span>
-              </span>
             </div>
             <div class="icon_team">
               <img ng-src="{{ team.img }}">
             </div>
+
+            <div class="project-list" ng-show="!show_users">
+              <div class="project-record" ng-repeat="project in team.projects">
+                <div class="project-name">
+                  <a href="/client/view?client_id={{ project.client.id }}" title="{{ project.client.name }}">{{ project.client.name }}</a> / <a href="/project/client/backlog?project_id={{ project.id }}" title="{{ project.name }}">{{ project.name }}</a>
+                </div>
+                <div class="project-worked-hours">
+                  <a href="{{ project.monthTimesUrl }}" bs-tooltip="thisMonthWorkedHoursTooltip">{{ project.this_month_worked_hours }}</a>
+                  <a href="{{ project.previousMonthTimesUrl }}" bs-tooltip="lastMonthWorkedHoursTooltip">({{ project.last_month_worked_hours }})</a>
+                </div>
+                <br />
+              </div>
+            </div>
+
             <div class="desc_team">
               <div class="team thumbnail"
                    data-drop="true"

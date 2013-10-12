@@ -44,6 +44,7 @@
                 <th class="role">Role</th>
                 <th class="calendars">Calendars</th>
                 <th>Start work</th>
+                <th>End work</th>
             </thead>
             <tbody>
                 <tr ng-repeat="user in get_users()">
@@ -66,6 +67,7 @@
                         <a ng-show="user.tasks_link" href="{{ user.tasks_link }}">Tasks</a>
                     </td>
                     <td>{{user.start_work}}</td>
+                    <td>{{user.stop_work}}</td>
                 </tr>
 
             </tbody>

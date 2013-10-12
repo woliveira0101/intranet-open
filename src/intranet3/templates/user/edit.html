@@ -76,7 +76,7 @@
             $full_time_work = $('#start_full_time_work');
         var today = Date.today(), full_time_start_date = Date.parseExact($full_time_work.val(), 'dd/MM/yyyy');
 
-        if(today.compareTo(full_time_start_date) < 0){
+        if(full_time_start_date != null && today.compareTo(full_time_start_date) < 0){
             // not working full time
             $if_full_time_work.prop('checked', false);
             $full_time_work.css('visibility', 'hidden');
