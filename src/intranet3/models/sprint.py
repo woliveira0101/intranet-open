@@ -38,5 +38,5 @@ class Sprint(Base):
 
     @property
     def velocity(self):
-        return (self.achieved_points / self.worked_hours) if self.worked_hours else 0.0
+        return (self.achieved_points / self.worked_hours * 8.0) if self.worked_hours else 0.0
 

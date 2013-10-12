@@ -74,7 +74,12 @@
                             <li><span>{% trans %}Points achieved{% endtrans %}</span>{{ sprint.achieved_points }}</li>
                             <li><span>{% trans %}Points commited{% endtrans %}</span> {{ sprint.commited_points }}</li>
                             <li><span>{% trans %}Total hours{% endtrans %}</span>{{ sprint.worked_hours | round | int }}</li>
-                            <li><span>{% trans %}Velocity per hour{% endtrans %}</span>{{ '%.2f' % sprint.velocity }}</li>
+                            <li>
+                                <span>{% trans %}Velocity per day{% endtrans %}</span>
+                                <span title="This sprint velocity">{{ '%.2f' % sprint.velocity }}</span> /
+                                <span title="Mean velocity of all sprints">{{ '%.2f' % sprint.mean_velocity }}</span> /
+                                <span title="Total velocity">{{ '%.2f' % sprint.total_velocity }}</span>
+                            </li>
                         </ul>
                     </div>
                     <div class="span3">
