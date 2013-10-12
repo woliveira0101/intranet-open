@@ -1,12 +1,14 @@
 var App = angular.module('intranet');
 
-App.controller('usersCtrl', function($scope, $http, $dialog, $timeout) {
+App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) {
     $scope.users = [];
     $scope.tab = 'employees';
     $scope.search = {
       name: '',
-      start_work: '',
-      stop_work: '',
+      start_work: {
+      },
+      stop_work: {
+      },
       locations: [],
       roles: [],
       teams: []
@@ -26,9 +28,9 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout) {
        $scope.tab = name;
     };
 
-    $scope.roles = _.map(G.ROLES, function(role){
+    $scope.roles = $filter('orderBy')(_.map(G.ROLES, function(role){
       return {id: role[0], name: role[1]};
-    });
+    }), 'name');
 
     $scope.to_pretty_role = function(role){
       return _.find(G.ROLES, function(a_role){
@@ -39,7 +41,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout) {
     $http.get('/api/users?full=1&inactive=1').success(function(data){
       $scope.users = data.users;
       $http.get('/api/teams').success(function(data){
-        $scope.teams = data.teams;
+        $scope.teams = $filter('orderBy')(data.teams, 'name');
         $scope.teams_to_user = {};
         $scope.user_to_teams = {};
         _.each(data, function(team){
@@ -66,43 +68,57 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout) {
     $scope.filtered_users = function(){
       var filtered_users = $scope.users;
 
-      filtered_users = _.filter(filtered_users, function(user){
-        var f_name = $scope.search.name.toLowerCase();
-        var u_name = user.name.toLowerCase();
-        return u_name.indexOf(f_name) >= 0;
-      });
+      var f_name = $scope.search.name.toLowerCase();
+      if(f_name){
+        filtered_users = _.filter(filtered_users, function(user){
+          var u_name = user.name.toLowerCase();
+          return u_name.indexOf(f_name) >= 0;
+        });
+      }
 
-      filtered_users = _.filter(filtered_users, function(user){
-        var f_roles = $scope.search.roles;
-        var u_roles = user.roles;
-        var intersection = _.intersection(f_roles, u_roles);
-        return intersection.length > 0 || f_roles.length === 0;
-      });
+      var f_roles = $scope.search.roles;
+      if(f_roles.length > 0){
+        filtered_users = _.filter(filtered_users, function(user){
+          var u_roles = user.roles;
+          var intersection = _.intersection(f_roles, u_roles);
+          return intersection.length > 0;
+        });
+      }
 
-      filtered_users = _.filter(filtered_users, function(user){
-        var f_locations = $scope.search.locations;
-        var u_location = user.location[0];
-        return f_locations.length === 0 || _.indexOf(f_locations, u_location) >= 0;
-      });
+      var f_locations = $scope.search.locations;
+      if(f_locations.length > 0){
+        filtered_users = _.filter(filtered_users, function(user){
+          var u_location = user.location[0];
+          return _.indexOf(f_locations, u_location) >= 0;
+        });
+      }
 
-      filtered_users = _.filter(filtered_users, function(user){
-        var f_teams = $scope.search.teams;
-        var u_teams = user.teams;
-        var intersection = _.intersection(f_teams, u_teams);
-        return f_teams.length === intersection.length;
-      });
+      var f_teams = $scope.search.teams;
+      if(f_teams.length > 0){
+        filtered_users = _.filter(filtered_users, function(user){
+          var u_teams = user.teams;
+          var intersection = _.intersection(f_teams, u_teams);
+          return f_teams.length === intersection.length;
+        });
+      }
 
-      filtered_users = _.filter(filtered_users, function(user){
-        var f_start_work = Date.parse($scope.search.start_work);
-        var u_start_work = Date.parse(user.start_work);
-        return !f_start_work || !u_start_work || (start = u_start_work >= f_start_work);
-      });
+      var start = $scope.search.start_work.start;
+      var end = $scope.search.start_work.end;
+      if(start && end){
+        filtered_users = _.filter(filtered_users, function(user){
+          var u_start_work = Date.parse(user.start_work);
+          return !u_start_work || (start <= u_start_work  && u_start_work <= end);
+        });
+      }
 
-      filtered_users = _.filter(filtered_users, function(user){
-        var f_stop_work = Date.parse($scope.search.stop_work);
-        var u_stop_work = Date.parse(user.stop_work);
-        return !f_stop_work || !u_stop_work || u_stop_work <= f_stop_work;
-      });
+      start = $scope.search.stop_work.start;
+      end = $scope.search.stop_work.end;
+      if(start && end){
+        filtered_users = _.filter(filtered_users, function(user){
+          var u_stop_work = Date.parse(user.stop_work);
+          return !u_stop_work || (start <= u_stop_work  && u_stop_work <= end);
+        });
+      }
 
       return filtered_users;
     };
