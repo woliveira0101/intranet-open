@@ -85,15 +85,17 @@ class Calendar(object):
         dev_key = config['GOOGLE_DEVELOPERS_KEY']
         try:
             credentials = AccessTokenCredentials(user.access_token, 'intranet/1.0')
+            http = httplib2.Http()
+            http = credentials.authorize(http)
+            self._service = build(
+                serviceName='calendar',
+                version='v3',
+                http=http,
+               developerKey=dev_key
+            )
         except Exception as e:
             self._error = True
             EXCEPTION("Can't refresh token for user %s: %s" % (user.email, e))
-            return
-
-        http = httplib2.Http()
-        http = credentials.authorize(http)
-        self._service = build(serviceName='calendar', version='v3', http=http,
-           developerKey=dev_key)
 
 
     def addEvent(self, event):
