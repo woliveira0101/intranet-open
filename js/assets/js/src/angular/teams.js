@@ -35,24 +35,65 @@ var resetScrolls = function(){
   }
 };
 
-App.controller('oneCtrl', function($scope, $http, $dialog, $timeout) {
+var getTimeTicketsReportUrl = function(projectId, previousMonth) {
+  var endDate = new Date();
+  endDate.setMonth(endDate.getMonth() + 1);
+  endDate.setDate(0);
+  if (previousMonth) {
+    endDate.setDate(0);
+  }
+  startDate = new Date();
+  startDate.setMonth(endDate.getMonth());
+  startDate.setDate(1);
+
+  params = {
+    date_range: startDate.toString('dd-MM-yyyy')
+                + '+-+' + endDate.toString('dd-MM-yyyy'),
+    projects: projectId,
+    group_by_client: 'y',
+    group_by_project: 'y',
+    group_by_bugs: 'y',
+    group_by_user: 'y'
+  }
+  url = '/times/tickets/report?';
+  for (key in params) {
+    url += key + '=' + params[key] + '&';
+  }
+  return url;
+}
+
+App.controller('oneCtrl', function($scope, $http, $dialog, $timeout, $filter) {
   $scope.teams = [];
   $scope.users = [];
   $scope.teamless = false;
   $scope.show_users = false;
 
-  $http.get('/api/users').success(function(data){
-      $scope.users = data.users;
+  $scope.thisMonthWorkedHoursTooltip = 'Numbers of hours spent on this project <i>this</i> month';
+  $scope.lastMonthWorkedHoursTooltip = 'Numbers of hours spent on this project <i>last</i> month';
 
-      $http.get('/api/teams').success(function(data){
-        $scope.teams = data.teams;
-        _.each($scope.teams, function(team){
-          team.users = _.filter($scope.users, function(user){
-            return team.users.indexOf(user.id) !== -1;
-          });
+  $http.get('/api/users').success(function(data){
+    $scope.users = data.users;
+
+    $http.get('/api/teams').success(function(data){
+      $scope.teams = data.teams;
+      _.each($scope.teams, function(team){
+        team.workedHoursLastMonth = 0;
+
+        _.each(team.projects, function(project){
+          project.monthTimesUrl = getTimeTicketsReportUrl(project.id, false);
+          project.previousMonthTimesUrl = getTimeTicketsReportUrl(project.id, true);
+          team.workedHoursLastMonth += project.last_month_worked_hours;
         });
-        resetScrolls()
+
+        team.projects = $filter('orderBy')(team.projects, 'last_month_worked_hours', true).slice(0, 4); // only top 4 projects
+
+        team.users = _.filter($scope.users, function(user){
+          return team.users.indexOf(user.id) !== -1;
+        });
+
       });
+      resetScrolls()
+    });
   });
 
 
