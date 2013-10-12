@@ -83,6 +83,8 @@ App.controller('oneCtrl', function($scope, $http, $dialog, $timeout, $filter) {
           project.monthTimesUrl = getTimeTicketsReportUrl(project.id, false);
           project.previousMonthTimesUrl = getTimeTicketsReportUrl(project.id, true);
           team.workedHoursLastMonth += project.last_month_worked_hours;
+          project.last_month_worked_hours = Math.round(project.last_month_worked_hours);
+          project.this_month_worked_hours = Math.round(project.this_month_worked_hours);
         });
 
         team.projects = $filter('orderBy')(team.projects, 'last_month_worked_hours', true).slice(0, 4); // only top 4 projects

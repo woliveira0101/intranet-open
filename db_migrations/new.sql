@@ -6,3 +6,4 @@ ALTER TABLE tracker ALTER COLUMN type TYPE tracker_type_enum USING type::text::t
 DROP type old__tracker_type_enum;
 COMMIT;
 -- add jira to tracker.type
+ALTER TABLE late ADD COLUMN work_from_home BOOLEAN DEFAULT FALSE;

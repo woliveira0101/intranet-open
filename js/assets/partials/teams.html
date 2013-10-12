@@ -58,7 +58,7 @@
             <div class="project-list" ng-show="!show_users">
               <div class="project-record" ng-repeat="project in team.projects">
                 <div class="project-name">
-                  <a href="/client/view?client_id={{ project.client.id }}" title="{{ project.client.name }}">{{ project.client.name }}</a> / <a href="/project/client/backlog?project_id={{ project.id }}" title="{{ project.name }}">{{ project.name }}</a>
+                  <a class="client" href="/client/view?client_id={{ project.client.id }}" title="{{ project.client.name }}">{{ project.client.name }}</a> / <a class="project" href="/project/client/backlog?project_id={{ project.id }}" title="{{ project.name }}">{{ project.name }}</a>
                 </div>
                 <div class="project-worked-hours">
                   <a href="{{ project.monthTimesUrl }}" bs-tooltip="thisMonthWorkedHoursTooltip">{{ project.this_month_worked_hours }}</a>
