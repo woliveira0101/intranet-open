@@ -50,9 +50,11 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
 
         _.each($scope.users, function(user){
           user.teams = [];
+          user.teams_ids = [];
           _.each($scope.teams, function(team){
             if(team.users.indexOf(user.id) >= 0){
-             user.teams.push(team.id);
+             user.teams.push(team);
+             user.teams_ids.push(team.id);
             }
           });
         });
@@ -96,7 +98,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       var f_teams = $scope.search.teams;
       if(f_teams.length > 0){
         filtered_users = _.filter(filtered_users, function(user){
-          var u_teams = user.teams;
+          var u_teams = user.teams_ids;
           var intersection = _.intersection(f_teams, u_teams);
           return f_teams.length === intersection.length;
         });

@@ -36,13 +36,13 @@
 
     <div class="tab-content">
         <div class="tab-pane fade in active">
-            <table id='oo' class="table table-bordered table-hover user-list width_auto ">
+            <table id='oo' class="table table-bordered table-hover user-list width_auto">
             <thead>
                 <th class="avatar">&nbsp;</th>
                 <th class="name">Employee's name</th>
                 <th class="contact">Contact</th>
                 <th class="role">Role</th>
-                <th class="calendars">Calendars</th>
+                <th class="teams">Teams</th>
                 <th>Start work</th>
                 <th>End work</th>
             </thead>
@@ -63,8 +63,7 @@
                         <div ng-repeat="role in user.roles">{{ to_pretty_role(role) }}</div>
                     </td>
                     <td>
-                        <a ng-show="user.availability_link" href="{{ user.availability_link }}">Avability</a><br/>
-                        <a ng-show="user.tasks_link" href="{{ user.tasks_link }}">Tasks</a>
+                        <div ng-repeat="team in user.teams">{{ team.name }}</div>
                     </td>
                     <td>{{user.start_work}}</td>
                     <td>{{user.stop_work}}</td>
