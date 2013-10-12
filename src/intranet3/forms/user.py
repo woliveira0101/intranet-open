@@ -17,7 +17,7 @@ class UserEditForm(wtf.Form):
     is_active = wtf.BooleanField(_(u"Is active"), validators=[])
 
     avatar = wtf.HiddenField()
-    roles = wtf.SelectMultipleField(_(u'Role'), validators=[], choices=User.LEVELS)
+    roles = wtf.SelectMultipleField(_(u'Role'), validators=[], choices=User.ROLES)
     
     start_work  = wtf.DateField(_(u"Start work"), format='%d/%m/%Y', validators=[])
     start_full_time_work  = wtf.DateField(_(u"Start full time work"), format='%d/%m/%Y', validators=[validators.Optional()])

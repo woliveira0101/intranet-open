@@ -37,7 +37,8 @@
                 return _.indexOf(this.groups, perm) >= 0;
               }
             };
-            G.ROLES = {{ request.user.LEVELS | tojson }};
+            G.ROLES = {{ request.user.ROLES | tojson }};
+            G.GROUPS = {{ request.user.GROUPS | tojson }};
           {% endif %}
           return G;
       })();

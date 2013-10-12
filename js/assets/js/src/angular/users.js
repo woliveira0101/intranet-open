@@ -11,6 +11,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       },
       locations: [],
       roles: [],
+      groups: [],
       teams: []
     };
 
@@ -28,8 +29,12 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
        $scope.tab = name;
     };
 
-    $scope.roles = $filter('orderBy')(_.map(G.ROLES, function(role){
+    $scope.roles = $filter('orderBy')(_.map($scope.G.ROLES, function(role){
       return {id: role[0], name: role[1]};
+    }), 'name');
+
+    $scope.groups = $filter('orderBy')(_.map($scope.G.GROUPS, function(group){
+      return {id: group, name: group};
     }), 'name');
 
     $scope.to_pretty_role = function(role){
@@ -83,6 +88,15 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
         filtered_users = _.filter(filtered_users, function(user){
           var u_roles = user.roles;
           var intersection = _.intersection(f_roles, u_roles);
+          return intersection.length > 0;
+        });
+      }
+
+      var f_groups = $scope.search.groups;
+      if(f_groups.length > 0){
+        filtered_users = _.filter(filtered_users, function(user){
+          var u_groups = user.groups;
+          var intersection = _.intersection(f_groups, u_groups);
           return intersection.length > 0;
         });
       }

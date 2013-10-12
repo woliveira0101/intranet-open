@@ -24,7 +24,7 @@ GOOGLE_ACCESS_TOKEN_MEMCACHE_KEY = 'google-access-token-userid-%s'
 class User(Base):
     __tablename__ = 'user'
     LOCATIONS = {'poznan': (u'Poznań', 'P'), 'wroclaw': (u'Wrocław', 'W')}
-    LEVELS = [
+    ROLES = [
         ('INTERN', 'INTERN'),
         ('P1', 'P1'),
         ('P2', 'P2'),
@@ -40,6 +40,15 @@ class User(Base):
         ('TESTER', 'Tester'),
         ('CEO A', 'CEO\'s Assistant'),
         ('CEO', 'CEO'),
+    ]
+    GROUPS = [
+        'user',
+        'admin',
+        'client',
+        'scrum',
+        'cron',
+        'coordinator',
+        'freelancer',
     ]
 
     id = Column(Integer, primary_key=True, nullable=False, index=True)
@@ -192,6 +201,9 @@ class User(Base):
             'img': self.avatar_url
         }
         if full:
+            groups = self.groups
+            if self.freelancer and not 'freelancer' in groups:
+                groups.append('freelancer')
             location = self.LOCATIONS[self.location]
             result.update({
             'email': self.email,
