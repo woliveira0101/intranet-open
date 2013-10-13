@@ -2,9 +2,10 @@ from pprint import pformat
 from sqlalchemy import Column, ForeignKey, orm
 from sqlalchemy.types import String, Integer, Boolean, Text
 from sqlalchemy.schema import UniqueConstraint
+from sqlalchemy import event, func
 
 from intranet3 import memcache
-from intranet3.models import Base, User
+from intranet3.models import Base, DBSession, User
 from intranet3.log import WARN_LOG, INFO_LOG, DEBUG_LOG
 
 
@@ -293,3 +294,51 @@ class SelectorMapping(object):
         memcache.delete(SELECTOR_CACHE_KEY % tracker_id)
         DEBUG(u'Invalidated selector mapping cache for tracker %s' % (tracker_id, ))
 
+    @classmethod
+    def recalculate_coordinators(cls):
+        pass
+
+
+@event.listens_for(Project.coordinator_id, 'set')
+def after_set(target, value, oldvalue, initiator):
+    if value != oldvalue:
+        target.old_coordinator = oldvalue
+
+
+def add_coordinator(session, user_id):
+    user = session.query(User).filter(User.id==user_id).first()
+    if 'coordinator' not in user.groups:
+        groups = user.groups[:]
+        groups.append('coordinator')
+        user.groups = groups
+
+def remove_coordinator(session, user_id):
+    from intranet3.models import Client
+    user, pc, cc = session.query(User, func.count(Project.id), func.count(Client.id))\
+                         .filter(User.id==user_id)\
+                         .outerjoin(Project, Project.coordinator_id==User.id)\
+                         .outerjoin(Client, Client.coordinator_id==User.id)\
+                         .group_by(User.id).first()
+    if (pc+cc) <= 1:
+        groups = user.groups[:]
+        if 'coordinator' in groups:
+            groups.remove('coordinator')
+            user.groups = groups
+
+
+@event.listens_for(DBSession, 'before_flush')
+def before_flush(session, *args):
+    from intranet3.models import Client
+    project_or_client = None
+    for obj in session:
+        if isinstance(obj, (Project, Client)) and hasattr(obj, 'old_coordinator'):
+            project_or_client = obj
+
+    if not project_or_client:
+        return
+
+    if project_or_client.old_coordinator:
+        remove_coordinator(session, project_or_client.old_coordinator)
+
+    if project_or_client.coordinator_id:
+        add_coordinator(session, project_or_client.coordinator_id)

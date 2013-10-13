@@ -71,46 +71,19 @@ def make_admin(config_path):
 def migrate(config_path):
     from intranet3 import config
     from intranet3.models import *
+    from sqlalchemy import func
+    session = DBSession()
 
+    results = session.query(User, func.count(Project.id), func.count(Client.id)) \
+        .outerjoin(Project, Project.coordinator_id==User.id) \
+        .outerjoin(Client, Client.coordinator_id==User.id) \
+        .group_by(User.id).all()
 
-    def levels_list(self):
-        l = []
-        i = 1
-        while i <= self.levels:
-            if self.levels& i:
-                l.append(i)
-            i=i * 2
-        return l
-
-    levels = dict([
-        ('1', 'INTERN'),
-        ('2', 'P1'),
-        ('4', 'P2'),
-        ('8', 'P3'),
-        ('16', 'P4'),
-        ('32', 'FED'),
-        ('64', 'ADMIN'),
-        ('128', 'EXT EXPERT'),
-        ('256', 'ANDROID'),
-        ('512', 'TESTER'),
-        ('1024', 'CEO A'),
-        ('2048', 'CEO'),
-    ])
-
-    users = DBSession.query(User).all()
-    for user in users:
-        roles = [levels[str(l)] for l in levels_list(user)]
-
-        if user.is_programmer:
-            roles.append('PROGRAMMER')
-
-        if user.is_frontend_developer:
-            roles.append('FRONTEND')
-
-        if user.is_graphic_designer:
-            roles.append('GRAPHIC')
-
-        user.roles = roles
+    for user, pc, cc in results:
+        if pc+cc > 0 and 'coordinator' not in user.groups:
+            groups = user.groups[:]
+            groups.append('coordinator')
+            user.groups = groups
 
     transaction.commit()
 

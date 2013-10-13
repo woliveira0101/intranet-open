@@ -58,12 +58,19 @@ class Add(BaseView):
             return HTTPFound(location=self.request.url_for('/client/view', client_id=project.client_id))
         return dict(client=client, form=form)
 
+@view_config(route_name='project_a', permission='scrum', renderer='json')
+class A(BaseView):
+    def dispatch(self):
+        project_id = self.request.GET.get('project_id')
+        project =  self.session.query(Project).filter(Project.id==project_id).one()
+        project.coordinator_id = 151
+        return {}
 
 @view_config(route_name='project_edit', permission='scrum')
 class Edit(BaseView):
     def dispatch(self):
         project_id = self.request.GET.get('project_id')
-        project =  Project.query.get(project_id)
+        project =  self.session.query(Project).filter(Project.id==project_id).one()
         form = ProjectForm(self.request.POST, obj=project)
         # hack, when user has no permision coordinator (that means that he has only scrum perms)
         # we do not validate the form

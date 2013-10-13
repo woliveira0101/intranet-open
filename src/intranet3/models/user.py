@@ -9,6 +9,7 @@ from sqlalchemy.types import String, Boolean, Integer, Date, Enum, Text
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql.expression import exists
+from sqlalchemy import not_
 
 from intranet3 import memcache, config
 from intranet3.log import ERROR_LOG
@@ -150,17 +151,6 @@ class User(Base):
             return leave.number
         else:
             return 0
-
-    @reify
-    def is_coordinator(self):
-        ## circular import :/
-        from intranet3.models import Project, Client
-        is_coordinator = DBSession.query(exists().where(or_(
-            Client.coordinator_id==self.id,
-            Project.coordinator_id==self.id
-        ))).scalar()
-        return is_coordinator
-
     @property
     def avatar_url(self):
         return '/api/images/users/%s' % self.id
@@ -186,13 +176,13 @@ class User(Base):
     def is_not_client(cls):
         # used in queries i.e. User.query.filter(User.is_not_client()).filter(...
         # <@ = http://www.postgresql.org/docs/8.3/static/functions-array.html
-        return User.groups.op('<@')('{user, admin, scrum}')
+        return not_(cls.is_client())
 
     @classmethod
     def is_client(cls):
         # used in queries i.e. User.query.filter(User.is_client()).filter(...
         # <@ = http://www.postgresql.org/docs/8.3/static/functions-array.html
-        return User.groups.op('<@')('{client}')
+        return User.groups.op('@>')('{client}')
 
     def to_dict(self, full=False):
         result =  {

@@ -68,8 +68,6 @@ def main(global_config, **settings):
         else:
             user = User.query.get(userid)
             perm = [ 'g:%s' % g for g in user.groups ]
-            if user.is_coordinator:
-                perm.append('g:coordinator')
             if user.freelancer:
                 perm.append('g:freelancer')
         return perm

@@ -5,6 +5,7 @@ import wtforms as wtf
 from wtforms import widgets
 from wtforms.validators import ValidationError
 from pyramid.i18n import TranslationStringFactory
+from sqlalchemy import not_
 
 from intranet3.models import DBSession, User
 
@@ -93,17 +94,24 @@ class UserChoices(object):
     def __init__(self, empty=False, inactive=False):
         self.empty = empty
         self.inactive = inactive
+        self.session = DBSession()
 
     def __iter__(self):
         if self.empty:
             yield '', u'-- None --'
-        query = DBSession.query(User.id, User.name).filter(User.is_not_client()).filter(User.is_active==True).order_by(User.name)
+        query = self.session.query(User.id, User.name)\
+                            .filter(not_(User.is_client()))\
+                            .filter(User.is_active==True)\
+                            .order_by(User.name)
         for id, name in query:
             yield str(id), name
 
         if self.inactive:
             yield '', ' '*8
-            query = DBSession.query(User.id, User.name).filter(User.is_not_client()).filter(User.is_active==False).order_by(User.name)
+            query = self.session.query(User.id, User.name)\
+                                .filter(User.is_client())\
+                                .filter(User.is_active==False)\
+                                .order_by(User.name)
             for id, name in query:
                 yield str(id), name
 
