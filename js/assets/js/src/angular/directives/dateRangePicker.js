@@ -13,9 +13,34 @@ App.directive('dateRangePicker', function($compile) {
         }
         return '';
       });
+      var thisYearStart = new Date(new Date().getFullYear(), 0, 1);
+      var thisYearEnd = new Date(new Date().getFullYear(), 11, 31);
+      var lastYearStart = new Date(new Date().getFullYear()-1, 0, 1);
+      var lastYearEnd = new Date(new Date().getFullYear()-1, 11, 31);
       $(el).daterangepicker(
         {
-          format: format
+          ranges: {
+            'This Month': [Date.today().moveToFirstDayOfMonth(), Date.today().moveToLastDayOfMonth()],
+            'Last Month': [Date.today().moveToFirstDayOfMonth().add({ months: -1 }), Date.today().moveToFirstDayOfMonth().add({ days: -1 })],
+            'This Year': [thisYearStart, thisYearEnd],
+            'Last Year': [lastYearStart, lastYearEnd]
+          },
+          opens: 'right',
+          format: 'dd-MM-yyyy',
+          separator: ' - ',
+          startDate: Date.today().moveToFirstDayOfMonth(),
+          endDate: Date.today().moveToLastDayOfMonth(),
+          locale: {
+            applyLabel: 'Submit',
+            fromLabel: 'From',
+            toLabel: 'To',
+            customRangeLabel: 'Custom Range',
+            daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr','Sa'],
+            monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            firstDay: 1
+          },
+          showWeekNumbers: true,
+          buttonClasses: ['btn-danger']
         },
         function (start, end) {
           scope.$apply(function() {
