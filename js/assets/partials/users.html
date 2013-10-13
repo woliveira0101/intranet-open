@@ -44,16 +44,16 @@
             <table id='oo' class="table table-bordered table-hover user-list width_auto">
             <thead>
                 <th class="avatar">&nbsp;</th>
-                <th class="name">Employee's name</th>
+                <th class="name" ng-click="predicate = 'name'; reverse=!reverse">Employee's name</th>
                 <th class="contact">Contact</th>
                 <th class="role">Role</th>
                 <th class="groups">Groups</th>
                 <th class="teams">Teams</th>
-                <th>Start work</th>
-                <th>End work</th>
+                <th ng-click="predicate = 'start_work'; reverse=!reverse">Start work</th>
+                <th ng-click="predicate = 'stop_work'; reverse=!reverse">End work</th>
             </thead>
             <tbody>
-                <tr ng-repeat="user in get_users()">
+                <tr ng-repeat="user in get_users() | orderBy:predicate:reverse">
                     <td class="email"><img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" /></td>
                     <td class="name">
                         <div><a ng-href="/user/view?user_id={{ user.id }}">{{user.name}}</a> ( {{user.location[2] }} )</div>
