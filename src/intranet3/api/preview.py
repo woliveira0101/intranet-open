@@ -144,7 +144,7 @@ class PreviewApi(ApiView):
         return res
 
 
-@view_config(route_name='api_images', renderer='json', http_cache=60)
+@view_config(route_name='api_images', renderer='json', http_cache=60, permission='client')
 class ImageApi(ApiView):
     ANONYMONUS = {
         'users': os.path.normpath(os.path.join(os.path.dirname(__file__),'..','static','img','anonymous.png')),

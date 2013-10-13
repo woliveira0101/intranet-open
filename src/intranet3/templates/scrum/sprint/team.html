@@ -7,20 +7,39 @@
     {% if sprint.team_id %}
     <div id="selectTeam" class="float_left">
         <h2>{{ sprint.team.name }}</h2>
-        <div class="icon_team">
-            <img src="{{ sprint.team.avatar_url }}">
-        </div>
-        <div class="team-box">
-            <div class="desc_team">
-                <div class="team thumbnail">
-                    {% for m in sprint.team.team_members %}
-                    <div class="user">
-                        <img src="{{ m.user.avatar_url }}"><a class="x-user-tooltip-{{m.user.id}}" href="{{ request.url_for('/user/view') }}?user_id={{ m.user.id }}">{{ m.user.name}}</a>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-         </div>
+
+        <table id='oo' class="table table-bordered table-hover user-list width_auto">
+            <thead>
+                <th class="avatar">&nbsp;</th>
+                <th class="name">Employee's name</th>
+                <th class="contact">Contact</th>
+            </thead>
+            <tbody>
+                {% for user in info.users | sort(attribute='name') %}
+                <tr>
+                    <td class="email"><img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" /></td>
+                    <td class="name">
+                        <div><a href="#">{{user.name}}</a> ( {{ user.get_location() }} )</div>
+                    </td>
+                    <td class="contact-info">
+                        <a href="mailto:{{ user.email }}">{{ user.email }}</a><br/><br/>
+                            {% if user.phone %}
+                            <label>Cellphone:<br/><span>{{ user.phone }}</span><br/></label>
+                            {% endif %}
+                            {% if user.phone_on_desk %}
+                            <label>Deskphone:<br/><span>{{ user.phone_on_desk }}</span><br/></label>
+                            {% endif %}
+                            {% if user.skype %}
+                            <label>Skype:<br/><span>{{ user.skype }}</span><br/></label>
+                            {% endif %}
+                            {% if user.irc %}
+                            <label>IRC:<br/><span>{{ user.irc }}</span><br/></label>
+                            {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+         </table>
     </div>
     {% endif %}
 </div>

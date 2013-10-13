@@ -4,7 +4,7 @@
     <ul class="nav nav-tabs nav-stacked left_ul">
         {% if request.is_user_in_group('admin') %}
             {% include "_menu_left/admin.html" %}
-        {% elif request.user.is_user_in_group('coordinator') %}
+        {% elif request.is_user_in_group('coordinator') %}
             {% include "_menu_left/coordinator.html" %}
         {% elif request.is_user_in_group('user') %}
             {% include "_menu_left/user.html" %}

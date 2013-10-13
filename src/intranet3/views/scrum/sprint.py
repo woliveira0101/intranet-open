@@ -371,7 +371,6 @@ class Team(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         bugs = self._fetch_bugs(sprint)
         sw = SprintWrapper(sprint, bugs, self.request)
 
-
         return dict(
             sprint=sprint,
             info=sw.get_info(),

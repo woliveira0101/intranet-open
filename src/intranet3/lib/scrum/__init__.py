@@ -205,6 +205,7 @@ class SprintWrapper(object):
             end=self.sprint.end.strftime('%Y-%m-%d'),
             days_remaining=h.get_working_days(datetime.date.today(), self.sprint.end),
             total_bugs = len(self.bugs),
+            users=self.session.query(User).filter(User.id.in_(self.sprint.team.users)).all(),
         )
         self.sprint.commited_points = points
         self.sprint.achieved_points = points_achieved
