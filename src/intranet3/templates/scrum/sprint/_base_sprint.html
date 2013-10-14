@@ -77,8 +77,8 @@
                             <li>
                                 <span>{% trans %}Velocity per day{% endtrans %}</span>
                                 <span title="This sprint velocity">{{ '%.2f' % sprint.velocity }}</span> /
-                                <span title="Mean velocity of all sprints">{{ '%.2f' % sprint.mean_velocity }}</span> /
-                                <span title="Total velocity">{{ '%.2f' % sprint.total_velocity }}</span>
+                                <span title="Mean velocity of all sprints (bugs only)">{{ '%.2f' % sprint.mean_bugs_velocity }}</span> /
+                                <span title="Mean velocity of all sprints (all time entries)">{{ '%.2f' % sprint.mean_velocity }}</span>
                             </li>
                         </ul>
                     </div>

@@ -146,16 +146,23 @@ class SprintWrapper(object):
         #
         #bug_ids_cond = or_(*[ and_(TimeEntry.project_id==p_id, TimeEntry.ticket_id==b_id)  for p_id, b_id in bugs_ids ])
 
-        entries = self.session.query(User, func.sum(TimeEntry.time))\
+        entries = self.session.query(User, func.sum(TimeEntry.time), TimeEntry.ticket_id)\
                               .filter(TimeEntry.user_id==User.id)\
                               .filter(TimeEntry.project_id==self.sprint.project_id) \
                               .filter(TimeEntry.added_ts>=self.sprint.start)\
                               .filter(TimeEntry.added_ts<=self.sprint.end)\
                               .filter(TimeEntry.deleted==False)\
-                              .group_by(User).all()
+                              .group_by(User, TimeEntry.ticket_id).all()
 
-        entries = sorted([ (user.name, round(time)) for user, time in entries ], key=lambda x: x[1], reverse=True)
-        return entries, sum([e[1] for e in entries])
+        entries = [ (user.name, round(time), ticket_id)
+                    for user, time, ticket_id in entries ]
+        entries = sorted(entries, key=lambda x: x[1], reverse=True)
+
+        return (
+            entries,
+            sum([e[1] for e in entries]),
+            sum([e[1] for e in entries if e[2] and not e[2].startswith('M')])
+        )
 
     def get_board(self):
         todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
@@ -195,10 +202,11 @@ class SprintWrapper(object):
         )
 
     def get_info(self):
-        entries, sum_worked_hours = self.get_worked_hours()
+        entries, sum_worked_hours, sum_bugs_worked_hours = self.get_worked_hours()
         points_achieved = self.get_points_achieved()
         points = self.get_points()
         total_hours = sum_worked_hours
+        total_bugs_hours = sum_bugs_worked_hours
 
         users = self.session.query(User)\
                     .filter(User.id.in_(self.sprint.team.users))\
@@ -213,6 +221,7 @@ class SprintWrapper(object):
         self.sprint.commited_points = points
         self.sprint.achieved_points = points_achieved
         self.sprint.worked_hours = total_hours
+        self.sprint.bugs_worked_hours = total_bugs_hours
         return result
 
 

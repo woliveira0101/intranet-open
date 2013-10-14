@@ -7,3 +7,4 @@ DROP type old__tracker_type_enum;
 COMMIT;
 -- add jira to tracker.type
 ALTER TABLE late ADD COLUMN work_from_home BOOLEAN DEFAULT FALSE;
+ALTER TABLE sprint ADD COLUMN bugs_worked_hours REAL DEFAULT 0.0;
