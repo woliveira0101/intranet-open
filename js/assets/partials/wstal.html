@@ -58,8 +58,8 @@
                                 <span class="name" ng-bind="user.name"></span>
                                 <span class="new-late-label" ng-show="newAbsencesIds.indexOf(user.absence_id) != -1">(NEW)</span>
                             </td>
-                            <td class="lates-column-from">{{ user.start  && (set_time(user.start) | date:'MM.dd') || '-'}}</td>
-                            <td class="lates-column-to">{{ user.end  && (set_time(user.end) | date:'MM.dd') || '-'}}</td>
+                            <td class="lates-column-from">{{ user.start  && (set_time(user.start) | date:'dd.MM') || '-'}}</td>
+                            <td class="lates-column-to">{{ user.end  && (set_time(user.end) | date:'dd.MM') || '-'}}</td>
                         </tr>
                     </tbody>
                 </table>
