@@ -29,7 +29,12 @@
                 <td>{{ bug.owner.name }}</td>
                 <td>{{ bug.whiteboard['p'] }}</td>
                 <td>{{ '%.2f' % bug.sprint_time }} ({{ '%.2f' % bug.time }})</td>
-                <td>{{ (bug.velocity | round(2)) if bug.velocity else '-' }}</td>
+                <td>
+                    {{ (bug.velocity | round(2)) if bug.velocity else '-' }}
+                    {% if bug.danger %}
+                        <div class="ui-icon ui-icon-alert task-danger" title="Low velocity"> </div>
+                    {% endif %}
+                </td>
                 <td>{{ bug.status }}</td>
             </tr>
             {% endfor %}
