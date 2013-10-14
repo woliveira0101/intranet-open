@@ -154,10 +154,15 @@ class SprintWrapper(object):
                               .filter(TimeEntry.deleted==False)\
                               .group_by(User, TimeEntry.ticket_id).all()
 
-        entries = sorted([ (user.name, round(time), ticket_id) for user, time, ticket_id in entries ], key=lambda x: x[1], reverse=True)
-        return entries, sum([e[1] for e in entries]), \
-                sum([e[1] for e in filter(lambda e:
-                    e[2] and not e[2][0] == 'M', entries)])
+        entries = [ (user.name, round(time), ticket_id)
+                    for user, time, ticket_id in entries ]
+        entries = sorted(entries, key=lambda x: x[1], reverse=True)
+
+        return (
+            entries,
+            sum([e[1] for e in entries]),
+            sum([e[1] for e in entries if e[2] and not e[2].startswith('M')])
+        )
 
     def get_board(self):
         todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)

@@ -78,7 +78,8 @@ class List(BaseView):
         ).all()
 
         for sprint in sprints:
-            associated_sprints = filter(lambda s: s[0]==sprint.project_id, all_sprints_for_velocity)
+            associated_sprints = [s for s in all_sprints_for_velocity
+                                 if s[0]==sprint.project_id]
             sprint.calculate_velocities(associated_sprints)
 
         return dict(
