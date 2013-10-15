@@ -9,6 +9,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       },
       stop_work: {
       },
+      full_time_only: false,
       locations: [],
       roles: [],
       groups: [],
@@ -45,6 +46,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
 
     $http.get('/api/users?full=1&inactive=1').success(function(data){
       $scope.users = data.users;
+
       $http.get('/api/teams').success(function(data){
         $scope.teams = $filter('orderBy')(data.teams, 'name');
         $scope.teams_to_user = {};
@@ -135,7 +137,11 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
           return !u_stop_work || (start <= u_stop_work  && u_stop_work <= end);
         });
       }
-
+      if ($scope.search.full_time_only){
+          filtered_users = _.filter(filtered_users, function(user){
+            return user.start_full_time_work;
+          });
+      }
       return filtered_users;
     };
 

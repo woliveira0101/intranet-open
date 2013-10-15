@@ -5,6 +5,9 @@
                  <input ng-model="search.name"  type="text" placeholder="Employee's name">
                  <input type="text" ng-model="search.start_work" placeholder="Start work" date-range-picker>
                  <input type="text" ng-model="search.stop_work" placeholder="Stop work" date-range-picker>
+                 <div class="description">
+                    Full time only: <input type="checkbox" ng-model="search.full_time_only">
+                 </div>
              </div>
              <div class="row below">
                <select
