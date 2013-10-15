@@ -41,6 +41,10 @@ class Sprint(Base):
     def velocity(self):
         return (self.achieved_points / self.worked_hours * 8.0) if self.worked_hours else 0.0
 
+    @property
+    def user_stories_velocity(self):
+        return (self.achieved_points / self.bugs_worked_hours * 8.0) if self.bugs_worked_hours else 0.0
+
     def calculate_velocities(self, associated_sprints):
         worked_hours_sum = sum([s[1] for s in associated_sprints])
         bugs_worked_hours_sum = sum([s[2] for s in associated_sprints])

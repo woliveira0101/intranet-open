@@ -32,9 +32,10 @@
             <td>{{ sprint.worked_hours | round | int }}</td>
             <td>{{ sprint.achieved_points }} / {{ sprint.commited_points }}</td>
             <td>
-                <span title="This sprint velocity">{{ '%.2f' % sprint.velocity }}</span> /
-                <span title="Mean velocity of all sprints (bugs only)">{{ '%.2f' % sprint.mean_bugs_velocity }}</span> /
-                <span title="Mean velocity of all sprints (all time entries)">{{ '%.2f' % sprint.mean_velocity }}</span>
+                <span title="This sprint velocity - user stories only (anchieved points / user stories worked hours)0">{{ '%.2f' % sprint.velocity }}</span> /
+                <span title="This sprint velocity - all time entries (anchieved points / worked hours)">{{ '%.2f' % sprint.velocity }}</span> /
+                <span title="Average velocity of all sprints - user stories only (sum of anchieved points / sum of user stories worked hours)">{{ '%.2f' % sprint.mean_bugs_velocity }}</span> /
+                <span title="Average velocity of all sprints - all time entries (sum of anchieved points / sum of worked hours)">{{ '%.2f' % sprint.mean_velocity }}</span>
             </td>
             {% if request.has_perm('scrum') %}
                 <td>
