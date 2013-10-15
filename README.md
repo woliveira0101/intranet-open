@@ -4,9 +4,9 @@ Application for managing a company.
 
 ## Features:
 
-1. Time tracking
-2. Fetching times from trackers like bugzilla or tracs
-3. Generating time reports (for employees, clients, owners)
+1. Time tracking.
+2. Fetching times from trackers like bugzilla or tracs.
+3. Generating time reports (for employees, clients, owners).
 4. Managing employee's arrival/leave time.
 5. Managing employee's absences/leaves.
 
@@ -15,6 +15,8 @@ Application for managing a company.
 Development under Ubuntu
 
 Created: May 2013
+
+Updated: September 2013
 
 Versions: Intranet 3.0.8; Ubuntu 13.04; PostgreSQL 9.1; Python 2.7.4
 
@@ -47,8 +49,8 @@ Now connect to PostgreSQL server. Create user with password. Then create databas
 
 ```
 postgres~$ psql
-postgres=# CREATE ROLE intradmin WITH LOGIN PASSWORD 'password';
-postgres=# CREATE DATABASE intranetdb WITH OWNER intradmin;
+postgres=# CREATE ROLE intranet2 WITH LOGIN PASSWORD 'password';
+postgres=# CREATE DATABASE intranetdb WITH OWNER intranet2;
 ```
 
 To logout press `CTRL+D` twice.
@@ -56,9 +58,17 @@ To logout press `CTRL+D` twice.
 Now test your newly created user and database:
 
 ```bash
-user~$ psql -d intranetdb -h localhost -U intradmin -W
-Password for user intradmin: password
+user~$ psql -d intranetdb -h localhost -U intranet2 -W
+Password for user intranet2: password
 ```
+
+If you dumping already existing DB, please login as postgres and:
+```bash
+postgres~$ psql intranetdb < /tmp/intranet.sql
+```
+
+Remember to migrate DB into proper version. This SQLs can be found in `db_migrations`.
+
 
 #### Memcached
 ```bash
@@ -159,11 +169,12 @@ python bootstrap.py -d
 
 ### 5. Configure Intranet
 
-Download configuration file name it [config.ini](#intranet-configuration-file) and put in `intranet\intranet\parts\etc`.
+Download configuration file name it [config.ini](#intranet-configuration-file) and put in `intranet\intranet`.
 
 1. There are 7 lines with `/home/<user>` to edit with your username.
 2. Modify line starts with `sqlalchemy.url =` with your data.
 3. Replace <generate_this> in lines starts `CRON_SECRET_KEY` and `DATASTORE_SYMMETRIC_PASSWORD` with this command outputs
+4. Replace `example.com` domain with your company domain.
 
 ```bash
 user~$ head -c 64 /dev/urandom | base64 -w 0
@@ -173,13 +184,21 @@ user~$ head -c 64 /dev/urandom | base64 -w 0
 After making configuration file get into `~/intranet/intranet/`
 
 - Initialize database
-- Compile `*.less` files
-- Run development server
-
 ```bash
-./bin/script parts/etc/config.ini init_db
-./bin/watch
-./bin/run
+./bin/script config.ini init_db
+```
+
+- Compile `*.less` and minimize `*.js` files
+```bash
+cd js
+npm install
+bower install
+grunt dev
+```
+
+- Run development server
+```bash
+./bin/run config.ini
 ```
 
 I'll just leave this here [http://localhost:5000/](http://localhost:5000/)
@@ -209,7 +228,7 @@ pyramid.includes =
 	pyramid_exclog
 
 pyramid.autoroute.root_module = intranet3.views
-sqlalchemy.url = postgresql://<intradmin>:<password>@localhost:5432/<intranetdb>
+sqlalchemy.url = postgresql://<intranet2>:<password>@localhost:5432/<intranetdb>
 sqlalchemy.pool_size = 20
 sqlalchemy.pool_timeout = 60
 sqlalchemy.pool_recycle = 3600
