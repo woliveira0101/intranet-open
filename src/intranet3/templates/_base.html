@@ -10,7 +10,7 @@
             {% include "_menu_left/user.html" %}
         {% elif request.is_user_in_group('client') %}
             {% include "_menu_left/client.html" %}
-        {% elif request.user.freelancer %}
+        {% elif request.is_user_in_group('freelancer') %}
             {% include "_menu_left/freelancer.html" %}
         {% endif %}
     </ul>
