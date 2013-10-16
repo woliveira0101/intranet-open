@@ -29,7 +29,13 @@
                 <td>{{ bug.owner.name }}</td>
                 <td>{{ bug.whiteboard['p'] }}</td>
                 <td>{{ '%.2f' % bug.sprint_time }} ({{ '%.2f' % bug.time }})</td>
-                <td>{{ (bug.velocity | round(2)) if bug.velocity else '-' }}</td>
+                <td>
+                    {% if bug.is_closed() %}
+                        <span>{{ (bug.velocity | round(2)) }}</span>
+                    {% else %}
+                        <span class="velocity-opened">{{ (bug.velocity | round(2)) }}</span>
+                    {% endif %}
+                </td>
                 <td>{{ bug.status }}</td>
             </tr>
             {% endfor %}
