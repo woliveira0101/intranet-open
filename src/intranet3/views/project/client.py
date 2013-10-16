@@ -120,6 +120,18 @@ class Sprints(BaseView):
         else:
             stats = None
 
+        all_sprints_for_velocity = self.session.query(
+            Sprint.project_id,
+            Sprint.worked_hours,
+            Sprint.bugs_worked_hours,
+            Sprint.achieved_points
+        ).all()
+
+        for sprint in sprints:
+            associated_sprints = [s for s in all_sprints_for_velocity
+                                 if s[0]==sprint.project_id]
+            sprint.calculate_velocities(associated_sprints)
+
         return dict(
             sprints=sprints,
             form=form,

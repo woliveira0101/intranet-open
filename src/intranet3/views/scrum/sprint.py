@@ -265,7 +265,7 @@ class Charts(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         burndown = sw.get_burndown_data()
         tracker = Tracker.query.get(sprint.project.tracker_id)
 
-        entries, sum_ = sw.get_worked_hours()
+        entries, sum_, bugs_sum = sw.get_worked_hours()
         entries.insert(0, ('Employee', 'Time'))
         piechart_data = json.dumps(entries)
 
