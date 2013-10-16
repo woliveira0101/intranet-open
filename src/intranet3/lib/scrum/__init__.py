@@ -208,9 +208,11 @@ class SprintWrapper(object):
         total_hours = sum_worked_hours
         total_bugs_hours = sum_bugs_worked_hours
 
-        users = self.session.query(User)\
-                    .filter(User.id.in_(self.sprint.team.users))\
-                    .filter(User.is_active==True).all()
+        users = []
+        if self.sprint.team_id:
+            users = self.session.query(User)\
+                        .filter(User.id.in_(self.sprint.team.users))\
+                        .filter(User.is_active==True).all()
         result = dict(
             start=self.sprint.start.strftime('%Y-%m-%d'),
             end=self.sprint.end.strftime('%Y-%m-%d'),
