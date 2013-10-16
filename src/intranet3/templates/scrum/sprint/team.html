@@ -15,7 +15,7 @@
                 <th class="contact">Contact</th>
             </thead>
             <tbody>
-                {% for user in info.users | sort(attribute='name') %}
+                {% for user in info.users %}
                 <tr>
                     <td class="email"><img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" /></td>
                     <td class="name">
