@@ -1,6 +1,7 @@
 var App = angular.module('intranet');
 
-App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) {
+App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, date_of_birth) {
+
     $scope.users = [];
     $scope.tab = 'employees';
     $scope.search = {
@@ -43,6 +44,8 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       })[1];
     };
 
+    $scope.dob = date_of_birth.create(1980, 1995);
+
     $http.get('/api/users?full=1&inactive=1').success(function(data){
       $scope.users = data.users;
       $http.get('/api/teams').success(function(data){
@@ -69,6 +72,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
           $scope.search.teams = [];
         }, 0);
       });
+        $scope.dob.update_years($scope.users);
     });
 
 
@@ -135,6 +139,19 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
           return !u_stop_work || (start <= u_stop_work  && u_stop_work <= end);
         });
       }
+
+        var d_start = $scope.dob.start;
+        var d_end = $scope.dob.end;
+        if( d_start && d_end ){
+            filtered_users = _.filter(filtered_users, function(user){
+                var dob = user.date_of_birth;
+                if (dob){
+                    var year = dob.substring(0,4);
+                    dob = (year >= d_start) && (year <= d_end);
+                }
+                return dob;
+            });
+        }
 
       return filtered_users;
     };

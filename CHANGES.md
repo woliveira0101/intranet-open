@@ -1,3 +1,7 @@
+New release
+===========
+- user date of birth
+
 0.9.4 (14-11-2013)
 ===============
 - absence / lates enhancemets
