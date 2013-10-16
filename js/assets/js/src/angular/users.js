@@ -139,7 +139,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       }
       if ($scope.search.full_time_only){
           filtered_users = _.filter(filtered_users, function(user){
-            return user.start_full_time_work;
+            return Date.parse(user.start_full_time_work) < new Date();
           });
       }
       return filtered_users;
