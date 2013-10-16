@@ -158,32 +158,37 @@ class SprintWrapper(object):
         return entries, sum([e[1] for e in entries])
 
     def get_board(self):
-        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
-        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
-        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
-        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
+        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
+            points=0, empty=True)
+        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
+            points=0, empty=True)
+        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
+            points=0, empty=True)
+        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
+            points=0, empty=True)
 
         def append_bug(d, bug):
             if bug.is_blocked:
-                d['blocked'].append(bug)
+                d['bugs']['blocked'].append(bug)
             elif bug.points:
-                d['with_points'].append(bug)
+                d['bugs']['with_points'].append(bug)
             else:
-                d['without_points'].append(bug)
+                d['bugs']['without_points'].append(bug)
+            d['empty'] = False;
 
         for bug in self.bugs:
             points = bug.points
             if bug.is_closed():
-                append_bug(completed['bugs'], bug)
+                append_bug(completed, bug)
                 completed['points'] += points
             elif bug.get_status() == 'RESOLVED':
-                append_bug(toverify['bugs'], bug)
+                append_bug(toverify, bug)
                 toverify['points'] += points
             elif not bug.is_unassigned():
-                append_bug(inprocess['bugs'], bug)
+                append_bug(inprocess, bug)
                 inprocess['points'] += points
             else:
-                append_bug(todo['bugs'], bug)
+                append_bug(todo, bug)
                 todo['points'] += points
 
         return dict(
