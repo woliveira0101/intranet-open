@@ -1302,8 +1302,13 @@ form.box_edit_user dl dt {
     position: relative;
     top: -5px;
 }
+#task_board_container {
+    width: 100%;
+}
 .task_board {
+    width: auto;
     border-top: 1px solid #dbd4d4;
+    margin: 0px auto;
     thead td {
         font-weight: bold;
         padding: 5px;
@@ -1320,6 +1325,9 @@ form.box_edit_user dl dt {
     }
     tbody td:first-child {
         text-align: left;
+    }
+    .empty_column {
+        width: 100px;
     }
     .head_card {
         font-size: 12px;
@@ -1338,7 +1346,7 @@ form.box_edit_user dl dt {
     .yellow_card {
         background-color:#faefa1;
         padding: 3px;
-        margin: 5px 0.5%;
+        margin: 5px 2px;
         color:#000;
         font-size:13px;
         text-decoration:none;
@@ -1347,13 +1355,12 @@ form.box_edit_user dl dt {
         border-bottom:2px solid rgba(0, 0, 0, 0.2);
         cursor:pointer;
         position: relative;
-        width: 49%;
         box-sizing:border-box;
         -moz-box-sizing:border-box;
         -webkit-box-sizing:border-box;
         text-align:left;
         float: left;
-        min-width: 138px;
+        min-width: 140px;
         &:hover {
             .desc_ticket {
                 height: auto;
@@ -1366,13 +1373,13 @@ form.box_edit_user dl dt {
     .container_card_blocked {
         position: relative;
         float: left;
-        min-width: 138px;
-        margin: 0 0.5%;
+        margin-right: 2px;
         .yellow_card {
             float: none;
             margin-top: -5px;
             border-top: 1px solid #a66464;
             width: 100% !important;
+            margin-right: 0px;
         }
         .yellow_card:first-child {
             z-index: 10;
@@ -2329,4 +2336,10 @@ i.pointer {
 
 .velocity-opened {
     color: #BBB;
+}
+.bootstrap-timepicker {
+    width: 206px;
+    .input-small {
+        width: 178px;
+    }
 }

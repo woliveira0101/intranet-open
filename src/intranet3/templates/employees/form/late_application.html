@@ -20,24 +20,8 @@
      <script type="text/javascript">
          var timepicker1 = $('#timepicker1');
          var timepicker2 = $('#timepicker2');
-         var checkbox1 = $('input[name$="timepicker1"]');
-         var checkbox2 = $('input[name$="timepicker2"]');
-         var block1 = checkbox1.parent().parent().find('dd').last();
-         var block2 = checkbox2.parent().parent().find('dd').last();
 
-         timepicker1.timepicker({ defaultTime: false, showMeridian: false });
-         timepicker2.timepicker({ defaultTime: false, showMeridian: false });
-
-         $('.whats-this').tooltip();
-
-         block1.addClass('invisible');
-         block2.addClass('invisible');
-         checkbox1.click( function() {
-            block1.toggleClass('visible');
-         });
-         checkbox2.click( function() {
-            block2.toggleClass('visible');
-         });
-
+         timepicker1.timepicker({ defaultTime: '09:00', showMeridian: false });
+         timepicker2.timepicker({ defaultTime: '17:00', showMeridian: false });
      </script>
 {% endblock %}

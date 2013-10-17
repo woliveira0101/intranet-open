@@ -4,7 +4,7 @@
 
 {% macro yellow_card(bug) -%}
 {% if bug.dependson %}
-<div class="container_card_blocked" style="width: 49%;">
+<div class="container_card_blocked">
 {% endif %}
     <div class="yellow_card {% if bug.is_blocked %}blocked{% endif %}">
         <div class="number_ticket"><a target="_blank" href="{{ bug.get_url() }}">{{ bug.id }}</a></div>
@@ -71,33 +71,112 @@
 
 {% block body %}
 <div class="btn go_normalscreen active" style="display: none">Fullscreen</div>
-<table class="table table-bordered task_board">
-    <thead>
-        <tr>
-            <td><a href="{{ bug_list_url(board['todo']['bugs']) }}">{% trans %}TODO{% endtrans %}</a>  <span class="badge badge-info">{{ board['todo']['points'] | int_or_float  }}</span></td>
-            <td><a href="{{ bug_list_url(board['inprocess']['bugs']) }}">{% trans %}IN PROCESS{% endtrans %}</a>  <span class="badge badge-info">{{ board['inprocess']['points'] | int_or_float  }}</span></td>
-            <td><a href="{{ bug_list_url(board['toverify']['bugs']) }}">{% trans %}TO VERIFY{% endtrans %}</a>  <span class="badge badge-info">{{ board['toverify']['points'] | int_or_float  }}</span></td>
-            <td><a href="{{ bug_list_url(board['completed']['bugs']) }}">{% trans %}COMPLETED{% endtrans %}</a>  <span class="badge badge-info">{{ board['completed']['points'] | int_or_float  }}</span></td>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-                {{ column(board['todo']['bugs']) }}
-            </td>
-            <td>
-                {{ column(board['inprocess']['bugs']) }}
-            </td>
-            <td>
-                {{ column(board['toverify']['bugs']) }}
-            </td>
-            <td>
-                {{ column(board['completed']['bugs']) }}
-            </td>
-        </tr>
-    </tbody>
-</table>
+<div id="task_board_container">
+    <table class="table table-bordered task_board">
+        <thead>
+            <tr>
+                <td {% if board['todo']['empty'] %} class="empty_column" {% endif %}>
+                    <a href="{{ bug_list_url(board['todo']['bugs']) }}">{% trans %}TODO{% endtrans %}</a>  <span class="badge badge-info">{{ board['todo']['points'] | int_or_float  }}</span>
+                </td>
+                <td {% if board['inprocess']['empty'] %} class="empty_column" {% endif %}>
+                    <a href="{{ bug_list_url(board['inprocess']['bugs']) }}">{% trans %}IN PROCESS{% endtrans %}</a>  <span class="badge badge-info">{{ board['inprocess']['points'] | int_or_float  }}</span>
+                </td>
+                <td {% if board['toverify']['empty'] %} class="empty_column" {% endif %}>
+                    <a href="{{ bug_list_url(board['toverify']['bugs']) }}">{% trans %}TO VERIFY{% endtrans %}</a>  <span class="badge badge-info">{{ board['toverify']['points'] | int_or_float  }}</span>
+                </td>
+                <td {% if board['completed']['empty'] %} class="empty_column" {% endif %}>
+                    <a href="{{ bug_list_url(board['completed']['bugs']) }}">{% trans %}COMPLETED{% endtrans %}</a>  <span class="badge badge-info">{{ board['completed']['points'] | int_or_float  }}</span>
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="board-column">
+                    {{ column(board['todo']['bugs']) }}
+                </td>
+                <td class="board-column">
+                    {{ column(board['inprocess']['bugs']) }}
+                </td>
+                <td class="board-column">
+                    {{ column(board['toverify']['bugs']) }}
+                </td>
+                <td class="board-column">
+                    {{ column(board['completed']['bugs']) }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 <script type="text/javascript">
+    function calculateRowsNumber(column) {
+        if (column.slots > 0) {
+            column.rows = Math.ceil(column.normal / column.slots)
+                            + Math.ceil(column.noPoints / column.slots)
+                            + Math.ceil(column.blocked / column.slots);
+        } else {
+            column.rows = 0;
+        }
+    }
+
+    function sortColumns(columns) {
+        return _.sortBy(columns, function(column) {
+                return -column.rows;
+            });
+    }
+
+    function renderCards() {
+        spaces = 11;
+        totalWidth = $('#task_board_container').width() - spaces*4
+                     - ($('.empty_column').width()+spaces)*$('.empty_column').length;
+
+        slotWidth = $($('.yellow_card')[0]).width() + spaces;
+        slotsAvailable = Math.floor(totalWidth / slotWidth);
+
+        columns = []
+        $('.board-column').each(function(index, element) {
+            normal = $('.frame_normal', element).children('.yellow_card').length;
+            noPoints = $('.frame_no_points', element).children('.yellow_card').length;
+            blocked = $('.frame_blocked', element).children('.container_card_blocked').length;
+
+            columns[index] = {
+                'index': index,
+                'normal': normal,
+                'noPoints': noPoints,
+                'blocked': blocked,
+                'sum': normal + noPoints + blocked,
+                'max': Math.max(normal, noPoints, blocked),
+                'slots': 0
+            };
+        })
+
+        _.each(columns, function(column) {
+            if (column.sum > 0) {
+                column.slots = 1;
+                slotsAvailable--;
+            }
+            calculateRowsNumber(column);
+        });
+        columns = sortColumns(columns);
+
+        while (slotsAvailable > 0) {
+            for (i in columns) {
+                current = columns[i];
+                if (current.max > current.slots) {
+                    current.slots++;
+                    calculateRowsNumber(current);
+                    columns = sortColumns(columns);
+                    break;
+                }
+            };
+            slotsAvailable--;
+        }
+
+        domColumns = $('.board-column');
+        _.each(columns, function(column) {
+            $(domColumns[column.index]).width(slotWidth * column.slots);
+        });
+    }
+
     $(document).ready(function() {
         $('.assignee').tooltip();
         $('.icon-exclamation-sign').tooltip();
@@ -153,25 +232,9 @@
                 $go_normalscreen_btn.hide()
             }
         });
-        var amountYellowCard = $('.yellow_card',this).length;
-        $('.task_board tbody td').each(function () {
-            var currentAmountYellowCard = $('.yellow_card',this).length,
-                percent = currentAmountYellowCard * 100/amountYellowCard + '%';
-            $(this).css('width',percent);
-            $(this).css('min-width','206px');
-            var percentCard = 100/parseInt($(this).width()/87) - 4 + '%';
-            if (currentAmountYellowCard==0) {
-                $(this).css('min-width','70px');
-            }
-            $('.yellow_card',this).each(function() {
-                $(this).css('width',percentCard);
-                if($(this).parent().hasClass('container_card_blocked')) {
-                    $(this).parent().css('width',percentCard);
-                }
-            });
-        });
 
-
+        renderCards();
+        $(window).resize(renderCards);
     });
 </script>
 {% endblock body %}

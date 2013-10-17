@@ -9,6 +9,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       },
       stop_work: {
       },
+      full_time_only: false,
       locations: [],
       roles: [],
       groups: [],
@@ -45,8 +46,10 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
 
     $http.get('/api/users?full=1&inactive=1').success(function(data){
       $scope.users = data.users;
+
       $http.get('/api/teams').success(function(data){
         $scope.teams = $filter('orderBy')(data.teams, 'name');
+        $scope.teams.push({'id':-1, 'name':' - No Team - ', 'users':[]});
         $scope.teams_to_user = {};
         $scope.user_to_teams = {};
         _.each(data, function(team){
@@ -54,14 +57,20 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
         });
 
         _.each($scope.users, function(user){
+          var no_team_condition = true;
           user.teams = [];
           user.teams_ids = [];
           _.each($scope.teams, function(team){
             if(team.users.indexOf(user.id) >= 0){
              user.teams.push(team);
              user.teams_ids.push(team.id);
+             no_team_condition = false;
             }
           });
+          if (no_team_condition) {
+              user.teams.push({'id':-1, 'name':' - No Team - ', 'users':[]});
+              user.teams_ids.push(-1);
+          }
         });
 
         $scope.search.teams = [1]; //szczuczka aby wymusić odświeżenie -- spowodowane kiepska implementacja dyrektywy bs-select
@@ -135,7 +144,11 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
           return !u_stop_work || (start <= u_stop_work  && u_stop_work <= end);
         });
       }
-
+      if ($scope.search.full_time_only){
+          filtered_users = _.filter(filtered_users, function(user){
+            return Date.parse(user.start_full_time_work) < new Date();
+          });
+      }
       return filtered_users;
     };
 

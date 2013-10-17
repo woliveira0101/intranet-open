@@ -163,32 +163,37 @@ class SprintWrapper(object):
         )
 
     def get_board(self):
-        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
-        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
-        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
-        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
+        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
+            points=0, empty=True)
+        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
+            points=0, empty=True)
+        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
+            points=0, empty=True)
+        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
+            points=0, empty=True)
 
         def append_bug(d, bug):
             if bug.is_blocked:
-                d['blocked'].append(bug)
+                d['bugs']['blocked'].append(bug)
             elif bug.points:
-                d['with_points'].append(bug)
+                d['bugs']['with_points'].append(bug)
             else:
-                d['without_points'].append(bug)
+                d['bugs']['without_points'].append(bug)
+            d['empty'] = False;
 
         for bug in self.bugs:
             points = bug.points
             if bug.is_closed():
-                append_bug(completed['bugs'], bug)
+                append_bug(completed, bug)
                 completed['points'] += points
             elif bug.get_status() == 'RESOLVED':
-                append_bug(toverify['bugs'], bug)
+                append_bug(toverify, bug)
                 toverify['points'] += points
             elif not bug.is_unassigned():
-                append_bug(inprocess['bugs'], bug)
+                append_bug(inprocess, bug)
                 inprocess['points'] += points
             else:
-                append_bug(todo['bugs'], bug)
+                append_bug(todo, bug)
                 todo['points'] += points
 
         return dict(
@@ -206,9 +211,12 @@ class SprintWrapper(object):
         total_hours = sum_worked_hours
         total_bugs_hours = sum_bugs_worked_hours
 
-        users = self.session.query(User)\
-                    .filter(User.id.in_(self.sprint.team.users))\
-                    .filter(User.is_active==True).all()
+        users = []
+        if self.sprint.team_id:
+            users = self.session.query(User)\
+                        .filter(User.id.in_(self.sprint.team.users))\
+                        .filter(User.is_active==True)\
+                        .order_by(User.name).all()
         result = dict(
             start=self.sprint.start.strftime('%Y-%m-%d'),
             end=self.sprint.end.strftime('%Y-%m-%d'),
