@@ -164,17 +164,16 @@ class TimesReportMixin(object):
     def _get_participation_of_workers(self, entries):
         participation_of_workers = {}
         participation_of_workers_sum = 0
-
         for client, project, bug_id, user, tracker, desc, date, time in entries:
-            if user.name not in participation_of_workers:
-                participation_of_workers[user.name] = time
+            if user not in participation_of_workers:
+                participation_of_workers[user] = time
             else:
-                participation_of_workers[user.name] += time
+                participation_of_workers[user] += time
 
             participation_of_workers_sum += time
 
-        participation_of_workers = [(name, round(time, 2), round(100*time/participation_of_workers_sum, 2))
-                                    for name, time in participation_of_workers.items()]
+        participation_of_workers = [(user, round(time, 2), round(100*time/participation_of_workers_sum, 2))
+                                    for user, time in participation_of_workers.items()]
         participation_of_workers.sort(key=lambda k: k[1], reverse=True)
         return participation_of_workers
 
