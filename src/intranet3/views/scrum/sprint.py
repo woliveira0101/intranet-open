@@ -179,7 +179,11 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
             tracker=tracker,
             bugs=sw.bugs,
             info=sw.get_info(),
+            str_date=self._sprint_daterange(sprint.start, sprint.end),
         )
+
+    def _sprint_daterange(self, st, end):
+        return '%s - %s' % (st.strftime('%d-%m-%Y'), end.strftime('%d-%m-%Y'))
 
 
 @view_config(route_name='scrum_sprint_board', permission='client')
