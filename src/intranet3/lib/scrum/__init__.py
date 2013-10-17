@@ -180,16 +180,16 @@ class SprintWrapper(object):
         for bug in self.bugs:
             points = bug.points
             if bug.is_closed():
-                append_bug(completed['bugs'], bug)
+                append_bug(completed, bug)
                 completed['points'] += points
             elif bug.get_status() == 'RESOLVED':
-                append_bug(toverify['bugs'], bug)
-                toverify['points'] += points
+                append_bug(toverify, bug)
+                toverify += points
             elif not bug.is_unassigned():
-                append_bug(inprocess['bugs'], bug)
+                append_bug(inprocess, bug)
                 inprocess['points'] += points
             else:
-                append_bug(todo['bugs'], bug)
+                append_bug(todo, bug)
                 todo['points'] += points
 
         return dict(
