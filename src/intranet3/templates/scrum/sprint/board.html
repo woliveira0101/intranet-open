@@ -142,9 +142,9 @@
 
         columns = []
         $('.board-column').each(function(index, element) {
-            normal = $('.frame_normal', element).children('.yellow_card').length;
-            noPoints = $('.frame_no_points', element).children('.yellow_card').length;
-            blocked = $('.frame_blocked', element).children('.container_card_blocked').length;
+            normal = $('.frame_normal', element).children('.yellow_card_outer_wrapper').length;
+            noPoints = $('.frame_no_points', element).children('.yellow_card_outer_wrapper').length;
+            blocked = $('.frame_blocked', element).children('.yellow_card_outer_wrapper').length;
 
             columns[index] = {
                 'index': index,
