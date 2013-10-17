@@ -184,7 +184,7 @@ class SprintWrapper(object):
                 completed['points'] += points
             elif bug.get_status() == 'RESOLVED':
                 append_bug(toverify, bug)
-                toverify += points
+                toverify['points'] += points
             elif not bug.is_unassigned():
                 append_bug(inprocess, bug)
                 inprocess['points'] += points
