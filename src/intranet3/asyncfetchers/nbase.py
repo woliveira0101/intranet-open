@@ -1,6 +1,8 @@
 from intranet3 import memcache
 from intranet3.models import User
 
+from .request import RPC
+
 
 MAX_TIMEOUT = 50 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 
@@ -117,9 +119,18 @@ class BaseFetcher(object):
         self.dependson_and_blocked_status = {}
         self.timeout = timeout
 
-    def request(self, url, headers, method='GET', body=None):
-        future = None
-        return future
+    def consume(self, responses):
+        if not isinstance(responses, list):
+            responses = [responses]
+
+        responses = [
+            r.get_result() if isinstance(r, RPC) else r
+            for r in responses
+        ]
+
+
+
+
 
     def parse(self, data):
         for bug_data in data:
