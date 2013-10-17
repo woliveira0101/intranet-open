@@ -1,3 +1,14 @@
+0.9.5 (17-11-2013)
+===============
+- much better scrum board layout 
+- extra links to /times/tickets/report
+- better out of office form
+- angular sortby polish chart support
+- no team option for user list
+- note presence only for views, not api 
+- teams page visible for users
+- bug fixes
+
 0.9.4 (14-11-2013)
 ===============
 - absence / lates enhancemets
