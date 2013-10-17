@@ -163,14 +163,10 @@ class SprintWrapper(object):
         )
 
     def get_board(self):
-        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
-            points=0, empty=True)
-        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
-            points=0, empty=True)
-        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
-            points=0, empty=True)
-        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
-            points=0, empty=True)
+        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
+        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
+        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
+        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
 
         def append_bug(d, bug):
             if bug.is_blocked:
