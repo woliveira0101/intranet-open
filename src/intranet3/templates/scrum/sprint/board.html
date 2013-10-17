@@ -23,9 +23,9 @@
                 {% if 'bug' in dbug_desc %}
                 <div class="yellow_card">
                     <div class="number_ticket">
-                        asdasd
+                        <a target="_blank" href="{{ dbug_desc['bug'].get_url() }}">{{ dbug_id }}</a>
                     </div>
-                    asda
+                    <div class="assignee" data-original-title="{{ dbug_desc['bug'].owner.name }}">{{ dbug_desc['bug'].owner.name | initials(3) }}</div>
                 </div>
                 {% endif %}
             {% endfor %}
