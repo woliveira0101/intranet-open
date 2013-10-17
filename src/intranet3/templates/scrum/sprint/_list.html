@@ -31,7 +31,11 @@
             <td>{{ sprint.end }}</td>
             <td>{{ sprint.worked_hours | round | int }}</td>
             <td>{{ sprint.achieved_points }} / {{ sprint.commited_points }}</td>
-            <td>{{ '%.2f' % sprint.velocity }}</td>
+            <td>
+                <span title="This sprint velocity">{{ '%.2f' % sprint.velocity }}</span> /
+                <span title="Mean velocity of all sprints (bugs only)">{{ '%.2f' % sprint.mean_bugs_velocity }}</span> /
+                <span title="Mean velocity of all sprints (all time entries)">{{ '%.2f' % sprint.mean_velocity }}</span>
+            </td>
             {% if request.has_perm('scrum') %}
                 <td>
                     <a href="{{ request.url_for('/scrum/sprint/edit', sprint_id=sprint.id) }}" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>

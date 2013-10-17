@@ -60,6 +60,10 @@ class LateApplicationForm(BaseForm):
         self.user = kwargs.pop('user')
         super(LateApplicationForm, self).__init__(*args, **kwargs)
 
+    def validate_late_start(self, field):
+        if field.data >= self.late_end.data:
+            raise ValidationError(_(u'Invalid time range'))
+
     def validate_popup_date(self, field):
         date = field.data
         user_id = self.user.id

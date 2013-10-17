@@ -223,8 +223,8 @@ App.controller('blackListCtrl', function($scope, $http, $timeout,
 
     $scope.selectedToWhite = function() {
         for (i = 0; i < $scope.selectedBlack.length; i++) {
-            delete $scope.blacklistIds[$scope.blacklistIds.indexOf(
-                    $scope.selectedBlack[i])];
+            $scope.blacklistIds.splice($scope.blacklistIds.indexOf(
+                    $scope.selectedBlack[i]), 1);
         }
 
         updateLists($scope);

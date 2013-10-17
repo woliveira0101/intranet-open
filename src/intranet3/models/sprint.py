@@ -30,6 +30,7 @@ class Sprint(Base):
     commited_points = Column(Integer, nullable=False, default=0)
     achieved_points = Column(Integer, nullable=False, default=0)
     worked_hours = Column(Float, nullable=False, default=0.0)
+    bugs_worked_hours = Column(Float, nullable=False, default=0.0)
 
     retrospective_note = Column(Text, nullable=False, default='')
 
@@ -39,4 +40,15 @@ class Sprint(Base):
     @property
     def velocity(self):
         return (self.achieved_points / self.worked_hours * 8.0) if self.worked_hours else 0.0
+
+    def calculate_velocities(self, associated_sprints):
+        worked_hours_sum = sum([s[1] for s in associated_sprints])
+        bugs_worked_hours_sum = sum([s[2] for s in associated_sprints])
+        anchieved_points_sum = sum([s[3] for s in associated_sprints])
+
+        self.mean_velocity = 8.0 * anchieved_points_sum / worked_hours_sum \
+            if worked_hours_sum else 0.0
+
+        self.mean_bugs_velocity = 8.0 * anchieved_points_sum / bugs_worked_hours_sum \
+            if bugs_worked_hours_sum else 0.0
 

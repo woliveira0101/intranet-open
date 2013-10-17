@@ -3,6 +3,7 @@ from sqlalchemy import Column, ForeignKey, orm
 from sqlalchemy.types import String, Integer, Boolean, Text
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy import event, func
+from sqlalchemy.util.langhelpers import symbol
 
 from intranet3 import memcache
 from intranet3.models import Base, DBSession, User
@@ -337,7 +338,8 @@ def before_flush(session, *args):
     if not project_or_client:
         return
 
-    if project_or_client.old_coordinator:
+    oldc = project_or_client.old_coordinator
+    if oldc and oldc != symbol('NO_VALUE'):
         remove_coordinator(session, project_or_client.old_coordinator)
 
     if project_or_client.coordinator_id:

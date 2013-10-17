@@ -1,9 +1,19 @@
+0.9.4 (14-11-2013)
+===============
+- absence / lates enhancemets
+- more teams enhancemets
+- more users list enhancements
+- velocity per day
+- fixes for github fetcher
+- bugzilla sprint regex fix
+- user avatar edit fix
+- better project filter in client/project view
+
 0.9.3 (24-09-2013)
 ===============
 - absence / lates support 
 - teams enhancemets
 - users list enhancements
-
 
 0.9.2 (24-09-2013)
 ===============

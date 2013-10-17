@@ -208,6 +208,7 @@ class User(Base):
             'phone_on_desk': self.phone_on_desk,
             'location': (self.location, location[0], location[1]),
             'start_work': self.start_work.isoformat() if self.start_work else None,
+            'start_full_time_work': self.start_full_time_work.isoformat() if self.start_full_time_work else None,
             'stop_work': self.stop_work.isoformat() if self.stop_work else None,
             'groups': self.groups,
             'roles': self.roles,
