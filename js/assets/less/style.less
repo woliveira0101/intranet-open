@@ -1343,10 +1343,47 @@ form.box_edit_user dl dt {
             font-weight: bold;
         }
     }
+    .yellow_card_wrapper {
+        overflow: hidden;
+        width: 140px;
+        height: 80px;
+    }
+    .yellow_card_wrapper:hover {
+        overflow: visible;
+        .yellow_card {
+           background-color:#dacf91;
+           z-index: 100;
+        }
+        .blocked {
+            background-color:#a66464;
+        }
+    }
+    .yellow_card_outer_wrapper {
+        overflow: visible;
+        position: relative;
+        float: left;
+        margin: 5px 2px;
+        .points-outer {
+            display: block;
+        }
+        .points-inner {
+            display: none;
+        }
+    }
+    .yellow_card_outer_wrapper:hover {
+        z-index: 100;
+        .points-outer {
+            display: none;
+        }
+        .points-inner {
+            display: block;
+        }
+    }
     .yellow_card {
         background-color:#faefa1;
+        overflow: visible;
+        width: 100%;
         padding: 3px;
-        margin: 5px 2px;
         color:#000;
         font-size:13px;
         text-decoration:none;
@@ -1354,23 +1391,16 @@ form.box_edit_user dl dt {
         box-shadow:0 1px 1px rgba(0, 0, 0, 0.2);
         border-bottom:2px solid rgba(0, 0, 0, 0.2);
         cursor:pointer;
-        position: relative;
         box-sizing:border-box;
         -moz-box-sizing:border-box;
         -webkit-box-sizing:border-box;
         text-align:left;
-        float: left;
-        min-width: 140px;
-        &:hover {
-            .desc_ticket {
-                height: auto;
-            }
-        }
     }
     .yellow_card.blocked {
         background-color: #faa1a1;
     }
     .container_card_blocked {
+        width: 100%;
         position: relative;
         float: left;
         margin-right: 2px;
@@ -1378,7 +1408,6 @@ form.box_edit_user dl dt {
             float: none;
             margin-top: -5px;
             border-top: 1px solid #a66464;
-            width: 100% !important;
             margin-right: 0px;
         }
         .yellow_card:first-child {
@@ -1407,7 +1436,7 @@ form.box_edit_user dl dt {
         margin-bottom: 2px;
     }
     .desc_ticket {
-        height: 56px;
+        // height: 56px;
         min-height: 56px;
         overflow: hidden;
         line-height: 14px;

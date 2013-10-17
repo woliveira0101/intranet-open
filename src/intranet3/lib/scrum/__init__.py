@@ -163,14 +163,10 @@ class SprintWrapper(object):
         )
 
     def get_board(self):
-        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
-            points=0, empty=True)
-        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
-            points=0, empty=True)
-        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
-            points=0, empty=True)
-        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]),
-            points=0, empty=True)
+        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
+        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
+        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
+        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
 
         def append_bug(d, bug):
             if bug.is_blocked:
@@ -184,16 +180,16 @@ class SprintWrapper(object):
         for bug in self.bugs:
             points = bug.points
             if bug.is_closed():
-                append_bug(completed, bug)
+                append_bug(completed['bugs'], bug)
                 completed['points'] += points
             elif bug.get_status() == 'RESOLVED':
-                append_bug(toverify, bug)
+                append_bug(toverify['bugs'], bug)
                 toverify['points'] += points
             elif not bug.is_unassigned():
-                append_bug(inprocess, bug)
+                append_bug(inprocess['bugs'], bug)
                 inprocess['points'] += points
             else:
-                append_bug(todo, bug)
+                append_bug(todo['bugs'], bug)
                 todo['points'] += points
 
         return dict(
