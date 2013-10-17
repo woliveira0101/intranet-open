@@ -129,7 +129,7 @@ class TimesReportMixin(object):
         )
         return uber_query
 
-    def _prepare_uber_query(self, start_date, end_date, projects, users, ticket_choice):
+    def _prepare_uber_query(self, start_date, end_date, projects, users, ticket_choice, bug_id=None):
         query = self.session.query
         uber_query = query(
             Client, Project, TimeEntry.ticket_id, User, Tracker,
@@ -139,6 +139,9 @@ class TimesReportMixin(object):
                                .filter(TimeEntry.project_id==Project.id)\
                                .filter(Project.tracker_id==Tracker.id)\
                                .filter(Project.client_id==Client.id)
+
+        if bug_id:
+            uber_query = uber_query.filter(TimeEntry.ticket_id==bug_id)
 
         if projects:
             uber_query = uber_query.filter(TimeEntry.project_id.in_(projects))
