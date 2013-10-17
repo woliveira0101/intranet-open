@@ -36,20 +36,20 @@
     </div>
     <div class="box box-teams">
       <h2 class="title">Teams</h2>
-      <button class="btn btn-primary" ng-click="openModal()">Add team</button>
+      <button class="btn btn-primary" ng-click="openModal()" ng-show="G.user.has_perm('admin')">Add team</button>
       <div class="input-prepend teams-input-search">
         <span class="add-on"><i class="icon-search"></i></span>
         <input type="text" ng-model="teamSearch">
       </div>
-      <i ng-click="toggle_users()" ng-hide="show_users" class="icon-arrow-left"></i>
+      <i ng-click="toggle_users()" ng-hide="show_users" class="icon-arrow-left" ng-show="G.user.has_perm('admin')"></i>
       <div class="clear"></div>
       <div class="team-box">
         <ul>
           <li ng-repeat="team in teams | filter:teamSearch | orderBy:'workedHoursLastMonth':true">
             <div class="name_team">{{ team.name }}
-              <i class="icon-edit" ng-click="openModal(team)"></i>
-              <i class="icon-remove icon-red" ng-show="!team.dirty" ng-click="deleteTeam(team)"></i>
-              <i class="icon-ok icon-green" ng-show="team.dirty" ng-click="save(team)"></i>
+              <i class="icon-edit" ng-click="openModal(team)" ng-show="G.user.has_perm('admin')"></i>
+              <i class="icon-remove icon-red" ng-show="!team.dirty && G.user.has_perm('admin')" ng-click="deleteTeam(team)"></i>
+              <i class="icon-ok icon-green" ng-show="team.dirty && G.user.has_perm('admin')" ng-click="save(team)"></i>
             </div>
             <div class="icon_team">
               <img ng-src="{{ team.img }}">
@@ -58,7 +58,10 @@
             <div class="project-list" ng-show="!show_users">
               <div class="project-record" ng-repeat="project in team.projects">
                 <div class="project-name">
-                  <a class="client" href="/client/view?client_id={{ project.client.id }}" title="{{ project.client.name }}">{{ project.client.name }}</a> / <a class="project" href="/project/client/backlog?project_id={{ project.id }}" title="{{ project.name }}">{{ project.name }}</a>
+                  <a class="client" href="/client/view?client_id={{ project.client.id }}" title="{{ project.client.name }}" ng-show="G.user.has_perm('admin')">{{ project.client.name }}</a>
+                  <span class="client" title="{{ project.client.name }}" ng-show="!G.user.has_perm('admin')">{{ project.client.name }}</span>
+                  /
+                   <a class="project" href="/project/client/backlog?project_id={{ project.id }}" title="{{ project.name }}">{{ project.name }}</a>
                 </div>
                 <div class="project-worked-hours">
                   <a href="{{ project.monthTimesUrl }}" bs-tooltip="thisMonthWorkedHoursTooltip">{{ project.this_month_worked_hours }}</a>
@@ -87,8 +90,8 @@
                      user-id="{{ item.id }}"
                      user-tooltip="item">
                      <img ng-src="{{ item.img }}">
-                  <button type="button" class="close" ng-click="deleteUser(item, team)">&times;</button></div>
-                <div class="help_text">Przeciągnij tutaj użytkownika</div>
+                  <button type="button" class="close" ng-click="deleteUser(item, team)"ng-show="G.user.has_perm('admin')">&times;</button></div>
+                <div class="help_text" ng-show="G.user.has_perm('admin')">Przeciągnij tutaj użytkownika</div>
               </div>
             </div>
           </li>
