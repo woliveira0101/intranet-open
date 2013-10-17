@@ -72,8 +72,8 @@ class PresenceApi(ApiView):
                     id=user_id,
                     name=user_name,
                     absence_id=absence_id,
-                    start=date_start and date_start.strftime('%d/%m') or None,
-                    end=date_end and date_end.strftime('%d/%m') or None,
+                    start=date_start and date_start.strftime('%d.%m.%y') or None,
+                    end=date_end and date_end.strftime('%d.%m.%y') or None,
                     remarks=remarks
                 )
                 for user_id, user_name, absence_id, date_start, date_end, remarks in absences

@@ -58,6 +58,21 @@ function findNewIds($scope, newData) {
     $scope.newAbsencesIds = _.difference(absencesIds, $scope.knownAbsencesIds);
 }
 
+function countNewEntries($scope) {
+    quantity = 0;
+    _.each($scope.get_absences(), function(user) {
+        if ($scope.newAbsencesIds.indexOf(user.absence_id) != -1) {
+            quantity++;
+        }
+    })
+    _.each($scope.get_lates(), function(user) {
+        if ($scope.newLatesIds.indexOf(user.late_id) != -1) {
+            quantity++;
+        }
+    })
+    return quantity;
+}
+
 App.controller('wstalCtrl', function($scope, $http, $dialog, $timeout) {
     $("#dialogRemovalConfirmation").dialog({
       autoOpen: false,
@@ -110,8 +125,7 @@ App.controller('wstalCtrl', function($scope, $http, $dialog, $timeout) {
                 $scope.absences = data.absences;
 
                 if (!$scope.show_box) {
-                    $scope.newLatesQuantity = $scope.newLatesIds.length
-                                                + $scope.newAbsencesIds.length;
+                    $scope.newLatesQuantity = countNewEntries($scope);
                 }
                 saveToLocalStorage($scope);
 
@@ -160,6 +174,10 @@ App.controller('wstalCtrl', function($scope, $http, $dialog, $timeout) {
 
     $scope.set_time = function(time_str){
         return Date.parse(time_str)
+    };
+
+    $scope.set_date = function(date_str){
+        return Date.parseExact(date_str, 'dd.MM.yy')
     };
 
     $scope.openModal = function(){
