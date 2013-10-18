@@ -9,7 +9,7 @@
     <li class="dropdown">
         <a class="title dropdown-toggle" data-toggle="dropdown" href="">{% trans sprint_name=sprint.name%}Sprint {{ sprint_name }}{% endtrans %}<b class="caret"></b></a>
         <ul class="dropdown-menu">
-            {% if request.has_perm('scrum') %}
+            {% if request.has_perm('scrum master') %}
             <li><a href="{{ request.url_for('/scrum/sprint/edit', sprint_id=sprint.id) }}">Edit sprint</a></li>
             {% endif %}
             <li><a href="{{ request.url_for('/project/client/backlog', project_id=project.id) }}">Project: {{ project.name }}</a></li>

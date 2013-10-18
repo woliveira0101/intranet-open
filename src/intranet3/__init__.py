@@ -33,12 +33,14 @@ class CustomAuthenticationPolicy(AuthTktAuthenticationPolicy):
 
 class Root(object):
     __acl__ = [
-        (Allow, 'g:freelancer', ('freelancer', 'client_or_freelancer')),
-        (Allow, 'g:client', ('client', 'client_or_freelancer')),
-        (Allow, 'g:user', ('view', 'freelancer', 'client', 'client_or_freelancer')),
-        (Allow, 'g:coordinator', ('view', 'client', 'freelancer', 'coordinator', 'client_or_freelancer', 'scrum')),
-        (Allow, 'g:scrum', ('scrum',)),
+        (Allow, 'g:freelancer', ('view', 'users', 'bugs_owner')),
+        (Allow, 'g:client', ('view', 'sprints', 'bugs_owner', 'task_pivot', 'tickets_report')),
+        (Allow, 'g:employee', ('view', 'bugs_owner', 'teams', 'users', 'task_pivot', 'projects', 'sprints', 'tickets_report')),
+        (Allow, 'g:coordinator', ('view', 'clients', 'scrum', 'tickets_report', 'coordinator')),
+        (Allow, 'g:scrum master', ('view', 'scrum', 'clients')),
         (Allow, 'g:cron', 'cron'),
+        (Allow, 'g:hr', ('view', 'users', 'hr')),
+        (Allow, 'g:business', ('view', 'tickets_report', 'clients')),
         (Allow, 'g:admin', ALL_PERMISSIONS)
     ]
 

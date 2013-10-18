@@ -9,7 +9,7 @@
     <div class="pic_user">
         <img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" />
         <div class="buttons btn_user">
-            {% if request.has_perm('admin') or request.user.id == user.id %}
+            {% if request.has_perm('hr') or request.user.id == user.id %}
                 <a href="{{ request.url_for('/user/edit', user_id=user.id) }}" class="button btn btn-success">Edit</a>
             {% endif %}
         </div>

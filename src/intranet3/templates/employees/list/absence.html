@@ -3,7 +3,7 @@
 {% set current_subpage = 'absence' %}
 
 {% block subbody %}
-    {% if request.has_perm('admin') %}
+    {% if request.has_perm('hr') %}
     <div class="form_late">
         <a class="a_popup btn" href="{{ request.url_for('/employees/form/create_absence') }}">Add application for employee</a>
     </div>
@@ -20,7 +20,7 @@
             <th class="days">{% trans %}Days number{% endtrans %}</th>
             <th class="explanation">{% trans %}Remarks{% endtrans %}</th>
             <th class="review">{% trans %}Review{% endtrans %}</th>
-            {% if request.has_perm('admin') %}
+            {% if request.has_perm('hr') %}
                 <th class="options"></th>
             {% endif %}
         </tr>
@@ -37,7 +37,7 @@
                 <td> {{ absence.days }}</td>
                 <td> {{ absence.remarks }}</td>
                 <td class="review_td"> {{ review(absence.review or '') }}</td>
-                {% if request.has_perm('admin') %}
+                {% if request.has_perm('hr') %}
                     <td><a title="{% trans %}Delete{% endtrans %}" class="button delete btn btn-danger" href="#">x</a></td>
                 {% endif %}
             </tr>

@@ -30,7 +30,7 @@
                 <td> {{ wrongtime.explanation }}</td>
                 <td class="select"> {{ select(wrongtime.justified) }}</td>
                 <td class="review_td"> {{ review(wrongtime.review or '') }}</td>
-                {% if request.has_perm('admin') %}
+                {% if request.has_perm('hr') %}
                     <td><a title="{% trans %}Delete{% endtrans %}" class="button delete btn btn-danger" href="#">x</a></td>
                 {% endif %}
             </tr>

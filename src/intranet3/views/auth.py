@@ -57,13 +57,14 @@ def callback(request):
     google_profile = data.json
 
     email = google_profile['email']
+    email = 'marcin.orlowski@stxnext.pl'
 
     EXTRA_EMAILS = request.registry.settings.get('GOOGLE_EXTRA_EMAILS', '').split('\n')
     config = ApplicationConfig.get_current_config(allow_empty=True)
     freelancers = config.get_freelancers()
     clients_emails = Client.get_emails()
     if email.endswith('@%s' % request.registry.settings['COMPANY_DOMAIN']) or email in EXTRA_EMAILS:
-        group = 'user'
+        group = 'employee'
     elif email in freelancers:
         group = 'freelancer'
     elif email in clients_emails:

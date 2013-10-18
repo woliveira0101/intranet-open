@@ -24,7 +24,7 @@ DEBUG = DEBUG_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
 
 
-@view_config(route_name='times_report_current_pivot', permission='freelancer')
+@view_config(route_name='times_report_current_pivot', permission='hr')
 class CurrentPivot(BaseView):
     def get(self):
         today = datetime.datetime.now().date()
@@ -32,7 +32,7 @@ class CurrentPivot(BaseView):
         return HTTPFound(location=url)
 
 
-@view_config(route_name='times_report_pivot', permission='freelancer')
+@view_config(route_name='times_report_pivot', permission='hr')
 class Pivot(MonthMixin, BaseView):
     def get(self):
         month_start, month_end = self._get_month()

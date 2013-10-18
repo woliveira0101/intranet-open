@@ -74,7 +74,7 @@ class Excel(BaseView):
         return response
 
 
-@view_config(route_name='times_tickets_titles', renderer='json', permission='coordinator')
+@view_config(route_name='times_tickets_titles', renderer='json', permission='tickets_report')
 class Titles(BaseView):
     def _fetch_bugs_titles(self, tracker_ticket):
         query = self.session.query
@@ -138,7 +138,7 @@ class Titles(BaseView):
         return titles
 
 
-@view_config(route_name='times_tickets_report', permission='client')
+@view_config(route_name='times_tickets_report', permission='tickets_report')
 class Report(TimesReportMixin, BaseView):
     def dispatch(self):
         client = self.request.user.get_client()

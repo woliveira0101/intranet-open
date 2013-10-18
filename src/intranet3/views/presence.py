@@ -18,7 +18,7 @@ hour_9 = datetime.time(9, 0, 0)
 locale = Locale('en', 'US')
 
 
-@view_config(route_name='presence_list')
+@view_config(route_name='presence_list', permission='hr')
 class List(BaseView):
     def get(self):
         date = self.request.GET.get('date')
@@ -80,7 +80,7 @@ class List(BaseView):
 
 
 
-@view_config(route_name='presence_full')
+@view_config(route_name='presence_full', permission='hr')
 class Full(BaseView):
     def get(self):
         date = self.request.GET.get('date')

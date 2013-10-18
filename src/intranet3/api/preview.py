@@ -20,19 +20,19 @@ LOG = INFO_LOG(__name__)
 
 
 class Preview(object):
-    
+
     DESTINATIONS = {
         'users' : 'users',
         'teams': 'teams',
     }
-    
+
     def __init__(self, request):
         self.request = request
-     
-        
+
+
     def avatar_path(self, directory, id):
         return os.path.join(self.request.registry.settings['AVATAR_PATH'], directory, str(id))
-        
+
     def file_write(self, path, data):
         try:
             dir = os.path.dirname(path)
@@ -43,7 +43,7 @@ class Preview(object):
             f.close()
         except OSError, e:
             LOG(e)
-    
+
     def upload_data(self, data):
         if data[:5] == 'data:':
             info,data = data.split(';')
@@ -52,32 +52,32 @@ class Preview(object):
             else:
                 return ''
         return data
-    
+
     def swap_avatar(self, type, id):
         directory = self.DESTINATIONS[type]
         user_id = self.request.user.id
         preview_path = self.avatar_path('previews', user_id)
         destination_path = self.avatar_path(directory, id)
-        
+
         if os.path.exists(destination_path):
             os.remove(destination_path)
-            
+
         try:
             os.rename(preview_path, destination_path)
         except OSError as e:
             return False
-        
+
         return True
 
-    
+
 @view_config(route_name='api_preview', renderer='json')
 class PreviewApi(ApiView):
-    
+
     DIMENTIONS = {
         'team': (77, 77),
         'user': (100, 100),
     }
-    
+
     def _response(self, data):
         if data is None:
             raise HTTPNotFound()
@@ -117,13 +117,13 @@ class PreviewApi(ApiView):
 
     def post(self):
         preview = Preview(self.request)
-        
+
         type_pv = self.request.GET.get('type')
         if type_pv not in [u'team', u'user']:
             raise HTTPBadRequest('Expect type = team or user')
-        
+
         width, height = self.DIMENTIONS[type_pv]
-            
+
         res = dict(status='error', msg='', file={})
         file = self.request.POST['file']
         data = preview.upload_data(file.file.read())
@@ -140,11 +140,11 @@ class PreviewApi(ApiView):
                 'mime': mimetype,
                 'size': size
             }
-            
+
         return res
 
 
-@view_config(route_name='api_images', renderer='json', http_cache=60, permission='client')
+@view_config(route_name='api_images', renderer='json', http_cache=60, permission='users')
 class ImageApi(ApiView):
     ANONYMONUS = {
         'users': os.path.normpath(os.path.join(os.path.dirname(__file__),'..','static','img','anonymous.png')),

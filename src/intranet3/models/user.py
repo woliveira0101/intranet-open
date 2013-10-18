@@ -43,13 +43,15 @@ class User(Base):
         ('CEO', 'CEO'),
     ]
     GROUPS = [
-        'user',
+        'employee',
         'admin',
         'client',
-        'scrum',
+        'scrum master',
         'cron',
         'coordinator',
         'freelancer',
+        'hr',
+        'business',
     ]
 
     id = Column(Integer, primary_key=True, nullable=False, index=True)
@@ -161,7 +163,7 @@ class User(Base):
             return self.LOCATIONS[self.location][1]
         else:
             return self.LOCATIONS[self.location][0]
-    
+
 
     def get_client(self):
         from intranet3.models import Client

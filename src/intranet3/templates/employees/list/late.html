@@ -14,7 +14,7 @@
             <th class="explanation">{% trans %}Explanation{% endtrans %}</th>
             <th class="justified">{% trans %}Excused?{% endtrans %}</th>
             <th class="review">{% trans %}Review{% endtrans %}</th>
-            {% if request.has_perm('admin') %}
+            {% if request.has_perm('hr') %}
             <th class="options"></th>
             {% endif %}
         </tr>
@@ -30,7 +30,7 @@
                 <td> {{ late.explanation }}</td>
                 <td class="select"> {{ select(late.justified) }}</td>
                 <td class="review_td"> {{ review(late.review or '') }}</td>
-                {% if request.has_perm('admin') %}
+                {% if request.has_perm('hr') %}
                 <td><a title="{% trans %}Delete{% endtrans %}" class="button delete btn btn-danger" href="#">x</a></td>
                 {% endif %}
             </tr>

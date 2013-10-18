@@ -6,8 +6,7 @@
     <div class="tabs subtabs">
         <ul class="nav nav-tabs">
             <li class="{% if current_subpage == 'absence' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/absence') }}">{% trans %}Absences{% endtrans %}</a></li>
-            <li class="{% if current_subpage == 'pivot' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/absence_pivot') }}">{% trans %}Leave entitlements{% endtrans %}</a></li>
-            <li class="{% if current_subpage == 'table' %}active{% endif %}"><a href="{{ request.url_for('/employees/table/absences') }}">{% trans %}Pivot{% endtrans %}</a></li>
+            <li class="{% if current_subpage == 'pivot' %}active{% endif %}"><a href="{{ request.url_for('/employees/list/absence_pivot') }}">{% trans %}Absence report{% endtrans %}</a></li>
         </ul>
     </div>
   {% block subbody %}

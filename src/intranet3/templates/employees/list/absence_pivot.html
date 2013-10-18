@@ -49,7 +49,7 @@
             </table>
         </div>
         <div class="span4">
-            {% if request.has_perm('admin') %}
+            {% if request.has_perm('hr') %}
             <div class="floating-menu box_buttons_absence_pivot">
                 <a id="edit" class="button btn btn-success" href="#">{% trans %}Edit{% endtrans %}</a>
                 <a style="display: none" id="ok" class="button btn btn-primary" href="#">{% trans %}OK{% endtrans %}</a>
@@ -62,7 +62,7 @@
 
 
 {% block sub_tailscript  %}
-    {% if request.has_perm('admin') %}
+    {% if request.has_perm('hr') %}
     <script>
         $edit = $('#edit');
         $ok = $('#ok');

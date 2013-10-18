@@ -49,6 +49,9 @@ class Request(request.Request):
     def is_user_in_group(self, group):
         return self.user and group in self.user.groups
 
+    def is_user_in_one_of_groups(self, *groups):
+        return self.user and any([g in self.user.groups for g in groups])
+
     @property
     def here(self):
         """The same as request.url but strips scheme + netloc"""

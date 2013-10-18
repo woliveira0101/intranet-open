@@ -16,7 +16,7 @@ from intranet3 import helpers as h
 from intranet3.api.preview import Preview
 
 
-@view_config(route_name='api_teams', renderer='json')
+@view_config(route_name='api_teams', renderer='json', permission='users')
 class Teams(ApiView):
 
     def get(self):
@@ -133,7 +133,7 @@ class Teams(ApiView):
         return team.to_dict()
 
 
-@view_config(route_name='api_team', renderer='json')
+@view_config(route_name='api_team', renderer='json', permission='users')
 class Team(ApiView):
     def get(self):
         team_id = self.request.matchdict.get('team_id')

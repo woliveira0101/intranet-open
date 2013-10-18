@@ -19,7 +19,7 @@ from intranet3.lib.times import ProtectTimeEntriesMixin, user_can_modify_timeent
 
 LOG = INFO_LOG(__name__)
 
-@view_config(route_name='times_today', permission='freelancer')
+@view_config(route_name='times_today', permission='bugs_owner')
 class Today(BaseView):
     def get(self):
         today = datetime.datetime.now().date()
@@ -42,7 +42,7 @@ class GetTimeEntriesMixin(object):
 
         return query
 
-@view_config(route_name='times_list', permission='freelancer')
+@view_config(route_name='times_list', permission='bugs_owner')
 class List(GetTimeEntriesMixin, BaseView):
     def get(self):
         date_str = self.request.GET.get('date')
@@ -132,7 +132,7 @@ class AddEntryToOneOfYourBugs(BaseView):
         )
 
 
-@view_config(route_name='times_add', permission='freelancer')
+@view_config(route_name='times_add', permission='bugs_owner')
 class Add(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
     def _add_to_harvest(self, form):
         PROJECT_ID = 2904241 # TODO
@@ -243,7 +243,7 @@ class Add(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
         )
 
 
-@view_config(route_name='times_edit')
+@view_config(route_name='times_edit', permission='bugs_owner')
 class Edit(ProtectTimeEntriesMixin, BaseView):
     def get(self):
         timeentry = self.v['timeentry']
@@ -316,7 +316,7 @@ class Edit(ProtectTimeEntriesMixin, BaseView):
         )
 
 
-@view_config(route_name='times_delete', renderer='intranet3:templates/common/delete.html')
+@view_config(route_name='times_delete', renderer='intranet3:templates/common/delete.html', permission='bugs_owner')
 class Delete(ProtectTimeEntriesMixin, BaseView):
     def post(self):
         form = DeleteForm(self.request.POST)

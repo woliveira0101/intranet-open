@@ -15,7 +15,7 @@ DEBUG = DEBUG_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
 
 
-@view_config(route_name='report_wrongtime_current', permission='admin')
+@view_config(route_name='report_wrongtime_current', permission='hr')
 class Current(BaseView):
     def get(self):
         today = datetime.date.today()
@@ -67,7 +67,7 @@ class AnnuallyReportMixin(object):
         )
 
 
-@view_config(route_name='report_wrongtime_annually', permission='admin')
+@view_config(route_name='report_wrongtime_annually', permission='hr')
 class Annually(AnnuallyReportMixin, BaseView):
     def get(self):
         year = self.request.GET.get('year')
@@ -75,7 +75,7 @@ class Annually(AnnuallyReportMixin, BaseView):
         return self._annually_report(year)
 
 
-@view_config(route_name='report_wrongtime_monthly', permission='admin')
+@view_config(route_name='report_wrongtime_monthly', permission='hr')
 class Monthly(MonthMixin, BaseView):
 
     def _group_by_user_monthly(self, data, user_id):

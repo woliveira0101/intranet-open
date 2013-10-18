@@ -21,7 +21,7 @@ from intranet3.api.preview import Preview
 LOG = INFO_LOG(__name__)
 
 
-@view_config(route_name='user_list', permission='freelancer')
+@view_config(route_name='user_list', permission='users')
 class List(BaseView):
     def get(self):
         check_role = self.request.GET.get('role')
@@ -78,7 +78,7 @@ class List(BaseView):
         )
 
 
-@view_config(route_name='user_view')
+@view_config(route_name='user_view', permission='users')
 class View(BaseView):
     def get(self):
         user_id = self.request.GET.get('user_id')
@@ -86,13 +86,13 @@ class View(BaseView):
         return dict(user=user)
 
 
-@view_config(route_name='user_edit', permission='freelancer')
+@view_config(route_name='user_edit', permission='hr')
 class Edit(BaseView):
 
     def dispatch(self):
         user_id = self.request.GET.get('user_id')
 
-        if user_id and self.request.has_perm('admin'):
+        if user_id and self.request.has_perm('hr'):
             user = User.query.get(user_id)
         elif user_id:
             raise Forbidden()
@@ -111,7 +111,7 @@ class Edit(BaseView):
             user.description = form.description.data or None
             user.date_of_birth = form.date_of_birth.data or None
             user.roles = form.roles.data
-            if self.request.has_perm('admin'):
+            if self.request.has_perm('hr'):
                 user.is_active = form.is_active.data
                 groups = form.groups.data
                 if "freelancer" in groups:
@@ -122,7 +122,7 @@ class Edit(BaseView):
                 user.groups = groups
                 user.start_full_time_work = form.start_full_time_work.data or None
                 user.stop_work = form.stop_work.data or None
-            if self.request.has_perm('admin'):
+            if self.request.has_perm('hr'):
                 user.employment_contract = form.employment_contract.data
 
 
@@ -133,7 +133,7 @@ class Edit(BaseView):
 
             self.flash(self._(u"User data saved"))
             LOG(u"User data saved")
-            if user_id and self.request.has_perm('admin'):
+            if user_id and self.request.has_perm('hr'):
                 return HTTPFound(location=self.request.url_for('/user/edit', user_id=user_id))
             else:
                 return HTTPFound(location=self.request.url_for('/user/edit'))
@@ -143,7 +143,7 @@ class Edit(BaseView):
         return dict(id=user.id, user=user, form=form)
 
 
-@view_config(route_name='user_tooltip', permission='freelancer')
+@view_config(route_name='user_tooltip', permission='users')
 class Tooltip(BaseView):
     def get(self):
         user_id = self.request.GET.get('user_id')
@@ -158,7 +158,7 @@ def _avatar_path(user_id, settings, temp=False):
     return os.path.join(settings['AVATAR_PATH'], 'users', user_id)
 
 
-@view_config(route_name='user_avatar', permission='freelancer')
+@view_config(route_name='user_avatar', permission='users')
 class Avatar(BaseView):
     def _file_read(self, path):
         if os.path.exists(path):

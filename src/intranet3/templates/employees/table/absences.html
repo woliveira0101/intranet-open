@@ -1,8 +1,6 @@
-{% extends "templates/employees/list/_absence_base.html" %}
+{% extends "templates/_base.html" %}
 
-{% set current_subpage = 'table' %}
-
-{% block subbody %}
+{% block content %}
 <div class="absences-nav">
     <ul class="pager">
         <li><a href="{{ request.url_for('/employees/table/absences') }}?year={{ year-1 }}">{% trans %}Previous year{% endtrans %}</a></li>
@@ -17,7 +15,7 @@
 <div class="absences">
     You have to have Javascript enabled in order to see this data.
 </div>
-{% endblock subbody %}
+{% endblock content %}
 
 {% block tail_script %}
     <script>

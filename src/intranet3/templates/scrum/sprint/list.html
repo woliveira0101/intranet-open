@@ -5,7 +5,7 @@
     <div class="tabs">
         <ul class="nav nav-tabs">
             <li class="title">{% trans %}Sprint list{% endtrans %}</li>
-            {% if request.has_perm('scrum') %}
+            {% if request.has_perm('scrum master') %}
             <li>
                 <a href="{{ request.url_for('/scrum/sprint/add') }}">{% trans %}Add sprint{% endtrans %}</a>
             </li>

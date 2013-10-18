@@ -66,7 +66,7 @@ class A(BaseView):
         project.coordinator_id = 151
         return {}
 
-@view_config(route_name='project_edit', permission='scrum')
+@view_config(route_name='project_edit', permission='coordinator')
 class Edit(BaseView):
     def dispatch(self):
         project_id = self.request.GET.get('project_id')

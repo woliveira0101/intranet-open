@@ -1,7 +1,7 @@
 {% extends "templates/_base.html" %}
 
 {% macro select(boolean) -%}
-{% if request.has_perm('admin') %}
+{% if request.has_perm('hr') %}
 <select>
     {% if boolean == None %}
     <option selected value="-1"></option>
@@ -21,7 +21,7 @@
 
 {% macro review(text) -%}
 <div class="review">
-{% if request.has_perm('admin') %}
+{% if request.has_perm('hr') %}
 <input class="text" type="text" value="{{ text }}">
 <input class="button btn btn-primary" type="button" value="{% trans %}Save{% endtrans %}">
 {% else %}

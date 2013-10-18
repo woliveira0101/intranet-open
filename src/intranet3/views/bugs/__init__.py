@@ -70,7 +70,7 @@ class GroupedBugsMixin(object):
             return bugs, grouped, people, people_sums, client_sums, project_sums, total, clients
 
 
-@view_config(route_name='my_bugs', permission='client_or_freelancer')
+@view_config(route_name='my_bugs', permission='bugs_owner')
 class My(BaseView):
     """
     Lists bugs for given user.
@@ -85,7 +85,7 @@ class My(BaseView):
             url = self.request.url_for('/bugs/my_json', resolved=resolved),
         )
 
-@view_config(route_name='my_bugs_json', renderer='intranet3:templates/bugs/_list.html', permission='client_or_freelancer')
+@view_config(route_name='my_bugs_json', renderer='intranet3:templates/bugs/_list.html', permission='bugs_owner')
 class MyJson(BaseView):
     """
     Lists bugs for given user.
@@ -99,7 +99,7 @@ class MyJson(BaseView):
         return dict(bugs=bugs)
 
 
-@view_config(route_name='bug_report', permission='client')
+@view_config(route_name='bug_report', permission='task_pivot')
 class Report(GroupedBugsMixin, FilterMixin, BaseView):
 
     def get(self):
@@ -274,7 +274,7 @@ class OtherProjects(GroupedBugsMixin, FilterMixin, BaseView):
         )
 
 
-@view_config(route_name='everyones_bugs')
+@view_config(route_name='everyones_bugs', permission='projects')
 class Everyones(FilterMixin, BaseView):
     def get(self):
         resolved, show_all_bugs, show_all_projects, sort_by_date = self._get_params()
@@ -282,7 +282,7 @@ class Everyones(FilterMixin, BaseView):
         return dict(projects=projects, resolved=resolved)
 
 
-@view_config(route_name='bugs_everyones_project')
+@view_config(route_name='bugs_everyones_project', permission='projects')
 class EveryonesProject(FilterMixin, BaseView):
     """ Show bugs on everyone in a given project """
     def get(self):
