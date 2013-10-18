@@ -688,3 +688,34 @@
     };
 
 }( window.IL = window.IL || {}, jQuery, _, Date ));
+
+function listIntoSelect(fromList, toSelect) {
+    toSelect = $(toSelect);
+
+    optionsGroups = [{name: '', options: []}];
+    currentOptionsGroup = optionsGroups[0];
+    $('li', fromList).each(function(index, element) {
+        entry = $(element).text();
+        link = $('a', element).attr('href');
+
+        if (link == undefined) {
+            currentOptionsGroup = optionsGroups[optionsGroups.length] = {name: entry, options: []};
+        } else {
+            currentOptionsGroup.options[currentOptionsGroup.options.length] = {
+                entry: entry,
+                link: link
+            };
+        }
+    })
+
+    _.each(optionsGroups, function(group) {
+        parent = toSelect;
+        if (group.name) {
+            parent = $('<optgroup>', {label: group.name});
+            toSelect.append(parent);
+        }
+        _.each(group.options, function(option) {
+            parent.append($('<option>', {value: option.link}).text(option.entry));
+        });
+    });
+}

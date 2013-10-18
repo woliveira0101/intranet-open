@@ -27,6 +27,13 @@ a {
         padding-left: 10px;
         padding-right: 10px;
     }
+
+    @media all and (max-width: 1024px) {
+        th, td {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+    }
 }
 .box {
     border: 1px solid @tableBorder;
@@ -81,6 +88,9 @@ form ul {
     height: 34px;
     .navbar-inner {
         min-height: 34px;
+    }
+    .mobile {
+        min-height: 17px;
     }
     .container-fluid {
         position: relative;
@@ -145,7 +155,6 @@ form ul {
 #content {
     padding-top: 45px;
     width: auto;
-    min-width: 750px;
     margin: auto 10px;
 }
 .nav-tabs {
@@ -207,7 +216,13 @@ form ul {
     box-sizing: border-box;
     border-radius: 5px;
     margin-left: 148px;
+
+    @media all and (max-width: 1024px) {
+        padding: 0px;
+    }
 }
+
+
 #right_column_content:after {
     visibility: hidden;
     display: block;
@@ -1679,6 +1694,24 @@ form.absence-form {
             font-size: 8px;
         }
     }
+    .container-fluid {
+        padding-right: 2px;
+        padding-left: 2px;
+    }
+    #content {
+        margin: 3px auto;
+    }
+    td {
+        padding: 0px !important;
+    }
+    .nav-tabs > li > a {
+        padding-top: 3px;
+        padding-bottom: 2px;
+    }
+    select {
+        margin-bottom: 2px;
+    }
+
 }
 @media all and (max-width: 760px) and (orientation:portrait) {
     body, #bar_head {
@@ -1931,7 +1964,6 @@ i.pointer {
         }
     }
     .scroll-user {
-        // width: 470px;
         .users {
             width: 104%;
         }
@@ -2235,6 +2267,10 @@ i.pointer {
   visibility: hidden;
 }
 
+.none {
+    display: none;
+}
+
 .markdown ul {
    list-style-type: disc !important;
    list-style-position: inside !important;
@@ -2339,7 +2375,30 @@ i.pointer {
 }
 .bootstrap-timepicker {
     width: 206px;
-    .input-small {
-        width: 178px;
+    @media all and (max-width: 1024px) {
+        .input-small {
+            width: auto;
+        }
+    }
+    @media all and (min-width: 1024px) {
+        .input-small {
+            width: 178px;
+        }
+    }
+}
+.user-list-mobile {
+    width: 100%;
+}
+#mobileNavigation {
+    width: 100%;
+    list-style: none;
+    margin: 0px;
+    #menuSelect {
+        width: auto;
+    }
+    li {
+        background: none;
+        float: left;
+        margin-right: 20px;
     }
 }
