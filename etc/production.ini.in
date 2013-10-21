@@ -32,9 +32,10 @@ jinja2.filters =
 	comma_number = intranet3.utils.filters.comma_number
 	format_time = intranet3.utils.filters.format_time
 
-session.type = ext:memcached
+session.type = file
 session.url = 127.0.0.1:11211
-session.lock_dir = ${buildout:directory}/var/beaker/sessions
+session.data_dir = ${buildout:directory}/var/beaker/sessions/data
+session.lock_dir = ${buildout:directory}/var/beaker/sessions/lock
 session.secret = session secret
 session.cookie_on_exception = true
 session.auto = True
