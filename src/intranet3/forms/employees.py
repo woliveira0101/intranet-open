@@ -62,11 +62,13 @@ class LateApplicationForm(BaseForm):
 
     def validate_late_start(self, field):
         if not field.data:
-            field.data = datetime.time(9,0)
-        if not self.late_end.data:
-            self.late_end.data = datetime.time(17,0)
+            raise ValidationError(_(u'Cannot accept midnight'))
         if field.data >= self.late_end.data:
             raise ValidationError(_(u'Invalid time range'))
+
+    def validate_late_end(self, field):
+        if not field.data:
+            raise ValidationError(_(u'Cannot accept midnight'))
 
     def validate_popup_date(self, field):
         date = field.data
