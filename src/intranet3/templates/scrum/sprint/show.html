@@ -34,7 +34,7 @@
                     </a>
                 </td>
                 <td>
-                    <span class="{{ 'velocity-opened' if bug.is_closed() else '' }}">{{ (bug.velocity | round(2)) }}</span>
+                    <span class="{{ 'velocity-opened' if not bug.is_closed() else '' }}">{{ (bug.velocity | round(2)) }}</span>
                 </td>
                 <td>{{ bug.status }}</td>
             </tr>
