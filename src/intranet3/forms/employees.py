@@ -61,6 +61,10 @@ class LateApplicationForm(BaseForm):
         super(LateApplicationForm, self).__init__(*args, **kwargs)
 
     def validate_late_start(self, field):
+        if not field.data:
+            field.data = datetime.time(9,0)
+        if not self.late_end.data:
+            self.late_end.data = datetime.time(17,0)
         if field.data >= self.late_end.data:
             raise ValidationError(_(u'Invalid time range'))
 
