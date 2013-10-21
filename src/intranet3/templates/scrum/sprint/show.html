@@ -32,7 +32,7 @@
                 <td>
                     {{ (bug.velocity | round(2)) if bug.velocity else '-' }}
                     {% if bug.danger %}
-                        <div class="ui-icon ui-icon-alert task-danger" title="Low velocity"> </div>
+                        <div class="ui-icon ui-icon-alert task-danger" title="High mean devation"> </div>
                     {% endif %}
                 </td>
                 <td>{{ bug.status }}</td>

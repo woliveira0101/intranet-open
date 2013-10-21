@@ -169,7 +169,8 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         for bug in bugs:
             bugAdapter = BugUglyAdapter(bug)
             bug.danger = bugAdapter.is_closed() \
-                        and bugAdapter.velocity <= (0.7 * mean_velocity)
+                        and (bugAdapter.velocity <= (0.7 * mean_velocity) \
+                        or bugAdapter.velocity >= (1.3 * mean_velocity))
 
         sw = SprintWrapper(sprint, bugs, self.request)
 
