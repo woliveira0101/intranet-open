@@ -29,7 +29,7 @@
                 <td>{{ bug.owner.name }}</td>
                 <td>{{ bug.whiteboard['p'] }}</td>
                 <td>
-                    <a href="{{ request.url_for('/times/tickets/report', users=bug.owner.id, bug_id=bug.id, projects=bug.project_id, date_range=str_date, group_by_client='y', group_by_project='y', group_by_bugs='y',group_by_user='y', ticket_choice='all' ,bigger_than=0)}}">
+                    <a href="{{ request.url_for('/times/tickets/report', users=bug.owner.id if bug.owner.id, bug_id=bug.id, projects=bug.project_id, date_range=str_date, group_by_client='y', group_by_project='y', group_by_bugs='y',group_by_user='y', ticket_choice='all' ,bigger_than=0)}}">
                         {{ '%.2f' % bug.sprint_time }} ({{ '%.2f' % bug.time }})
                     </a>
                 </td>
