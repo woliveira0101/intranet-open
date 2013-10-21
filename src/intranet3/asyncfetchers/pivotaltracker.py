@@ -164,6 +164,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
     def fetch_all_tickets(self):
         self.fetch('stories', filters=dict(
             state=','.join(ISSUE_STATE_UNRESOLVED),
+            includedone='true',
         ))
 
     @cached_bug_fetcher(lambda: u'user-resolved')
@@ -171,28 +172,33 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         self.fetch('stories', filters=dict(
             owner='"%s"' % self.login,
             state=','.join(ISSUE_STATE_RESOLVED),
+            includedone='true',
         ))
 
     @cached_bug_fetcher(lambda: u'all-resolved')
     def fetch_all_resolved_tickets(self):
         self.fetch('stories', filters=dict(
             state=','.join(ISSUE_STATE_RESOLVED),
+            includedone='true',
         ))
 
     def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
         self.fetch('stories', filters=dict(
-            id=','.join(ticket_ids)
+            id=','.join(ticket_ids),
+            includedone='true',
         ))
 
     def fetch_resolved_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
         self.fetch('stories', filters=dict(
             id=','.join(ticket_ids),
             state=','.join(ISSUE_STATE_RESOLVED),
+            includedone='true',
         ))
 
     def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
         self.fetch('stories', filters=dict(
             label=sprint_name,
+            includedone='true',
         ))
 
     def fetch_bug_titles_and_depends_on(self, ticket_ids):
