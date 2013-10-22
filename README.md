@@ -224,9 +224,10 @@ jinja2.filters =
 	format_time = intranet3.utils.filters.format_time
 venusian.ignore = intranet3.loader
 
-session.type = ext:memcached
+session.type = file
 session.url = 127.0.0.1:11211
-session.lock_dir = /home/<user>/intranet/intranet/var/beaker/sessions
+session.lock_dir = /home/<user>/intranet/intranet/var/beaker/sessions/data
+session.data_dir = /home/<user>/intranet/intranet/var/beaker/sessions/lock
 session.secret = /AqcOMcps/3NEE7oEOayDn53A25iEFFl
 session.cookie_on_exception = true
 session.auto = True
