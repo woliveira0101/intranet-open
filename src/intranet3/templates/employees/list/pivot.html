@@ -1,0 +1,93 @@
+{% extends "templates/employees/list/_base.html" %}
+
+{% set current_page = 'pivot' %}
+{% block tail_script %}
+    <script>
+        (function($) {
+            $(function(){
+                $('#roleoption-{{check}}').attr("selected", "selected");
+                $('#roleselect').change(function (){
+                    var role = $(this).val() || '';
+                    if (role == '')
+                        window.location = '{{ request.url_for("/employees/list/pivot")}}';
+                    else
+                        window.location = '{{ request.url_for("/employees/list/pivot")}}?role='+role;
+                });
+            });
+        })(jQuery);
+    </script>
+
+
+{% endblock %}
+{% block body %}
+<div id="employment_pivot">
+        <div class="role_select">
+            <label>{% trans %}Role{% endtrans %}</label>
+            <select id="roleselect">
+                   <option value="">All</option>
+                {% for role in roles %}
+                    <option id="roleoption-{{ role[0] }}" value="{{role[0]}}">{{ role[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="clear"></div>
+        <div class="row-fluid">
+            <div class="span6 table_pivot">
+                <table class="table table-bordered table-hover">
+                <thead class="first">
+                <tr>
+                    <th class="client">Year</th>
+                    <th class="worked annually_hours ">Sum</th>
+                    {% for i in range(4) %}
+                        <th class="quarter">Q{{ i+1 }}</th>
+                    {% endfor %}
+                    {% for i in range(12) %}
+                        <th class="month {% if loop.last %}last_month{% endif %}">{{ i+1 }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                    {% for year, s in start | dictsort %}
+                    <tr class="">
+                        {% set quarters = quarters_sum(s) %}
+                        <td class="current_year">{{ year }}</td>
+                        <td class="annually_hours">
+                            {% if s[:12] | sum %}
+                                <a href="{{ link_with_year("start_work", year, check) }}">{{ s[:12] | sum }}</a>
+                            {% endif %}
+                            {% if s[12:] | sum %}
+                                <a href="{{ link_with_year("stop_work", year, check) }}" class="stop_work">({{ s[12:] | sum }})</a>
+                            {% endif %}
+                        </td>
+                        {% for q in range(4) %}
+                            <td class="quarter">
+                                {% if quarters[q] %}
+                                    <a href="{{ link_with_quarter("start_work", year, q, check) }}">{{ quarters[q] }}</a>
+                                {% endif %}
+                                {% if quarters[q+4]%}
+                                    <a href="{{ link_with_quarter("stop_work", year, q, check) }}" class="stop_work">({{ quarters[q+4] }})</a>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                        {% for month in range(12) %}
+                                <td class="month" id="{{year}}/{{month}}">
+                                    {% if  s[month] %}
+                                        <a href="{{ link_with_month("start_work", year, month, check) }}">{{ s[month] }}</a>
+                                    {% endif %}
+                                    {% if s[month+12] %}
+                                        <a href="{{ link_with_month("stop_work", year, month, check) }}" class="stop_work">({{ s[month+12] }})</a>
+                                    {% endif %}
+                                </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+                </table>
+            </div>
+            <div class="span6 chart_pivot">
+
+            </div>
+        </div>
+    </div>
+    <div class="clear"></div>
+{% endblock body %}

@@ -2,6 +2,8 @@
 import os
 import base64
 import mimetypes
+import datetime
+import calendar
 
 from pyramid.view import view_config
 from pyramid.exceptions import Forbidden
@@ -22,24 +24,57 @@ LOG = INFO_LOG(__name__)
 @view_config(route_name='user_list', permission='freelancer')
 class List(BaseView):
     def get(self):
-        res = User.query.filter(User.is_active==True)\
-                          .filter(User.is_not_client())\
-                          .order_by(User.name).all()
+        check_role = self.request.GET.get('role')
+        get_year =  self.request.GET.get('year')
+        get_month = self.request.GET.get('month')
+        get_stop_work = self.request.GET.get('stop')
+        get_quaters = self.request.GET.get('q')
+        is_get = True if check_role or get_month or get_stop_work or get_year else False
+        users=[]
+        if get_year:
+            year = int(get_year)
+            if get_month:
 
-        users = [user for user in res if not user.freelancer]
-        freelancers = [user for user in res if user.freelancer]
+                month = int(get_month)
+                day_of_week, days_in_month = calendar.monthrange(year, month)
+                start_date = datetime.date(year, month, 1)
+                stop_date = datetime.date(year, month, days_in_month)
+            elif get_quaters:
+                quater = int(get_quaters)
+                day_of_week, days_in_month = calendar.monthrange(year, quater*3)
+                start_date = datetime.date(year, ((quater-1)*3)+1, 1)
+                stop_date = datetime.date(year, quater*3, days_in_month)
+            else:
+                start_date = datetime.date(year, 1, 1)
+                stop_date = datetime.date(year, 12, 31)
 
-        clients = []
-        if self.request.has_perm('admin'):
-            clients = User.query.filter(User.is_active==True)\
-                                .filter(User.is_client())\
-                                .order_by(User.name).all()
+            if (not check_role or check_role == 'None') and not get_stop_work:
+                users = User.query.filter(User.is_not_client())\
+                                  .filter(User.start_work >= start_date)\
+                                  .filter(User.start_work <= stop_date)\
+                                  .order_by(User.name).all()
 
+            elif (not check_role or check_role == 'None') and get_stop_work:
+                users = User.query.filter(User.is_not_client())\
+                                  .filter(User.stop_work >= start_date)\
+                                  .filter(User.stop_work <= stop_date)\
+                                  .order_by(User.name).all()
+            elif check_role and get_stop_work:
+                users = User.query.filter(User.is_not_client())\
+                                  .filter(User.stop_work >= start_date)\
+                                  .filter(User.stop_work <= stop_date)\
+                                  .filter(User.roles.op('&&')('{%s}'%(check_role)))\
+                                  .order_by(User.name).all()
+            elif check_role and not get_stop_work:
+                users = User.query.filter(User.is_not_client())\
+                                  .filter(User.start_work >= start_date)\
+                                  .filter(User.start_work <= stop_date)\
+                                  .filter(User.roles.op('&&')('{%s}'%(check_role)))\
+                                  .order_by(User.name).all()
 
         return dict(
             users=users,
-            freelancers=freelancers,
-            clients=clients,
+            is_get=is_get
         )
 
 

@@ -1151,7 +1151,7 @@ select#clients {
 #bar_chart_div, #pie_chart_div {
     float: left;
 }
-#clients_pivot {
+#clients_pivot, #employment_pivot {
   td, th {
     padding: 2px;
     text-align: center;
@@ -1181,6 +1181,29 @@ select#clients {
   }
   .chart_pivot {
     margin: 28px 0 0 0;
+  }
+
+}
+
+#employment_pivot {
+  .table {
+    width: auto;
+  }
+  th.client {
+    width: 50px;
+
+  }
+  th.annually_hours {
+    width: 80px;
+
+  }
+  th.quarter {
+    width: 60px;
+
+  }
+  th.month {
+    width: 40px;
+
   }
 
 }
@@ -2261,6 +2284,9 @@ i.pointer {
   }
 }
 
+a.stop_work {
+    color: red;
+}
 #floatBar {
     position: fixed;
     bottom: 8px;

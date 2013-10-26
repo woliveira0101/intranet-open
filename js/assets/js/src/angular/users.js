@@ -1,12 +1,13 @@
 var App = angular.module('intranet');
 
-App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, date_of_birth) {
-
+App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, $location, $routeParams, date_of_birth) {
     $scope.users = [];
     $scope.tab = 'employees';
     $scope.search = {
       name: '',
       start_work: {
+          start: undefined,
+          end: undefined
       },
       stop_work: {
       },
@@ -16,6 +17,51 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       teams: [],
       time_works: 0
     };
+
+    $scope.$watch(function(){ return $location.search()}, function(){
+      if ($location.search().start_work != undefined){
+        var date_start = $location.search().start_work.split(' - ');
+        $scope.search.start_work = {
+          start: new Date.parse(date_start[0].split('-').reverse().join('-')),
+          end: new Date.parse(date_start[1].split('-').reverse().join('-'))
+        }
+      }
+      if ($location.search().stop_work != undefined){
+        var date_stop = $location.search().stop_work.split(' - ');
+        $scope.search.stop_work = {
+          start: new Date.parse(date_stop[0].split('-').reverse().join('-')),
+          end: new Date.parse(date_stop[1].split('-').reverse().join('-'))
+        }
+      }
+    });
+
+    var t = _.template("<%= start %> - <%= end %>");
+    $scope.$watch('search.start_work', function(){
+      var start = $scope.search.start_work.start;
+      var end = $scope.search.start_work.end;
+
+      if(start && end){
+        start = start.toString('dd-MM-yyyy');
+        end = end.toString('dd-MM-yyyy');
+        $location.search('start_work', t({start:start, end:end}));
+      } else {
+        $location.search('start_work', '')
+      }
+    });
+
+    $scope.$watch('search.stop_work', function(){
+      var start = $scope.search.stop_work.start;
+      var end = $scope.search.stop_work.end;
+
+      if(start && end){
+        start = start.toString('dd-MM-yyyy');
+        end = end.toString('dd-MM-yyyy');
+        $location.search('stop_work', t({start:start, end:end}));
+      } else {
+        $location.search('stop_work', '')
+      }
+    });
+
 
     $scope.locations = [
         {
@@ -92,10 +138,8 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
         $scope.dob.update_years($scope.users);
     });
 
-
     $scope.filtered_users = function(){
       var filtered_users = $scope.users;
-
       var f_name = $scope.search.name.toLowerCase();
       if(f_name){
         filtered_users = _.filter(filtered_users, function(user){
@@ -148,7 +192,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       if(start && end){
         filtered_users = _.filter(filtered_users, function(user){
           var u_start_work = Date.parse(user.start_work);
-          return !u_start_work || (start <= u_start_work  && u_start_work <= end);
+          return !u_start_work || (start <= u_start_work && u_start_work <= end);
         });
       }
 
@@ -157,7 +201,17 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       if(start && end){
         filtered_users = _.filter(filtered_users, function(user){
           var u_stop_work = Date.parse(user.stop_work);
-          return !u_stop_work || (start <= u_stop_work  && u_stop_work <= end);
+          return !!u_stop_work || (start <= u_stop_work && u_stop_work <= end);
+      });
+
+      filtered_users = _.filter(filtered_users, function(user){
+        var u_start_work = Date.parse(user.start_work);
+        return !$scope.search.start_work || !$scope.aditional_start || u_start_work <= $scope.aditional_start;
+      });
+
+      filtered_users = _.filter(filtered_users, function(user){
+        var u_stop_work = Date.parse(user.stop_work);
+        return !$scope.search.stop_work || !$scope.aditional_stop || u_stop_work <= $scope.aditional_stop;
         });
       }
       if ($scope.search.time_works != 0 ){

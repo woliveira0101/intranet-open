@@ -60,6 +60,8 @@ def first_day_of_week(date=None):
 def last_day_of_month(date):
     return first_day_of_month(h.next_month(date)) - relativedelta(days=1)
 
+def last_day_of_quarter(date):
+    return first_day_of_quarter(h.next_quarter(date)) - relativedelta(days=1)
 
 def months_between(d1, d2):
     result = []

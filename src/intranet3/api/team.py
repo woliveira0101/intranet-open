@@ -218,5 +218,3 @@ class Users(ApiView):
             return dict(
                 users=[u.to_dict() for u in users],
             )
-
-
