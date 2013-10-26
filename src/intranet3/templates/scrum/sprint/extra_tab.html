@@ -1,0 +1,14 @@
+{% extends "templates/scrum/sprint/_base_sprint.html" %}
+
+{% set page = 'extra_tab' %}
+
+
+{% block body %}
+
+<div>
+    URL: <a href="{{ extra_tab['link'] }}">{{ extra_tab['link'] }}</a>
+</div>
+
+<iframe src="{{ extra_tab['link'] }}" height="500" width="100%"></iframe>
+
+{% endblock body %}

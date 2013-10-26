@@ -1,3 +1,5 @@
+import re
+
 from pprint import pformat
 from sqlalchemy import Column, ForeignKey, orm
 from sqlalchemy.types import String, Integer, Boolean, Text
@@ -82,7 +84,13 @@ class Project(Base):
     continuous_integration_url = Column(String, nullable=False, default='')
     backlog_url = Column(String, nullable=False, default='')
 
+    sprint_tabs = Column(Text, nullable=False, default='')
+
     __table_args__ = (UniqueConstraint('name', 'client_id', name='project_name_client_id_unique'), {})
+
+    @property
+    def get_sprint_tabs(self):
+        return re.findall('(.+)\|(.+)(?:\n|$)', self.sprint_tabs)
 
     def format_selector(self):
         if self.turn_off_selectors:

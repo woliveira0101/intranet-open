@@ -55,6 +55,18 @@
             </li>
         {% endif %}
     {% endif %}
+
+    {% for tab_name, _ in sprint_tabs %}
+        {% if (page == 'extra_tab') and (tab_name == extra_tab['name']) %}
+            <li class="active">
+        {% else %}
+            <li>
+        {% endif %}
+                <a href="{{ request.url_for('/scrum/sprint/extra_tab', sprint_id=sprint.id, tab_name=tab_name) }}">{{ tab_name }}</a>
+            </li>
+    {% endfor %}
+
+
 </ul>
 <div class="stats-container row-fluid">
     <div class="span12">

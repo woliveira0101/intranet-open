@@ -130,6 +130,7 @@ class Field(ClientProtectionMixin, BaseView):
 
 class BaseSprintView(BaseView):
     def tmpl_ctx(self):
+
         session = self.session
         sprint = self.v.get('sprint')
         if not sprint:
@@ -190,6 +191,7 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
             bugs=sw.bugs,
             info=sw.get_info(),
             str_date=self._sprint_daterange(sprint.start, sprint.end),
+            sprint_tabs=sw.get_tabs(),
         )
 
     def _sprint_daterange(self, st, end):
@@ -215,13 +217,13 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
 
         sw = SprintWrapper(sprint, bugs, self.request)
         board = sw.get_board()
-
         return dict(
             board=board,
             info=sw.get_info(),
             bug_list_url=lambda bugs_list: sprint.project.get_bug_list_url(
                 [bug.id for bugs in bugs_list.values() for bug in bugs]
             ),
+            sprint_tabs=sw.get_tabs()
         )
 
 
@@ -279,6 +281,7 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin,
                 [time[1] for time in participation_of_workers]
             ),
             trackers_id=trackers_id, tickets_id=tickets_id,
+            sprint_tabs=sw.get_tabs()
         )
 
 @view_config(route_name='scrum_sprint_charts', permission='client')
@@ -300,6 +303,7 @@ class Charts(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
             charts_data=json.dumps(burndown),
             piechart_data=piechart_data,
             info=sw.get_info(),
+            sprint_tabs=sw.get_tabs()
         )
 
 
@@ -319,6 +323,7 @@ class Retros(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
             bugs=bugs,
             info=sw.get_info(),
             sprints=sprints,
+            sprint_tabs=sw.get_tabs()
         )
 
 
@@ -380,8 +385,8 @@ class Add(BaseView):
 
 
 @view_config(route_name='scrum_sprint_delete',
-    renderer='intranet3:templates/common/delete.html',
-    permission='scrum')
+             renderer='intranet3:templates/common/delete.html',
+             permission='scrum')
 class Delete(BaseView):
 
     def dispatch(self):
@@ -411,4 +416,24 @@ class Team(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
             sprint=sprint,
             info=sw.get_info(),
 
+        )
+
+@view_config(route_name='scrum_sprint_extra-tab', permission='client')
+class ExtraTab(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
+    def get(self):
+        sprint = self.v['sprint']
+        bugs = self._fetch_bugs(sprint)
+        sw = SprintWrapper(sprint, bugs, self.request)
+
+        tab_name = self.request.GET['tab_name']
+        tabs = sw.get_tabs()
+
+        extra_tab = dict(
+            name=tab_name,
+            link=dict(tabs)[tab_name]
+        )
+        return dict(
+            info=sw.get_info(),
+            sprint_tabs=tabs,
+            extra_tab=extra_tab,
         )
