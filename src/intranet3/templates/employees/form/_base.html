@@ -1,3 +1,7 @@
+{% if request.wants_mobile %}
+    {% extends "templates/_base.html" %}
+{% endif %}
+
 {% macro form_field(field, description) -%}
 <div>
     <dl>
