@@ -5,11 +5,13 @@
                  <input ng-model="search.name"  type="text" placeholder="Employee's name">
                  <input type="text" ng-model="search.start_work" placeholder="Start work" date-range-picker>
                  <input type="text" ng-model="search.stop_work" placeholder="Stop work" date-range-picker>
-                 <div class="description">
-                    Full time only: <input type="checkbox" ng-model="search.full_time_only">
-                 </div>
              </div>
              <div class="row below">
+                 <select
+                   ng-model="search.time_works" title="Full time"
+                   ng-options="time_work.id as time_work.name for time_work in time_works"
+                   bs-select>
+               </select>
                <select
                    ng-model="search.groups" multiple title="Choose group"
                    ng-options="group.id as group.name for group in groups"

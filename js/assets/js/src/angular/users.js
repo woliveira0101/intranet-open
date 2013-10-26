@@ -9,11 +9,11 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       },
       stop_work: {
       },
-      full_time_only: false,
       locations: [],
       roles: [],
       groups: [],
-      teams: []
+      teams: [],
+      time_works: 0
     };
 
     $scope.locations = [
@@ -29,6 +29,20 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
     $scope.set_tab = function(name){
        $scope.tab = name;
     };
+    $scope.time_works = [
+        {
+            id:0,
+            name:'All'
+        },
+        {
+            id:1,
+            name:'Full'
+        },
+        {
+            id:2,
+            name:'Part'
+        }
+    ];
 
     $scope.roles = $filter('orderBy')(_.map($scope.G.ROLES, function(role){
       return {id: role[0], name: role[1]};
@@ -144,10 +158,18 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
           return !u_stop_work || (start <= u_stop_work  && u_stop_work <= end);
         });
       }
-      if ($scope.search.full_time_only){
-          filtered_users = _.filter(filtered_users, function(user){
-            return Date.parse(user.start_full_time_work) < new Date();
-          });
+      if ($scope.search.time_works != 0 ){
+          if ($scope.search.time_works == 1) {
+            filtered_users = _.filter(filtered_users, function(user){
+                return Date.parse(user.start_full_time_work) < new Date();
+            });
+          }
+          else {
+              filtered_users = _.filter(filtered_users, function(user){
+                return Date.parse(user.start_full_time_work) > new Date();
+            });
+          }
+
       }
       return filtered_users;
     };
