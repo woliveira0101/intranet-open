@@ -1,11 +1,14 @@
 var App = angular.module('intranet');
 
-App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) {
+App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, $location) {
+    $scope.location = $location;
     $scope.users = [];
     $scope.tab = 'employees';
     $scope.search = {
       name: '',
       start_work: {
+          start: undefined,
+          end: undefined
       },
       stop_work: {
       },
@@ -14,7 +17,20 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       groups: [],
       teams: []
     };
-
+    if ($location.search().start_work != undefined){
+        var date_start = $location.search().start_work.split(' - ');
+        $scope.search.start_work = {
+            start: new Date.parse(date_start[0].split('-').reverse().join('-')),
+            end: new Date.parse(date_start[1].split('-').reverse().join('-'))
+        }
+    };
+    if ($location.search().stop_work != undefined){
+        var date_stop = $location.search().stop_work.split(' - ');
+        $scope.search.stop_work = {
+            start: new Date.parse(date_stop[0].split('-').reverse().join('-')),
+            end: new Date.parse(date_stop[1].split('-').reverse().join('-'))
+        }
+    };
     $scope.locations = [
         {
             id:'poznan',
@@ -71,10 +87,8 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       });
     });
 
-
     $scope.filtered_users = function(){
       var filtered_users = $scope.users;
-
       var f_name = $scope.search.name.toLowerCase();
       if(f_name){
         filtered_users = _.filter(filtered_users, function(user){
@@ -123,16 +137,26 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       if(start && end){
         filtered_users = _.filter(filtered_users, function(user){
           var u_start_work = Date.parse(user.start_work);
-          return !u_start_work || (start <= u_start_work  && u_start_work <= end);
+          return !u_start_work || (start <= u_start_work && u_start_work <= end);
         });
       }
 
-      start = $scope.search.stop_work.start;
-      end = $scope.search.stop_work.end;
+      var start = $scope.search.stop_work.start;
+      var end = $scope.search.stop_work.end;
       if(start && end){
         filtered_users = _.filter(filtered_users, function(user){
           var u_stop_work = Date.parse(user.stop_work);
-          return !u_stop_work || (start <= u_stop_work  && u_stop_work <= end);
+          return !u_stop_work || (start <= u_stop_work && u_stop_work <= end);
+      });
+
+      filtered_users = _.filter(filtered_users, function(user){
+        var u_start_work = Date.parse(user.start_work);
+        return !$scope.search.start_work || !$scope.aditional_start || u_start_work <= $scope.aditional_start;
+      });
+
+      filtered_users = _.filter(filtered_users, function(user){
+        var u_stop_work = Date.parse(user.stop_work);
+        return !$scope.search.stop_work || !$scope.aditional_stop || u_stop_work <= $scope.aditional_stop;
         });
       }
 

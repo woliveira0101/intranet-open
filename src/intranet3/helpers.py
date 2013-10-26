@@ -83,6 +83,9 @@ def previous_month(date):
 def next_month(date):
     return date + MONTH_DELTA
 
+def next_quarter(date):
+    return date + relativedelta(months=3)
+
 def start_end_month(date=None):
     if not date:
         date = datetime.date.today()
