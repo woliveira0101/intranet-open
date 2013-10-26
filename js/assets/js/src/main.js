@@ -428,6 +428,12 @@
             showOn: 'focus'
         });
 
+        $('.datepicker-dob').datepicker({
+            dateFormat: 'dd/mm/yy',
+            defaultDate: '01/01/1985',
+            showOn: 'focus'
+        });
+
         $('.bootstrap-tooltip').tooltip();
 
         $('.daterange').daterangepicker(

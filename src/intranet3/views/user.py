@@ -74,6 +74,7 @@ class Edit(BaseView):
             user.location = form.location.data or None
             user.start_work = form.start_work.data or None
             user.description = form.description.data or None
+            user.date_of_birth = form.date_of_birth.data or None
             user.roles = form.roles.data
             if self.request.has_perm('admin'):
                 user.is_active = form.is_active.data

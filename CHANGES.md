@@ -2,6 +2,7 @@ New release
 ===========
 - default show active sprints only
 - project configuration allows to add custom tabs in sprint with embedded iframe
+- user date of birth
 
 0.9.5 (17-11-2013)
 ===============
