@@ -1,20 +1,22 @@
 {% extends "templates/employees/form/_base.html" %}
 
 {% block content %}
-    <h2 class="content-header">Out of office request</h2>
-    <form action="{{ request.url_for('/employees/form/late_application') }}" method="post" accept-charset="utf-8">
-        {{ csrf_field }}
-        {{ form_field(form.popup_date, 'Format DD/MM/RRRR', class='datepicker') }}
-        {{ late_form_field(form.late_start, 'Format HH:MM', 'timepicker1', id='timepicker1', type='text', class='input-small', explanation='Time when person leaves office') }}
-        {{ late_form_field(form.late_end, 'Format HH:MM', 'timepicker2', id='timepicker2', type='text', class='input-small', explanation='Time when person comes to office') }}
-        {{ form_field(form.work_from_home) }}
-        {{ form_field(form.popup_explanation, 'Wyjaśnienie') }}
+    <div class="form-wrapper">
+        <h2 class="content-header">Out of office request</h2>
+        <form action="{{ request.url_for('/employees/form/late_application') }}" method="post" accept-charset="utf-8">
+            {{ csrf_field }}
+            {{ form_field(form.popup_date, 'Format DD/MM/RRRR', class='datepicker') }}
+            {{ late_form_field(form.late_start, 'Format HH:MM', 'timepicker1', id='timepicker1', type='text', class='input-small', explanation='Time when person leaves office') }}
+            {{ late_form_field(form.late_end, 'Format HH:MM', 'timepicker2', id='timepicker2', type='text', class='input-small', explanation='Time when person comes to office') }}
+            {{ form_field(form.work_from_home) }}
+            {{ form_field(form.popup_explanation, 'Wyjaśnienie') }}
 
-        <div class="buttons">
-            <input type="submit" value="Submit" class="button btn"/>
-            <img class="ajax-loader" title="Bug titles loading" src="/static/img/ajax.gif"/>
-        </div>
-    </form>
+            <div class="buttons">
+                <input type="submit" value="Submit" class="button btn"/>
+                <img class="ajax-loader" title="Bug titles loading" src="/static/img/ajax.gif"/>
+            </div>
+        </form>
+    </div>
 {% endblock content %}
 {% block tail_script %}
      <script type="text/javascript">
