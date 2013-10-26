@@ -150,7 +150,7 @@ class Report(TimesReportMixin, BaseView):
 
         if not projects:
             projects = [p[0] for p in form.projects.choices]
-
+        bug_id = self.request.GET.get('bug_id')
         users = form.users.data
         bigger_than = form.bigger_than.data
         ticket_choice = form.ticket_choice.data
@@ -164,7 +164,7 @@ class Report(TimesReportMixin, BaseView):
         LOG(u'Tickets report %r - %r - %r' % (start_date, end_date, projects))
 
         uber_query = self._prepare_uber_query(
-            start_date, end_date, projects, users, ticket_choice,
+            start_date, end_date, projects, users, ticket_choice, bug_id
         )
 
         entries = uber_query.all()
