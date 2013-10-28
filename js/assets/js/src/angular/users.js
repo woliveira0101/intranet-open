@@ -19,14 +19,14 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
     };
 
     $scope.$watch(function(){ return $location.search()}, function(){
-      if ($location.search().start_work != undefined){
+      if ($location.search().start_work){
         var date_start = $location.search().start_work.split(' - ');
         $scope.search.start_work = {
           start: new Date.parse(date_start[0].split('-').reverse().join('-')),
           end: new Date.parse(date_start[1].split('-').reverse().join('-'))
         }
       }
-      if ($location.search().stop_work != undefined){
+      if ($location.search().stop_work){
         var date_stop = $location.search().stop_work.split(' - ');
         $scope.search.stop_work = {
           start: new Date.parse(date_stop[0].split('-').reverse().join('-')),
