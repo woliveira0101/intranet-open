@@ -1,6 +1,6 @@
-New release
+0.9.6 (28-11-2013)
 ===========
-- default show active sprints only
+- better mobile support
 - project configuration allows to add custom tabs in sprint with embedded iframe
 - user date of birth
 
