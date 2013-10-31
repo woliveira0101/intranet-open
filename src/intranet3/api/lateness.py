@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 import datetime
-import dateutil.parser as dparser
 
 from pyramid.view import view_config
+from webob.multidict import MultiDict
 
 from intranet3 import memcache
 from intranet3.utils.views import ApiView
 from intranet3.utils import google_calendar as cal
 from intranet3.models import Late
 from intranet3.api.presence import MEMCACHED_NOTIFY_KEY
+from intranet3.forms.employees import LateApplicationForm
 
 
 hour9 = datetime.time(hour=9)
@@ -30,24 +31,28 @@ class LatenessApi(ApiView):
 
     def post(self):
         lateness = self.request.json.get('lateness')
-        date = dparser.parse(lateness["date"]).date()
-        explanation = lateness["explanation"]
-        in_future = date > datetime.date.today()
-        late = Late(
-            user_id=self.request.user.id,
-            date=date,
-            explanation=explanation,
-            justified=in_future or None,
-            late_start=dparser.parse(lateness["start"]),
-            late_end=dparser.parse(lateness["end"]),
-            work_from_home=lateness["work_from_home"],
-        )
+        form = LateApplicationForm(MultiDict(**lateness), user=self.request.user)
+        if form.validate():
+            date = form.popup_date.data
+            explanation = form.popup_explanation.data
+            in_future = date > datetime.date.today()
+            late = Late(
+                user_id=self.request.user.id,
+                date=date,
+                explanation=explanation,
+                justified=in_future or None,
+                late_start=form.late_start.data,
+                late_end=form.late_end.data,
+                work_from_home=form.work_from_home.data,
+            )
 
-        self.session.add(late)
-        memcache.delete(MEMCACHED_NOTIFY_KEY % date)
+            self.session.add(late)
+            memcache.delete(MEMCACHED_NOTIFY_KEY % date)
 
-        debug = self.request.registry.settings['DEBUG'] == 'True'
-        if in_future and not debug:
-            event_id = self._add_event(date, explanation)
+            debug = self.request.registry.settings['DEBUG'] == 'True'
+            if in_future and not debug:
+                event_id = self._add_event(date, explanation)
 
-        return u'Entry added'
+            return u'Entry added'
+
+        return form.errors
