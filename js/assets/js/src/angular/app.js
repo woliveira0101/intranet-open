@@ -3,3 +3,8 @@ var App = angular.module('intranet', ['ngDragDrop', 'ui.bootstrap', '$strap.dire
 App.run(function($rootScope) {
   $rootScope.G = G;
 });
+
+
+App.config(function($compileProvider){
+  $compileProvider.urlSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|tel):/);
+});
