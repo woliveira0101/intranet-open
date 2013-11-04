@@ -19,6 +19,7 @@ twistd.pid
 
 *.tar.gz
 *.DS_Store
+.*swp
 
 venv
 node_modules
