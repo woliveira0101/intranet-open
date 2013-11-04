@@ -51,8 +51,10 @@ class Excel(BaseView):
                                .filter(Project.tracker_id==Tracker.id)\
                                .filter(Project.client_id==Client.id)
 
-        uber_query = uber_query.filter(TimeEntry.project_id.in_(projects))\
-                               .filter(TimeEntry.date>=start_date)\
+        if projects:
+            uber_query = uber_query.filter(TimeEntry.project_id.in_(projects))
+
+        uber_query = uber_query.filter(TimeEntry.date>=start_date)\
                                .filter(TimeEntry.date<=end_date)\
                                .filter(TimeEntry.deleted==False)
 
