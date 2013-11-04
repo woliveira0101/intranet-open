@@ -55,4 +55,5 @@ class LatenessApi(ApiView):
 
             return u'Entry added'
 
+        self.request.response.status = 400
         return form.errors
