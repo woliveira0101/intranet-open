@@ -5,12 +5,16 @@ App.directive('formTimepicker', function() {
         restrict: 'E',
         require: 'ngModel',
         scope: {
-            name: "@",
-            defaultTime: "@",
             ngModel: "="
         },
         transclude: true,
         replace: true,
-        templateUrl: 'form/timepicker.html'
+        templateUrl: 'form/timepicker.html',
+        compile: function($el, attr) {
+            var input = $el.find('input');
+
+            input.attr('name', attr.name);
+            input.attr('default-time', attr.defaultTime);
+        }
     };
 });
