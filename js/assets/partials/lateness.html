@@ -3,29 +3,34 @@
         <button class="close" aria-hidden="true" ng-click="close()">x</button>
         <h3 id='lateness_header'>Out of office request</h3>
     </div>
+
     <div class="modal-body">
         <form name="latenessForm" class="form-horizontal" ng-class="{submitted: form_submitted}" novalidate>
             <div class="control-group">
                 <label class="control-label">Date</label>
-                <input class="datepicker" name="popup_date" type="text" ng-model="lateness.popup_date" jqdatepicker required>
+                <input class="datepicker" name="popup_date" type="text" ng-model="lateness.popup_date" jqdatepicker required server-validate>
                 <div class="errors" ng-show="errors.popup_date">{{errors.popup_date}}</div>
             </div>
+
             <form-timepicker name="late_start" ng-model="lateness.late_start" default-time="9:00">From</form-timepicker>
+
             <form-timepicker name="late_end" ng-model="lateness.late_end" default-time="17:00">To</form-timepicker>
+
             <div class="control-group">
                 <label class="control-label">Work From Home</label>
                 <input name="work_from_home" type="checkbox" value="y" ng-model="lateness.work_from_home">
             </div>
+
             <div class="control-group">
                 <label class="control-label">Explanation</label>
-                <textarea id="popup_explanation" name="popup_explanation" ng-model="lateness.popup_explanation" required></textarea>
+                <textarea id="popup_explanation" name="popup_explanation" ng-model="lateness.popup_explanation" required server-validate></textarea>
                 <div class="errors" ng-show="errors.popup_explanation">{{errors.popup_explanation}}</div>
             </div>
 
             <div class="alert alert-error" ng-bind="error" ng-show="error"></div>
 
             <div class="pull-right buttons">
-                <button class="btn" type="submit" ng-click="add()">Submit</button>
+                <button class="btn btn-primary" type="submit" ng-click="add()" ng-disabled="latenessForm.$pristine || latenessForm.$invalid">Submit</button>
             </div>
         </form>
     </div>

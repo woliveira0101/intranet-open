@@ -4,13 +4,14 @@ App.directive('jqdatepicker', function() {
   return {
     require: 'ngModel',
     link: function(scope, el, attr, ngModel) {
-      $(el).datepicker({
+      el.datepicker({
         dateFormat: 'dd/mm/yy',
         showOn: 'focus',
         onSelect: function(dateText) {
           scope.$apply(function() {
             ngModel.$setViewValue(dateText);
           });
+          el.trigger('change');
         }
       });
     }

@@ -1,8 +1,8 @@
 <div class="control-group">
     <label class="control-label" ng-transclude></label>
     <div class="input-append">
-        <input class="input-small" name="{{name}}" type="text" ng-model="ngModel" bs-timepicker default-time="{{defaultTime}}" show-meridian="false" required>
+        <input class="input-small" name="{{name}}" type="text" ng-model="ngModel" bs-timepicker default-time="{{defaultTime}}" show-meridian="false" required server-validate>
         <button type="button" class="btn" data-toggle="timepicker"><i class="icon-time"></i></button>
     </div>
-    <div class="errors" ng-show="errors.late_start">{{errors.late_start}}</div>
+    <div class="errors" ng-show="$parent.errors[name]">{{$parent.errors[name]}}</div>
 </div>

@@ -10,7 +10,6 @@ App.controller('latenessCtrl', function($scope, $http, $dialog, $timeout, dialog
 
     $scope.add = function() {
         $scope.form_submitted = true;
-        if($scope.latenessForm.$invalid) return;
 
         $http.post('/api/lateness', {
             lateness: {
@@ -21,12 +20,11 @@ App.controller('latenessCtrl', function($scope, $http, $dialog, $timeout, dialog
                 work_from_home: $scope.lateness.work_from_home
             }
         }).success(function(data) {
-            console.log('success');
-            console.log(data);
+            $scope.close();
         }).error(function(data) {
             angular.forEach(data, function(errors, field) {
-                $scope.latenessForm.$setValidity(field, false);
-                $scope.errors[field] = errors.join('\n');
+                $scope.latenessForm[field].$setValidity('server', false);
+                $scope.errors[field] = errors.join('<br/>');
             });
         });
     };
