@@ -5,6 +5,7 @@ App.directive('formTimepicker', function() {
         restrict: 'E',
         require: 'ngModel',
         scope: {
+            name: "@",
             ngModel: "="
         },
         transclude: true,
