@@ -21,6 +21,12 @@ App.controller('latenessCtrl', function($scope, $http, $dialog, $timeout, dialog
             }
         }).success(function(data) {
             $scope.close();
+
+            $dialog.dialog({
+                controller: function($scope, dialog) {
+                    $scope.close = function() {dialog.close();};
+                }
+            }).open("latenessConfirmation");
         }).error(function(data) {
             angular.forEach(data, function(errors, field) {
                 $scope.latenessForm[field].$setValidity('server', false);
