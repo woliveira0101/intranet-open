@@ -62,7 +62,7 @@
       <!--[if IE 8 ]><body class="ie8"><![endif]-->
         <!--[if IE 9 ]><body class="ie9"><![endif]-->
           <!--[if (gt IE 9)|!(IE)]><!--><!--<![endif]-->
-          <body id="">
+          <body id="" ng-app="intranet">
             <div class="navbar navbar-inverse navbar-fixed-top" id="bar_head">
               <div class="navbar-inner {% if request.wants_mobile %}mobile{% endif %}">
                 <div class="container-fluid">
@@ -76,8 +76,8 @@
                     <ul class="nav">
                       <li class="dropdown">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown">{% trans %}Quick links{% endtrans %}<b class="caret"></b></a>
-                      <ul class="dropdown-menu">
-                        <li><a class="{%if not request.wants_mobile %}a_popup{% endif %}" href="{{ request.url_for('/employees/form/late_application') }}">{% trans %}Out of office form{% endtrans %}</a></li>
+                      <ul class="dropdown-menu" ng-controller="quickLinksCtrl">
+                        <li><a href="#" ng-click="lateness()">{% trans %}Out of office form{% endtrans %}</a></li>
                         <li><a class="a_popup" href="{{ request.url_for('/employees/form/wrong_time_justification') }}">{% trans %}Excuse wrong time entry{% endtrans %}</a></li>
                         <li><a class="a_popup" href="{{ request.url_for('/employees/form/absence_application') }}">{% trans %}Submit absence/holiday{% endtrans %}</a></li>
                         {% if request.is_mobile %}
@@ -130,7 +130,7 @@
                 </div>
               </div>
             </div>
-            <div id="content" ng-app="intranet">
+            <div id="content">
                 <div class="container-fluid">
                     {% block container %}
                     <div class="row-fluid">
