@@ -109,7 +109,7 @@ ${name}"""
             response = {
                 u'request': False,
                 u'hours': False,
-                u'calendar': False,
+                u'calendar_entry': False,
             }
 
             memcache.clear()
@@ -176,7 +176,7 @@ ${name}"""
             )
             event_id = calendar.addEvent(event)
 
-            response[u'calendar'] = bool(event_id)
+            response[u'calendar_entry'] = bool(event_id)
 
             return response
 

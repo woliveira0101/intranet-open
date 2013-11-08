@@ -21,6 +21,10 @@ App.controller('absenceCtrl', function($scope, $http, $dialog, dialog) {
             }
         }).success(function(data) {
             $scope.close();
+
+            $dialog.dialog({
+                resolve: {messages: function() {return data;}}
+            }).open('modalConfirm.html', 'modalConfirmCtrl');
         }).error(function(data) {
             console.log(data);
             angular.forEach(data, function(errors, field) {
