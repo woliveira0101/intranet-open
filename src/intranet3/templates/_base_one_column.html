@@ -79,7 +79,7 @@
                       <ul class="dropdown-menu" ng-controller="quickLinksCtrl">
                         <li><a href="#" ng-click="lateness()">{% trans %}Out of office form{% endtrans %}</a></li>
                         <li><a class="a_popup" href="{{ request.url_for('/employees/form/wrong_time_justification') }}">{% trans %}Excuse wrong time entry{% endtrans %}</a></li>
-                        <li><a class="a_popup" href="{{ request.url_for('/employees/form/absence_application') }}">{% trans %}Submit absence/holiday{% endtrans %}</a></li>
+                        <li><a href="#" ng-click="absence()">{% trans %}Submit absence/holiday{% endtrans %}</a></li>
                         {% if request.is_mobile %}
                           {% if request.wants_mobile %}
                             <li><a href="/?wants_mobile=0">{% trans %}Go to full intranet{% endtrans %}</a></li>

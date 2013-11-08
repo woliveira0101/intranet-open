@@ -30,6 +30,8 @@ App.controller('latenessCtrl', function($scope, $http, $dialog, dialog) {
                 $scope.latenessForm[field].$setValidity('server', false);
                 $scope.errors[field] = errors.join('<br/>');
             });
+
+            $scope.form_submitted = false;
         });
     };
 });
