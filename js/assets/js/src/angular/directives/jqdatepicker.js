@@ -14,6 +14,15 @@ App.directive('jqdatepicker', function() {
           el.trigger('change');
         }
       });
+      if(attr.defaultDate) {
+          if(attr.defaultDate === 'today') {
+              var date = $.datepicker.formatDate('dd/mm/yy', new Date());
+          } else {
+              var date = attr.defaultDate;
+          }
+          el.val(date);
+          ngModel.$setViewValue(date);
+      }
     }
   };
 });
