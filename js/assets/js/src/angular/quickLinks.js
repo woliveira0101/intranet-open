@@ -1,7 +1,7 @@
 var App = angular.module('intranet');
 
 
-App.controller('quickLinksCtrl', function($scope, $http, $dialog, $timeout) {
+App.controller('quickLinksCtrl', function($scope, $http, $dialog) {
     $scope.lateness = function() {
         var d = $dialog.dialog({
             resolve: {
@@ -10,5 +10,9 @@ App.controller('quickLinksCtrl', function($scope, $http, $dialog, $timeout) {
         });
 
         d.open('lateness.html', 'latenessCtrl');
+    };
+
+    $scope.absence = function() {
+        $dialog.dialog().open('absence.html', 'absenceCtrl');
     };
 });
