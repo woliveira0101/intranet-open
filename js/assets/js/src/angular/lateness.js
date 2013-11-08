@@ -1,7 +1,7 @@
 var App = angular.module('intranet');
 
 
-App.controller('latenessCtrl', function($scope, $http, $dialog, $timeout, dialog, $callerScope) {
+App.controller('latenessCtrl', function($scope, $http, $dialog, dialog) {
     $scope.errors = {};
 
     $scope.close = function() {
