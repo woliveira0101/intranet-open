@@ -105,6 +105,7 @@ def main(global_config, **settings):
     pyramid_config.add_route('api_blacklist', 'api/blacklist')
     pyramid_config.add_route('api_lateness', '/api/lateness')
     pyramid_config.add_route('api_absence', '/api/absence')
+    pyramid_config.add_route('api_absence_days', '/api/absence_days')
 
     pyramid_config.add_renderer('.html', 'pyramid_jinja2.renderer_factory')
     pyramid_config.add_renderer(None, 'intranet3.utils.renderer.renderer_factory')

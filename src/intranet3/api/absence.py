@@ -13,6 +13,7 @@ from intranet3.utils.mail import EmailSender
 from intranet3.models import Absence, Holiday, TimeEntry
 from intranet3.api.presence import MEMCACHED_NOTIFY_KEY
 from intranet3.forms.employees import AbsentApplicationForm, ABSENCE_TYPES
+from intranet3.lib.employee import user_leave
 
 
 LEAVE_PROJECT_ID = 86
@@ -182,3 +183,36 @@ ${name}"""
 
         self.request.response.status = 400
         return form.errors
+
+
+@view_config(route_name='api_absence_days', renderer='json')
+class AbsenceDaysApi(ApiView):
+    def get(self):
+        date_start = self.request.GET.get('date_start')
+        date_end = self.request.GET.get('date_end')
+
+        if date_start:
+            date_start = datetime.datetime.strptime(date_start, '%d/%m/%Y').date()
+            mandated, used, left = user_leave(self.request, date_start.year)
+            days = 0
+
+            if date_end:
+                type = self.request.GET.get('type')
+                date_end = datetime.datetime.strptime(date_end, '%d/%m/%Y').date()
+
+                days = h.get_working_days(date_start, date_end)
+                if days is None:
+                    days = 0
+                if type in ('planowany', 'zadanie'):
+                    left -= days
+
+            return dict(
+                days=days,
+                left=left,
+                mandated=mandated
+            )
+
+        self.request.response.status = 400
+        return dict(
+            date_start='This field is required.'
+        )
