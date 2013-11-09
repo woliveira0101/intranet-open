@@ -1,24 +1,41 @@
-from intranet3 import memcache
+
+import gevent
+import gevent.monkey
+gevent.monkey.patch_all()
+
+import sys
+import traceback
+import codecs
+import functools
+import csv
+
+from requests.auth import HTTPBasicAuth
+
 from intranet3.models import User
+from intranet3.helpers import decoded_dict
 
 from .request import RPC
 
 
-MAX_TIMEOUT = 50 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
+
+class FetchException(Exception):
+    pass
+
+class Scrum(object):
+    def __init__(self, bug):
+        self.__bug = bug
+
+    @property
+    def points(self):
+        return None
+
+    @property
+    def velocity(self):
+        return 0.0
 
 
 class Bug(object):
-    class Scrum(object):
-        def __init__(self, bug):
-            self.__bug = bug
-
-        @property
-        def points(self):
-            return None
-
-        @property
-        def velocity(self):
-            return 0.0
+    Scrum = Scrum
 
     def __init__(self, tracker, login_mapping, raw_data):
         # we shouldn't keep login_mapping inside Bug object
@@ -30,7 +47,7 @@ class Bug(object):
             login_mapping,
         )
         self.reporter = self.__resolve_user(
-            self.get_owner(self.data),
+            self.get_reporter(self.data),
             login_mapping,
         )
         self.scrum = self.Scrum(self)
@@ -101,12 +118,48 @@ class Bug(object):
         return {}
 
 
+class FetcherMeta(type):
+    FETCHERS = [
+        'fetch_user_tickets',
+        'fetch_all_tickets',
+        'fetch_bugs_for_query',
+        'fetch_scrum',
 
-class BaseFetcher(object):
+        'fetch_bug_titles_and_depends_on',
+        'fetch_dependons_for_ticket_ids',
+    ]
+
+    @staticmethod
+    def __async(f):
+        @functools.wraps(f)
+        def func(*args, **kwargs):
+            self = args[0]
+            self._run = f
+            self.args = args
+            self.kwargs = kwargs
+            self.start()
+            return
+        return func
+
+    def __new__(mcs, name, bases, dct):
+        for name, prop in dct.iteritems():
+            if name in mcs.FETCHERS:
+                dct[name] = mcs.__async(prop)
+        return type.__new__(mcs, name, bases, dct)
+
+class BaseFetcher(gevent.Greenlet):
+    __metaclass__ = FetcherMeta
     CACHE_TIMEOUT = 3 * 60  # 3 minutes
+    SPRINT_REGEX = 's=%s(?!\S)'
     BUG_CLASS = Bug
+    MAX_TIMEOUT = 50 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
+
+    def __repr__(self):
+        return ''
+
 
     def __init__(self, tracker, credentials, login_mapping, timeout=MAX_TIMEOUT):
+        gevent.Greenlet.__init__(self)
         self.tracker = tracker
         self.login = credentials.login
         self.password = credentials.password
@@ -119,18 +172,61 @@ class BaseFetcher(object):
         self.dependson_and_blocked_status = {}
         self.timeout = timeout
 
-    def consume(self, responses):
-        if not isinstance(responses, list):
-            responses = [responses]
+        self.traceback = None
+        self.fetch_error = None
 
-        responses = [
-            r.get_result() if isinstance(r, RPC) else r
-            for r in responses
-        ]
+    def get_auth(self):
+        """ Perform action to get authentication (like token or cookies) """
+        return None
 
+    def set_auth(self, session, data=None):
+        """ Perform action to set authentication (like token or cookies) """
+        return None
 
+    def add_data(self, session):
+        return None
 
+    def before_processing(self, rpc):
+        """
+        Store some data before doing processing,
+        i.e. fetch some data necessary for processing
+        """
+        return None
 
+    def consume(self, rpcs):
+        if not isinstance(rpcs, list):
+            rpcs = [rpcs]
+
+        auth_data = self.get_auth()
+
+        for rpc in rpcs:
+            self.set_auth(rpc.s, auth_data)
+            self.add_data(rpc.s)
+            rpc.start()
+
+        rpc = RPC()
+        self.set_auth(rpc.s, auth_data)
+        self.before_processing(rpc)
+
+        for rpc in rpcs:
+            response = rpc.get_result()
+            reason = self.check_if_failed(response)
+            if reason:
+                self.fail(FetchException(reason))
+                return
+            self.received(response.text)
+
+    def check_if_failed(self, response):
+        code = response.status_code
+        if 200 > code > 299:
+            return u'Received response %s' % code
+
+    def received(self, data):
+        """ Called when server returns whole response body """
+        try:
+            self.bugs = [bug for bug in self.parse(data)]
+        except Exception as e:
+            self.fail(*sys.exc_info())
 
     def parse(self, data):
         for bug_data in data:
@@ -138,10 +234,18 @@ class BaseFetcher(object):
 
     def result(self):
         """ iterate over fetched tickets """
-        if self.cache_key and self.error is None: # cache bugs if key was designeated and no error occured
-            memcache.set(self.cache_key, self.bugs, timeout=self.CACHE_TIMEOUT)
-        for bug_data in self.bugs.itervalues():
-            yield self.BUG_CLASS(self.tracker, self.login_mapping, bug_data)
+        self.join()
+        if self.fetch_error:
+            e, v, t = self.fetch_error
+            raise e, v, t
+
+        return [
+            self.BUG_CLASS(self.tracker, self.login_mapping, bug_data)
+            for bug_data in self.bugs
+        ]
+
+    def fail(self, type_, value=None, traceb=None):
+        self.fetch_error = type_, value, traceb
 
     # methods that should be overridden:
 
@@ -180,3 +284,35 @@ class BaseFetcher(object):
 
     def fetch_scrum(self, sprint_name, project_id, component_id=None):
         raise NotImplementedError()
+
+
+class BasicAuthMixin(object):
+
+    def set_auth(self, session, data=None):
+        session.auth = HTTPBasicAuth(self.login, self.password)
+
+class CSVParserMixin(object):
+    # bug object class
+    bug_class = None
+
+    # CSV encoding
+    encoding = 'utf-8'
+
+    # CSV delimited
+    delimiter=','
+
+    def parse(self, data):
+        if codecs.BOM_UTF8 == data[:3]:
+            data = data.decode('utf-8-sig')
+        else:
+            data = data.encode('utf-8')
+
+        if '\r\n' in data:
+            data = data.split('\r\n')
+        else:
+            data = data.split('\n')
+
+        reader = csv.DictReader(data,  delimiter=self.delimiter)
+        for bug_desc in reader:
+            bug_desc = decoded_dict(bug_desc, encoding=self.encoding)
+            yield bug_desc

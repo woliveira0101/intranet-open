@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from twisted.scheduling.cron import CronSchedule
-from twisted.scheduling.task import ScheduledCall
 
 from task import URLCronTask
 from intranet3.log import INFO_LOG, EXCEPTION_LOG, WARN_LOG

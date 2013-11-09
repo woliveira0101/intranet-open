@@ -185,3 +185,22 @@ def create_config(env):
     DBSession.add(config)
     transaction.commit()
 
+
+def g(env):
+    from intranet3.models import *
+    from intranet3.asyncfetchers.nbugzilla import BugzillaFetcher
+
+    session = DBSession()
+    session.query()
+    p, t, tc = session.query(Project, Tracker, TrackerCredentials) \
+        .filter(Project.id==182) \
+        .filter(Project.tracker_id==Tracker.id) \
+        .filter(TrackerCredentials.tracker_id==Project.tracker_id) \
+        .filter(TrackerCredentials.user_id==54).one()
+    # 11
+
+    fetcher = BugzillaFetcher(t, tc, t.logins_mapping)
+    #fetcher.fetch_scrum('postmaster-sprint5', p.project_selector, p.component_selector)
+    fetcher.fetch_all_tickets()
+    results = fetcher.result()
+    import ipdb; ipdb.set_trace()

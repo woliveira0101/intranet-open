@@ -10,6 +10,7 @@ def read(*rnames):
 
 dependency_links = [
     'http://github.com/krotkiewicz/pyramid_autoroute/tarball/master#egg=pyramid_autoroute',
+    'https://github.com/surfly/gevent/releases/download/1.0rc3/gevent-1.0rc3.tar.gz#egg=gevent',
 ]
 
 setup(
@@ -43,13 +44,12 @@ setup(
         'zope.sqlalchemy',
         'waitress',
         'psycopg2',
+        'gevent',
         'WTForms',
         'gdata==2.0.17',
         'ordereddict==1.1',
         'python-memcached==1.47',
-        'Twisted==11.0.0',
         'PyOpenSSL',
-        'twisted.scheduling==1.0',
         'python-dateutil==1.5',
         'xlwt<=0.7.4',
         'pil==1.1.7',

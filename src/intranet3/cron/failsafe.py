@@ -5,9 +5,6 @@ import datetime
 
 from pickle import load, dump
 from functools import partial, wraps
-from twisted.web.client import Agent, WebClientContextFactory
-from twisted.web.http_headers import Headers
-from twisted.internet import reactor
 
 from intranet3.log import DEBUG_LOG, EXCEPTION_LOG, INFO_LOG
 from intranet3.helpers import dates_between
@@ -32,9 +29,7 @@ class RequiredAction(object):
 class Repeater(object):
     
     USER_AGENT = 'STXNext Intranet 2 Cron task'
-    contextFactory = WebClientContextFactory()
-    client = Agent(reactor, contextFactory)
-        
+
     def __init__(self, *actions):
         self.headers = {
             'User-Agent': [self.USER_AGENT],

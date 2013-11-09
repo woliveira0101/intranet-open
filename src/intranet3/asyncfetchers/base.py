@@ -2,13 +2,6 @@
 import csv
 import codecs
 from base64 import b64encode
-from twisted.internet import reactor
-from twisted.web.client import Agent, WebClientContextFactory
-from twisted.web.http_headers import Headers
-from twisted.web._newclient import ResponseDone
-from twisted.internet.protocol import Protocol
-from twisted.web.iweb import IBodyProducer
-from twisted.internet.defer import succeed
 from zope.interface.declarations import implements
 
 from intranet3 import memcache
@@ -129,7 +122,7 @@ class Bug(object):
 class FetchException(Exception):
     pass
 
-class SimpleProtocol(Protocol):
+class SimpleProtocol(object):
     
     def __init__(self, on_success, on_error):
         self.buffer = []
@@ -147,7 +140,6 @@ class SimpleProtocol(Protocol):
             self.on_error(reason.value)
             
 class StringProducer(object):
-    implements(IBodyProducer)
 
     def __init__(self, body):
         self.body = body
@@ -187,8 +179,6 @@ class cached_bug_fetcher(object):
 class BaseFetcher(object):
     
     USER_AGENT = 'Intranet Bug Fetcher'
-    contextFactory = WebClientContextFactory()
-    client = Agent(reactor, contextFactory)
     SLEEP_PERIOD = 0.1
     CACHE_TIMEOUT = 3 * 60  # 3 minutes
     redirect_support = False
@@ -374,6 +364,7 @@ class CSVParserMixin(object):
 
         if codecs.BOM_UTF8 == data[:3]:
             data = data.decode('utf-8-sig')
+
 
         if '\r\n' in data:
             data = data.split('\r\n')

@@ -15,10 +15,6 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.security import Allow, ALL_PERMISSIONS
 from werkzeug.contrib.cache import MemcachedCache
 
-from twisted.web.wsgi import WSGIResource
-from twisted.internet import reactor
-from twisted.web import server
-
 
 @implementer(IAuthenticationPolicy)
 class CustomAuthenticationPolicy(AuthTktAuthenticationPolicy):
@@ -140,44 +136,5 @@ def main(global_config, **settings):
         'TEMPLATE_DIR': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates'),
     })
 
-
     app = pyramid_config.make_wsgi_app()
     return app
-
-
-def run():
-    argv = sys.argv[1:]
-    if argv:
-        config_file_path = argv[0]
-    else:
-        caller_file = inspect.getouterframes(inspect.currentframe())[1][1]
-        caller_file = os.path.realpath(caller_file)
-        buildout_dir = os.path.dirname(os.path.dirname(caller_file))
-        config_file_path = os.path.join(buildout_dir, 'parts', 'etc', 'config.ini')
-
-    if not os.path.isfile(config_file_path):
-        print u'Path to config file must be given as a single parameter, for example "bin/run parts/etc/config.ini"'
-        return
-
-    paster.setup_logging(config_file_path)
-    settings = paster.get_appsettings(config_file_path)
-
-    app = main(None, **settings)
-
-    from intranet3 import cron
-    if not config.get('CRON_DISABLE'):
-        cron.run_cron_tasks()
-
-    for directory in ['users', 'teams', 'previews']:
-        if not os.path.exists(os.path.join(settings['AVATAR_PATH'], directory)):
-            os.makedirs(os.path.join(settings['AVATAR_PATH'], directory))
-
-    full_config_path = os.path.abspath(config_file_path)
-    server_config = ConfigParser.ConfigParser()
-    server_config.readfp(open(full_config_path))
-    port = server_config.getint('server:main', 'port')
-    host = server_config.get('server:main', 'host')
-    resource = WSGIResource(reactor, reactor.getThreadPool(), app)
-    site = server.Site(resource)
-    reactor.listenTCP(port, site)
-    reactor.run()

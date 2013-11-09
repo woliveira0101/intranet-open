@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 from pprint import pformat
 
-from twisted.web.client import Agent, WebClientContextFactory
-from twisted.web.http_headers import Headers
-from twisted.internet import reactor
-
 from intranet3.log import INFO_LOG, EXCEPTION_LOG, WARN_LOG
 from intranet3.utils.mail import MailCheckerTask
 from intranet3 import config
@@ -17,8 +13,6 @@ WARN= WARN_LOG(__name__)
 class URLCronTask(object):
 
     USER_AGENT = 'STXNext Intranet 2 Cron task'
-    contextFactory = WebClientContextFactory()
-    client = Agent(reactor, contextFactory)
 
     def __init__(self, task_name, url, repeats=None):
         self.busy = False

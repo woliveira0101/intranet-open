@@ -16,12 +16,6 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email import Encoders
 
-from twisted.internet import ssl, reactor
-from twisted.internet.defer import Deferred, DeferredList
-from twisted.mail.smtp import ESMTPSenderFactory
-from twisted.mail.pop3client import POP3Client
-from twisted.internet.protocol import ClientFactory
-
 import transaction
 from intranet3.models import ApplicationConfig, Project, Tracker, TrackerCredentials
 from intranet3.models.project import SelectorMapping
@@ -43,9 +37,6 @@ MIN_HOURS = 6.995 #record hours
 
 class EmailSender(object):
 
-    SMTP_SERVER = 'smtp.gmail.com'
-    SMTP_PORT = 587
-    contextFactory = ssl.ClientContextFactory()
 
     @classmethod
     def send(cls, to, topic, message, sender_name=None, cc=None, replay_to=None):
@@ -183,7 +174,7 @@ def get_msg_payload(msg):
         payload = b64decode(payload)
     return payload
 
-class MailerPOP3Client(POP3Client):
+class MailerPOP3Client(object):
 
     MAX_EMAILS = 100
 
@@ -410,7 +401,7 @@ class MailerPOP3Client(POP3Client):
         EXCEPTION(u'POP3 Client failed during %s: %s' % (during, pformat(resp)))
         self.factory.done_callback()
 
-class CustomClientFactory(ClientFactory):
+class CustomClientFactory(object):
 
     protocol = MailerPOP3Client
 
@@ -428,7 +419,6 @@ class MailCheckerTask(object):
     MAX_BUSY_CALLS = 3
     POP3_SERVER = 'pop.gmail.com'
     POP3_PORT = 995
-    context_factory = ssl.ClientContextFactory()
 
     def __init__(self):
         self.busy = False
