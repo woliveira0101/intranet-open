@@ -10,7 +10,7 @@
             <div class="controls">
                 <div class="errors" ng-show="errors.popup_date">{{errors.popup_date}}</div>
                 <div class="description">Format DD/MM/RRRR</div>
-                <input class="datepicker" name="popup_date" type="text" ng-model="lateness.popup_date" jqdatepicker required server-validate>
+                <input class="datepicker" name="popup_date" type="text" ng-model="lateness.popup_date" jqdatepicker required>
             </div>
         </div>
 
@@ -30,12 +30,12 @@
             <div class="controls">
                 <div class="errors" ng-show="errors.popup_explanation">{{errors.popup_explanation}}</div>
                 <div class="description">Wyjaśnienie</div>
-                <textarea id="popup_explanation" name="popup_explanation" ng-model="lateness.popup_explanation" required server-validate></textarea>
+                <textarea id="popup_explanation" name="popup_explanation" ng-model="lateness.popup_explanation" required></textarea>
             </div>
         </div>
     </form>
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-primary" type="submit" ng-click="add()" ng-disabled="latenessForm.$pristine || latenessForm.$invalid || form_submitted">Submit</button>
+    <button class="btn btn-primary" type="submit" ng-click="add()" ng-disabled="form_submitted">Submit</button>
 </div>
