@@ -1,121 +1,19 @@
-
-import gevent
-import gevent.monkey
-gevent.monkey.patch_all()
-
 import sys
 import traceback
 import codecs
 import functools
 import csv
 
+import gevent
 from requests.auth import HTTPBasicAuth
 
 from intranet3.models import User
+from intranet3.models.project import SelectorMapping
 from intranet3.helpers import decoded_dict
-
 from .request import RPC
-
-
 
 class FetchException(Exception):
     pass
-
-class Scrum(object):
-    def __init__(self, bug):
-        self.__bug = bug
-
-    @property
-    def points(self):
-        return None
-
-    @property
-    def velocity(self):
-        return 0.0
-
-
-class Bug(object):
-    Scrum = Scrum
-
-    def __init__(self, tracker, login_mapping, raw_data):
-        # we shouldn't keep login_mapping inside Bug object
-        # we do not need it to be pickled during memcached set
-        self.tracker = tracker
-        self.data = self.parse(raw_data)
-        self.owner = self.__resolve_user(
-            self.get_owner(self.data),
-            login_mapping,
-        )
-        self.reporter = self.__resolve_user(
-            self.get_reporter(self.data),
-            login_mapping,
-        )
-        self.scrum = self.Scrum(self)
-
-    def __resolve_user(self, orig_login, login_mapping):
-        return login_mapping.get(
-            orig_login.lower(),
-            User(name=orig_login, email=orig_login),
-        )
-
-    def parse(self, raw_data):
-        return raw_data
-
-    def get_owner(self, data):
-        """ Get tracker owner username """
-        return None
-
-    def get_reporter(self, data):
-        """ Get tracker reporter username """
-        return None
-
-    @property
-    def id(self):
-        return None
-
-    @property
-    def desc(self):
-        return None
-
-    @property
-    def priority(self):
-        return None
-
-    @property
-    def severity(self):
-        return None
-
-    @property
-    def status(self):
-        return None
-
-    @property
-    def resolution(self):
-        return None
-
-    @property
-    def url(self):
-        return None
-
-    @property
-    def project(self):
-        return None
-
-    @property
-    def opendate(self):
-        return None
-
-    @property
-    def changeddate(self):
-        return None
-
-    @property
-    def dependson(self):
-        return {}
-
-    @property
-    def blocked(self):
-        return {}
 
 
 class FetcherMeta(type):
@@ -149,14 +47,14 @@ class FetcherMeta(type):
 
 class BaseFetcher(gevent.Greenlet):
     __metaclass__ = FetcherMeta
+    bug_class = None
+    get_converter = None
     CACHE_TIMEOUT = 3 * 60  # 3 minutes
     SPRINT_REGEX = 's=%s(?!\S)'
-    BUG_CLASS = Bug
     MAX_TIMEOUT = 50 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 
     def __repr__(self):
         return ''
-
 
     def __init__(self, tracker, credentials, login_mapping, timeout=MAX_TIMEOUT):
         gevent.Greenlet.__init__(self)
@@ -216,33 +114,62 @@ class BaseFetcher(gevent.Greenlet):
                 return
             self.received(response.text)
 
+        self.done = True
+
     def check_if_failed(self, response):
         code = response.status_code
         if 200 > code > 299:
             return u'Received response %s' % code
 
+    def isReady(self):
+        """ Check if this fetcher is done """
+        return self.done
+
     def received(self, data):
         """ Called when server returns whole response body """
+        converter = self.get_converter()
         try:
-            self.bugs = [bug for bug in self.parse(data)]
+            for bug_desc in self.parse(data):
+                bug = self.bug_class(
+                    tracker=self.tracker,
+                    **converter(bug_desc)
+                )
+                self.bugs[bug.id] = bug
         except Exception as e:
             self.fail(*sys.exc_info())
+
 
     def parse(self, data):
         for bug_data in data:
             yield bug_data
 
-    def result(self):
+    def resolve_user(self, orig_login):
+        login = orig_login.lower()
+        if login in self.login_mapping:
+            return self.login_mapping[login]
+        else:
+            return User(name=orig_login, email=orig_login)
+
+    def resolve(self, bug):
+        bug.owner = self.resolve_user(bug.owner)
+        bug.reporter = self.resolve_user(bug.reporter)
+        bug.project_id = SelectorMapping(self.tracker).match(
+            bug.id, bug.project_name, bug.component_name, bug.version,
+        )
+
+    def get_result(self):
         """ iterate over fetched tickets """
         self.join()
         if self.fetch_error:
             e, v, t = self.fetch_error
             raise e, v, t
 
-        return [
-            self.BUG_CLASS(self.tracker, self.login_mapping, bug_data)
-            for bug_data in self.bugs
-        ]
+        results = []
+        for bug in self.bugs.itervalues():
+            self.resolve(bug)
+            results.append(bug)
+
+        return results
 
     def fail(self, type_, value=None, traceb=None):
         self.fetch_error = type_, value, traceb

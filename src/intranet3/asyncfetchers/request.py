@@ -1,6 +1,4 @@
 import gevent
-import gevent.monkey
-gevent.monkey.patch_all()
 from requests.auth import HTTPBasicAuth
 
 import requests

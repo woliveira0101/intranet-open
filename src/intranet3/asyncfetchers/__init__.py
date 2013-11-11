@@ -1,3 +1,8 @@
+from nbugzilla import BugzillaFetcher
+
+FETCHERS = {
+   'bugzilla': BugzillaFetcher
+}
 
 def get_fetcher(tracker, credentials, login_mapping):
     type = tracker.type

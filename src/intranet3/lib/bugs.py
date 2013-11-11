@@ -29,7 +29,6 @@ class Bugs(object):
 
     @log_time
     def _get_bugs(self, fetcher_callback, full_mapping=True):
-        start = time()
         fetchers = []
         creds_q = DBSession.query(Tracker, TrackerCredentials)\
                            .filter(Tracker.id==TrackerCredentials.tracker_id)\
@@ -43,28 +42,12 @@ class Bugs(object):
             fetchers.append(fetcher)
             fetcher_callback(fetcher) # initialize query
         bugs = []
-        while fetchers:
-            for i, fetcher in enumerate(fetchers):
-                if fetcher.isReady():
-                    fetchers.pop(i)
-                    if fetcher.error:
-                        WARN(u"Could not fetch bugs from tracker %s: %s" % (fetcher.tracker.name, fetcher.error))
-                        flash(u"Could not fetch bugs from tracker %s" % (fetcher.tracker.name, ))
-                    else:
-                        for bug in fetcher:
-                            bugs.append(bug)
-                    break
-            else:
-                # no fetcher is yet ready, give them time
-                if time() - start > MAX_TIMEOUT:
-                    WARN(u"Fetchers for trackers %s timed-out" % (u', '.join(fetcher.tracker.name for fetcher in fetchers)))
-                    for fetcher in fetchers:
-                        pass
-                        flash(u"Getting bugs from tracker %s timed out" % (fetcher.tracker.name, ))
-                    fetchers = []
-                else:
-                    sleep(0.1)
-                    # all bugs were fetched, time to resolve their projects
+
+
+        for fetcher in fetchers:
+            fbugs = fetcher.get_result()
+            bugs.extend(fbugs)
+
         projects = {}
         for bug in bugs:
             projects[bug.project_id] = None
@@ -123,21 +106,11 @@ class Bugs(object):
         fetcher = get_fetcher(tracker, credentials, login_mapping)
         (fetcher.fetch_resolved_bugs_for_query if resolved else fetcher.fetch_bugs_for_query)(*project.get_selector_tuple())
 
-        while True:
-            if fetcher.isReady():
-                if fetcher.error:
-                    WARN(u"Could not fetch bugs from tracker %s: %s" % (tracker.name, fetcher.error))
-                    flash(u"Could not fetch bugs from tracker %s" % (tracker.name, ))
-                else:
-                    for bug in fetcher:
-                        bug.project = project
-                        bugs.append(bug)
-                break
-            elif time() - start > MAX_TIMEOUT:
-                WARN(u"Fetchers for tracker %s timed-out" % (tracker.name, ))
-                flash(u"Getting bugs from tracker %s timed out" % (tracker.name, ))
-            else:
-                sleep(0.1)
+        bugs = []
+
+        for bug in fetcher.get_result():
+            bug.project = project
+            bugs.append(bug)
 
         bugs = self.add_time(bugs)
         return bugs
@@ -166,28 +139,11 @@ class Bugs(object):
 
         start = time()
         bugs = []
-        while fetchers:
-            for i, fetcher in enumerate(fetchers):
-                if fetcher.isReady():
-                    fetchers.pop(i)
-                    if fetcher.error:
-                        WARN(u"Could not fetch bugs from tracker %s: %s" % (fetcher.tracker.name, fetcher.error))
-                        flash(u"Could not fetch bugs from tracker %s" % (fetcher.tracker.name, ))
-                    else:
-                        for bug in fetcher:
-                            bugs.append(bug)
-                    break
-            else:
-                # no fetcher is yet ready, give them time
-                if time() - start > MAX_TIMEOUT:
-                    WARN(u"Fetchers for trackers %s timed-out" % (u', '.join(fetcher.tracker.name for fetcher in fetchers)))
-                    for fetcher in fetchers:
-                        pass
-                        flash(u"Getting bugs from tracker %s timed out" % (fetcher.tracker.name, ))
-                    fetchers = []
-                else:
-                    sleep(0.1)
-                    # all bugs were fetched, time to resolve their projects
+
+        for fetcher in fetchers:
+            fbugs = fetcher.get_result()
+            bugs.extend(fbugs)
+
 
         projects = [bug.project_id for bug in bugs]
         projects = dict((project.id, project) for project in Project.query.filter(Project.id.in_(projects)))

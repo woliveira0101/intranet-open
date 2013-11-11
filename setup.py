@@ -67,6 +67,7 @@ setup(
         'iso8601',
         'colander',
         'netaddr',
+        'pastegevent',
     ],
     message_extractors = { 'src/intranet3': [
         ('**.py', 'python', None ),
