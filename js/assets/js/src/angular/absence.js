@@ -13,12 +13,7 @@ App.controller('absenceCtrl', function($scope, $http, $dialog, dialog) {
         $scope.form_submitted = true;
 
         $http.post('/api/absence', {
-            absence: {
-                popup_date_start: $scope.absence.popup_date_start,
-                popup_date_end: $scope.absence.popup_date_end,
-                popup_type: $scope.absence.popup_type,
-                popup_remarks: $scope.absence.popup_remarks
-            }
+            absence: $scope.absence
         }).success(function(data) {
             $scope.close();
 
@@ -26,6 +21,9 @@ App.controller('absenceCtrl', function($scope, $http, $dialog, dialog) {
                 resolve: {messages: function() {return data;}}
             }).open('modalConfirm.html', 'modalConfirmCtrl');
         }).error(function(data) {
+            $scope.absenceForm.$setPristine();
+            $scope.errors = {};
+
             angular.forEach(data, function(errors, field) {
                 $scope.absenceForm[field].$setValidity('server', false);
                 $scope.errors[field] = errors.join('<br/>');

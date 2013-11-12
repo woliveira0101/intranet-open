@@ -7,17 +7,18 @@ function capitalize(str) {
 }
 
 
-App.controller('modalConfirmCtrl', function($scope, $http, $dialog, dialog, messages) {
+App.controller('modalConfirmCtrl', function($scope, $http, $sce, dialog, messages) {
     $scope.close = function() {
         dialog.close();
     };
 
+    var message = "";
     if(angular.isObject(messages)) {
-        $scope.message = "";
-        angular.forEach(messages, function(yes, message) {
-            $scope.message += capitalize(message) + (yes ? "" : " not") + " added<br/>";
+        angular.forEach(messages, function(yes, msg) {
+            message += capitalize(msg) + (yes ? "" : " not") + " added<br/>";
         });
     } else if(angular.isString(messages)) {
-        $scope.message = angular.fromJson(messages);
+        message = angular.fromJson(messages);
     }
+    $scope.message = $sce.trustAsHtml(message);
 });

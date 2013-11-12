@@ -53,7 +53,9 @@ class LatenessApi(ApiView):
             if in_future and not debug:
                 event_id = self._add_event(date, explanation)
 
-            return u'Entry added'
+            return dict(
+                entry=True
+            )
 
         self.request.response.status = 400
         return form.errors

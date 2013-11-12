@@ -18,7 +18,7 @@
             <div class="controls">
                 <div class="errors" ng-show="errors.popup_date_start">{{errors.popup_date_start}}</div>
                 <div class="description">Format DD/MM/RRRR</div>
-                <input class="datepicker" name="popup_date_start" type="text" ng-model="absence.popup_date_start" ng-change="updateDays()" jqdatepicker default-date="today" required server-validate>
+                <input class="datepicker" name="popup_date_start" type="text" ng-model="absence.popup_date_start" ng-change="updateDays()" jqdatepicker default-date="today" required>
             </div>
         </div>
         <div class="control-group">
@@ -26,7 +26,7 @@
             <div class="controls">
                 <div class="errors" ng-show="errors.popup_date_end">{{errors.popup_date_end}}</div>
                 <div class="description">Format DD/MM/RRRR</div>
-                <input class="datepicker" name="popup_date_end" type="text" ng-model="absence.popup_date_end" ng-change="updateDays()" jqdatepicker required server-validate>
+                <input class="datepicker" name="popup_date_end" type="text" ng-model="absence.popup_date_end" ng-change="updateDays()" jqdatepicker required>
             </div>
         </div>
         <div class="errors" ng-show="errors.absence_days">{{errors.absence_days}}</div>
@@ -66,7 +66,7 @@
             <label class="control-label">Type</label>
             <div class="controls">
                 <div class="description">Rodzaj</div>
-                <select name="popup_type" ng-model="absence.popup_type" required server-validate>
+                <select name="popup_type" ng-model="absence.popup_type" required>
                     <option value="planowany" selected="selected">Planned leave</option>
                     <option value="zadanie">Leave at request</option>
                     <option value="l4">Illness</option>
@@ -83,12 +83,12 @@
             <div class="controls">
                 <div class="errors" ng-show="errors.popup_remarks">{{errors.popup_remarks}}</div>
                 <div class="description">Uwagi</div>
-                <textarea name="popup_remarks" ng-model="absence.popup_remarks" required server-validate></textarea>
+                <textarea name="popup_remarks" ng-model="absence.popup_remarks" required></textarea>
             </div>
         </div>
     </form>
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-primary" type="submit" ng-click="add()" ng-disabled="absenceForm.$pristine || absenceForm.$invalid || left < 0 || form_submitted">Submit</button>
+    <button class="btn btn-primary" type="submit" ng-click="add()" ng-disabled="form_submitted">Submit</button>
 </div>
