@@ -1,6 +1,6 @@
 var App = angular.module('intranet');
 
-App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, $location, $routeParams, date_of_birth) {
+App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, $location, date_of_birth) {
     $scope.users = [];
     $scope.tab = 'employees';
     $scope.search = {
