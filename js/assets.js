@@ -6,6 +6,7 @@ var BOWER_JS = [
   BOWER_COMPONENTS + 'bootstrap/js/bootstrap-tooltip.js',
   BOWER_COMPONENTS + 'bootstrap/js/*.js',
   BOWER_COMPONENTS + 'angular/angular.js',
+  BOWER_COMPONENTS + 'angular-route/angular-route.js',
   BOWER_COMPONENTS + 'angular-strap/dist/angular-strap.js',
   BOWER_COMPONENTS + 'angular-bootstrap/ui-bootstrap.min.js',
   BOWER_COMPONENTS + 'angular-bootstrap/ui-bootstrap-tpls.min.js',

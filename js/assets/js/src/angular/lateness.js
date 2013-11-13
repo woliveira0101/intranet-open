@@ -1,8 +1,10 @@
 var App = angular.module('intranet');
 
 
-App.controller('latenessCtrl', function($scope, $http, $dialog, dialog) {
+App.controller('latenessCtrl', function($scope, $http, $location, $dialog, dialog) {
     $scope.errors = {};
+
+    $scope.modal = !!dialog;
 
     $scope.close = function() {
         dialog.close();
@@ -14,11 +16,15 @@ App.controller('latenessCtrl', function($scope, $http, $dialog, dialog) {
         $http.post('/api/lateness', {
             lateness: $scope.lateness
         }).success(function(data) {
-            $scope.close();
+            if(!$scope.modal) {
+                $location.path('/mobile/confirm').search(data);
+            } else {
+                $scope.close();
 
-            $dialog.dialog({
-                resolve: {messages: function() {return data;}}
-            }).open('modalConfirm.html', 'modalConfirmCtrl');
+                $dialog.dialog({
+                    resolve: {messages: function() {return data;}}
+                }).open('modalConfirm.html', 'modalConfirmCtrl');
+            }
         }).error(function(data) {
             $scope.latenessForm.$setPristine();
             $scope.errors = {};
