@@ -19,9 +19,9 @@ App.config(function($httpProvider, $routeProvider, $locationProvider) {
       dialog: function() {return undefined;},
       messages: function($routeParams) {return $routeParams;}
     }
+  }).otherwise({
+      redirectTo: '/mobile/user/list'
   });
-
-  $locationProvider.html5Mode(true);
 });
 
 App.run(function($rootScope) {
