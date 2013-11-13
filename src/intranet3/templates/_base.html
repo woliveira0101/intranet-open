@@ -35,7 +35,7 @@
     {% endfor %}
     {% endif %}
     {% endwith %}
-    <div class="mobile-modal" ng-view></div>
+    {% block content %}<!-- main content area -->{% endblock %}
     {% if request.has_perm('view') %}
         <div ng-include src="'wstal.html'"></div>
     {% endif %}
