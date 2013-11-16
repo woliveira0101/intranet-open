@@ -72,13 +72,6 @@ class LateApplicationForm(BaseForm):
 
     def validate_popup_date(self, field):
         date = field.data
-        user_id = self.user.id
-        late = Late.query.filter(Late.date==date)\
-                         .filter(Late.user_id==user_id)\
-                         .filter(Late.deleted==False).first()
-        if late:
-            raise ValidationError(_(u'You already have application in this date'))
-
         if date < datetime.date.today():
             start_date = datetime.datetime.combine(date, day_start)
             end_date = datetime.datetime.combine(date, day_end)
