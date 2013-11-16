@@ -1,0 +1,11 @@
+<div class="control-group">
+    <label class="control-label" ng-transclude></label>
+    <div class="controls">
+        <div class="errors" ng-show="$parent.errors[name]">{{$parent.errors[name]}}</div>
+        <div class="description">Format HH:MM</div>
+        <div class="input-append">
+            <input class="input-small" type="text" ng-model="ngModel" bs-timepicker show-meridian="false" required>
+            <span class="add-on" data-toggle="timepicker"><i class="icon-time"></i></span>
+        </div>
+    </div>
+</div>
