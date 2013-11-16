@@ -16,7 +16,7 @@ class UnfuddleTrackerBug(Bug):
 
     def get_url(self, number=None):
         number = number if number else self.id
-        url = make_path(self.tracker.url, '/a#/projects/%s/tickets/by_number/%s')
+        url = make_path(self.tracker.get_url(), '/a#/projects/%s/tickets/by_number/%s')
         url = url % (self.project_name, number)
         return url
 
@@ -70,7 +70,7 @@ class UnfuddleUserFetcher(BasicAuthMixin, BaseFetcher):
 
     def fetch_data(self, callback):
         headers = self.get_headers()
-        url = self.tracker.url + self.DATA_API
+        url = self.tracker.get_url() + self.DATA_API
         url = str(url)
         self.request(
             url,
@@ -179,7 +179,7 @@ A comma or vertical bar separated list of report criteria composed as
             path = project_api % project_id
         else:
             path = api
-        return str(make_path(self.tracker.url, path))
+        return str(make_path(self.tracker.get_url(), path))
 
     def fetch(self, url, callback=None):
         if not self.unfuddle_data:
