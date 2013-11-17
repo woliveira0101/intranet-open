@@ -11,11 +11,6 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 WARN= WARN_LOG(__name__)
 
 
-#sync = URLCronTask(
-#    u'Synchronization delays',
-#    '/presence/sync',
-#    repeats=5
-#)
 sync_holidays = URLCronTask(
     u'Holidays synchronization ',
     '/cron/holidays/sync'
@@ -55,10 +50,6 @@ old_bugs_report_email = URLCronTask(
     u'Report with old bugs',
     '/cron/bugs/old_bugs_report',
 )
-#hours_worked_report = URLCronTask(
-#    u'Report with hours worked',
-#    '/time/cron_hours_worked_report',
-#)
 tickets_report_with_excel = URLCronTask(
     u'Report with ticket times in excel',
     '/cron/times/excel_report',
@@ -72,30 +63,38 @@ repeater = Repeater(
     RequiredAction('sync_client_hours', lambda date: '/cron/time/client_hours'),
 )
 
-tasks = (
-    #func, params, cron_line
-    (sync_holidays, (), '1 0 * * *'),
-    (mailer, (), '*/1 * * * *'),
-    (clean, (), '0 03 * * *'),
-    (resolved_notification, (), '0 7 * * *'),
-    (missing_hours_notification, (), '0 19 * * *'),
-    (repeater, (), '1 0 1,2,3,4,5 * *'), # at 00:01 every first 5 days of month
-    (report_with_today_hours, (), '1 0 * * *'), # at 00:01 every day
-    (report_with_today_hours_without_ticket, (), '1 0 * * *'), # at 00:01 every day
-    (report_with_hours_added_for_prev_months, (), '1 0 * * *'), # at 00:01 every day
+cron_tasks = (
+    #func, cron_line
+    (clean, (-1, -1, -1, -1, -1)),
+#    (sync_holidays, '1 0 * * *'),
+#    (resolved_notification, '0 7 * * *'),
+#    (missing_hours_notification, '0 19 * * *'),
+#    (repeater, '1 0 1,2,3,4,5 * *'), # at 00:01 every first 5 days of month
+#    (report_with_today_hours, '1 0 * * *'), # at 00:01 every day
+#    (report_with_today_hours_without_ticket, '1 0 * * *'), # at 00:01 every day
+#    (report_with_hours_added_for_prev_months, '1 0 * * *'), # at 00:01 every day
 
-    (tickets_report_with_excel, (), '1 1 2 * *'),
-    (annually_time_report_email, (), '1 0 28 * *'),
-    (old_bugs_report_email, (), '1 0 1 * * '),
-    (missed_hours, (), '1 0 1,2 * *'), # at 00:01 every first 2 days of month
-    #(hours_worked_report, (), '0 0 1 * * '),
+#    (tickets_report_with_excel, '1 1 2 * *'),
+#    (annually_time_report_email, '1 0 28 * *'),
+#    (old_bugs_report_email, '1 0 1 * * '),
+#    (missed_hours, '1 0 1,2 * *'), # at 00:01 every first 2 days of month
+)
+
+timer_tasks = (
+    (mailer, 60), # every 60 second
 )
 
 def run_cron_tasks():
-    for task in tasks:
-        func, params, cron_line = task
+    from uwsgidecorators import cron, timer
+    for task in cron_tasks:
+        f, cron_line = task
 
-        time = CronSchedule(cron_line)
-        schedule = ScheduledCall(func, *params)
-        schedule.start(time)
+        cron_job = cron(*cron_line)
+        cron_job(f)
+
+    for task in timer_tasks:
+        f, sec = task
+        timer_job = timer(sec)
+        timer_job(f)
+
 

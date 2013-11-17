@@ -45,7 +45,7 @@ class URLCronTask(object):
         self.busy = False
         LOG(u'Cron function [%s] finished (status code %s)' % (self.task_name, resp.code))
 
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
         LOG(u'Cron function [%s] starting (%s)' % (self.task_name, self.repeated))
         if not self.busy:
             self.busy = True

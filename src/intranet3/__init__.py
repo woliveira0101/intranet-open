@@ -14,6 +14,10 @@ from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.security import Allow, ALL_PERMISSIONS
 from werkzeug.contrib.cache import MemcachedCache
+try:
+    import uwsgi
+except:
+    uwsgi = None
 
 
 @implementer(IAuthenticationPolicy)
@@ -135,6 +139,10 @@ def main(global_config, **settings):
     pyramid_config.add_settings({
         'TEMPLATE_DIR': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates'),
     })
+
+    if uwsgi:
+        from intranet3.cron import run_cron_tasks
+        run_cron_tasks()
 
     app = pyramid_config.make_wsgi_app()
     return app
