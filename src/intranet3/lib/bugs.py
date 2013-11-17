@@ -3,7 +3,7 @@ from time import sleep, time
 
 from intranet3.decorators import log_time
 from intranet3.models import DBSession, TrackerCredentials, Tracker, Project
-from intranet3.asyncfetchers import get_fetcher
+from intranet3.asyncfetchers import get_fetcher, FetcherBaseException, FetcherTimeout
 from intranet3.log import INFO_LOG, WARN_LOG, ERROR_LOG
 from intranet3.utils import flash
 from intranet3 import memcache
@@ -16,7 +16,6 @@ MAX_TIMEOUT = 50 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 
 SCRUM_BUG_CACHE_KEY = 'sprint-%s'
 SCRUM_BUG_CACHE_TIMEOUT = 3*60
-
 
 class Bugs(object):
 
@@ -45,8 +44,19 @@ class Bugs(object):
 
 
         for fetcher in fetchers:
-            fbugs = fetcher.get_result()
-            bugs.extend(fbugs)
+            try:
+                fbugs = fetcher.get_result()
+                bugs.extend(fbugs)
+            except FetcherTimeout as e:
+                flash(
+                    'Fetchers for trackers %s timed-out' % fetcher.tracker.name,
+                    klass='error',
+                )
+            except FetcherBaseException as e:
+                flash(
+                    'Could not fetch bugs from tracker %s' % fetcher.tracker.name,
+                    klass='error',
+                )
 
         projects = {}
         for bug in bugs:

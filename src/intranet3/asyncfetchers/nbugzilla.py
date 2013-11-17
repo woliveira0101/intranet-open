@@ -1,10 +1,7 @@
-from intranet3.models.project import SelectorMapping
 from intranet3 import helpers as h
 from .request import RPC
 from .nbase import BaseFetcher, BasicAuthMixin, CSVParserMixin
 from .bugzilla import BugzillaBug, bugzilla_converter
-
-
 
 
 class BugzillaFetcher(CSVParserMixin, BasicAuthMixin, BaseFetcher):

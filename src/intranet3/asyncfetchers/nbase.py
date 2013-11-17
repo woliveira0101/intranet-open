@@ -12,7 +12,16 @@ from intranet3.models.project import SelectorMapping
 from intranet3.helpers import decoded_dict
 from .request import RPC
 
-class FetchException(Exception):
+
+class FetcherBaseException(Exception):
+    pass
+
+
+class FetchException(FetcherBaseException):
+    pass
+
+
+class FetcherTimeout(FetcherBaseException):
     pass
 
 
@@ -51,7 +60,7 @@ class BaseFetcher(gevent.Greenlet):
     get_converter = None
     CACHE_TIMEOUT = 3 * 60  # 3 minutes
     SPRINT_REGEX = 's=%s(?!\S)'
-    MAX_TIMEOUT = 50 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
+    MAX_TIMEOUT = 1 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 
     def __repr__(self):
         return ''
@@ -110,8 +119,7 @@ class BaseFetcher(gevent.Greenlet):
             response = rpc.get_result()
             reason = self.check_if_failed(response)
             if reason:
-                self.fail(FetchException(reason))
-                return
+                raise FetchException(reason)
             self.received(response.text)
 
         self.done = True
@@ -121,27 +129,15 @@ class BaseFetcher(gevent.Greenlet):
         if 200 > code > 299:
             return u'Received response %s' % code
 
-    def isReady(self):
-        """ Check if this fetcher is done """
-        return self.done
-
     def received(self, data):
         """ Called when server returns whole response body """
         converter = self.get_converter()
-        try:
-            for bug_desc in self.parse(data):
-                bug = self.bug_class(
-                    tracker=self.tracker,
-                    **converter(bug_desc)
-                )
-                self.bugs[bug.id] = bug
-        except Exception as e:
-            self.fail(*sys.exc_info())
-
-
-    def parse(self, data):
-        for bug_data in data:
-            yield bug_data
+        for bug_desc in self.parse(data):
+            bug = self.bug_class(
+                tracker=self.tracker,
+                **converter(bug_desc)
+            )
+            self.bugs[bug.id] = bug
 
     def resolve_user(self, orig_login):
         login = orig_login.lower()
@@ -158,11 +154,13 @@ class BaseFetcher(gevent.Greenlet):
         )
 
     def get_result(self):
-        """ iterate over fetched tickets """
-        self.join()
-        if self.fetch_error:
-            e, v, t = self.fetch_error
-            raise e, v, t
+        self.join(self.MAX_TIMEOUT)
+
+        if not self.ready():
+            raise FetcherTimeout()
+
+        if not self.successful():
+            raise self.exception
 
         results = []
         for bug in self.bugs.itervalues():
@@ -171,10 +169,10 @@ class BaseFetcher(gevent.Greenlet):
 
         return results
 
-    def fail(self, type_, value=None, traceb=None):
-        self.fetch_error = type_, value, traceb
-
     # methods that should be overridden:
+
+    def parse(self, data):
+        raise NotImplementedError()
 
     def fetch_user_tickets(self):
         """ Start fetching tickets for current user """

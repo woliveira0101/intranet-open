@@ -1,5 +1,7 @@
 from nbugzilla import BugzillaFetcher
 
+from nbase import FetchException, FetcherTimeout, FetcherBaseException
+
 FETCHERS = {
    'bugzilla': BugzillaFetcher
 }
