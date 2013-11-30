@@ -2,7 +2,7 @@
       action="{{ request.url_for(
                         '/times/add',
                         date=date.strftime('%d.%m.%Y'),
-                        user_id=user.id if request.has_perm('admin') else None,
+                        user_id=user.id if request.has_perm('edit_users_timeentry') else None,
                         next=next or request.here) }}"
       method="post"
       accept-charset="utf-8">

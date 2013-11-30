@@ -22,7 +22,7 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 MAX_TIMEOUT = 20 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 MAX_TICKETS_PER_REQUEST = 50 # max number of ticket ids to include in a single request to tracker
 
-@view_config(route_name='times_tickets_excel', permission='client')
+@view_config(route_name='times_tickets_excel', permission='times_reports')
 class Excel(BaseView):
     def get(self):
         client = self.request.user.get_client()
@@ -74,7 +74,7 @@ class Excel(BaseView):
         return response
 
 
-@view_config(route_name='times_tickets_titles', renderer='json', permission='tickets_report')
+@view_config(route_name='times_tickets_titles', renderer='json', permission='times_reports')
 class Titles(BaseView):
     def _fetch_bugs_titles(self, tracker_ticket):
         query = self.session.query
@@ -138,7 +138,7 @@ class Titles(BaseView):
         return titles
 
 
-@view_config(route_name='times_tickets_report', permission='tickets_report')
+@view_config(route_name='times_tickets_report', permission='times_reports')
 class Report(TimesReportMixin, BaseView):
     def dispatch(self):
         client = self.request.user.get_client()

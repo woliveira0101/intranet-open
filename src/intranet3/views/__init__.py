@@ -1,7 +1,7 @@
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
-@view_config(route_name='root', permission='view')
+@view_config(route_name='root')
 def root(request):
     if request.wants_mobile:
         location = request.url_for('/mobile/user/list')

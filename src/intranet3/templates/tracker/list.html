@@ -5,7 +5,7 @@
     <div class="tabs">
         <ul class="nav nav-tabs">
             <li class="title">{% trans %}Tracker list{% endtrans %}</li>
-            {% if request.has_perm('admin') %}
+            {% if request.has_perm('edit_trackers') %}
             <li>
                 <a href="{{ request.url_for('/tracker/add') }}">{% trans %}Add tracker{% endtrans %}</a>
             </li>
@@ -16,7 +16,7 @@
         <thead>
             <th>{% trans %}Tracker Name{% endtrans %}</th>
             <th>{% trans %}Credentials Actions{% endtrans %}</th>
-            {% if request.has_perm('admin') %}
+            {% if request.has_perm('edit_trackers') %}
             <th>{% trans %}Tracker Actions{% endtrans %}</th>
             {% endif %}
         </thead>
@@ -38,12 +38,12 @@
                         <a href="{{ request.url_for('/tracker/delete_login', tracker_id=tracker['tracker'].id) }}" class="button btn btn-danger">{% trans %}Delete credentials{% endtrans %}</a>
                     {% endif %}
                 </td>
-                {% if request.has_perm('admin') %}
                 <td>
+                  {% if request.has_perm('edit_trackers') %}
                     <a href="{{ request.url_for('/tracker/edit', tracker_id=tracker['tracker'].id) }}" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
                     <a href="{{ request.url_for('/tracker/delete', tracker_id=tracker['tracker'].id) }}" class="button btn btn-danger">{% trans %}Delete{% endtrans %}</a>
+                  {% endif %}
                 </td>
-                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

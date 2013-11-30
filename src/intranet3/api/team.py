@@ -16,7 +16,7 @@ from intranet3 import helpers as h
 from intranet3.api.preview import Preview
 
 
-@view_config(route_name='api_teams', renderer='json', permission='users')
+@view_config(route_name='api_teams', renderer='json', permission='view_teams')
 class Teams(ApiView):
 
     def get(self):
@@ -104,7 +104,7 @@ class Teams(ApiView):
             teams=result
         )
 
-    @has_perm('admin')
+    @has_perm('edit_teams')
     def post(self):
         try:
             json_team = self.request.json_body
@@ -133,7 +133,7 @@ class Teams(ApiView):
         return team.to_dict()
 
 
-@view_config(route_name='api_team', renderer='json', permission='users')
+@view_config(route_name='api_team', renderer='json', permission='view_teams')
 class Team(ApiView):
     def get(self):
         team_id = self.request.matchdict.get('team_id')
@@ -143,7 +143,7 @@ class Team(ApiView):
         else:
             raise HTTPNotFound()
 
-    @has_perm('admin')
+    @has_perm('edit_teams')
     def put(self):
         team_id = self.request.matchdict.get('team_id')
         team = Team_m.query.get(team_id)
@@ -185,7 +185,7 @@ class Team(ApiView):
 
         return HTTPOk("OK")
 
-    @has_perm('admin')
+    @has_perm('edit_teams')
     def delete(self):
         team_id = self.request.matchdict.get('team_id')
         team = Team_m.query.get(team_id)
@@ -197,7 +197,7 @@ class Team(ApiView):
 
         return HTTPOk('OK')
 
-@view_config(route_name='api_users', renderer='json')
+@view_config(route_name='api_users', renderer='json', permission='users')
 class Users(ApiView):
     def get(self):
         full = self.request.GET.get('full') == '1'
@@ -205,7 +205,7 @@ class Users(ApiView):
 
         users = User.query.order_by(User.name)
 
-        if not (self.request.has_perm('admin') and inactive):
+        if not (self.request.has_perm('see_inactive_users') and inactive):
             users = users.filter(User.is_active==True)
 
         if full:

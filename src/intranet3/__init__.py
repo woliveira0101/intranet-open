@@ -12,7 +12,7 @@ from pyramid.config import Configurator
 from pyramid_beaker import session_factory_from_settings
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid.security import Allow, ALL_PERMISSIONS
+from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS
 from werkzeug.contrib.cache import MemcachedCache
 
 from twisted.web.wsgi import WSGIResource
@@ -32,20 +32,71 @@ class CustomAuthenticationPolicy(AuthTktAuthenticationPolicy):
 
 
 class Root(object):
-    __acl__ = [
-        (Allow, 'g:freelancer', ('view', 'users', 'bugs_owner')),
-        (Allow, 'g:client', ('view', 'sprints', 'bugs_owner', 'task_pivot', 'tickets_report')),
-        (Allow, 'g:employee', ('view', 'bugs_owner', 'teams', 'users', 'task_pivot', 'projects', 'sprints', 'tickets_report')),
-        (Allow, 'g:coordinator', ('view', 'clients', 'scrum', 'tickets_report', 'coordinator')),
-        (Allow, 'g:scrum master', ('view', 'scrum', 'clients')),
-        (Allow, 'g:cron', 'cron'),
-        (Allow, 'g:hr', ('view', 'users', 'hr')),
-        (Allow, 'g:business', ('view', 'tickets_report', 'clients')),
-        (Allow, 'g:admin', ALL_PERMISSIONS)
-    ]
+
+    PERMS = (
+        ('',                          ('freelancer', 'employee', 'coordinator', 'scrum master', 'business', 'hr', 'client',)),
+        ('users',                     ('A',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('bugs_owner',                ('A',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('wrongtime_justification',   ('A',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('late_justification',        (' ',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('view_presence',             (' ',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('edit_presence',             (' ',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('task_pivot',                (' ',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('view_teams',                (' ',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('view_sprints',              (' ',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('client_stuff',              (' ',          'A',        ' ',           ' ',            ' ',        ' ',  'A',     )),
+        ('edit_sprints',              (' ',          ' ',        'A',           'A',            ' ',        ' ',  ' ',     )),
+        ('view_clients',              (' ',          ' ',        'A',           'A',            ' ',        ' ',  ' ',     )),
+        ('view_projects',             (' ',          ' ',        'A',           'A',            ' ',        ' ',  ' ',     )),
+        ('edit_clients',              (' ',          ' ',        'A',           ' ',            ' ',        ' ',  ' ',     )),
+        ('edit_projects',             (' ',          ' ',        'A',           ' ',            ' ',        ' ',  ' ',     )),
+        ('edit_teams',                (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
+        ('times_monthly_reports',     (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
+        ('hr_stuff',                  (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
+        ('see_inactive_users',        (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
+        ('edit_user',                 (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
+        ('times_reports',             (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
+
+        # ADMIN ONLY:
+        ('edit_config',               (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('edit_trackers',             (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('delete_projects',           (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('delete_clients',            (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('edit_users_timeentry',      (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('view_users_timeentry',      (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+    )
+
+    @staticmethod
+    def generate(perms):
+        base = [
+            (Allow, Authenticated, ('view',)),
+            (Allow, 'g:cron', 'cron'),
+            (Allow, 'g:admin', ALL_PERMISSIONS),
+        ]
+        groups = perms[0][1]
+
+        perms = perms[1:]
+
+        result = {group: [] for group in groups}
+        for perm, checklist in perms:
+            for group, check in zip(groups, checklist):
+                # perm, group, check
+                if check == 'A':
+                    result[group].append(perm)
+                elif check != ' ':
+                    raise Exception('%s not supported' % check)
+
+        dynamic = []
+        for group, perms in result.iteritems():
+            dynamic.append((Allow, 'g:%s' % group, perms))
+
+        return base + dynamic
+
 
     def __init__(self, request):
         self.request = request
+
+Root.__acl__ = Root.generate(Root.PERMS)
 
 config = None
 memcache = None

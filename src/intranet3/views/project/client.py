@@ -26,7 +26,7 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 MAX_TIMEOUT = 20 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 MAX_TICKETS_PER_REQUEST = 50 # max number of ticket ids to include in a single request to tracker
 
-@view_config(route_name='project_client_times', permission='client')
+@view_config(route_name='project_client_times', permission='client_stuff')
 class Times(TimesReportMixin, BaseView):
     def dispatch(self):
         client = self.request.user.get_client()
@@ -79,7 +79,7 @@ class Times(TimesReportMixin, BaseView):
         )
 
 
-@view_config(route_name='project_client_sprints', permission='client')
+@view_config(route_name='project_client_sprints', permission='client_stuff')
 class Sprints(BaseView):
     def get(self):
         client = self.request.user.get_client()
@@ -141,7 +141,7 @@ class Sprints(BaseView):
         )
 
 
-@view_config(route_name='project_client_backlog', permission='client')
+@view_config(route_name='project_client_backlog', permission='client_stuff')
 class Backlog(EveryonesProject):
     def protect(self):
         project_id = self.request.GET.get('project_id')
@@ -155,7 +155,7 @@ class Backlog(EveryonesProject):
                 raise HTTPForbidden
 
 
-@view_config(route_name='project_client_field', permission='client')
+@view_config(route_name='project_client_field', permission='client_stuff')
 class ProjectField(BaseView):
     def protect(self):
         project_id = self.request.GET.get('project_id')

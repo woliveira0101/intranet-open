@@ -1,6 +1,11 @@
+<!-- TODAY -->
+{% if request.is_user_in_one_of_groups('employee', 'freelancer') %}<li class="nav-head">{% trans %}Today{% endtrans %}:</li>{% endif %}
+{% if request.is_user_in_one_of_groups('employee', 'freelancer') %}<li><a href="{{ request.url_for('/times/today') }}"><i class="icon-chevron-right"></i>{% trans %}Hours{% endtrans %}</a></li>{% endif %}
+{% if request.is_user_in_one_of_groups('employee') %}<li><a href="{{ request.url_for('/presence/list') }}"><i class="icon-chevron-right"></i>{% trans %}Presences{% endtrans %}</a></li>{% endif %}
+
 <!-- TIME -->
+<div class="space_li"></div>
 {% if request.is_user_in_one_of_groups('admin', 'employee', 'freelancer') %}<li class="nav-head">{% trans %}Time{% endtrans %}:</li>{% endif %}
-{% if request.is_user_in_one_of_groups('admin', 'employee', 'freelancer') %}<li><a href="{{ request.url_for('/times/today') }}"><i class="icon-chevron-right"></i>{% trans %}Today's hours{% endtrans %}</a></li>{% endif %}
 {% if request.is_user_in_one_of_groups('admin', 'employee') %}<li><a href="{{ request.url_for('/employees/table/absences') }}"><i class="icon-chevron-right"></i>{% trans %}Absence{% endtrans %}</a></li>{% endif %}
 
 
@@ -15,7 +20,7 @@
 {% if request.is_user_in_one_of_groups('admin', 'client', 'coordinator', 'employee', 'business') %}<li class="nav-head">{% trans %}Projects{% endtrans %}:</li>{% endif %}
 {% if request.is_user_in_one_of_groups('admin', 'client', 'employee') %}<li><a href="{{ request.url_for('/scrum/sprint/list') }}"><i class="icon-chevron-right"></i>{% trans %}Sprints{% endtrans %}</a></li>{% endif %}
 {% if request.is_user_in_one_of_groups('admin', 'coordinator', 'scrum master') %}<li><a href="{{ request.url_for('/client/map') }}"><i class="icon-chevron-right"></i>{% trans %}Clients/Projects{% endtrans %}</a></li>{% endif %}
-{% if request.is_user_in_one_of_groups('admin', 'business', 'client', 'coordinator', 'employee') %}<li><a href="{{ request.url_for('/times/tickets/report') }}"><i class="icon-chevron-right"></i>{% trans %}Time reports{% endtrans %}</a></li>{% endif %}
+{% if request.is_user_in_one_of_groups('admin', 'business', 'client', 'coordinator') %}<li><a href="{{ request.url_for('/times/tickets/report') }}"><i class="icon-chevron-right"></i>{% trans %}Time reports{% endtrans %}</a></li>{% endif %}
 {% if request.is_user_in_one_of_groups('admin', 'business', 'coordinator') %}<li><a href="{{ request.url_for('/times/client/current_pivot') }}"><i class="icon-chevron-right"></i>{% trans %}Client pivot{% endtrans %}</a></li>{% endif %}
 
 
@@ -29,7 +34,6 @@
 <!-- HR -->
 <div class="space_li"></div>
 {% if request.is_user_in_one_of_groups('admin', 'hr') %}<li class="nav-head">{% trans %}HR{% endtrans %}:</li>{% endif %}
-{% if request.is_user_in_one_of_groups('admin', 'hr') %}<li><a href="{{ request.url_for('/presence/list') }}"><i class="icon-chevron-right"></i>{% trans %}Presences{% endtrans %}</a></li>{% endif %}
 {% if request.is_user_in_one_of_groups('admin', 'hr') %}<li><a href="{{ request.url_for('/times/report/current_pivot') }}"><i class="icon-chevron-right"></i>{% trans %}Worked hours{% endtrans %}</a></li>{% endif %}
 {% if request.is_user_in_one_of_groups('admin', 'hr') %}<li><a href="{{ request.url_for('/report/late/current') }}"><i class="icon-chevron-right"></i>{% trans %}Out of office report{% endtrans %}</a></li>{% endif %}
 {% if request.is_user_in_one_of_groups('admin', 'hr') %}<li><a href="{{ request.url_for('/report/wrongtime/current') }}"><i class="icon-chevron-right"></i>{% trans %}Wrong time report{% endtrans %}</a></li>{% endif %}

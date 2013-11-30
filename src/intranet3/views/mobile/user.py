@@ -6,7 +6,7 @@ from intranet3.log import INFO_LOG
 
 LOG = INFO_LOG(__name__)
 
-@view_config(route_name='mobile_user_list')
+@view_config(route_name='mobile_user_list', permission='users')
 class List(BaseView):
     def get(self):
         return {}

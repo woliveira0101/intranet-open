@@ -86,18 +86,19 @@ class View(BaseView):
         return dict(user=user)
 
 
-@view_config(route_name='user_edit', permission='hr')
+@view_config(route_name='user_edit', permission='users')
 class Edit(BaseView):
 
     def dispatch(self):
         user_id = self.request.GET.get('user_id')
 
-        if user_id and self.request.has_perm('hr'):
+        if user_id and self.request.has_perm('edit_user'):
             user = User.query.get(user_id)
         elif user_id:
             raise Forbidden()
         else:
             user = self.request.user
+
         form = UserEditForm(self.request.POST, obj=user)
         if self.request.method == 'POST' and form.validate():
             user.availability_link = form.availability_link.data or None
@@ -111,7 +112,7 @@ class Edit(BaseView):
             user.description = form.description.data or None
             user.date_of_birth = form.date_of_birth.data or None
             user.roles = form.roles.data
-            if self.request.has_perm('hr'):
+            if self.request.has_perm('edit_user'):
                 user.is_active = form.is_active.data
                 groups = form.groups.data
                 if "freelancer" in groups:
@@ -122,7 +123,7 @@ class Edit(BaseView):
                 user.groups = groups
                 user.start_full_time_work = form.start_full_time_work.data or None
                 user.stop_work = form.stop_work.data or None
-            if self.request.has_perm('hr'):
+            if self.request.has_perm('edit_user'):
                 user.employment_contract = form.employment_contract.data
 
 
@@ -133,7 +134,7 @@ class Edit(BaseView):
 
             self.flash(self._(u"User data saved"))
             LOG(u"User data saved")
-            if user_id and self.request.has_perm('hr'):
+            if user_id and self.request.has_perm('edit_user'):
                 return HTTPFound(location=self.request.url_for('/user/edit', user_id=user_id))
             else:
                 return HTTPFound(location=self.request.url_for('/user/edit'))

@@ -70,7 +70,7 @@ class Preview(object):
         return True
 
 
-@view_config(route_name='api_preview', renderer='json')
+@view_config(route_name='api_preview', renderer='json', permission='users')
 class PreviewApi(ApiView):
 
     DIMENTIONS = {

@@ -15,7 +15,7 @@ from intranet3 import helpers as h
 locale = Locale('en', 'US')
 
 
-@view_config(route_name='employee_table_absences')
+@view_config(route_name='employee_table_absences', permission='users')
 class Absences(BaseView):
     WEEKDAYS = None
 
