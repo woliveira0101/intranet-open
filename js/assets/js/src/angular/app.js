@@ -30,5 +30,5 @@ App.run(function($rootScope) {
 
 
 App.config(function($compileProvider){
-  $compileProvider.urlSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|tel):/);
+  $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|tel):/);
 });
