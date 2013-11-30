@@ -14,8 +14,6 @@
 
 {% if request.is_user_in_one_of_groups('admin', 'client', 'employee') %}<li><a href="{{ request.url_for('/bugs/report') }}"><i class="icon-chevron-right"></i>{% trans %}Task pivot{% endtrans %}</a></li>{% endif %}
 
-{% if request.is_user_in_one_of_groups('admin', 'employee') %}<li><a href="{{ request.url_for('/bugs/everyones') }}"><i class="icon-chevron-right"></i>{% trans %}Project's tasks{% endtrans %}</a></li>{% endif %}
-
 <!-- PROJECTS -->
 <div class="space_li"></div>
 {% if request.is_user_in_one_of_groups('admin', 'client', 'coordinator', 'employee', 'business') %}<li class="nav-head">{% trans %}Projects{% endtrans %}:</li>{% endif %}
