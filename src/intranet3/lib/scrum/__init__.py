@@ -33,11 +33,14 @@ class BugUglyAdapter(object):
 
     @property
     def points(self):
-        return float(self.whiteboard.get('p', 0.0))
+        try:
+            return float(self.whiteboard.get('p', 0.0))
+        except:
+            return 0.0
 
     @property
     def velocity(self):
-        points = float(self.whiteboard.get('p', 0.0))
+        points = self.points
         return (points / self.time * 8.0) if self.time else 0.0
 
     @classmethod
