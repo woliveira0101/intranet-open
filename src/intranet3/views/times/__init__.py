@@ -68,7 +68,7 @@ class List(GetTimeEntriesMixin, BaseView):
             can_modify=user_can_modify_timeentry(self.request.user, date),
         )
 
-@view_config(route_name='times_list_user', permission='times_monthly_reports')
+@view_config(route_name='times_list_user', permission='can_see_users_times')
 class ListUser(GetTimeEntriesMixin, BaseView):
     def get(self):
         date_str = self.request.GET.get('date')

@@ -205,7 +205,7 @@ class Users(ApiView):
 
         users = User.query.order_by(User.name)
 
-        if not (self.request.has_perm('see_inactive_users') and inactive):
+        if not (self.request.has_perm('can_see_inactive_users') and inactive):
             users = users.filter(User.is_active==True)
 
         if full:

@@ -53,10 +53,10 @@ class Root(object):
         ('can_edit_clients',          (' ',          ' ',        'A',           ' ',            ' ',        ' ',  ' ',     )),
         ('can_edit_projects',         (' ',          ' ',        'A',           ' ',            ' ',        ' ',  ' ',     )),
         ('can_edit_teams',            (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
-        ('times_monthly_reports',     (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
+        ('can_see_users_times',       (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
         ('hr_stuff',                  (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
-        ('see_inactive_users',        (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
-        ('edit_user',                 (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
+        ('can_see_inactive_users',    (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
+        ('can_edit_users',            (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
         ('times_reports',             (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
 
         # ADMIN ONLY:

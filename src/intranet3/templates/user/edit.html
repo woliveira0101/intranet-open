@@ -10,7 +10,7 @@
         <div id="user_edit_form">
             <form class="user_profile box box_edit_user" action="{{ request.path_qs }}" method="post" accept-charset="utf-8">
                 {{ csrf_field }}
-                {% if request.has_perm('edit_users') %}
+                {% if request.has_perm('can_edit_users') %}
                     {{ form_field(form.is_active, _('Uncheck if no longer works here')) }}
                     {{ form_field(form.groups, _('Privilages for views, by default new employees get user and freelancers')) }}
                 {% endif %}
@@ -24,7 +24,7 @@
                 {{ form_field(form.irc, 'IRC') }}
                 {{ form_field(form.location, 'Office location') }}
                 {{ form_field(form.start_work, _('Start work'), class='datepicker') }}
-                {% if request.has_perm('edit_users') %}
+                {% if request.has_perm('can_edit_users') %}
                     {% with field=form.start_full_time_work %}
                     <div>
                         <dl>
