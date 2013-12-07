@@ -62,6 +62,11 @@ class Edit(BaseView):
             user.roles = form.roles.data
             if self.request.has_perm('can_edit_users'):
                 user.is_active = form.is_active.data
+                user.start_full_time_work = form.start_full_time_work.data or None
+                user.stop_work = form.stop_work.data or None
+                user.employment_contract = form.employment_contract.data
+
+            if self.request.has_perm('can_add_user_to_group'):
                 groups = form.groups.data
                 if "freelancer" in groups:
                     groups.remove('freelancer')
@@ -69,11 +74,6 @@ class Edit(BaseView):
                 else:
                     user.freelancer = False
                 user.groups = groups
-                user.start_full_time_work = form.start_full_time_work.data or None
-                user.stop_work = form.stop_work.data or None
-            if self.request.has_perm('can_edit_users'):
-                user.employment_contract = form.employment_contract.data
-
 
             if form.avatar.data:
                 preview = Preview(self.request)

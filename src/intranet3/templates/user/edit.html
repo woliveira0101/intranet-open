@@ -12,7 +12,9 @@
                 {{ csrf_field }}
                 {% if request.has_perm('can_edit_users') %}
                     {{ form_field(form.is_active, _('Uncheck if no longer works here')) }}
-                    {{ form_field(form.groups, _('Privilages for views, by default new employees get user and freelancers')) }}
+                {% endif %}
+                {% if request.has_perm('can_add_user_to_group') %}
+                    {{ form_field(form.groups, _('Privilages for views')) }}
                 {% endif %}
                 {{ form_field(form.roles, 'Role') }}
 

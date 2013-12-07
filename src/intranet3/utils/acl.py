@@ -34,6 +34,7 @@ class Root(object):
         ('can_delete_projects',       (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
         ('can_delete_clients',        (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
         ('can_edit_users_timeentry',  (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('can_add_user_to_group',     (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
     )
     __acl__ = []
 
