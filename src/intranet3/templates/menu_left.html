@@ -3,12 +3,6 @@
 {% if request.is_user_in_one_of_groups('employee', 'freelancer') %}<li><a href="{{ request.url_for('/times/today') }}"><i class="icon-chevron-right"></i>{% trans %}Hours{% endtrans %}</a></li>{% endif %}
 {% if request.is_user_in_one_of_groups('employee') %}<li><a href="{{ request.url_for('/presence/list') }}"><i class="icon-chevron-right"></i>{% trans %}Presences{% endtrans %}</a></li>{% endif %}
 
-<!-- TIME -->
-<div class="space_li"></div>
-{% if request.is_user_in_one_of_groups('admin', 'employee', 'freelancer') %}<li class="nav-head">{% trans %}Time{% endtrans %}:</li>{% endif %}
-{% if request.is_user_in_one_of_groups('admin', 'employee') %}<li><a href="{{ request.url_for('/employees/table/absences') }}"><i class="icon-chevron-right"></i>{% trans %}Absence{% endtrans %}</a></li>{% endif %}
-
-
 <!-- TASKS -->
 <div class="space_li"></div>
 {% if request.is_user_in_one_of_groups('admin', 'client', 'employee', 'freelancer') %}<li class="nav-head">{% trans %}Tasks{% endtrans %}:</li>{% endif %}
@@ -27,8 +21,10 @@
 <!-- PEOPLE -->
 <div class="space_li"></div>
 {% if request.is_user_in_one_of_groups('admin', 'employee', 'freelancer', 'hr') %}<li class="nav-head">{% trans %}People{% endtrans %}:</li>{% endif %}
-{% if request.is_user_in_one_of_groups('admin', 'employee') %}<li><a href="{{ request.url_for('/team/view') }}"><i class="icon-chevron-right"></i>{% trans %}Teams{% endtrans %}</a></li>{% endif %}
+
 {% if request.is_user_in_one_of_groups('admin', 'employee', 'freelancer', 'hr') %}<li><a href="{{ request.url_for('/user/list') }}"><i class="icon-chevron-right"></i>{% trans %}Employees{% endtrans %}</a></li>{% endif %}
+{% if request.is_user_in_one_of_groups('admin', 'employee') %}<li><a href="{{ request.url_for('/team/view') }}"><i class="icon-chevron-right"></i>{% trans %}Teams{% endtrans %}</a></li>{% endif %}
+{% if request.is_user_in_one_of_groups('admin', 'employee') %}<li><a href="{{ request.url_for('/employees/table/absences') }}"><i class="icon-chevron-right"></i>{% trans %}Absence{% endtrans %}</a></li>{% endif %}
 
 
 <!-- HR -->
