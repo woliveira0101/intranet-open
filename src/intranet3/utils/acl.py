@@ -35,13 +35,14 @@ class Root(object):
         ('can_delete_clients',        (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
         ('can_edit_users_timeentry',  (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
     )
+    __acl__ = []
 
     @staticmethod
     def generate(perms):
         base = [
             (Allow, Authenticated, ('view',)),
-            (Allow, 'g:cron', 'cron'),
-            (Allow, 'g:admin', ALL_PERMISSIONS),
+            (Allow, 'g:cron', ('cron',)),
+            (Allow, 'g:admin', ALL_PERMISSIONS,),
             ]
         groups = perms[0][1]
 
@@ -62,6 +63,23 @@ class Root(object):
 
         return base + dynamic
 
+    @classmethod
+    def to_js(cls):
+        """
+        Hack to transport permissions to javascript layer.
+        Only works with Allow
+
+        """
+        result = {}
+        for allow, group, perms in cls.__acl__:
+            if allow != Allow:
+                raise NotImplementedError('%s not implemented' % allow)
+            if ':' in group:
+                group = group.split(':')[1]
+            if perms == ALL_PERMISSIONS:
+                perms = ['__ALL__']
+            result[group] = perms
+        return result
 
     def __init__(self, request):
         self.request = request

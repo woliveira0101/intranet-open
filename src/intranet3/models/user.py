@@ -14,6 +14,7 @@ from sqlalchemy import not_
 from intranet3 import memcache, config
 from intranet3.log import ERROR_LOG
 from intranet3.models import Base, DBSession
+from intranet3.utils import acl
 
 
 ERROR = ERROR_LOG(__name__)
@@ -110,6 +111,20 @@ class User(Base):
     @property
     def user_groups(self):
         return ", ".join([group for group in self.groups])
+
+    @reify
+    def all_perms(self):
+        """
+        Combine all perms for a user for js layer.
+        """
+        acls = acl.Root.to_js()
+        user_groups = self.groups
+        perms = [
+            perm for group, perms in acls.iteritems()
+            if group in user_groups for perm in perms
+        ]
+        perms = list(set(perms))
+        return perms
 
     @reify
     def access_token(self):
