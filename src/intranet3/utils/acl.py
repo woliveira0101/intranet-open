@@ -1,9 +1,11 @@
+import tabulate
+
 from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS
 
 class Root(object):
 
     PERMS = (
-        ('',                          ('freelancer', 'employee', 'coordinator', 'scrum master', 'business', 'hr', 'client',)),
+        ('PERMISSIONS/GROUPS',        ('freelancer', 'employee', 'coordinator', 'scrum master', 'business', 'hr', 'client',)),
         ('can_view_users',            ('A',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
         ('can_edit_own_profile',      ('A',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
         ('can_see_own_bugs',          ('A',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
@@ -63,6 +65,17 @@ class Root(object):
             dynamic.append((Allow, 'g:%s' % group, perms))
 
         return base + dynamic
+
+    @classmethod
+    def to_prettyprint(cls):
+        rows = [[one] + list(two) for one, two in cls.PERMS]
+        header = rows[0]
+        rows = rows[1:]
+        return tabulate.tabulate(
+            rows,
+            header,
+            tablefmt='grid',
+        )
 
     @classmethod
     def to_js(cls):

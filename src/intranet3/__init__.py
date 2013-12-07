@@ -72,6 +72,7 @@ def main(global_config, **settings):
         default_permission='view',
         root_factory=acl.Root,
     )
+    print acl.Root.to_prettyprint()
     pyramid_config.add_forbidden_view(forbidden_view)
 
     pyramid_config.add_static_view('static', 'static', cache_max_age=3600)
