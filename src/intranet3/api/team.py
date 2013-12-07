@@ -197,7 +197,7 @@ class Team(ApiView):
 
         return HTTPOk('OK')
 
-@view_config(route_name='api_users', renderer='json', permission='users')
+@view_config(route_name='api_users', renderer='json', permission='can_view_users')
 class Users(ApiView):
     def get(self):
         full = self.request.GET.get('full') == '1'

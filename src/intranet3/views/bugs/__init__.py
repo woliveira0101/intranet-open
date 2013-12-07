@@ -70,7 +70,7 @@ class GroupedBugsMixin(object):
             return bugs, grouped, people, people_sums, client_sums, project_sums, total, clients
 
 
-@view_config(route_name='my_bugs', permission='bugs_owner')
+@view_config(route_name='my_bugs', permission='can_see_own_bugs')
 class My(BaseView):
     """
     Lists bugs for given user.
@@ -85,7 +85,7 @@ class My(BaseView):
             url = self.request.url_for('/bugs/my_json', resolved=resolved),
         )
 
-@view_config(route_name='my_bugs_json', renderer='intranet3:templates/bugs/_list.html', permission='bugs_owner')
+@view_config(route_name='my_bugs_json', renderer='intranet3:templates/bugs/_list.html', permission='can_see_own_bugs')
 class MyJson(BaseView):
     """
     Lists bugs for given user.

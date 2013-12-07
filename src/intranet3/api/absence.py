@@ -20,7 +20,7 @@ LEAVE_PROJECT_ID = 86
 L4_PROJECT_ID = 87
 
 
-@view_config(route_name='api_absence', renderer='json', permission='edit_presence')
+@view_config(route_name='api_absence', renderer='json', permission='can_edit_presence')
 class AbsenceApi(ApiView):
     ABSENCE_TOPIC = u'[intranet] Podanie o urlop'
     ABSENCE_BODY = u"""Poznań, ${today}
@@ -185,7 +185,7 @@ ${name}"""
         return form.errors
 
 
-@view_config(route_name='api_absence_days', renderer='json', permission='edit_presence')
+@view_config(route_name='api_absence_days', renderer='json', permission='can_edit_presence')
 class AbsenceDaysApi(ApiView):
     def get(self):
         date_start = self.request.GET.get('date_start')

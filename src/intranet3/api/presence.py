@@ -9,7 +9,7 @@ from intranet3 import memcache
 MEMCACHED_NOTIFY_KEY = 'notify-%s'
 
 
-@view_config(route_name='api_presence', renderer='json', permission='edit_presence')
+@view_config(route_name='api_presence', renderer='json', permission='can_edit_presence')
 class PresenceApi(ApiView):
 
     def get(self):

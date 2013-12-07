@@ -26,7 +26,7 @@
     {% endif %}
     {% endwith %}
     {% block content %}<!-- main content area -->{% endblock %}
-    {% if request.has_perm('view_presence') %}
+    {% if request.has_perm('can_view_presence') %}
         <div ng-include src="'wstal.html'"></div>
     {% endif %}
   </div>

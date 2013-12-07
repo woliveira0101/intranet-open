@@ -19,7 +19,7 @@ LOG = INFO_LOG(__name__)
 CHANGE_STATUS = '<script>$(".justification-info").html(\'<span class="justification-info label">%s</span>\');</script>'
 RELOAD_PAGE = '<script>window.location.reload()</script>'
 
-@view_config(route_name='employee_form_late_justification', permission='late_justification')
+@view_config(route_name='employee_form_late_justification', permission='can_justify_late')
 class LateJustification(BaseView):
     def get(self):
         form = LateJustificationForm(self.request.GET, user=self.request.user)
@@ -41,7 +41,7 @@ class LateJustification(BaseView):
         return dict(form=form)
 
 
-@view_config(route_name='employee_form_wrong_time_justification', permission='wrong_time_justification')
+@view_config(route_name='employee_form_wrong_time_justification', permission='can_justify_wrongtime')
 class WrongTimeJustification(BaseView):
     def get(self):
         form = WrongTimeJustificationForm(self.request.GET, user=self.request.user)

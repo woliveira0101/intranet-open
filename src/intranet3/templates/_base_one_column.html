@@ -71,7 +71,7 @@
                     <li>
                         <a class="brand" {{ 'style=color:red' if request.registry.settings['DEBUG'] | is_true }} href="{{ request.url_for('/') }}">Intranet</a>
                     </li>
-                    {% if request.has_perm('edit_presence') %}
+                    {% if request.has_perm('can_edit_presence') %}
                     <li class="fast-access {% if request.wants_mobile %}none{% endif %}">
                     <ul class="nav">
                       <li class="dropdown">

@@ -70,7 +70,7 @@ class Preview(object):
         return True
 
 
-@view_config(route_name='api_preview', renderer='json', permission='users')
+@view_config(route_name='api_preview', renderer='json', permission='can_view_users')
 class PreviewApi(ApiView):
 
     DIMENTIONS = {
@@ -144,7 +144,7 @@ class PreviewApi(ApiView):
         return res
 
 
-@view_config(route_name='api_images', renderer='json', http_cache=60, permission='users')
+@view_config(route_name='api_images', renderer='json', http_cache=60, permission='can_view_users')
 class ImageApi(ApiView):
     ANONYMONUS = {
         'users': os.path.normpath(os.path.join(os.path.dirname(__file__),'..','static','img','anonymous.png')),

@@ -46,7 +46,7 @@ class UserCredentialsMixin(object):
                                        .filter(TrackerCredentials.tracker_id==tracker.id).first()
 
 
-@view_config(route_name='tracker_list', permission='bugs_owner')
+@view_config(route_name='tracker_list', permission='can_see_own_bugs')
 class List(UserCredentialsMixin, BaseView):
     def get(self):
         trackers = self._get_current_users_credentials()
@@ -97,7 +97,7 @@ def _add_tracker_login_validator(tracker_name, form):
     for validator_name, validator in validators.items():
         getattr(form, validator_name).validators = validators[validator_name]
 
-@view_config(route_name='tracker_login', permission='bugs_owner')
+@view_config(route_name='tracker_login', permission='can_see_own_bugs')
 class Login(UserCredentialsMixin, BaseView):
     def get(self):
         tracker_id = self.request.GET.get('tracker_id')
@@ -179,7 +179,7 @@ class Delete(BaseView):
         )
 
 
-@view_config(route_name='tracker_delete_login', renderer='intranet3:templates/common/delete.html', permission='bugs_owner')
+@view_config(route_name='tracker_delete_login', renderer='intranet3:templates/common/delete.html', permission='can_see_own_bugs')
 class DeleteLogin(BaseView):
     def dispatch(self):
         tracker_id = self.request.GET.get('tracker_id')

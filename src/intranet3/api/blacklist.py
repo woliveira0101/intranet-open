@@ -3,7 +3,7 @@ from pyramid.view import view_config
 from intranet3.utils.views import ApiView
 
 
-@view_config(route_name='api_blacklist', renderer='json', permission='view_presence')
+@view_config(route_name='api_blacklist', renderer='json', permission='can_view_presence')
 class BlacklistApi(ApiView):
     def get(self):
         blacklist = self.request.user.notify_blacklist
