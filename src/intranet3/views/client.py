@@ -88,7 +88,7 @@ class Add(BaseView):
         return dict(form=form)
 
 
-@view_config(route_name='client_delete', renderer='intranet3:templates/common/delete.html', permission='delete_clients')
+@view_config(route_name='client_delete', renderer='intranet3:templates/common/delete.html', permission='can_delete_clients')
 class Delete(BaseView):
     def dispatch(self):
         client_id = self.request.GET.get('client_id')

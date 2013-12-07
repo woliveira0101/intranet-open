@@ -53,7 +53,7 @@ class List(UserCredentialsMixin, BaseView):
         return dict(trackers=trackers)
 
 
-@view_config(route_name='tracker_view', permission='edit_trackers')
+@view_config(route_name='tracker_view', permission='can_edit_trackers')
 class View(BaseView):
     def get(self):
         tracker_id = self.request.GET.get('tracker_id')
@@ -61,7 +61,7 @@ class View(BaseView):
         return dict(tracker=tracker, TRACKER_TYPES=TRACKER_TYPES)
 
 
-@view_config(route_name='tracker_add', permission='edit_trackers')
+@view_config(route_name='tracker_add', permission='can_edit_trackers')
 class Add(BaseView):
     def get(self):
         form = TrackerForm()
@@ -132,7 +132,7 @@ class Login(UserCredentialsMixin, BaseView):
             return HTTPFound(location=url)
         return dict(form=form, tracker=tracker)
 
-@view_config(route_name='tracker_edit', permission='edit_trackers')
+@view_config(route_name='tracker_edit', permission='can_edit_trackers')
 class Edit(BaseView):
     def get(self):
         tracker_id = self.request.GET.get('tracker_id')
@@ -157,7 +157,7 @@ class Edit(BaseView):
 
 
 
-@view_config(route_name='tracker_delete', renderer='intranet3:templates/common/delete.html', permission='edit_trackers')
+@view_config(route_name='tracker_delete', renderer='intranet3:templates/common/delete.html', permission='can_edit_trackers')
 class Delete(BaseView):
 
     def dispatch(self):

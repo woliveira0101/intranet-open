@@ -84,7 +84,7 @@
                 {% if project.active == True %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}
             </td>
             <td>
-                {% if request.has_perm('delete_projects') %}
+                {% if request.has_perm('can_delete_projects') %}
                     <a href="{{ request.url_for('/project/delete', project_id=project.id) }}" class="button btn btn-danger">{% trans %}Delete{% endtrans %}</a>
                 {% endif %}
             </td>

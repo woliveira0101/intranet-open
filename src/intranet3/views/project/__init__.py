@@ -97,7 +97,7 @@ class Edit(BaseView):
         return dict(project_id=project.id, form=form)
 
 
-@view_config(route_name='project_delete', renderer='intranet3:templates/common/delete.html', permission='delete_projects')
+@view_config(route_name='project_delete', renderer='intranet3:templates/common/delete.html', permission='can_delete_projects')
 class Delete(BaseView):
     def dispatch(self):
         project_id = self.request.GET.get('project_id')

@@ -77,9 +77,6 @@ class ListUser(GetTimeEntriesMixin, BaseView):
         if self.request.user.id == int(user_id):
             return HTTPFound(self.request.url_for('/times/list', date=date_str))
 
-        if not self.request.has_perm('view_user_timeentry') and user_id != self.request.user.id:
-            return HTTPForbidden()
-
         user = User.query.get(user_id)
         if user is None:
             return HTTPNotFound()
@@ -95,10 +92,10 @@ class ListUser(GetTimeEntriesMixin, BaseView):
             user=user,
             prev_date=previous_day(date), next_date=next_day(date),
             total_sum=total_sum,
-            can_modify=self.request.has_perm('edit_users_timeentry'),
+            can_modify=self.request.has_perm('can_edit_users_timeentry'),
         )
 
-@view_config(route_name='times_list_bug', permission='times_reports')
+@view_config(route_name='times_list_bug', permission='can_view_times_reports')
 class ListBug(GetTimeEntriesMixin, BaseView):
     def get(self):
         project_id = self.request.GET.get('project_id')

@@ -4,7 +4,7 @@ from intranet3.log import INFO_LOG
 
 LOG = INFO_LOG(__name__)
 
-@view_config(route_name='team_view', permission='teams')
+@view_config(route_name='team_view', permission='can_view_teams')
 class View(BaseView):
     def get(self):
         return {}

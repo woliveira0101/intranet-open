@@ -57,15 +57,14 @@ class Root(object):
         ('hr_stuff',                  (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
         ('can_see_inactive_users',    (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
         ('can_edit_users',            (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
-        ('times_reports',             (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
+        ('can_times_reports',         (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
 
         # ADMIN ONLY:
-        ('edit_config',               (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
-        ('edit_trackers',             (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
-        ('delete_projects',           (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
-        ('delete_clients',            (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
-        ('edit_users_timeentry',      (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
-        ('view_users_timeentry',      (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('can_edit_config',           (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('can_edit_trackers',         (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('can_delete_projects',       (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('can_delete_clients',        (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('can_edit_users_timeentry',  (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
     )
 
     @staticmethod

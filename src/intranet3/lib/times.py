@@ -66,7 +66,7 @@ class ProtectTimeEntriesMixin(object):
             if not user_can_modify_timeentry(self.request.user, date):
                 raise HTTPForbidden()
 
-            if not self.request.has_perm('edit_users_timeentry'):
+            if not self.request.has_perm('can_edit_users_timeentry'):
                 if timeentry.deleted: # cannot edit an already deleted entry
                     return HTTPBadRequest()
                 elif timeentry.user_id != self.request.user.id: # edit only own entries
@@ -82,7 +82,7 @@ class ProtectTimeEntriesMixin(object):
             self.v['date'] = date
 
         if 'user_id' in self.request.GET:
-            if not self.request.has_perm('edit_users_timeentry'):
+            if not self.request.has_perm('can_edit_users_timeentry'):
                 raise HTTPForbidden()
             self.v['user'] = User.query.get(self.request.GET.get('user_id'))
 
