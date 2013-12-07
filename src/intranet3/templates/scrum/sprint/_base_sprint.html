@@ -98,7 +98,7 @@
                     <div class="span3">
                         <ul class="number_box">
                             {% set project = sprint.project %}
-                            {% set project_edit_url = request.url_for('/project/edit', project_id=project.id if request.has_perm('edit_projects') else '#') %}
+                            {% set project_edit_url = request.url_for('/project/edit', project_id=project.id if request.has_perm('can_edit_projects') else '#') %}
                             <li>
                                 <span>{% trans %}Working agreement{% endtrans %}</span>
                                 {% if project.working_agreement %}

@@ -4,12 +4,12 @@
     <div class="tabs">
         <ul class="nav nav-tabs">
             <li class="title">{% trans %}All clients{% endtrans %}</li>
-            {% if request.has_perm('view_clients') %}
+            {% if request.has_perm('can_view_clients') %}
             <li>
                 <a href="{{ request.url_for('/client/map') }}">{% trans %}Map clients{% endtrans %}</a>
             </li>
             {% endif %}
-            {% if request.has_perm('edit_clients') %}
+            {% if request.has_perm('can_edit_clients') %}
             <li>
                 <a href="{{ request.url_for('/client/add') }}">{% trans %}Add client{% endtrans %}</a>
             </li>

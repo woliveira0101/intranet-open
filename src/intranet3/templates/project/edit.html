@@ -8,7 +8,7 @@
     </div>
     <form class="box box_edit_project" action="{{ request.url_for('/project/edit', project_id=project_id) }}" method="post" accept-charset="utf-8">
         {{ csrf_field }}
-        {% if request.has_perm('edit_projects') %}
+        {% if request.has_perm('can_edit_projects') %}
             {{ form_field(form.name, _('Project friendly name')) }}
             {{ form_field(form.coordinator_id) }}
             {{ form_field(form.tracker_id, _('Tracker for given project')) }}

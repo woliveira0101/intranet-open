@@ -6,7 +6,7 @@
     <th>{% trans %}Worked hours{% endtrans %}</th>
     <th>{% trans %}Points ( achieved / commited ){% endtrans %}</th>
     <th>{% trans %}Velocity per day{% endtrans %}</th>
-    {% if request.has_perm('edit_sprints') %}
+    {% if request.has_perm('can_edit_sprints') %}
         <th>
             {% trans %}Sprint Actions{% endtrans %}
         </th>
@@ -37,7 +37,7 @@
                 <span title="This sprint velocity - all time entries (8 * anchieved points / worked hours)">{{ '%.2f' % sprint.velocity }}</span>
                 <span title="Average velocity of all sprints - all time entries (8 * sum of anchieved points / sum of worked hours)">({{ '%.2f' % sprint.mean_velocity }})</span>
             </td>
-            {% if request.has_perm('edit_sprints') %}
+            {% if request.has_perm('can_edit_sprints') %}
                 <td>
                     <a href="{{ request.url_for('/scrum/sprint/edit', sprint_id=sprint.id) }}" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
                     <a href="{{ request.url_for('/scrum/sprint/delete', sprint_id=sprint.id) }}" class="button btn btn-danger">{% trans %}Delete{% endtrans %}</a>

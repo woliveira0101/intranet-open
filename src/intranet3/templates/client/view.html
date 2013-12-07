@@ -52,7 +52,7 @@
 
     </table>
 
-    {% if request.has_perm('edit_clients') %}
+    {% if request.has_perm('can_edit_clients') %}
     <div class="buttons">
         <a href="{{ request.url_for('/client/edit', client_id=client.id) }}" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
     </div>
@@ -61,7 +61,7 @@
     <div class="tabs head_project">
         <ul class="nav nav-tabs">
             <li class="title">{% trans %}Projects{% endtrans %}</li>
-            {% if request.has_perm('edit_projects') %}
+            {% if request.has_perm('can_edit_projects') %}
             <li>
                 <a href="{{ request.url_for('/project/add', client_id=client.id) }}">{% trans %}Add{% endtrans %}</a>
             </li>

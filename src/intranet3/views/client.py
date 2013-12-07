@@ -13,7 +13,7 @@ LOG = INFO_LOG(__name__)
 WARN = WARN_LOG(__name__)
 
 
-@view_config(route_name='client_view', permission='view_clients')
+@view_config(route_name='client_view', permission='can_view_clients')
 class View(BaseView):
     """ View an existing client """
     def get(self):
@@ -22,7 +22,7 @@ class View(BaseView):
         return dict(client=client)
 
 
-@view_config(route_name='client_list', permission='view_clients')
+@view_config(route_name='client_list', permission='can_view_clients')
 class List(BaseView):
     def get(self):
         clients = Client.query.order_by(Client.name)
@@ -36,7 +36,7 @@ class Counter():
         return str(self.index)
 
 
-@view_config(route_name='client_map', permission='view_clients')
+@view_config(route_name='client_map', permission='can_view_clients')
 class Map(BaseView):
     """ Map clients/projects/selectors """
     def get(self):
@@ -57,7 +57,7 @@ class Map(BaseView):
             counter=Counter()
         )
 
-@view_config(route_name='client_add', permission='edit_clients')
+@view_config(route_name='client_add', permission='can_edit_clients')
 class Add(BaseView):
     """ Add new client """
     def dispatch(self):
@@ -108,7 +108,7 @@ class Delete(BaseView):
         )
 
 
-@view_config(route_name='client_edit', permission='edit_clients')
+@view_config(route_name='client_edit', permission='can_edit_clients')
 class Edit(BaseView):
     """ Edit an existing client """
     def dispatch(self):

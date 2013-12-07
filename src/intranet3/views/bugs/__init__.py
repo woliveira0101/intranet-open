@@ -99,7 +99,7 @@ class MyJson(BaseView):
         return dict(bugs=bugs)
 
 
-@view_config(route_name='bug_report', permission='task_pivot')
+@view_config(route_name='bug_report', permission='can_view_task_pivot')
 class Report(GroupedBugsMixin, FilterMixin, BaseView):
 
     def get(self):
@@ -122,7 +122,7 @@ class Report(GroupedBugsMixin, FilterMixin, BaseView):
 
 
 
-@view_config(route_name='bugs_user', renderer='intranet3:templates/bugs/_filtered_report.html', permission='task_pivot')
+@view_config(route_name='bugs_user', renderer='intranet3:templates/bugs/_filtered_report.html', permission='can_view_task_pivot')
 class User(GroupedBugsMixin, FilterMixin, BaseView):
     """ Show bugs for given user """
     def get(self):
@@ -146,7 +146,7 @@ class User(GroupedBugsMixin, FilterMixin, BaseView):
         )
 
 
-@view_config(route_name='bugs_project_user', renderer='intranet3:templates/bugs/_filtered_report.html', permission='task_pivot')
+@view_config(route_name='bugs_project_user', renderer='intranet3:templates/bugs/_filtered_report.html', permission='can_view_task_pivot')
 class ProjectUser(GroupedBugsMixin, FilterMixin, BaseView):
     def get(self):
         user_id = self.request.GET.get('user_id')
@@ -181,7 +181,7 @@ class ProjectUser(GroupedBugsMixin, FilterMixin, BaseView):
         )
 
 
-@view_config(route_name='bugs_project', renderer='intranet3:templates/bugs/_filtered_report.html', permission='task_pivot')
+@view_config(route_name='bugs_project', renderer='intranet3:templates/bugs/_filtered_report.html', permission='can_view_task_pivot')
 class Project(GroupedBugsMixin, FilterMixin, BaseView):
     """ Show bugs for a project """
     def get(self):
@@ -207,7 +207,7 @@ class Project(GroupedBugsMixin, FilterMixin, BaseView):
         )
 
 
-@view_config(route_name='bugs_client', renderer='intranet3:templates/bugs/_filtered_report.html', permission='task_pivot')
+@view_config(route_name='bugs_client', renderer='intranet3:templates/bugs/_filtered_report.html', permission='can_view_task_pivot')
 class Client(GroupedBugsMixin, FilterMixin, BaseView):
     """ Show bugs for a client """
     def get(self):
@@ -234,7 +234,7 @@ class Client(GroupedBugsMixin, FilterMixin, BaseView):
         )
 
 
-@view_config(route_name='bugs_other_project_user', renderer='intranet3:templates/bugs/_filtered_report.html', permission='task_pivot')
+@view_config(route_name='bugs_other_project_user', renderer='intranet3:templates/bugs/_filtered_report.html', permission='can_view_task_pivot')
 class OtherProjectsUser(GroupedBugsMixin, FilterMixin, BaseView):
     """ Show other bugs"""
     def get(self):
@@ -256,7 +256,7 @@ class OtherProjectsUser(GroupedBugsMixin, FilterMixin, BaseView):
 
 
 
-@view_config(route_name='bugs_other_project', renderer='intranet3:templates/bugs/_filtered_report.html', permission='task_pivot')
+@view_config(route_name='bugs_other_project', renderer='intranet3:templates/bugs/_filtered_report.html', permission='can_view_task_pivot')
 class OtherProjects(GroupedBugsMixin, FilterMixin, BaseView):
     """ Show other bugs"""
     def get(self):
@@ -274,7 +274,7 @@ class OtherProjects(GroupedBugsMixin, FilterMixin, BaseView):
         )
 
 
-@view_config(route_name='everyones_bugs', permission='task_pivot')
+@view_config(route_name='everyones_bugs', permission='can_view_task_pivot')
 class Everyones(FilterMixin, BaseView):
     def get(self):
         resolved, show_all_bugs, show_all_projects, sort_by_date = self._get_params()
@@ -282,7 +282,7 @@ class Everyones(FilterMixin, BaseView):
         return dict(projects=projects, resolved=resolved)
 
 
-@view_config(route_name='bugs_everyones_project', permission='task_pivot')
+@view_config(route_name='bugs_everyones_project', permission='can_view_task_pivot')
 class EveryonesProject(FilterMixin, BaseView):
     """ Show bugs on everyone in a given project """
     def get(self):

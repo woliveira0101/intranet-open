@@ -16,7 +16,7 @@ from intranet3 import helpers as h
 from intranet3.api.preview import Preview
 
 
-@view_config(route_name='api_teams', renderer='json', permission='view_teams')
+@view_config(route_name='api_teams', renderer='json', permission='can_view_teams')
 class Teams(ApiView):
 
     def get(self):
@@ -104,7 +104,7 @@ class Teams(ApiView):
             teams=result
         )
 
-    @has_perm('edit_teams')
+    @has_perm('can_edit_teams')
     def post(self):
         try:
             json_team = self.request.json_body
@@ -133,7 +133,7 @@ class Teams(ApiView):
         return team.to_dict()
 
 
-@view_config(route_name='api_team', renderer='json', permission='view_teams')
+@view_config(route_name='api_team', renderer='json', permission='can_view_teams')
 class Team(ApiView):
     def get(self):
         team_id = self.request.matchdict.get('team_id')
@@ -143,7 +143,7 @@ class Team(ApiView):
         else:
             raise HTTPNotFound()
 
-    @has_perm('edit_teams')
+    @has_perm('can_edit_teams')
     def put(self):
         team_id = self.request.matchdict.get('team_id')
         team = Team_m.query.get(team_id)
@@ -185,7 +185,7 @@ class Team(ApiView):
 
         return HTTPOk("OK")
 
-    @has_perm('edit_teams')
+    @has_perm('can_edit_teams')
     def delete(self):
         team_id = self.request.matchdict.get('team_id')
         team = Team_m.query.get(team_id)

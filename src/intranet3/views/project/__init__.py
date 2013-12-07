@@ -12,7 +12,7 @@ from intranet3.models.project import SelectorMapping
 LOG = INFO_LOG(__name__)
 
 
-@view_config(route_name='project_view', permission='view_projects')
+@view_config(route_name='project_view', permission='can_view_projects')
 class View(BaseView):
     def get(self):
         project_id = self.request.GET.get('project_id')
@@ -20,7 +20,7 @@ class View(BaseView):
         return dict(project=project)
 
 
-@view_config(route_name='project_add', permission='edit_projects')
+@view_config(route_name='project_add', permission='can_edit_projects')
 class Add(BaseView):
     def dispatch(self):
         client_id = self.request.GET.get('client_id')
@@ -58,15 +58,15 @@ class Add(BaseView):
             return HTTPFound(location=self.request.url_for('/client/view', client_id=project.client_id))
         return dict(client=client, form=form)
 
-@view_config(route_name='project_edit', permission='edit_sprints')
+@view_config(route_name='project_edit', permission='can_edit_sprints')
 class Edit(BaseView):
     def dispatch(self):
         project_id = self.request.GET.get('project_id')
         project =  self.session.query(Project).filter(Project.id==project_id).one()
         form = ProjectForm(self.request.POST, obj=project)
-        # hack, when user has no permision edit_projects (that means that he has only scrum perms)
+        # hack, when user has no permision can_edit_projects (that means that he has only scrum perms)
         # we do not validate the form
-        if self.request.method == 'POST' and (not self.request.has_perm('edit_projects') or form.validate()):
+        if self.request.method == 'POST' and (not self.request.has_perm('can_edit_projects') or form.validate()):
             project.working_agreement = form.working_agreement.data
             project.definition_of_done = form.definition_of_done.data
             project.definition_of_ready = form.definition_of_ready.data
@@ -74,7 +74,7 @@ class Edit(BaseView):
             project.backlog_url = form.backlog_url.data
             project.status = form.status.data
             project.sprint_tabs = form.sprint_tabs.data
-            if self.request.has_perm('edit_projects'):
+            if self.request.has_perm('can_edit_projects'):
                 project.name = form.name.data
                 coordinator_id = int(form.coordinator_id.data) if form.coordinator_id.data.isdigit() else None
                 project.coordinator_id = coordinator_id
