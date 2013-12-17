@@ -3,7 +3,7 @@
 
 from task import URLCronTask
 from intranet3.log import INFO_LOG, EXCEPTION_LOG, WARN_LOG
-from intranet3.utils.mail import MailCheckerTask
+from intranet3.utils.mail import Ma
 from failsafe import Repeater, RequiredAction
 
 LOG = INFO_LOG(__name__)

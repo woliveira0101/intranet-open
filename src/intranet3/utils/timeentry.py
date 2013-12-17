@@ -6,14 +6,14 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 WARN = WARN_LOG(__name__)
 DEBUG = DEBUG_LOG(__name__)
 
-def add_time(user_id, date, bug_id, project_id, hours, subject):
+def add_time(user_id, date, bug_id, project_id, hours, subject, session=None):
     # try finding existing entry for this bug
-    session = DBSession()
+    session = session or DBSession()
     bug_id = str(bug_id)
-    entry = TimeEntry.query.filter(TimeEntry.user_id==user_id) \
-                           .filter(TimeEntry.date==date.date()) \
-                           .filter(TimeEntry.ticket_id==bug_id) \
-                           .filter(TimeEntry.project_id==project_id).first()
+    entry = session.query.filter(TimeEntry.user_id==user_id) \
+                         .filter(TimeEntry.date==date.date()) \
+                         .filter(TimeEntry.ticket_id==bug_id) \
+                         .filter(TimeEntry.project_id==project_id).first()
     if not entry:
         # create new entry
         entry = TimeEntry(
@@ -25,14 +25,13 @@ def add_time(user_id, date, bug_id, project_id, hours, subject):
             project_id = project_id,
             modified_ts=date
         )
-        session.add(entry)
         LOG(u'Adding new entry')
     else:
         # update existing entry
         if not entry.frozen:
             entry.time += hours
             entry.modified_ts = date # TODO: this might remove an already existing lateness
-            session.add(entry)
             LOG(u'Updating existing entry')
+            return entry
         else:
             LOG(u'Omission of an existing entry because it is frozen')

@@ -7,17 +7,14 @@ import email
 import quopri
 import datetime
 import time
+import poplib
 from base64 import b64decode
-from functools import partial
 from pprint import pformat
 from email.header import decode_header
-from email.utils import parsedate, formataddr
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email import Encoders
+from email.utils import parsedate
 
 import transaction
-from intranet3.models import ApplicationConfig, Project, Tracker, TrackerCredentials
+from intranet3.models import ApplicationConfig, Project, Tracker, TrackerCredentials, DBSession
 from intranet3.models.project import SelectorMapping
 from intranet3.log import DEBUG_LOG, WARN_LOG, EXCEPTION_LOG, INFO_LOG
 from intranet3.utils.timeentry import add_time
@@ -26,7 +23,6 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
-from email.mime.text import MIMEText
 
 LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
@@ -34,119 +30,6 @@ WARN = WARN_LOG(__name__)
 DEBUG = DEBUG_LOG(__name__)
 
 MIN_HOURS = 6.995 #record hours
-
-class EmailSender(object):
-
-
-    @classmethod
-    def send(cls, to, topic, message, sender_name=None, cc=None, replay_to=None):
-        """
-        Send an email with message to given address.
-        This is an asynchronous call.
-
-        @return: deferred
-        """
-        config = ApplicationConfig.get_current_config()
-        user = config.google_user_email
-        email_addr = user
-        if sender_name:
-            email_addr = formataddr((sender_name, email_addr))
-        secret = config.google_user_password
-        SenderFactory = ESMTPSenderFactory
-
-        email = MIMEText(message, _charset='utf-8')
-        email['Subject'] = topic
-        email['From'] = email_addr
-        email['To'] = to
-        if cc:
-            email['Cc'] = cc
-
-        if replay_to:
-            email['Reply-To'] = replay_to
-
-        formatted_mail = email.as_string()
-
-        messageFile = StringIO(formatted_mail)
-
-        resultDeferred = Deferred()
-
-        senderFactory = SenderFactory(
-            user, # user
-            secret, # secret
-            user, # from
-            to, # to
-            messageFile, # message
-            resultDeferred, # deferred
-            contextFactory=cls.contextFactory)
-
-        reactor.connectTCP(cls.SMTP_SERVER, cls.SMTP_PORT, senderFactory)
-        return resultDeferred
-
-    @classmethod
-    def send_html(cls, to, topic, message):
-        config = ApplicationConfig.get_current_config()
-
-        email = MIMEMultipart('alternative')
-        email['Subject'] = topic
-        email['From'] = config.google_user_email
-        email['To'] = to
-        email.attach(MIMEText(message,'html', 'utf-8'))
-
-        formatted_mail = email.as_string()
-
-        messageFile = StringIO(formatted_mail)
-
-        resultDeferred = Deferred()
-
-        senderFactory = ESMTPSenderFactory(
-            config.google_user_email, # user
-            config.google_user_password, # secret
-            config.google_user_email, # from
-            to, # to
-            messageFile, # message
-            resultDeferred, # deferred
-            contextFactory=cls.contextFactory)
-
-        reactor.connectTCP(cls.SMTP_SERVER, cls.SMTP_PORT, senderFactory)
-        return resultDeferred
-
-    @classmethod
-    def send_with_file(cls, to, topic, message, file_path):
-        config = ApplicationConfig.get_current_config()
-
-        email = MIMEMultipart()
-        email['Subject'] = topic
-        email['From'] = config.google_user_email
-        email['To'] = to
-
-        part = MIMEBase('application', "octet-stream")
-        part.set_payload(open(file_path, "rb").read())
-        Encoders.encode_base64(part)
-
-        part.add_header('Content-Disposition', 'attachment; filename="%s"' % file_path.split('/')[-1])
-
-        email.attach(part)
-        email.attach(MIMEText(message))
-
-        formatted_mail = email.as_string()
-
-        messageFile = StringIO(formatted_mail)
-
-        resultDeferred = Deferred()
-
-        senderFactory = ESMTPSenderFactory(
-            config.google_user_email, # user
-            config.google_user_password, # secret
-            config.google_user_email, # from
-            to, # to
-            messageFile, # message
-            resultDeferred, # deferred
-            contextFactory=cls.contextFactory)
-
-        reactor.connectTCP(cls.SMTP_SERVER, cls.SMTP_PORT, senderFactory)
-        return resultDeferred
-
-
 
 decode = lambda header: u''.join(
     val.decode('utf-8' if not encoding else encoding)
@@ -174,10 +57,11 @@ def get_msg_payload(msg):
         payload = b64decode(payload)
     return payload
 
-class MailerPOP3Client(object):
 
-    MAX_EMAILS = 100
-
+class TimeEntryMailExtractor(object):
+    """
+    Extracts timeentry from mail
+    """
     SUBJECT_REGEXP = re.compile(r'^\[Bug (\d+)\](.*)')
     HOURS_REGEXP = re.compile(r'^\s*Hours Worked\|\s*\|(\d+(\.\d+)?)$')
     HOURS_NEW_BUG_REGEXP = re.compile(r'^\s*Hours Worked: (\d+(\.\d+)?)$')
@@ -187,7 +71,13 @@ class MailerPOP3Client(object):
     TRAC_AUTHOR_REGEXP = re.compile(r'^Changes \(by (.*)\)\:')
     TRAC_COMPONENT_REGEXP = re.compile(r'.*Component:\ *([^|]*)')
 
-    timeout = 10
+    def __init__(self, trackers, logins_mappings, projects, selector_mappings,
+                session=None):
+        self.trackers = trackers
+        self.logins_mappings = logins_mappings
+        self.projects = projects
+        self.selector_mappings = selector_mappings
+        self.session = session or DBSession()
 
     def handle_trac_email(self, msg, tracker):
         date = decode(msg['Date'])
@@ -231,20 +121,20 @@ class MailerPOP3Client(object):
             return
 
         who = who.lower()
-        if not who in self.factory.logins_mappings[tracker.id]:
+        if not who in self.logins_mappings[tracker.id]:
             DEBUG(u'User %s not in logins mapping' % (who, ))
             return
 
-        user = self.factory.logins_mappings[tracker.id][who]
+        user = self.logins_mappings[tracker.id][who]
         DEBUG(u'Found user %s' % (user.name, ))
 
-        mapping = self.factory.selector_mappings[tracker.id]
+        mapping = self.selector_mappings[tracker.id]
         project_id = mapping.match(bug_id, 'none', component)
 
         if project_id is None:
             DEBUG(u'Project not found for component %s' % (component, ))
             return
-        project = self.factory.projects[project_id]
+        project = self.projects[project_id]
 
         LOG(u"Will add entry for user %s project %s bug #%s hours %s title %s" % (
             user.name, project.name, bug_id, hours, subject
@@ -273,7 +163,7 @@ class MailerPOP3Client(object):
         payload = get_msg_payload(msg)
 
         username = who.lower()
-        if username not in self.factory.logins_mappings[tracker.id]:
+        if username not in self.logins_mappings[tracker.id]:
             DEBUG(u'User %s not in logins mapping' % (who, ))
             return
 
@@ -308,12 +198,12 @@ class MailerPOP3Client(object):
             DEBUG(u'Ignoring non-new bug without hours')
             return
 
-        user = self.factory.logins_mappings[tracker.id][username]
+        user = self.logins_mappings[tracker.id][username]
         DEBUG(u'Found user %s' % (user.name, ))
         # selector_mapping given explicitly to avoid cache lookups
-        mapping = self.factory.selector_mappings[tracker.id]
+        mapping = self.selector_mappings[tracker.id]
         project_id = mapping.match(bug_id, product, component)
-        project = self.factory.projects[project_id]
+        project = self.projects[project_id]
 
         LOG(u"Will add entry for user %s project %s bug #%s hours %s title %s" % (
             user.name, project.name, bug_id, hours, subject
@@ -325,51 +215,16 @@ class MailerPOP3Client(object):
     handle_igozilla_email = handle_bugzilla_email
     handle_rockzilla_email = handle_bugzilla_email
 
-    def serverGreeting(self, greeting):
-        """ When connected to server """
-        DEBUG(u'Server greeting received %s' % (pformat(greeting, )))
-        self.login(self.factory.login, self.factory.password)\
-        .addCallbacks(self.on_login, partial(self.fail, u'login'))
-
-    def on_login(self, welcome):
-        """ When login succeeded """
-        DEBUG(u'Logged in: %s' % (welcome, ))
-        self.stat().addCallbacks(self.on_stat, partial(self.fail, u'stat'))
-
-    def prepare(self):
-        """ Prepare structures for bugs fetching """
-        self.times = []
-
-    def on_stat(self, stats):
-        """ When number of messages was provided """
-        LOG(u'Emails: %s' % (pformat(stats)))
-        mails, sizes = stats
-        if mails > self.MAX_EMAILS:
-            mails = self.MAX_EMAILS
-        if mails:
-            self.prepare()
-
-            retrievers = []
-            for i in xrange(mails):
-                d = self.retrieve(i)
-                d.addCallbacks(self.on_retrieve, partial(self.fail, u'retrive %s' % (i, )))
-                retrievers.append(d)
-            DeferredList(retrievers).addCallback(self.on_finish)
-        else:
-            DEBUG(u'No new messages')
-            self.quit().addCallbacks(self.on_quit, partial(self.fail, u'empty quit'))
-
     def match_tracker(self, msg):
         sender = decode(msg['From'])
-        for email in self.factory.trackers:
+        for email in self.trackers:
             if email in sender:
-                return self.factory.trackers[email]
+                return self.trackers[email]
         else:
             return None
 
-    def on_retrieve(self, lines):
+    def get(self, msg):
         """ When single message was retrieved """
-        msg = email.message_from_string('\n'.join(lines))
         sender = decode(msg['From'])
         tracker = self.match_tracker(msg)
         if tracker is None:
@@ -383,84 +238,52 @@ class MailerPOP3Client(object):
         if data is None: # email should be ignored
             return
         user_id, date, bug_id, project_id, hours, subject = data
-        add_time(user_id, date, bug_id, project_id, hours, subject)
-        transaction.commit()
+        return add_time(user_id, date, bug_id, project_id, hours, subject)
 
 
-    def on_finish(self, results):
-        """ When all messages have been retrieved """
-        self.quit().addCallbacks(self.on_quit, partial(self.fail, u'quit'))
+class MailFetcher(object):
 
-    def on_quit(self, bye):
-        """ When QUIT finishes """
-        DEBUG(u'POP3 Quit: %s' % bye)
-        self.factory.done_callback()
+    HOST = 'pop.gmail.com'
+    MAX_EMAILS = 100
 
-    def fail(self, during, resp):
-        """ Something went wrong """
-        EXCEPTION(u'POP3 Client failed during %s: %s' % (during, pformat(resp)))
-        self.factory.done_callback()
-
-class CustomClientFactory(object):
-
-    protocol = MailerPOP3Client
-
-    def __init__(self, login, password, done_callback, trackers, logins_mappings, projects, selector_mappings):
+    def __init__(self, login, password, trackers, logins_mappings, projects, selector_mappings):
         self.login = login
         self.password = password
-        self.done_callback = done_callback
         self.trackers = trackers
         self.logins_mappings = logins_mappings
         self.projects = projects
         self.selector_mappings = selector_mappings
 
+    def __iter__(self):
+        pop_conn = poplib.POP3_SSL(self.HOST)
+        pop_conn.user(self.login)
+        pop_conn.pass_(self.password)
+
+        stats = pop_conn.stat()
+        LOG(u'Emails: %s' % (pformat(stats)))
+        num, _ = stats
+        num = num if num < self.MAX_EMAILS else self.MAX_EMAILS
+
+        messages = (pop_conn.retr(i) for i in range(1, num + 1))
+        messages = ("\n".join(mssg[1]) for mssg in messages)
+        messages = (email.parser.Parser().parsestr(mssg) for mssg in messages)
+        for msg in messages:
+            yield msg
+
 class MailCheckerTask(object):
 
-    MAX_BUSY_CALLS = 3
-    POP3_SERVER = 'pop.gmail.com'
-    POP3_PORT = 995
-
-    def __init__(self):
-        self.busy = False
-        self.busy_calls = 0
-
-    def __call__(self):
-        if self.busy:
-            self.busy_calls += 1
-            if self.busy_calls > self.MAX_BUSY_CALLS:
-                self.busy_calls = 0
-                WARN(u'Will override a busy Mail Checker')
-                self.run()
-            else:
-                WARN(u'Mail Checker is already running, ignoring (%s/%s)' % (self.busy_calls, self.MAX_BUSY_CALLS))
-        else:
-            self.busy_calls = 0
-            self.busy = True
-            LOG(u'Will start Mail Checker')
-            self.run()
-
-    def mark_not_busy(self):
-        if not self.busy:
-            WARN(u'Tried to unmark an already unmarked Mail Checker')
-        else:
-            self.busy = False
-            LOG(u'Marked Mail Check as not busy anymore')
-
     def run(self):
-        self._run()
-
-    def _run(self):
         config = ApplicationConfig.get_current_config(allow_empty=True)
         if config is None:
             WARN(u'Application config not found, emails cannot be checked')
-            return self.mark_not_busy()
+            return
         trackers = dict(
             (tracker.mailer, tracker)
                 for tracker in Tracker.query.filter(Tracker.mailer != None).filter(Tracker.mailer != '')
         )
         if not len(trackers):
             WARN(u'No trackers have mailers configured, email will not be checked')
-            return self.mark_not_busy()
+            return
 
         username = config.google_user_email.encode('utf-8')
         password = config.google_user_password.encode('utf-8')
@@ -484,8 +307,27 @@ class MailCheckerTask(object):
         # all pre-conditions should be checked by now
 
         # start fetching
-        f = CustomClientFactory(username, password, self.mark_not_busy,
-            trackers, logins_mappings, projects, selector_mappings)
-        f.protocol = MailerPOP3Client
-        reactor.connectSSL(self.POP3_SERVER, self.POP3_PORT, f, self.context_factory)
+        fetcher = MailFetcher(
+            username,
+            password,
+            trackers,
+            logins_mappings,
+            projects,
+            selector_mappings,
+        )
+        # ok, we have all mails, lets create timeentries from them
+        session = DBSession()
+        extractor = TimeEntryMailExtractor(
+            trackers,
+            logins_mappings,
+            projects,
+            logins_mappings,
+            session,
+        )
+
+        for msg in fetcher:
+            timeentry = extractor.get(msg)
+            if timeentry:
+                session.add(timeentry)
+        transaction.commit()
 
