@@ -72,8 +72,16 @@ class EmailSender(object):
 
     def send(self, to, topic, message=None, html_message=None,
              sender_name=None, cc=None, replay_to=None, file_path=None):
-        if message is None and html_message is None:
-            raise TypeError('send() takes at least message or html_message')
+        none_provided = (
+            message is None and
+            html_message is None
+        )
+        both_provided = (
+            message is not None and
+            html_message is not None
+        )
+        if none_provided or both_provided:
+            raise TypeError('send() takes either message or html_message')
 
         email_addr = self.user
         if sender_name:
