@@ -208,4 +208,4 @@ def g(env):
 def m(env):
     from intranet3.utils.smtp import EmailSender
     sender = EmailSender()
-    import ipdb; ipdb.set_trace()
+    sender.send('konrad.rotkiewicz@stxnext.pl', 'dupa', message='<b>abc2</b>', file_path='/tmp/a.txt')
