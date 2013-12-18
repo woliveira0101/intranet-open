@@ -7,7 +7,7 @@ from pyramid.response import Response
 from intranet3.utils.views import CronView
 from intranet3.models import User, Holiday
 from intranet3.log import INFO_LOG, DEBUG_LOG, EXCEPTION_LOG
-from intranet3.utils.mail import EmailSender
+from intranet3.utils.smtp import EmailSender
 from intranet3.lib.bugs import Bugs
 
 LOG = INFO_LOG(__name__)

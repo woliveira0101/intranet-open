@@ -204,3 +204,8 @@ def g(env):
     fetcher.fetch_all_tickets()
     results = fetcher.result()
     import ipdb; ipdb.set_trace()
+
+def m(env):
+    from intranet3.utils.smtp import EmailSender
+    sender = EmailSender()
+    import ipdb; ipdb.set_trace()

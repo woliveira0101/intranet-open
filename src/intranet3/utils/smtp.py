@@ -1,3 +1,4 @@
+import smtplib
 from email.utils import formataddr
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -19,22 +20,25 @@ DEBUG = DEBUG_LOG(__name__)
 
 
 class EmailSender(object):
+    HOST = 'smtp.gmail.com'
+    PORT = 587
 
-    @classmethod
-    def send(cls, to, topic, message, sender_name=None, cc=None, replay_to=None):
-        """
-        Send an email with message to given address.
-        This is an asynchronous call.
-
-        @return: deferred
-        """
+    def __init__(self):
         config = ApplicationConfig.get_current_config()
         user = config.google_user_email
-        email_addr = user
-        if sender_name:
-            email_addr = formataddr((sender_name, email_addr))
         secret = config.google_user_password
-        SenderFactory = ESMTPSenderFactory
+        self.user, self.secret = user, secret
+        self.server = smtplib.SMTP(self.HOST, self.PORT)
+        self.server.ehlo()
+        self.server.starttls()
+        self.server.login(user, secret)
+
+    def send(self, to, topic, message=None, html_message=None,
+             sender_name=None, cc=None, replay_to=None):
+
+        email_addr = self.user
+        if sender_name:
+            email_addr = formataddr((sender_name, self.user))
 
         email = MIMEText(message, _charset='utf-8')
         email['Subject'] = topic
@@ -46,54 +50,28 @@ class EmailSender(object):
         if replay_to:
             email['Reply-To'] = replay_to
 
-        formatted_mail = email.as_string()
+        self.server.sendmail(
+            self.user,
+            to,
+            email.as_string(),
+        )
 
-        messageFile = StringIO(formatted_mail)
-
-        resultDeferred = Deferred()
-
-        senderFactory = SenderFactory(
-            user, # user
-            secret, # secret
-            user, # from
-            to, # to
-            messageFile, # message
-            resultDeferred, # deferred
-            contextFactory=cls.contextFactory)
-
-        reactor.connectTCP(cls.SMTP_SERVER, cls.SMTP_PORT, senderFactory)
-        return resultDeferred
-
-    @classmethod
-    def send_html(cls, to, topic, message):
+    def send_html(self, to, topic, message):
         config = ApplicationConfig.get_current_config()
 
         email = MIMEMultipart('alternative')
         email['Subject'] = topic
         email['From'] = config.google_user_email
         email['To'] = to
-        email.attach(MIMEText(message,'html', 'utf-8'))
+        email.attach(MIMEText(message, 'html', 'utf-8'))
 
-        formatted_mail = email.as_string()
+        self.server.sendmail(
+            self.user,
+            to,
+            email.as_string(),
+        )
 
-        messageFile = StringIO(formatted_mail)
-
-        resultDeferred = Deferred()
-
-        senderFactory = ESMTPSenderFactory(
-            config.google_user_email, # user
-            config.google_user_password, # secret
-            config.google_user_email, # from
-            to, # to
-            messageFile, # message
-            resultDeferred, # deferred
-            contextFactory=cls.contextFactory)
-
-        reactor.connectTCP(cls.SMTP_SERVER, cls.SMTP_PORT, senderFactory)
-        return resultDeferred
-
-    @classmethod
-    def send_with_file(cls, to, topic, message, file_path):
+    def send_with_file(self, to, topic, message, file_path):
         config = ApplicationConfig.get_current_config()
 
         email = MIMEMultipart()
@@ -110,20 +88,8 @@ class EmailSender(object):
         email.attach(part)
         email.attach(MIMEText(message))
 
-        formatted_mail = email.as_string()
-
-        messageFile = StringIO(formatted_mail)
-
-        resultDeferred = Deferred()
-
-        senderFactory = ESMTPSenderFactory(
-            config.google_user_email, # user
-            config.google_user_password, # secret
-            config.google_user_email, # from
-            to, # to
-            messageFile, # message
-            resultDeferred, # deferred
-            contextFactory=cls.contextFactory)
-
-        reactor.connectTCP(cls.SMTP_SERVER, cls.SMTP_PORT, senderFactory)
-        return resultDeferred
+        self.server.sendmail(
+            self.user,
+            to,
+            email.as_string(),
+        )

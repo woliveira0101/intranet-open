@@ -2,7 +2,7 @@
 from pprint import pformat
 
 from intranet3.log import INFO_LOG, EXCEPTION_LOG, WARN_LOG
-from intranet3.utils.mail import MailCheckerTask
+from intranet3.utils.mail_fetcher import MailCheckerTask
 from intranet3 import config
 from failsafe import Repeater, RequiredAction
 

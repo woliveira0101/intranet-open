@@ -9,7 +9,7 @@ from intranet3 import config
 from intranet3.models import ApplicationConfig
 from intranet3.utils.views import CronView
 from intranet3.log import INFO_LOG, EXCEPTION_LOG
-from intranet3.utils.mail import EmailSender
+from intranet3.utils.smtp import EmailSender
 from intranet3.views.report.late import AnnuallyReportMixin
 
 LOG = INFO_LOG(__name__)

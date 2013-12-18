@@ -7,7 +7,7 @@ from intranet3 import config
 from intranet3.lib.bugs import Bugs
 from intranet3.log import INFO_LOG, DEBUG_LOG, EXCEPTION_LOG
 from intranet3.models import User, Project
-from intranet3.utils.mail import EmailSender
+from intranet3.utils.smtp import EmailSender
 from intranet3.utils.views import CronView
 
 

@@ -9,7 +9,7 @@ from intranet3 import config
 from intranet3 import helpers as h
 from intranet3.utils.views import BaseView
 from intranet3.utils import google_calendar as cal
-from intranet3.utils.mail import EmailSender
+from intranet3.utils.smtp import EmailSender
 from intranet3.forms.employees import (LateJustificationForm,
                                        LateApplicationForm,
                                        WrongTimeJustificationForm,

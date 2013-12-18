@@ -19,7 +19,7 @@ from intranet3.utils import gdocs
 from intranet3.utils.views import CronView
 from intranet3.views.report.wrongtime import AnnuallyReportMixin
 from intranet3.models import TimeEntry, Tracker, Project, Client, User, ApplicationConfig, Holiday
-from intranet3.utils.mail import EmailSender
+from intranet3.utils.smtp import EmailSender
 from intranet3.log import WARN_LOG, ERROR_LOG, DEBUG_LOG, INFO_LOG, EXCEPTION_LOG
 
 LOG = INFO_LOG(__name__)
