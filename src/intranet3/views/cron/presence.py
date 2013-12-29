@@ -9,7 +9,8 @@ from intranet3 import config
 from intranet3.models import ApplicationConfig
 from intranet3.utils.views import CronView
 from intranet3.log import INFO_LOG, EXCEPTION_LOG
-from intranet3.utils.smtp import EmailSender
+from intranet3.utils import mail
+from intranet3.utils.task import deferred
 from intranet3.views.report.late import AnnuallyReportMixin
 
 LOG = INFO_LOG(__name__)
@@ -25,21 +26,15 @@ class Report(AnnuallyReportMixin, CronView):
     def action(self):
         today = datetime.date.today()
         data = self._annually_report(today.year)
-
-        def on_success(result):
-            LOG(u'Monthly report with lates - sent')
-        def on_error(err):
-            EXCEPTION(u'Failed to sent Monthly report with lates')
-
         data['config'] = self.request.registry.settings
         response = render('intranet3:templates/_email_reports/presence_annually_report.html', data, self.request)
         response = response.replace('\n', '').replace('\t', '')
-        deferred = EmailSender.send_html(
+        deferred.defer(
+            mail.send,
             config['MANAGER_EMAIL'],
             self._(u'[Intranet2] Late report'),
-            response
+            html_message=response,
         )
-        deferred.addCallbacks(on_success, on_error)
         return Response('ok')
 
 

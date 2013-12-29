@@ -9,7 +9,8 @@ from intranet3 import config
 from intranet3 import helpers as h
 from intranet3.utils.views import BaseView
 from intranet3.utils import google_calendar as cal
-from intranet3.utils.smtp import EmailSender
+from intranet3.utils.task import deferred
+from intranet3.utils import mail
 from intranet3.forms.employees import (LateJustificationForm,
                                        LateApplicationForm,
                                        WrongTimeJustificationForm,
@@ -64,7 +65,8 @@ class LateApplication(BaseView):
                        email=self.request.user.email,
                        date=date.strftime('%d.%m.%Y')
         )
-        deferred = EmailSender.send(
+        deferred.defer(
+            mail.send,
             config['COMPANY_MAILING_LIST'],
             topic,
             explanation,
@@ -217,7 +219,8 @@ ${name}""", **kwargs)
         kwargs = locals()
         kwargs.pop('self')
         body = body(**kwargs)
-        return EmailSender.send(
+        return deferred.defer(
+            mail.send,
             config['ACCOUNTANT_EMAIL'],
             topic,
             body,
@@ -276,7 +279,7 @@ ${name}""", **kwargs)
                     date += oneday
 
                 ## let's send email
-                deferred = self._send_mail(
+                self._send_mail(
                     absence.type,
                     date_start.strftime('%Y-%m-%d'),
                     date_end.strftime('%Y-%m-%d'),

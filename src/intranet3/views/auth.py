@@ -1,7 +1,7 @@
 import requests
 from oauth2client.client import FlowExchangeError
 from pyramid.view import view_config
-from pyramid.security import authenticated_userid, remember, forget, NO_PERMISSION_REQUIRED
+from pyramid.security import remember, forget, NO_PERMISSION_REQUIRED
 from pyramid.httpexceptions import HTTPForbidden, HTTPFound
 
 from intranet3 import config
@@ -39,13 +39,6 @@ flow = users_flow
 freelancers_flow = clients_flow
 
 
-def forbidden_view(request):
-    if authenticated_userid(request):
-        return HTTPForbidden()
-    else:
-        return HTTPFound(location=request.url_for('/auth/logout_view'))
-
-
 @view_config(route_name='auth_callback', permission=NO_PERMISSION_REQUIRED)
 def callback(request):
     code = request.params.get('code', '')
@@ -54,7 +47,7 @@ def callback(request):
     except FlowExchangeError:
         raise HTTPForbidden
     data = requests.get(USER_INFO_URI % credentials.access_token, verify=False)
-    google_profile = data.json
+    google_profile = data.json()
 
     email = google_profile['email']
 

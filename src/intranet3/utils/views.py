@@ -152,6 +152,10 @@ class CronView(View):
         raise HTTPNotFound()
 
 
+class TaskView(CronView):
+    pass
+
+
 class MonthMixin(object):
     """
     Mixin for creating start and end date of month from GET month parameter('%m.%y')

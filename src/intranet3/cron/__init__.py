@@ -65,7 +65,7 @@ repeater = Repeater(
 
 cron_tasks = (
     #func, cron_line
-    (clean, (-1, -1, -1, -1, -1)),
+#    (clean, (-1, -1, -1, -1, -1)),
 #    (sync_holidays, '1 0 * * *'),
 #    (resolved_notification, '0 7 * * *'),
 #    (missing_hours_notification, '0 19 * * *'),
@@ -80,8 +80,11 @@ cron_tasks = (
 #    (missed_hours, '1 0 1,2 * *'), # at 00:01 every first 2 days of month
 )
 
+from intranet3.utils.task.worker import worker
+
 timer_tasks = (
-    (mailer, 60), # every 60 second
+    #(mailer, 60), # every 60 second
+    (worker, 1), # every 60 second
 )
 
 def run_cron_tasks():

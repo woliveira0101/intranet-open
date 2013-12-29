@@ -19,7 +19,8 @@ from intranet3.utils import gdocs
 from intranet3.utils.views import CronView
 from intranet3.views.report.wrongtime import AnnuallyReportMixin
 from intranet3.models import TimeEntry, Tracker, Project, Client, User, ApplicationConfig, Holiday
-from intranet3.utils.smtp import EmailSender
+from intranet3.utils.task import deferred
+from intranet3.utils import mail
 from intranet3.log import WARN_LOG, ERROR_LOG, DEBUG_LOG, INFO_LOG, EXCEPTION_LOG
 
 LOG = INFO_LOG(__name__)
@@ -95,19 +96,13 @@ class ExcelReport(CronView):
         wbk.save(file_path)
         topic = '[intranet] Excel with projects hours'
         message = 'Excel with projects hours'
-        deferred = EmailSender.send_with_file(
+        deferred.defer(
+            mail.send,
             config['MANAGER_EMAIL'],
             topic,
             message,
-            file_path
+            file_path=file_path
         )
-        def on_success(result):
-            os.remove(file_path)
-            LOG(u'Report with client hours excel %s - sent' % (today,))
-        def on_error(err):
-            os.remove(file_path)
-            EXCEPTION(u'Failed to sent Report with client hours excel on %s' % (today,))
-        deferred.addCallbacks(on_success, on_error)
         return Response('ok')
 
 
@@ -116,20 +111,16 @@ class WrongTimeReport(AnnuallyReportMixin, CronView):
     def action(self):
         today = datetime.date.today()
         data = self._annually_report(today.year)
-
-        def on_success(result):
-            LOG(u'Report with incorrect time records - sent')
-        def on_error(err):
-            EXCEPTION(u'Failed to sent report with incorrect time records')
         data['config'] = self.settings
         response = render('intranet3:templates/_email_reports/time_annually_report.html', data, request=self.request)
         response = response.replace('\n', '').replace('\t', '')
-        deferred = EmailSender.send_html(
+
+        deferred.defer(
+            mail.send,
             config['MANAGER_EMAIL'],
             self._(u'[Intranet2] Wrong time record report'),
-            response
+            html_message=response,
         )
-        deferred.addCallbacks(on_success, on_error)
         return Response('ok')
 
 
@@ -231,13 +222,13 @@ class TodayHours(CronView):
 
         message = u'<br />\n'.join(output).replace('\t', '&emsp;&emsp;')
 
-        def on_success(result):
-            LOG(u'Report with hours added on %s - sent' % (date,))
-        def on_error(err):
-            EXCEPTION(u'Failed to sent Report with hours added on %s' % (date,))
         topic = self._(u"[intranet] Daily hours report")
-        deferred = EmailSender.send_html(config['MANAGER_EMAIL'], topic, message)
-        deferred.addCallbacks(on_success, on_error)
+        deferred.defer(
+            mail.send,
+            config['MANAGER_EMAIL'],
+            topic,
+            html_message=message,
+        )
         LOG(u"Report with hours on %s - started" % (date,))
         return message
 
@@ -304,13 +295,13 @@ class DailyHoursWithoutTicket(CronView):
 
         message = u'\n'.join(output)
 
-        def on_success(result):
-            LOG(u'Report with hours without ticket added on %s - sent' % (date,))
-        def on_error(err):
-            EXCEPTION(u'Failed to sent Report with hours without ticketadded on %s' % (date,))
         topic = self._(u"[intranet] Daily hours report without bugs")
-        deferred = EmailSender.send(config['MANAGER_EMAIL'], topic, message)
-        deferred.addCallbacks(on_success, on_error)
+        deferred.defer(
+            mail.send,
+            config['MANAGER_EMAIL'],
+            topic,
+            message,
+        )
         LOG(u"Report with hours without ticket on %s - started" % (date,))
         return message
 
@@ -366,13 +357,13 @@ class HoursForPreviousMonths(CronView):
 
         message = u'\n'.join(output)
 
-        def on_success(result):
-            LOG(u'Report with hours added for the previous months - sent')
-        def on_error(err):
-            EXCEPTION(u'Failed to sent report with hours added for the previous months')
         topic = self._(u"[intranet] Report with hours added for the previous months")
-        deferred = EmailSender.send(config['MANAGER_EMAIL'], topic, message)
-        deferred.addCallbacks(on_success, on_error)
+        deferred.defer(
+            mail.send,
+            config['MANAGER_EMAIL'],
+            topic,
+            message,
+        )
         LOG(u"Report with hours added for previous months - started")
         return message
 
@@ -473,16 +464,12 @@ class MissedHours(CronView):
             request=self.request
         )
         response = response.replace('\n', '').replace('\t', '')
-        deferred = EmailSender.send_html(
+        deferred.defer(
+            mail.send,
             config['MANAGER_EMAIL'],
             self._(u'[Intranet2] Missed hours'),
-            response
+            html_message=response,
         )
-        def on_success(result):
-            LOG(u'Report with missed hours - sent')
-        def on_error(err):
-            EXCEPTION(u'Failed to sent report with missed hours')
-        deferred.addCallbacks(on_success, on_error)
         return data
 
     def _get_first_day_of_work(self):

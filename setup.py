@@ -53,9 +53,10 @@ setup(
         'python-dateutil==1.5',
         'xlwt<=0.7.4',
         'pil==1.1.7',
-        'requests<=0.14.2',
+        'requests==2.1.0',
         'certifi',
         'paste',
+        'PasteScript',
         'pyramid_ldap',
         'google-api-python-client',
         'werkzeug', # good memcached wrapper
@@ -68,6 +69,7 @@ setup(
         'colander',
         'netaddr',
         'pastegevent',
+        'redis==2.8.0',
     ],
     message_extractors = { 'src/intranet3': [
         ('**.py', 'python', None ),

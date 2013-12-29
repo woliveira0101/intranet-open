@@ -7,7 +7,8 @@ from pyramid.response import Response
 from intranet3.utils.views import CronView
 from intranet3.models import User, Holiday
 from intranet3.log import INFO_LOG, DEBUG_LOG, EXCEPTION_LOG
-from intranet3.utils.smtp import EmailSender
+from intranet3.utils import mail
+from intranet3.utils.task import deferred
 from intranet3.lib.bugs import Bugs
 
 LOG = INFO_LOG(__name__)
@@ -41,14 +42,13 @@ Twój intranet
             url=hours_url,
             date=date.strftime('%d.%m.%Y'),
         )
-
-        def on_success(result):
-            LOG(u'Email reminder about missing hours sent to user %s' % (email, ))
-        def on_error(err):
-            EXCEPTION(u'Failed to remind user %s about missing hours' % (email, ))
         topic = self._(u"[intranet] brakujące godziny z dnia ${date}", date=date.strftime('%d.%m.%Y'))
-        deferred = EmailSender.send(email, topic, message)
-        deferred.addCallbacks(on_success, on_error)
+        deferred.defer(
+            mail.send,
+            email,
+            topic,
+            message,
+        )
         LOG(u"Email reminder for user %s started" % (email, ))
         return message
 
@@ -112,13 +112,13 @@ class ResolvedBugs(CronView):
         output.append(self._(u'Pozdrawiam,\nTwój intranet'))
         message = u'\n'.join(output)
 
-        def on_success(result):
-            LOG(u'Email reminder about resolved bugs sent to user %s' % (user.email, ))
-        def on_error(err):
-            EXCEPTION(u'Failed to remind user %s about resolved bugs' % (user.email, ))
         topic = self._(u"[intranet] ${num} zgłoszeń do zamknięcia", num=len(bugs))
-        deferred = EmailSender.send(user.email, topic, message)
-        deferred.addCallbacks(on_success, on_error)
+        deferred.defer(
+            mail.send,
+            user.email,
+            topic,
+            message,
+        )
         LOG(u"Email reminder for user %s started" % (user.email, ))
         return message
 

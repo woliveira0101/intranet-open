@@ -7,7 +7,8 @@ from intranet3 import config
 from intranet3.lib.bugs import Bugs
 from intranet3.log import INFO_LOG, DEBUG_LOG, EXCEPTION_LOG
 from intranet3.models import User, Project
-from intranet3.utils.smtp import EmailSender
+from intranet3.utils import mail
+from intranet3.utils.task import deferred
 from intranet3.utils.views import CronView
 
 
@@ -20,11 +21,6 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 class OldBugsReport(CronView):
 
     def _send_report(self, coordinator_id, email, bugs):
-        def on_success(result):
-            LOG(u'Monthly report with old bugs - sent')
-        def on_error(err):
-            EXCEPTION(u'Failed to sent Monthly report with old bugs')
-
         # Bugs filtering & ordering
         # Coordinator gets bugs from his projects, manager gets bugs from
         # all projects
@@ -50,12 +46,12 @@ class OldBugsReport(CronView):
                 data,
                 request=self.request
             )
-            deferred = EmailSender.send_html(
+            deferred.defer(
+                mail.send,
                 email,
                 self._(u'[Intranet3] Old bugs report'),
-                response
+                html_message=response,
             )
-            deferred.addCallbacks(on_success, on_error)
 
     def action(self):
         coordinators = self.session.query(Project.coordinator_id, User.email) \

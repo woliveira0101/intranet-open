@@ -14,6 +14,9 @@ from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.security import Allow, ALL_PERMISSIONS
 from werkzeug.contrib.cache import MemcachedCache
+
+from intranet3.utils.redis_lib import Redis
+
 try:
     import uwsgi
 except:
@@ -27,7 +30,10 @@ class CustomAuthenticationPolicy(AuthTktAuthenticationPolicy):
         if result is None:
             cron_key = request.registry.settings['CRON_SECRET_KEY']
             if request.headers.get('X-Intranet-Cron', 'false') == cron_key:
-                result = 0 # cron userid
+                result = -1 # cron userid
+            task_key = request.registry.settings['TASK_SECRET_KEY']
+            if request.headers.get('X-Intranet-Task', 'false') == task_key:
+                result = -2 # cron userid
         return result
 
 
@@ -39,6 +45,7 @@ class Root(object):
         (Allow, 'g:coordinator', ('view', 'client', 'freelancer', 'coordinator', 'client_or_freelancer', 'scrum')),
         (Allow, 'g:scrum', ('scrum',)),
         (Allow, 'g:cron', 'cron'),
+        (Allow, 'g:task', 'task'),
         (Allow, 'g:admin', ALL_PERMISSIONS)
     ]
 
@@ -47,6 +54,7 @@ class Root(object):
 
 config = None
 memcache = None
+redis = Redis(host='localhost', port=6379, db=0)
 
 
 def main(global_config, **settings):
@@ -56,15 +64,17 @@ def main(global_config, **settings):
     global config
     config = settings
     global memcache
+    global redis
     memcache = MemcachedCache([config['MEMCACHE_URI']])
 
     from intranet3.models import DBSession, Base, User
     from intranet3.utils import request
-    from intranet3.views.auth import forbidden_view
 
     def groupfinder(userid, request):
-        if userid == 0: ## cron userid
+        if userid == -1: ## cron userid
             perm = ['g:cron']
+        elif userid == -2: ## task userid
+            perm = ['g:task']
         else:
             user = User.query.get(userid)
             perm = [ 'g:%s' % g for g in user.groups ]
@@ -87,7 +97,6 @@ def main(global_config, **settings):
         default_permission='view',
         root_factory=Root,
     )
-    pyramid_config.add_forbidden_view(forbidden_view)
 
     pyramid_config.add_static_view('static', 'static', cache_max_age=3600)
 
@@ -103,6 +112,7 @@ def main(global_config, **settings):
     pyramid_config.add_route('api_images', '/api/images/{type:\w+}/{id:\d+}')
     pyramid_config.add_route('api_presence', 'api/presence')
     pyramid_config.add_route('api_blacklist', 'api/blacklist')
+    pyramid_config.add_route('deferred', '/_i/deferred')
 
     pyramid_config.add_renderer('.html', 'pyramid_jinja2.renderer_factory')
     pyramid_config.add_renderer(None, 'intranet3.utils.renderer.renderer_factory')

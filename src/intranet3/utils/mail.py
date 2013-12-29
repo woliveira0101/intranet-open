@@ -120,3 +120,21 @@ class EmailSender(object):
             to,
             msg.as_string(),
         )
+
+
+def send(to, topic, message=None, html_message=None,
+         sender_name=None, cc=None, replay_to=None, file_path=None):
+    """
+    Helper for sending single email address
+    """
+    sender = EmailSender()
+    sender.send(
+        to,
+        topic,
+        message,
+        html_message,
+        sender_name,
+        cc,
+        replay_to,
+        file_path
+    )

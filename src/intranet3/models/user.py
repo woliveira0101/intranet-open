@@ -123,11 +123,11 @@ class User(Base):
                 grant_type='refresh_token',
             )
             response = requests.post('https://accounts.google.com/o/oauth2/token', data=args, verify=False)
-            if 'access_token' not in response.json:
+            data = response.json()
+            if 'access_token' not in data:
                 ERROR('There is no token in google response %s, status_code: %s, refresh_token: %s, user.email: %s' % (response.json, response.status_code, self.refresh_token, self.email))
                 return None
 
-            data = response.json
             INFO('Received response with access_token for user %s: %s' % (
                 self.name, data
             ))
