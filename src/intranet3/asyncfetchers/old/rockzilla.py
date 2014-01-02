@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-from .igozilla import IgozillaFetcher
+from intranet3.asyncfetchers.igozilla import IgozillaFetcher
+from intranet3.asyncfetchers.bugzilla import BugzillaBug
 
 KEYINGREDIENT_TRACKER_ID = 10
+
 
 class RockzillaFetcher(IgozillaFetcher):
 

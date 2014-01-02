@@ -1,9 +1,13 @@
-from nbugzilla import BugzillaFetcher
+from .bugzilla import BugzillaFetcher
+from .rockzilla import RockzillaFetcher
+from .pivotaltracker import PivotalTrackerFetcher
 
-from nbase import FetchException, FetcherTimeout, FetcherBaseException
+from .base import FetchException, FetcherTimeout, FetcherBaseException
 
 FETCHERS = {
-   'bugzilla': BugzillaFetcher
+   'bugzilla': BugzillaFetcher,
+   'rockzilla': RockzillaFetcher,
+   'pivotaltracker': PivotalTrackerFetcher,
 }
 
 def get_fetcher(tracker, credentials, login_mapping):

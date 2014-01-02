@@ -1,189 +1,72 @@
-# -*- coding: utf-8 -*-
-import csv
+import sys
+import traceback
 import codecs
-from base64 import b64encode
-from zope.interface.declarations import implements
+import functools
+import csv
 
-from intranet3 import memcache
-from intranet3.log import EXCEPTION_LOG, INFO_LOG, DEBUG_LOG
-from intranet3.models.project import SelectorMapping
+import gevent
+from requests.auth import HTTPBasicAuth
+
 from intranet3.models import User
+from intranet3.models.project import SelectorMapping
 from intranet3.helpers import decoded_dict
-from intranet3.lib.scrum import parse_whiteboard
-from intranet3.priorities import PRIORITIES
-
-EXCEPTION = EXCEPTION_LOG(__name__)
-LOG = INFO_LOG(__name__)
-DEBUG = DEBUG_LOG(__name__)
-
-_marker = object()
-
-class Bug(object):
-    
-    def __init__(self,
-                 tracker, id, desc, reporter, owner, priority, severity,
-                 status, resolution, project_name, component_name, deadline,
-                 opendate, changeddate,
-                 dependson=_marker, blocked=_marker, whiteboard='', version='',
-                 number=None, labels=None):
-        self.time = 0.0
-        self.tracker = tracker
-        self.number = number  # Unique number for github
-        self.id = str(id)
-        self.desc = desc
-        self.reporter = reporter
-        self.owner = owner
-        self.priority = priority
-        self.severity = severity
-        self.status = status
-        self.resolution = resolution
-        self.project_name = project_name
-        self.component_name = component_name
-        self.project = None
-        self.deadline = deadline
-        self.opendate = opendate
-        self.changeddate = changeddate
-        self.dependson = {} if dependson is _marker else dependson
-        self.blocked = {} if blocked is _marker else blocked
-        self.labels = labels
-
-        if isinstance(whiteboard, basestring):
-            self.whiteboard = parse_whiteboard(whiteboard)
-        else:
-            self.whiteboard = whiteboard
-        self.version = version
-
-    def get_url(self):
-        raise NotImplementedError()
-
-    def is_unassigned(self):
-        raise NotImplementedError()
-
-    @property
-    def is_blocked(self):
-        return False
-
-    def get_status(self):
-        """
-        Convert tracker specific status to one of these:
-        'NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED', 'WAITING', 'RESOLVED', 'VERIFIED'
-        """
-        raise NotImplementedError()
-
-    @property
-    def priority_number(self):
-        priority = getattr(self, 'priority', 'unknown')
-        return PRIORITIES.get(priority.lower(), 5)
-
-    @property
-    def severity_number(self):
-        severity = getattr(self, 'severity', 'unknown')
-        return PRIORITIES.get(severity.lower(), 5)
-
-    def to_dict(self):
-        response = {
-            'id': self.id,
-            'time': self.time,
-            'desc': self.desc,
-            'severity': self.severity,
-            'severity_number': self.severity_number,
-            'project_name': self.project_name,
-            'component_name': self.component_name,
-            'dependson': [(bug_id, value) for bug_id, value in self.dependson.iteritems()],
-            'blocked': [(bug_id, value) for bug_id, value in self.blocked.iteritems()],
-            'version': self.version,
-            'priority': self.priority,
-            'whiteboard': self.whiteboard,
-            'url': self.get_url(),
-            'owner_name': self.owner.name,
-            'raporter_name': self.reporter.name,
-            'opendate': self.opendate.strftime('%Y-%m-%d'),
-            'changeddate': self.changeddate.strftime('%Y-%m-%d'),
-            'deadline': self.deadline,
-            'labels' : self.labels
-        }
-
-        if self.project:
-            response.update({
-                'project': {
-                    'id': self.project.id,
-                    'name': self.project.name,
-                    'client_name': self.project.client.name
-                }
-            })
-        else:
-            response.update({
-                'project': None,
-            })
-
-        return response
+from .request import RPC
 
 
-class FetchException(Exception):
+class FetcherBaseException(Exception):
     pass
 
-class SimpleProtocol(object):
-    
-    def __init__(self, on_success, on_error):
-        self.buffer = []
-        self.on_success = on_success
-        self.on_error = on_error
-        
-    def dataReceived(self, bytes):
-        self.buffer.append(bytes)
 
-    def connectionLost(self, reason):
-        DEBUG(u'SimpleProtocol lost connection due to %s' % (reason.getErrorMessage(), ))
-        if isinstance(reason.value, ResponseDone):
-            self.on_success(''.join(self.buffer))
-        else:
-            self.on_error(reason.value)
-            
-class StringProducer(object):
+class FetchException(FetcherBaseException):
+    pass
 
-    def __init__(self, body):
-        self.body = body
-        self.length = len(body)
 
-    def startProducing(self, consumer):
-        consumer.write(self.body)
-        return succeed(None)
+class FetcherTimeout(FetcherBaseException):
+    pass
 
-    def pauseProducing(self):
-        pass
 
-    def stopProducing(self):
-        pass
+class FetcherMeta(type):
+    FETCHERS = [
+        'fetch_user_tickets',
+        'fetch_all_tickets',
+        'fetch_bugs_for_query',
+        'fetch_scrum',
 
-class cached_bug_fetcher(object):
-    """ makes function fetch bugs from cache first """
-    def __init__(self, key_generator):
-        assert callable(key_generator)
-        self.key_generator = key_generator
-    
-    def __call__(self, func):
-        def fetcher(this, *args, **kwargs):
-            query = self.key_generator(*args, **kwargs)
-            key = u"BUGS_LOGIN-%s_TRACKERID-%s_QUERY-%s" % (this.login, this.tracker.id, query)
-            bugs = memcache.get(key)
-            if bugs is None: # fetch as usual
-                DEBUG(u"Bugs not in cache for key %s" % (key, ))
-                this.cache_key = key.replace(' ', '') # mark where to cache results
-                func(this, *args, **kwargs)
-            else:  # bugs got from cache
-                DEBUG(u"Bugs found in cache for key %s" % (key, ))
-                this.bugs = bugs
-                this.success()
-        return fetcher
+        'fetch_bug_titles_and_depends_on',
+        'fetch_dependons_for_ticket_ids',
+    ]
 
-class BaseFetcher(object):
-    
-    USER_AGENT = 'Intranet Bug Fetcher'
-    SLEEP_PERIOD = 0.1
+    @staticmethod
+    def __async(f):
+        @functools.wraps(f)
+        def func(*args, **kwargs):
+            self = args[0]
+            self._run = f
+            self.args = args
+            self.kwargs = kwargs
+            self.start()
+            return
+        return func
+
+    def __new__(mcs, name, bases, dct):
+        for name, prop in dct.iteritems():
+            if name in mcs.FETCHERS:
+                dct[name] = mcs.__async(prop)
+        return type.__new__(mcs, name, bases, dct)
+
+class BaseFetcher(gevent.Greenlet):
+    __metaclass__ = FetcherMeta
+    bug_class = None
+    get_converter = None
     CACHE_TIMEOUT = 3 * 60  # 3 minutes
-    redirect_support = False
-    
-    def __init__(self, tracker, credentials, login_mapping):
+    SPRINT_REGEX = 's=%s(?!\S)'
+    MAX_TIMEOUT = 30 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
+
+    def __repr__(self):
+        return ''
+
+    def __init__(self, tracker, credentials, login_mapping, timeout=MAX_TIMEOUT):
+        gevent.Greenlet.__init__(self)
         self.tracker = tracker
         self.login = credentials.login
         self.password = credentials.password
@@ -194,102 +77,83 @@ class BaseFetcher(object):
         self.error = None
         self.cache_key = None
         self.dependson_and_blocked_status = {}
-        
-    def run(self):
-        """ start fetching tickets """
-        try:
-            # start asynchronous ticket fetching
-            self.fetch()
-        except:
-            # failed to start ticket fetching
-            self.done = True
-            raise
-        
-    def request(self, url, headers, on_success, on_failure=None, method='GET', body=None):
-        LOG(u'Will request URL %s' % (url, ))
-        if on_failure is None:
-            on_failure = self.failed
-        deferred = self.client.request(
-            method,
-            url,
-            Headers(headers),
-            None if body is None else StringProducer(body)
-        )
-        def redirecting_on_success(resp):
-            if resp.code == 302:
-                LOG(u"Redirect (302) found in response")
-                location = resp.headers.getRawHeaders('location')[0]
-                if method == 'POST':
-                    new_url, body = location.split('?')
-                    self.request(new_url, headers, on_success, on_failure,
-                                 method, body)
-                else:
-                    self.request(location, headers, on_success, on_failure,
-                                 'GET', None)
-            else:
-                on_success(resp)
-        deferred.addCallbacks(redirecting_on_success if self.redirect_support else on_success, on_failure)
+        self.timeout = timeout
 
-    def failed(self, err):
-        self.fail(err)
-        EXCEPTION(u"Fetcher for tracker %s failed: %s" % (self.tracker.name, err))
-        
-    def success(self):
+        self.traceback = None
+        self.fetch_error = None
+
+        self._auth_data = None
+
+    def get_auth(self):
+        """ Perform action to get authentication (like token or cookies) """
+        return None
+
+    def set_auth(self, session, data=None):
+        """ Perform action to set authentication (like token or cookies) """
+        return None
+
+    def add_data(self, session):
+        return None
+
+    def before_processing(self):
+        """
+        Store some data before doing processing,
+        i.e. fetch some data necessary for processing
+        """
+        return None
+
+    def get_rpc(self):
+        rpc = RPC()
+        if not self._auth_data:
+            self._auth_data = self.get_auth()
+        self.set_auth(rpc.s, self._auth_data)
+        return rpc
+
+    def consume(self, rpcs):
+        if not isinstance(rpcs, list):
+            rpcs = [rpcs]
+
+        if not self._auth_data:
+            self._auth_data = self.get_auth()
+
+        for rpc in rpcs:
+            self.set_auth(rpc.s, self._auth_data)
+            self.add_data(rpc.s)
+            rpc.start()
+
+        self.before_processing()
+
+        for rpc in rpcs:
+            response = rpc.get_result()
+            reason = self.check_if_failed(response)
+            if reason:
+                raise FetchException(reason)
+            self.received(response.text)
+
         self.done = True
-        
-    def get_headers(self):
-        """ Generate request headers (as a dictionary) """
-        return {
-            'User-Agent': [self.USER_AGENT]
-        }
-    
-    def fetch_user_tickets(self):
-        """ Start fetching tickets for current user """
-        raise NotImplementedError()
-    
-    def fetch_all_tickets(self):
-        """ Start fetching tickets for all users in mapping """
-        raise NotImplementedError()
-    
-    def fetch_user_resolved_bugs(self):
-        """ Start fetching fixable tickets for current user """
-        raise NotImplementedError()
-    
-    def fetch_all_resolved_bugs(self):
-        """ Start fetching fixable tickets for all users """
-        raise NotImplementedError()
-    
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
-        """ Start fetching all bugs matching given criteria """
-        raise NotImplementedError()
-    
-    def fetch_resolved_bugs_for_query(self, ticket_id, project_selector, component_selector, version):
-        """ Start fetching resolved bugs matching given criteria """
-        raise NotImplementedError()
-    
-    def fetch_bug_titles_and_depends_on(self, ticket_ids):
-        """ Start fetching bug titles and bug depends_on for bugs with given ids """
-        # TODO other implementations
-        self.success()
-    
-    def fetch_dependons_for_ticket_ids(self, ticket_ids):
-        """ Start recursively fetching dependons for ticket ids """
-        raise NotImplementedError()
 
-    def fetch_scrum(self, sprint_name, project_id, component_id=None):
-        raise NotImplementedError()
+    def check_if_failed(self, response):
+        code = response.status_code
+        if 200 > code > 299:
+            return u'Received response %s' % code
 
-    def isReady(self):
-        """ Check if this fetcher is done """
-        return self.done
-    
+    def received(self, data):
+        """ Called when server returns whole response body """
+        converter = self.get_converter()
+        for bug_desc in self.parse(data):
+            bug = self.bug_class(
+                tracker=self.tracker,
+                **converter(bug_desc)
+            )
+            self.bugs[bug.id] = bug
+
     def resolve_user(self, orig_login):
         login = orig_login.lower()
         if login in self.login_mapping:
             return self.login_mapping[login]
         else:
             return User(name=orig_login, email=orig_login)
-    
+
     def resolve(self, bug):
         bug.owner = self.resolve_user(bug.owner)
         bug.reporter = self.resolve_user(bug.reporter)
@@ -297,74 +161,84 @@ class BaseFetcher(object):
             bug.id, bug.project_name, bug.component_name, bug.version,
         )
 
-    def __iter__(self):
-        """ iterate over fetched tickets """
-        if self.cache_key and self.error is None: # cache bugs if key was designeated and no error occured
-            memcache.set(self.cache_key, self.bugs, timeout=self.CACHE_TIMEOUT)
-            DEBUG(u"Cached %s bugs for key %s" % (len(self.bugs), self.cache_key))
+    def get_result(self):
+        self.join(self.MAX_TIMEOUT)
+
+        if not self.ready():
+            raise FetcherTimeout()
+
+        if not self.successful():
+            raise self.exception
+
+        results = []
         for bug in self.bugs.itervalues():
             self.resolve(bug)
-            yield bug
-            
-    def responded(self, resp, on_success=None):
-        """ Called when server returns response headers """
-        if resp.code == 200:
-            on_success = on_success or self.received
-            resp.deliverBody(SimpleProtocol(on_success, self.failed))
-        else:
-            self.fail(FetchException(u'Received response %s' % (resp.code, )))
+            results.append(bug)
 
-    def received(self, data):
-        """ Called when server returns whole response body """
-        try:
-            for bug in self.parse(data):
-                self.bugs[bug.id] = bug  
-        except BaseException, e:
-            EXCEPTION(u"Could not parse tracker response")
-            self.fail(e)
-        else:
-            self.success()
-            
+        return results
+
+    # methods that should be overridden:
+
     def parse(self, data):
         raise NotImplementedError()
-    
-    def fail(self, error):
-        self.done = True
-        self.error = error
-    
-    def update_depensons_and_blocked_status(self):
-        for bug in self.bugs.itervalues():
-            for key in bug.dependson:
-                bug.dependson[key] = self.dependson_and_blocked_status.get(key, {})
-                
-            for key in bug.blocked:
-                bug.blocked[key] = self.dependson_and_blocked_status.get(key, {})
-        
-    fetch_user_resolved_tickets = success
-        
-    fetch_all_resolved_tickets = success
 
+    def fetch_user_tickets(self):
+        """ Start fetching tickets for current user """
+        raise NotImplementedError()
+
+    def fetch_all_tickets(self):
+        """ Start fetching tickets for all users in mapping """
+        raise NotImplementedError()
+
+    def fetch_user_resolved_bugs(self):
+        """ Start fetching fixable tickets for current user """
+        raise NotImplementedError()
+
+    def fetch_all_resolved_bugs(self):
+        """ Start fetching fixable tickets for all users """
+        raise NotImplementedError()
+
+    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
+        """ Start fetching all bugs matching given criteria """
+        raise NotImplementedError()
+
+    def fetch_resolved_bugs_for_query(self, ticket_id, project_selector, component_selector, version):
+        """ Start fetching resolved bugs matching given criteria """
+        raise NotImplementedError()
+
+    def fetch_bug_titles_and_depends_on(self, ticket_ids):
+        """ Start fetching bug titles and bug depends_on for bugs with given ids """
+        # TODO other implementations
+        self.success()
+
+    def fetch_dependons_for_ticket_ids(self, ticket_ids):
+        """ Start recursively fetching dependons for ticket ids """
+        raise NotImplementedError()
+
+    def fetch_scrum(self, sprint_name, project_id, component_id=None):
+        raise NotImplementedError()
+
+
+class BasicAuthMixin(object):
+
+    def set_auth(self, session, data=None):
+        session.auth = HTTPBasicAuth(self.login, self.password)
 
 class CSVParserMixin(object):
-    
-    # function that converts CSV entries into bug class keyword params
-    get_converter = lambda self: None
-    
     # bug object class
     bug_class = None
-    
+
     # CSV encoding
     encoding = 'utf-8'
-    
+
     # CSV delimited
     delimiter=','
-    
-    def parse(self, data):
-        converter = self.get_converter()
 
+    def parse(self, data):
         if codecs.BOM_UTF8 == data[:3]:
             data = data.decode('utf-8-sig')
-
+        else:
+            data = data.encode('utf-8')
 
         if '\r\n' in data:
             data = data.split('\r\n')
@@ -374,43 +248,4 @@ class CSVParserMixin(object):
         reader = csv.DictReader(data,  delimiter=self.delimiter)
         for bug_desc in reader:
             bug_desc = decoded_dict(bug_desc, encoding=self.encoding)
-            yield self.bug_class(
-                tracker=self.tracker,
-                **converter(bug_desc)
-            )
-
-
-class BasicAuthMixin(object):
-
-    def get_headers(self):
-        headers = super(BasicAuthMixin, self).get_headers()
-        headers.update(Authorization=['Basic %s' % b64encode('%s:%s' % (self.login, self.password))])
-        return headers
-
-class AuthCookiesMixin(object):
-
-    def get_headers(self):
-        """ We need to do an additional HTTP request to get a login token from cookie """
-        headers = super(AuthCookiesMixin, self).get_headers()
-        if self.cookie:
-            headers['Cookie'] = self.cookie
-        return headers
-
-    def __call__(self, *args, **kwargs):
-        self.cookie = None
-        try:
-            self.cookie = self.get_auth_cookie()
-
-        except BaseException, e:
-            EXCEPTION(u'Cookie auth token fetch failed')
-            self.failed = FetchException(e)
-        else:
-            self.failed = None
-            return super(AuthCookiesMixin, self).__call__(*args, **kwargs)
-
-    def __iter__(self):
-        if self.failed:
-            raise self.failed
-        else:
-            for bug in super(AuthCookiesMixin, self).__iter__():
-                yield bug
+            yield bug_desc

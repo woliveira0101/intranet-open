@@ -58,6 +58,7 @@ class Bugs(object):
                     klass='error',
                 )
 
+
         projects = {}
         for bug in bugs:
             projects[bug.project_id] = None
