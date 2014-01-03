@@ -1,11 +1,11 @@
 
-class FakeFetcher(list):
+class FakeFetcher(object):
     """
     Used i.e. in Harvest tracker when we need credentials but don't fetcher
     """
 
     def __init__(self, *args, **kwargs):
-        super(FakeFetcher, self).__init__()
+        pass
 
     def fetch_user_tickets(self, *args, **kwargs):
         pass
@@ -31,17 +31,11 @@ class FakeFetcher(list):
     def fetch_dependons_for_ticket_ids(self, *args, **kwargs):
         pass
 
-
     def fetch_user_resolved_tickets(self, *args, **kwargs):
         pass
 
     def fetch_all_resolved_tickets(self, *args, **kwargs):
         pass
 
-    def isReady(self):
-        return True
-
-    def run(self):
-        pass
-
-    error = False
+    def get_result(self):
+        return []

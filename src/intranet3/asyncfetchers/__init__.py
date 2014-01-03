@@ -4,6 +4,7 @@ from .pivotaltracker import PivotalTrackerFetcher
 from .unfuddle import UnfuddleFetcher
 from .github import GithubFetcher
 from .trac import TracFetcher
+from .fake import FakeFetcher
 
 from .base import FetchException, FetcherTimeout, FetcherBaseException
 
@@ -14,6 +15,7 @@ FETCHERS = {
    'unfuddle': UnfuddleFetcher,
    'github': GithubFetcher,
    'trac': TracFetcher,
+   'harvest': FakeFetcher,
 }
 
 def get_fetcher(tracker, credentials, user, login_mapping):
