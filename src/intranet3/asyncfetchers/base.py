@@ -41,7 +41,9 @@ class FetcherMeta(type):
         @functools.wraps(f)
         def func(*args, **kwargs):
             self = args[0]
+            # clear fetcher
             self.bugs = {}
+            # start greenlet
             self._greenlet = gevent.Greenlet.spawn(f, *args, **kwargs)
         return func
 

@@ -134,7 +134,6 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         return [p.text for p in xml.findall('project/id')]
 
     def fetch_user_tickets(self):
-        import ipdb; ipdb.set_trace()
         rpcs = self.fetch('stories', filters=dict(
             owner='"%s"' % self.login,
             state=','.join(ISSUE_STATE_UNRESOLVED),
