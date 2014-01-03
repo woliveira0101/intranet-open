@@ -38,16 +38,11 @@ class FetcherMeta(type):
 
     @staticmethod
     def __async(f):
-        f.dupa = 1
         @functools.wraps(f)
         def func(*args, **kwargs):
             self = args[0]
-            greenlet = self._greenlet
-            greenlet._run = f
-            greenlet.args = args
-            greenlet.kwargs = kwargs
-            greenlet.start()
-            return
+            self.bugs = {}
+            self._greenlet = gevent.Greenlet.spawn(f, *args, **kwargs)
         return func
 
     def __new__(mcs, name, bases, attrs):
@@ -66,7 +61,7 @@ class BaseFetcher(object):
     MAX_TIMEOUT = 30 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 
     def __init__(self, tracker, credentials, user, login_mapping, timeout=MAX_TIMEOUT):
-        self._greenlet = gevent.Greenlet()
+        self._greenlet = None
         self.tracker = tracker
         self.login = credentials.login
         self.password = credentials.password
