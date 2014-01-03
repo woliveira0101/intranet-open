@@ -24,6 +24,13 @@ class FetchException(FetcherBaseException):
 class FetcherTimeout(FetcherBaseException):
     pass
 
+class FetcherBadDataError(FetcherBaseException):
+    """
+    Exception that indicates that is misconfigurated,
+    like wrong password or wrong sprint name.
+    Exception.message will be shown to user.
+    """
+
 
 class FetcherMeta(type):
     FETCHERS = [
@@ -44,6 +51,7 @@ class FetcherMeta(type):
             # clear fetcher
             self.bugs = {}
             # start greenlet
+            self.before_fetch()
             self._greenlet = gevent.Greenlet.spawn(f, *args, **kwargs)
         return func
 
@@ -92,18 +100,27 @@ class BaseFetcher(object):
     def add_data(self, session):
         return None
 
-    def before_processing(self):
+    def before_fetch(self):
         """
-        Store some data before doing processing,
-        i.e. fetch some data necessary for processing
+        Action before fetching the data
+        It is called before fetch_* function.
+        It blocks fetch_* function.
         """
         return None
 
-    def get_rpc(self):
-        rpc = RPC()
+    def apply_auth(self, rpc_or_session):
+        if isinstance(rpc_or_session, RPC):
+            session = rpc_or_session.s
+        else:
+            session = rpc_or_session
+
         if not self._auth_data:
             self._auth_data = self.get_auth()
-        self.set_auth(rpc.s, self._auth_data)
+        self.set_auth(session, self._auth_data)
+
+    def get_rpc(self):
+        rpc = RPC()
+        self.apply_auth(rpc)
         return rpc
 
     def consume(self, rpcs):
@@ -117,8 +134,6 @@ class BaseFetcher(object):
             self.set_auth(rpc.s, self._auth_data)
             self.add_data(rpc.s)
             rpc.start()
-
-        self.before_processing()
 
         for rpc in rpcs:
             response = rpc.get_result()
