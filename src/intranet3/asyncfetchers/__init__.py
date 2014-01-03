@@ -2,6 +2,7 @@ from .bugzilla import BugzillaFetcher
 from .rockzilla import RockzillaFetcher
 from .pivotaltracker import PivotalTrackerFetcher
 from .unfuddle import UnfuddleFetcher
+from .github import GithubFetcher
 
 from .base import FetchException, FetcherTimeout, FetcherBaseException
 
@@ -10,6 +11,7 @@ FETCHERS = {
    'rockzilla': RockzillaFetcher,
    'pivotaltracker': PivotalTrackerFetcher,
    'unfuddle': UnfuddleFetcher,
+   'github': GithubFetcher,
 }
 
 def get_fetcher(tracker, credentials, user, login_mapping):

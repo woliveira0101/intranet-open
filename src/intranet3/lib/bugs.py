@@ -136,15 +136,16 @@ class Bugs(object):
 
         project_ids = sprint.bugs_project_ids
 
-        entries = query(Project, Tracker, TrackerCredentials) \
+        entries = query(Project, Tracker, TrackerCredentials, User) \
                    .filter(Project.id.in_(project_ids)) \
                    .filter(Project.tracker_id==Tracker.id) \
                    .filter(TrackerCredentials.tracker_id==Project.tracker_id) \
+                   .filter(TrackerCredentials.user_id==User.id)\
                    .filter(TrackerCredentials.user_id==self.user.id).all()
 
         fetchers = []
-        for project, tracker, creds in entries:
-            fetcher = get_fetcher(tracker, creds, tracker.logins_mapping)
+        for project, tracker, creds, user in entries:
+            fetcher = get_fetcher(tracker, creds, user, tracker.logins_mapping)
             fetcher.fetch_scrum(sprint.name, project.project_selector, project.component_selector)
             fetchers.append(fetcher)
             if tracker.type in ('bugzilla', 'rockzilla', 'igozilla'):
