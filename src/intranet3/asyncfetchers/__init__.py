@@ -10,7 +10,7 @@ FETCHERS = {
    'pivotaltracker': PivotalTrackerFetcher,
 }
 
-def get_fetcher(tracker, credentials, login_mapping):
+def get_fetcher(tracker, credentials, user, login_mapping):
     type = tracker.type
     fetcher_class = FETCHERS[type]
-    return fetcher_class(tracker, credentials, login_mapping)
+    return fetcher_class(tracker, credentials, user, login_mapping)

@@ -2,7 +2,7 @@ from __future__ import with_statement
 from time import sleep, time
 
 from intranet3.decorators import log_time
-from intranet3.models import DBSession, TrackerCredentials, Tracker, Project
+from intranet3.models import DBSession, TrackerCredentials, Tracker, Project, User
 from intranet3.asyncfetchers import get_fetcher, FetcherBaseException, FetcherTimeout
 from intranet3.log import INFO_LOG, WARN_LOG, ERROR_LOG
 from intranet3.utils import flash
@@ -29,15 +29,17 @@ class Bugs(object):
     @log_time
     def _get_bugs(self, fetcher_callback, full_mapping=True):
         fetchers = []
-        creds_q = DBSession.query(Tracker, TrackerCredentials)\
-                           .filter(Tracker.id==TrackerCredentials.tracker_id)\
-                           .filter(TrackerCredentials.user_id==self.user.id)
-        for tracker, credentials in creds_q:
+        creds_q = DBSession.query(Tracker, TrackerCredentials, User)\
+                           .filter(Tracker.id==TrackerCredentials.tracker_id) \
+                           .filter(User.id==TrackerCredentials.user_id)\
+                           .filter(TrackerCredentials.user_id==self.user.id).all()
+
+        for tracker, credentials, user in creds_q:
             if full_mapping:
                 mapping = TrackerCredentials.get_logins_mapping(tracker)
             else:
                 mapping = {credentials.login.lower(): self.user}
-            fetcher = get_fetcher(tracker, credentials, mapping)
+            fetcher = get_fetcher(tracker, credentials, user, mapping)
             fetchers.append(fetcher)
             fetcher_callback(fetcher) # initialize query
         bugs = []

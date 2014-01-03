@@ -67,12 +67,18 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
     get_converter = lambda self: pivotaltracker_converter
 
 
-    def __init__(self, tracker, credentials, login_mapping):
-        super(PivotalTrackerTokenFetcher, self).__init__(tracker, credentials, login_mapping)
+    def __init__(self, tracker, credentials, user, login_mapping):
+        super(PivotalTrackerTokenFetcher, self).__init__(
+            tracker,
+            credentials,
+            user,
+            login_mapping,
+        )
         try:
             email, login =  credentials.login.split(';')
         except Exception:
             email, login = '', ''
+
         self.email = email
         self.login = login
         self.login_mapping = dict([
@@ -128,6 +134,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         return [p.text for p in xml.findall('project/id')]
 
     def fetch_user_tickets(self):
+        import ipdb; ipdb.set_trace()
         rpcs = self.fetch('stories', filters=dict(
             owner='"%s"' % self.login,
             state=','.join(ISSUE_STATE_UNRESOLVED),

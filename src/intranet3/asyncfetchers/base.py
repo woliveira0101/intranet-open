@@ -38,23 +38,26 @@ class FetcherMeta(type):
 
     @staticmethod
     def __async(f):
+        f.dupa = 1
         @functools.wraps(f)
         def func(*args, **kwargs):
             self = args[0]
-            self._run = f
-            self.args = args
-            self.kwargs = kwargs
-            self.start()
+            greenlet = self._greenlet
+            greenlet._run = f
+            greenlet.args = args
+            greenlet.kwargs = kwargs
+            greenlet.start()
             return
         return func
 
-    def __new__(mcs, name, bases, dct):
-        for name, prop in dct.iteritems():
-            if name in mcs.FETCHERS:
-                dct[name] = mcs.__async(prop)
-        return type.__new__(mcs, name, bases, dct)
+    def __new__(mcs, name, bases, attrs):
+        for attr_name in mcs.FETCHERS:
+            if attr_name in attrs:
+                attr = attrs[attr_name]
+                attrs[attr_name] = mcs.__async(attr)
+        return type.__new__(mcs, name, bases, attrs)
 
-class BaseFetcher(gevent.Greenlet):
+class BaseFetcher(object):
     __metaclass__ = FetcherMeta
     bug_class = None
     get_converter = None
@@ -62,15 +65,12 @@ class BaseFetcher(gevent.Greenlet):
     SPRINT_REGEX = 's=%s(?!\S)'
     MAX_TIMEOUT = 30 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 
-    def __repr__(self):
-        return ''
-
-    def __init__(self, tracker, credentials, login_mapping, timeout=MAX_TIMEOUT):
-        gevent.Greenlet.__init__(self)
+    def __init__(self, tracker, credentials, user, login_mapping, timeout=MAX_TIMEOUT):
+        self._greenlet = gevent.Greenlet()
         self.tracker = tracker
         self.login = credentials.login
         self.password = credentials.password
-        self.user = credentials.user
+        self.user = user
         self.login_mapping = login_mapping
         self.bugs = {}
         self.done = False
@@ -162,13 +162,13 @@ class BaseFetcher(gevent.Greenlet):
         )
 
     def get_result(self):
-        self.join(self.MAX_TIMEOUT)
+        self._greenlet.join(self.MAX_TIMEOUT)
 
-        if not self.ready():
+        if not self._greenlet.ready():
             raise FetcherTimeout()
 
-        if not self.successful():
-            raise self.exception
+        if not self._greenlet.successful():
+            raise self._greenlet.exception
 
         results = []
         for bug in self.bugs.itervalues():
