@@ -82,11 +82,7 @@ class Bugs(object):
         """
         Get user's bugs from all trackers
         """
-        if resolved:
-            bugs = self._get_bugs(lambda fetcher: fetcher.fetch_user_resolved_tickets(), full_mapping=False)
-        else:
-            bugs = self._get_bugs(lambda fetcher: fetcher.fetch_user_tickets(), full_mapping=False)
-
+        bugs = self._get_bugs(lambda fetcher: fetcher.fetch_user_tickets(resolved=resolved), full_mapping=False)
         bugs = self.add_time(bugs)
         return bugs
 
@@ -95,11 +91,7 @@ class Bugs(object):
         Get all bugs from all trackers
         This number of bugs is limited by used user's credentials.
         """
-        if resolved:
-            bugs = self._get_bugs(lambda fetcher: fetcher.fetch_all_resolved_tickets(), full_mapping=True)
-        else:
-            bugs = self._get_bugs(lambda fetcher: fetcher.fetch_all_tickets(), full_mapping=True)
-
+        bugs = self._get_bugs(lambda fetcher: fetcher.fetch_all_tickets(resolved=resolved), full_mapping=True)
         bugs = self.add_time(bugs)
         return bugs
 
@@ -116,8 +108,8 @@ class Bugs(object):
             return []
 
         login_mapping = TrackerCredentials.get_logins_mapping(tracker)
-        fetcher = get_fetcher(tracker, credentials, login_mapping)
-        (fetcher.fetch_resolved_bugs_for_query if resolved else fetcher.fetch_bugs_for_query)(*project.get_selector_tuple())
+        fetcher = get_fetcher(tracker, credentials, self.user, login_mapping)
+        fetcher.fetch_bugs_for_query(*project.get_selector_tuple(), resolved=resolved)
 
         bugs = []
 
@@ -145,7 +137,7 @@ class Bugs(object):
 
         fetchers = []
         for project, tracker, creds, user in entries:
-            fetcher = get_fetcher(tracker, creds, user, tracker.logins_mapping)
+            fetcher = get_fetcher(tracker, creds, tracker.logins_mapping)
             fetcher.fetch_scrum(sprint.name, project.project_selector, project.component_selector)
             fetchers.append(fetcher)
             if tracker.type in ('bugzilla', 'rockzilla', 'igozilla'):

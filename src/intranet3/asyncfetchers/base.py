@@ -202,20 +202,8 @@ class BaseFetcher(object):
         """ Start fetching tickets for all users in mapping """
         raise NotImplementedError()
 
-    def fetch_user_resolved_bugs(self):
-        """ Start fetching fixable tickets for current user """
-        raise NotImplementedError()
-
-    def fetch_all_resolved_bugs(self):
-        """ Start fetching fixable tickets for all users """
-        raise NotImplementedError()
-
     def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
         """ Start fetching all bugs matching given criteria """
-        raise NotImplementedError()
-
-    def fetch_resolved_bugs_for_query(self, ticket_id, project_selector, component_selector, version):
-        """ Start fetching resolved bugs matching given criteria """
         raise NotImplementedError()
 
     def fetch_scrum(self, sprint_name, project_id, component_id=None):

@@ -184,47 +184,34 @@ A comma or vertical bar separated list of report criteria composed as
         ticket_conditions = '|'.join(ticket_conditions)
         return ticket_conditions
 
-    def fetch_user_tickets(self):
+    def fetch_user_tickets(self, resolved=False):
         url = self.api_url() + '?'
-        conditions_string = '%s,%s' % (self.get_user_conditions(), self.get_unresolved_conditions())
+        if resolved:
+            conditions_string = '%s,%s' % (self.get_user_conditions(), self.get_resolved_conditions())
+        else:
+            conditions_string = '%s,%s' % (self.get_user_conditions(), self.get_unresolved_conditions())
         full_url = serialize_url(url, conditions_string=conditions_string)
         rpc = self.fetch(full_url)
         self.consume(rpc)
 
-    def fetch_user_resolved_tickets(self):
+    def fetch_all_tickets(self, resolved=False):
         url = self.api_url() + '?'
-        conditions_string = '%s,%s' % (self.get_user_conditions(), self.get_resolved_conditions())
+        if resolved:
+            conditions_string = '%s,%s' % (self.get_resolved_conditions(), self.get_user_conditions(all=True))
+        else:
+            conditions_string = '%s,%s' % (self.get_unresolved_conditions(), self.get_user_conditions(all=True))
+
         full_url = serialize_url(url, conditions_string=conditions_string)
         rpc = self.fetch(full_url)
         self.consume(rpc)
 
-    def fetch_all_tickets(self):
-        url = self.api_url() + '?'
-        conditions_string = '%s,%s' % (self.get_unresolved_conditions(), self.get_user_conditions(all=True))
-        full_url = serialize_url(url, conditions_string=conditions_string)
-        rpc = self.fetch(full_url)
-        self.consume(rpc)
-
-    def fetch_all_resolved_tickets(self):
-        url = self.api_url() + '?'
-        conditions_string = '%s,%s' % (self.get_resolved_conditions(), self.get_user_conditions(all=True))
-        full_url = serialize_url(url, conditions_string=conditions_string)
-        rpc = self.fetch(full_url)
-        self.consume(rpc)
-
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
+    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version, resolved=False):
         url = self.api_url(project_selector) + '?'
-        conditions_string = self.get_unresolved_conditions()
-        if ticket_ids:
-            conditions_string += ',' + self.get_ticket_conditions(ticket_ids)
+        if resolved:
+            conditions_string = self.get_resolved_conditions()
+        else:
+            conditions_string = self.get_unresolved_conditions()
 
-        full_url = serialize_url(url, conditions_string=conditions_string)
-        rpc = self.fetch(full_url)
-        self.consume(rpc)
-
-    def fetch_resolved_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
-        url = self.api_url(project_selector) + '?'
-        conditions_string = self.get_resolved_conditions()
         if ticket_ids:
             conditions_string += ',' + self.get_ticket_conditions(ticket_ids)
 

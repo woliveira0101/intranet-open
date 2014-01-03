@@ -90,48 +90,39 @@ class TracFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             owner=self.login_mapping.keys()
         )
 
-    def fetch_user_tickets(self):
-        params = self.common_url_params()
-        params.update(self.single_user_params())
-        url = serialize_url(self.tracker.url + '/query?', **params)
-        self.fetch(url)
-
-    def fetch_all_tickets(self):
-        params = self.common_url_params()
-        params.update(self.all_users_params())
-        url = serialize_url(self.tracker.url + '/query?', **params)
-        self.fetch(url)
-
-    def fetch_user_resolved_bugs(self):
-        params = self.resolved_common_url_params()
-        params.update(self.single_user_params())
-        params['reporter'] = params['owner']
-        del params['owner']
-        url = serialize_url(self.tracker.url + '/query?', **params)
-        self.fetch(url)
-
-    def fetch_all_resolved_bugs(self):
-        params = self.resolved_common_url_params()
-        params.update(self.all_users_params())
-        params['reporter'] = params['owner']
-        del params['owner']
-        url = serialize_url(self.tracker.url + '/query?', **params)
-        self.fetch(url)
-
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
-        params = self.common_url_params()
-        if ticket_ids:
-            params.update(id=[str(id) for id in ticket_ids])
+    def fetch_user_tickets(self, resolved=False):
+        if resolved:
+            params = self.resolved_common_url_params()
         else:
-            if project_selector:
-                params.update(client_name=project_selector)
-                if component_selector:
-                    params.update(component=component_selector)
+            params = self.common_url_params()
+
+        params.update(self.single_user_params())
+        if resolved:
+            params['reporter'] = params['owner']
+            del params['owner']
+
         url = serialize_url(self.tracker.url + '/query?', **params)
         self.fetch(url)
 
-    def fetch_resolved_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
-        params = self.resolved_common_url_params()
+    def fetch_all_tickets(self, resolved=False):
+        if resolved:
+            params = self.resolved_common_url_params()
+        else:
+            params = self.common_url_params()
+
+        params.update(self.all_users_params())
+        if resolved:
+            params['reporter'] = params['owner']
+            del params['owner']
+        url = serialize_url(self.tracker.url + '/query?', **params)
+        self.fetch(url)
+
+    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version, resolved=False):
+        if resolved:
+            params = self.resolved_common_url_params()
+        else:
+            params = self.common_url_params()
+
         if ticket_ids:
             params.update(id=[str(id) for id in ticket_ids])
         else:

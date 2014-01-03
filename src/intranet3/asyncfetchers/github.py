@@ -199,7 +199,9 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             filter='all'
         )
 
-    def fetch_user_tickets(self):
+    def fetch_user_tickets(self, resolved=False):
+        if resolved:
+            return
         params = self.common_url_params()
         params.update(self.single_user_params())
         url = serialize_url(self.tracker.url + 'issues?', **params)
@@ -209,10 +211,9 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             url
         ))
 
-    def fetch_user_resolved_bugs(self):
-        self.done = True
-
-    def fetch_all_tickets(self):
+    def fetch_all_tickets(self, resolved=False):
+        if resolved:
+            return
         params = self.common_url_params()
         params.update(self.all_users_params())
         url = serialize_url(self.tracker.url + 'issues?', **params)
@@ -222,10 +223,10 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             url
         ))
 
-    def fetch_all_resolved_tickets(self):
-        self.done = True
+    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version, resolved=False):
+        if resolved:
+            return
 
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
         params = self.common_url_params()
         if ticket_ids:
             self._wanted_ticket_ids = ticket_ids
@@ -238,11 +239,6 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
                 'GET',
                 url,
             ))
-        else:
-            self.done = True
-
-    def fetch_resolved_bugs_for_query(self, ticket_id, project_selector, component_selector, version):
-        self.done = True
 
     def parse(self, data):
         json_data = json.loads(data)

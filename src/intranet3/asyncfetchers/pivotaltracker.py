@@ -133,42 +133,36 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         xml = ET.fromstring(data)
         return [p.text for p in xml.findall('project/id')]
 
-    def fetch_user_tickets(self):
+    def fetch_user_tickets(self, resolved=False):
+        if resolved:
+            state = ','.join(ISSUE_STATE_RESOLVED)
+        else:
+            state =','.join(ISSUE_STATE_UNRESOLVED)
+
         rpcs = self.fetch('stories', filters=dict(
             owner='"%s"' % self.login,
-            state=','.join(ISSUE_STATE_UNRESOLVED),
+            state=state,
         ))
         self.consume(rpcs)
 
-    def fetch_all_tickets(self):
+    def fetch_all_tickets(self, resolved=False):
+        if resolved:
+            state = ','.join(ISSUE_STATE_RESOLVED)
+        else:
+            state = ','.join(ISSUE_STATE_UNRESOLVED)
+
         self.fetch('stories', filters=dict(
-            state=','.join(ISSUE_STATE_UNRESOLVED),
+            state=state,
         ))
 
-    def fetch_user_resolved_tickets(self):
-        rpcs = self.fetch('stories', filters=dict(
-            owner='"%s"' % self.login,
-            state=','.join(ISSUE_STATE_RESOLVED),
-        ))
-        self.consume(rpcs)
-
-    def fetch_all_resolved_tickets(self):
-        rpcs = self.fetch('stories', filters=dict(
-            state=','.join(ISSUE_STATE_RESOLVED),
-        ))
-        self.consume(rpcs)
-
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
-        rpcs = self.fetch('stories', filters=dict(
+    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version, resolved=False):
+        filters = dict(
             id=','.join(ticket_ids)
-        ))
-        self.consume(rpcs)
+        )
+        if resolved:
+            filters['state'] = ','.join(ISSUE_STATE_UNRESOLVED)
 
-    def fetch_resolved_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
-        rpcs = self.fetch('stories', filters=dict(
-            id=','.join(ticket_ids),
-            state=','.join(ISSUE_STATE_RESOLVED),
-        ))
+        rpcs = self.fetch('stories', filters=filters)
         self.consume(rpcs)
 
     def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
