@@ -194,15 +194,15 @@ class BaseFetcher(object):
     def parse(self, data):
         raise NotImplementedError()
 
-    def fetch_user_tickets(self):
+    def fetch_user_tickets(self, resolved=False):
         """ Start fetching tickets for current user """
         raise NotImplementedError()
 
-    def fetch_all_tickets(self):
+    def fetch_all_tickets(self, resolved=False):
         """ Start fetching tickets for all users in mapping """
         raise NotImplementedError()
 
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
+    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version, resolved=False):
         """ Start fetching all bugs matching given criteria """
         raise NotImplementedError()
 
