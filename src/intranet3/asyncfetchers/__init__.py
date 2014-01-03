@@ -6,7 +6,7 @@ from .github import GithubFetcher
 from .trac import TracFetcher
 from .fake import FakeFetcher
 
-from .base import FetchException, FetcherTimeout, FetcherBaseException
+from .base import FetchException, FetcherTimeout, FetcherBaseException, FetcherBadDataError
 
 FETCHERS = {
    'bugzilla': BugzillaFetcher,

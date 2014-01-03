@@ -3,7 +3,7 @@ from time import sleep, time
 
 from intranet3.decorators import log_time
 from intranet3.models import DBSession, TrackerCredentials, Tracker, Project, User
-from intranet3.asyncfetchers import get_fetcher, FetcherBaseException, FetcherTimeout
+from intranet3.asyncfetchers import get_fetcher, FetcherBaseException, FetcherTimeout, FetcherBadDataError
 from intranet3.log import INFO_LOG, WARN_LOG, ERROR_LOG
 from intranet3.utils import flash
 from intranet3 import memcache
@@ -54,6 +54,8 @@ class Bugs(object):
                     'Fetchers for trackers %s timed-out' % fetcher.tracker.name,
                     klass='error',
                 )
+            except FetcherBadDataError as e:
+                flash(e, klass='error')
             except FetcherBaseException as e:
                 flash(
                     'Could not fetch bugs from tracker %s' % fetcher.tracker.name,
@@ -113,9 +115,22 @@ class Bugs(object):
 
         bugs = []
 
-        for bug in fetcher.get_result():
-            bug.project = project
-            bugs.append(bug)
+        try:
+            for bug in fetcher.get_result():
+                bug.project = project
+                bugs.append(bug)
+        except FetcherTimeout as e:
+            flash(
+                'Fetchers for trackers %s timed-out' % fetcher.tracker.name,
+                klass='error',
+            )
+        except FetcherBadDataError as e:
+            flash(e, klass='error')
+        except FetcherBaseException as e:
+            flash(
+                'Could not fetch bugs from tracker %s' % fetcher.tracker.name,
+                klass='error',
+            )
 
         bugs = self.add_time(bugs)
         return bugs
@@ -137,7 +152,7 @@ class Bugs(object):
 
         fetchers = []
         for project, tracker, creds, user in entries:
-            fetcher = get_fetcher(tracker, creds, tracker.logins_mapping)
+            fetcher = get_fetcher(tracker, creds, user, tracker.logins_mapping)
             fetcher.fetch_scrum(sprint.name, project.project_selector, project.component_selector)
             fetchers.append(fetcher)
             if tracker.type in ('bugzilla', 'rockzilla', 'igozilla'):
@@ -147,7 +162,23 @@ class Bugs(object):
         bugs = []
 
         for fetcher in fetchers:
-            fbugs = fetcher.get_result()
+            try:
+                fbugs = fetcher.get_result()
+            except FetcherTimeout as e:
+                flash(
+                    'Fetchers for trackers %s timed-out' % fetcher.tracker.name,
+                    klass='error',
+                    )
+                continue
+            except FetcherBadDataError as e:
+                flash(e, klass='error')
+                continue
+            except FetcherBaseException as e:
+                flash(
+                    'Could not fetch bugs from tracker %s' % fetcher.tracker.name,
+                    klass='error',
+                    )
+                continue
             bugs.extend(fbugs)
 
 
