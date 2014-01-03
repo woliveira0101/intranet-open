@@ -218,15 +218,6 @@ class BaseFetcher(object):
         """ Start fetching resolved bugs matching given criteria """
         raise NotImplementedError()
 
-    def fetch_bug_titles_and_depends_on(self, ticket_ids):
-        """ Start fetching bug titles and bug depends_on for bugs with given ids """
-        # TODO other implementations
-        self.success()
-
-    def fetch_dependons_for_ticket_ids(self, ticket_ids):
-        """ Start recursively fetching dependons for ticket ids """
-        raise NotImplementedError()
-
     def fetch_scrum(self, sprint_name, project_id, component_id=None):
         raise NotImplementedError()
 
