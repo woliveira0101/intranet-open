@@ -227,6 +227,7 @@ class BasicAuthMixin(object):
     def set_auth(self, session, data=None):
         session.auth = HTTPBasicAuth(self.login, self.password)
 
+
 class CSVParserMixin(object):
     # bug object class
     bug_class = None

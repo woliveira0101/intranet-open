@@ -1,10 +1,7 @@
-import csv
 from dateutil.parser import parse
-from functools import partial
 
 from intranet3.helpers import Converter, serialize_url
 from intranet3.log import INFO_LOG, EXCEPTION_LOG
-from intranet3.helpers import decoded_dict
 
 from .base import BaseFetcher, CSVParserMixin, BasicAuthMixin
 from .bug import Bug
