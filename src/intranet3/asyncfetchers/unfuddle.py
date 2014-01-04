@@ -1,55 +1,45 @@
 import json
-import datetime
 import dateutil.parser
-from functools import partial
 
 from pyramid.decorator import reify
 
-from intranet3 import memcache
 from intranet3.helpers import Converter, serialize_url, make_path
 from intranet3.log import EXCEPTION_LOG, INFO_LOG
-from intranet3.utils import flash
 
 from .base import BaseFetcher, BasicAuthMixin, FetcherBadDataError
-from .bug import Bug
+from .nbug import BaseScrumProducer, BaseBugProducer
 from .request import RPC
 
 LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
 
-class UnfuddleTrackerBug(Bug):
 
-    def get_url(self, number=None):
-        number = number if number else self.id
-        url = make_path(self.tracker.url, '/a#/projects/%s/tickets/by_number/%s')
-        url = url % (self.project_name, number)
+class UnfuddleBugProducer(BaseBugProducer):
+
+    def parse(self, tracker, login_mapping, raw_data):
+        d = raw_data
+        return dict(
+            id=d['id'],
+            desc=d['desc'],
+            reporter=d['reporter'],
+            owner=d['owner'],
+            status=d['status'],
+            project_name=d['project_name'],
+            opendate=d['opendate'],
+            changeddate=d['changeddate'],
+            priority=d['priority'],
+            component_name=d['component_name'],
+            whiteboard=d['whiteboard'],
+        )
+
+    def get_url(self, tracker, login_mapping, parsed_data):
+        id, project_name = parsed_data['id'], parsed_data['project_name']
+        url = make_path(tracker.url, '/a#/projects/%s/tickets/by_number/%s')
+        url = url % (project_name, id)
         return url
 
-    def is_unassigned(self):
-        if self.owner.name == 'nobody':
-            return True
-        else:
-            return False
-
-    def get_status(self):
-        return self.status.upper()
-
-unfuddletracker_converter = Converter(
-    id='id',
-    desc='desc',
-    reporter='reporter',
-    owner='owner',
-    status='status',
-    resolution=lambda d: '',
-    project_name='project_name',
-    opendate='opendate',
-    changeddate='changeddate',
-    priority='priority',
-    severity='severity',
-    component_name='component_name',
-    deadline='deadline',
-    whiteboard='whiteboard',
-)
+    def get_status(self, tracker, login_mapping, parsed_data):
+        return parsed_data['status'].upper()
 
 
 class UnfuddleMetadataFetcher(BasicAuthMixin, BaseFetcher):
@@ -140,8 +130,7 @@ A comma or vertical bar separated list of report criteria composed as
         '4': 'High',
         '5': 'Highest',
     }
-    bug_class = UnfuddleTrackerBug
-    get_converter = lambda self: unfuddletracker_converter
+    BUG_PRODUCER_CLASS = UnfuddleBugProducer
 
     def __init__(self, *args, **kwargs):
         super(UnfuddleFetcher, self).__init__(*args, **kwargs)
@@ -270,8 +259,7 @@ A comma or vertical bar separated list of report criteria composed as
             )
             whiteboard_field_id = ticket.get('field3_value_id')
             key = str(ticket['project_id']), str(whiteboard_field_id)
-            whiteboard = self.unfuddle_data['custom_fields'].get(key)
-            if whiteboard:
-                bug_desc['whiteboard'] = whiteboard
+            whiteboard = self.unfuddle_data['custom_fields'].get(key, '')
+            bug_desc['whiteboard'] = whiteboard
 
             yield bug_desc

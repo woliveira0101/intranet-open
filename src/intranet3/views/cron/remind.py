@@ -104,7 +104,7 @@ class ResolvedBugs(CronView):
         for i, bug in enumerate(bugs, 1):
             id = bug.id
             desc = bug.desc
-            url = bug.get_url()
+            url = bug.url
             output.append(u"%(i)s. #%(id)s %(desc)s %(url)s" % locals())
         output.append(u'')
         output.append(self._(u'Te bugi możesz również zobaczyć pod adresem ${list_url}', list_url=list_url))

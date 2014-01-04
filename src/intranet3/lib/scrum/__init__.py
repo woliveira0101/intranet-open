@@ -79,8 +79,8 @@ def parse_whiteboard(wb):
 
 def move_blocked_to_the_end(bugs):
     """Move blocked bugs to the end of the list"""
-    blocked_bugs = [bug for bug in bugs if bug.is_blocked]
-    bugs = [bug for bug in bugs if not bug.is_blocked]
+    blocked_bugs = [bug for bug in bugs if bug.scrum.is_blocked]
+    bugs = [bug for bug in bugs if not bug.scrum.is_blocked]
     bugs.extend(blocked_bugs)
     return bugs
 
@@ -88,7 +88,7 @@ def move_blocked_to_the_end(bugs):
 class SprintWrapper(object):
     def __init__(self, sprint, bugs, request):
         self.sprint = sprint
-        self.bugs = BugUglyAdapter.produce([b for b in bugs if getattr(b, 'project')])
+        self.bugs = bugs
         self.request = request
         self.session = request.db_session
 
@@ -106,13 +106,13 @@ class SprintWrapper(object):
         tseries = dict([(cdate, 0) for cdate in h.dates_between(sdate, edate) ])
 
         for bug in self.bugs:
-            if bug.is_closed() or bug.get_status() == 'RESOLVED':
+            if bug.scrum.is_closed or bug.status == 'RESOLVED':
                 for date in tseries.iterkeys():
                     if date < bug.changeddate.date():
-                        tseries[date] += bug.points
+                        tseries[date] += bug.scrum.points
             else:
                 for date in tseries.iterkeys():
-                    tseries[date] += bug.points
+                    tseries[date] += bug.scrum.points
 
         tseries = [ (self._date_to_js(v[0]), v[1]) for v in sorted(tseries.iteritems(), key=lambda x: x[0]) ]
         return tseries
@@ -131,11 +131,11 @@ class SprintWrapper(object):
         )
 
     def get_points_achieved(self):
-        points = sum([ bug.points for bug in self.bugs if bug.is_closed()])
+        points = sum([ bug.scrum.points for bug in self.bugs if bug.scrum.is_closed])
         return points
 
     def get_points(self):
-        points = sum([ bug.points for bug in self.bugs ])
+        points = sum([ bug.scrum.points for bug in self.bugs ])
         return points
 
     def get_worked_hours(self):
@@ -171,22 +171,22 @@ class SprintWrapper(object):
         completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
 
         def append_bug(d, bug):
-            if bug.is_blocked:
+            if bug.scrum.is_blocked:
                 d['blocked'].append(bug)
-            elif bug.points:
+            elif bug.scrum.points:
                 d['with_points'].append(bug)
             else:
                 d['without_points'].append(bug)
 
         for bug in self.bugs:
-            points = bug.points
-            if bug.is_closed():
+            points = bug.scrum.points
+            if bug.scrum.is_closed:
                 append_bug(completed['bugs'], bug)
                 completed['points'] += points
-            elif bug.get_status() == 'RESOLVED':
+            elif bug.status == 'RESOLVED':
                 append_bug(toverify['bugs'], bug)
                 toverify['points'] += points
-            elif not bug.is_unassigned():
+            elif not bug.scrum.is_unassigned:
                 append_bug(inprocess['bugs'], bug)
                 inprocess['points'] += points
             else:

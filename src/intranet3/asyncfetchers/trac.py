@@ -1,62 +1,40 @@
 from dateutil.parser import parse
 
-from intranet3.helpers import Converter, serialize_url
+from intranet3.helpers import serialize_url
 from intranet3.log import INFO_LOG, EXCEPTION_LOG
 
 from .base import BaseFetcher, CSVParserMixin, BasicAuthMixin
-from .bug import Bug
+from .nbug import BaseBugProducer, BaseScrumProducer
 from .request import RPC
 
 LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
 
-class TracBug(Bug):
-    
-    def get_url(self, number=None):
-        number = number if number else self.id
-        return self.tracker.url + '/ticket/' + number
 
+class TracBugProducer(BaseBugProducer):
+    def parse(self, tracker, login_mapping, raw_data):
+        d = raw_data
+        return dict(
+            id=d['id'],
+            desc=d['summary'],
+            reporter=d['reporter'],
+            owner=d['owner'],
+            priority=d.get('priority') or d.get('severity'),
+            severity=d.get('priority') or d.get('severity'),
+            status=d['status'],
+            project_name=d.get('client_name', 'none'),
+            component_name=d['component'],
+            opendate=parse(d.get('time', '')),
+            changeddate=parse(d.get('changetime', '')),
+        )
 
-def get_depends_on(bug_desc):
-    if 'blockedby' in bug_desc:
-        deps = bug_desc['blockedby']
-    elif 'dependencies' in bug_desc:
-        deps = bug_desc['dependencies']
-    else:
-        return []
-    output = []
-    for dep in deps.split(', '):
-        try:
-            id = int(dep)
-        except ValueError: # nl trac can return '--'
-            continue
-        else:
-            output.append(str(id))
-    return output
+    def get_url(self, tracker, login_mapping, parsed_data):
+        return tracker.url + '/ticket/' + parsed_data['id']
 
-
-trac_converter = Converter(
-    id='id',
-    desc='summary',
-    reporter='reporter',
-    owner='owner',
-    priority=lambda d: d.get('priority') or d.get('severity'),
-    severity=lambda d: d.get('priority') or d.get('severity'),
-    status='status',
-    resolution=lambda d: '',
-    project_name=lambda d: d.get('client_name', 'none'),
-    component_name='component',
-    deadline='deadline',
-    opendate=lambda d: parse(d.get('time', '')),
-    changeddate=lambda d: parse(d.get('changetime', '')),
-    dependson=lambda d: dict((bug, {'resolved': False}) for bug in get_depends_on(d) if bug),
-    blocked=lambda d: dict((bug, {'resolved': False}) for bug in d.get('blocking', '').split(', ') if bug)
-)
 
 class TracFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
-    bug_class = TracBug
-    get_converter = lambda self: trac_converter
-    
+    BUG_PRODUCER_CLASS = TracBugProducer
+
     def fetch(self, url):
         self.consume(RPC(
             'GET',
@@ -68,7 +46,11 @@ class TracFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             max='1000',
             status=['assigned', 'new', 'reopened'],
             order='priority',
-            col=['id', 'summary', 'status', 'type', 'priority', 'severity', 'milestone', 'component', 'reporter', 'owner', 'client_name', 'time', 'changetime', 'blockedby', 'dependencies', 'blocking'],
+            col=[
+                'id', 'summary', 'status', 'type', 'priority', 'severity',
+                'milestone', 'component', 'reporter', 'owner', 'client_name',
+                'time', 'changetime', 'blockedby', 'dependencies', 'blocking'
+            ],
             format='csv'
         )
 

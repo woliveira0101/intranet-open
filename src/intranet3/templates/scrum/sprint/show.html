@@ -20,16 +20,16 @@
             </thead>
             <tbody>
             {% for bug in bugs %}
-            <tr class="{{ loop.cycle('odd', 'even') }} {{ bug.status | lower }} {% if bug.is_blocked %} blocked{% elif bug.is_unassigned() %} unassigned{% endif %}">
-                <td><a href="{{bug.get_url()}}" class="external">{{ bug.id }}</a></td>
+            <tr class="{{ loop.cycle('odd', 'even') }} {{ bug.status | lower }} {% if bug.scrum.is_blocked %} blocked{% elif bug.scrum.is_unassigned %} unassigned{% endif %}">
+                <td><a href="{{bug.url}}" class="external">{{ bug.id }}</a></td>
                 <td>{{ bug.project_name }}</td>
                 <td>{{ bug.component_name }}</td>
                 <td data-sort="{{bug.priority_number}}"><span class="priority priority_{{ bug.priority_number }}">{{ bug.priority }}</span></td>
                 <td>{{ bug.desc }}</td>
                 <td>{{ bug.owner.name }}</td>
-                <td>{{ bug.whiteboard['p'] }}</td>
+                <td>{{ bug.scrum.points }}</td>
                 <td>{{ '%.2f' % bug.sprint_time }} ({{ '%.2f' % bug.time }})</td>
-                <td>{{ (bug.velocity | round(2)) if bug.velocity else '-' }}</td>
+                <td>{{ (bug.scrum.velocity | round(2)) if bug.scrum.velocity else '-' }}</td>
                 <td>{{ bug.status }}</td>
             </tr>
             {% endfor %}

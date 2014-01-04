@@ -1,61 +1,38 @@
 from dateutil.parser import parse
-from pyramid.decorator import reify
 
 from intranet3 import helpers as h
 from .request import RPC
 from .base import BaseFetcher, BasicAuthMixin, CSVParserMixin
-from .bug import Bug
+from .nbug import BaseBugProducer, BaseScrumProducer
 
-bugzilla_converter = h.Converter(
-    id='bug_id',
-    desc='short_desc',
-    reporter='reporter',
-    owner='assigned_to',
-    priority=lambda d: d.get('priority', ''), # + '/' + d['priority'],
-    severity=lambda d: d.get('bug_severity', ''),
-    status=lambda d: d.get('bug_status', ''), # + '/' + d['resolution'],
-    resolution=lambda d: d.get('resolution', ''),
-    project_name='product',
-    component_name='component',
-    deadline='deadline',
-    opendate=lambda d: parse(d.get('opendate', '')),
-    changeddate=lambda d: parse(d.get('changeddate', '')),
-    whiteboard='status_whiteboard',
-    version='version',
-)
 
-class BugzillaBug(Bug):
+class BugzillaBugProducer(BaseBugProducer):
+    def parse(self, tracker, login_mapping, raw_data):
+        d = raw_data
+        return dict(
+            id=d['bug_id'],
+            desc=d['short_desc'],
+            reporter=d['reporter'],
+            owner=d['assigned_to'],
+            priority=d.get('priority', ''), # + '/' + d['priority'],
+            severity=d.get('bug_severity', ''),
+            status=d.get('bug_status', ''), # + '/' + d['resolution'],
+            resolution=d.get('resolution', ''),
+            project_name=d['product'],
+            component_name=d['component'],
+            deadline=d['deadline'],
+            opendate=parse(d.get('opendate', '')),
+            changeddate=parse(d.get('changeddate', '')),
+            whiteboard=d['status_whiteboard'],
+            version=d['version'],
+        )
 
-    def get_url(self, number=None):
-        number = number if number else self.id
-        return self.tracker.url + '/show_bug.cgi?id=%(id)s' % {'id': number}
-
-    def is_unassigned(self):
-        return not self.owner or not self.owner.email.endswith('stxnext.pl')
-
-    @reify
-    def is_blocked(self):
-        wb_blocked = self.whiteboard.get('blocked')
-        if wb_blocked in h.positive_values:
-            return True
-
-        if wb_blocked is None: # blocked param is not set
-            for bug_data in self.dependson.values():
-                if bug_data.get('resolved', True) is False:
-                    return True
-
-        return False
-
-    def get_status(self):
-        return self.status
-
-    def get_resolution(self):
-        return self.resolution
+    def get_url(self, tracker, login_mapping, parsed_data):
+        return tracker.url + '/show_bug.cgi?id=%s' % parsed_data['id']
 
 
 class BugzillaFetcher(CSVParserMixin, BasicAuthMixin, BaseFetcher):
-    bug_class = BugzillaBug
-    get_converter = lambda self: bugzilla_converter
+    BUG_PRODUCER_CLASS = BugzillaBugProducer
 
     COLUMNS = (
         'bug_severity', 'assigned_to', 'version',

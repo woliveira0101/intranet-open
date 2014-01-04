@@ -1,131 +1,55 @@
 # coding: utf-8
 import json
 import re
-from functools import partial
 from dateutil.parser import parse
-import requests
 
-from intranet3 import memcache
 from intranet3.helpers import Converter, serialize_url
 from intranet3.log import INFO_LOG, EXCEPTION_LOG
 
 from .base import BaseFetcher, BasicAuthMixin, FetcherBadDataError
-from .bug import Bug
+from .nbug import BaseBugProducer, BaseScrumProducer
 from .request import RPC
 
 LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
 
 
-class GithubBug(Bug):
+class GithubScrumProducer(BaseScrumProducer):
 
-    SCRUM_LABELS = ['to verify', 'in process']
+    def get_points(self, bug, tracker, login_mapping, parsed_data):
+        digit_labels = [ int(label) for label in parsed_data['labels'] if label.isdigit()]
 
-    def __init__(self, *args, **kwargs):
-        self._project_name = None
-        self._component_name = None
-        self._severity = None
-        self.url = None
+        return digit_labels[0] if digit_labels else 0
 
-        if 'url' in kwargs:
-            self.url = kwargs['url']
-            del kwargs['url']
-        super(GithubBug, self).__init__(*args, **kwargs)
+class GithubBugProducer(BaseBugProducer):
+    SCRUM_PRODUCER_CLASS = GithubScrumProducer
+    def parse(self, tracker, login_mapping, raw_data):
+        d = raw_data
+        result = dict(
+            id=str(d['number']),
+            github_id=d['id'],
+            desc=d['title'],
+            reporter=d['user']['login'],
+            owner=d['assignee']['login'] if d['assignee'] else '',
+            status=d['state'],
+            url=d['html_url'],
+            opendate=parse(d.get('created_at', '')),
+            changeddate=parse(d.get('updated_at', '')),
+            labels=[label['name'] for label in d['labels']],
+        )
+        return result
 
-        label_names = [label['name'] for label in self.labels]
-        self.scrum_labels = [label for label in label_names if label in self.SCRUM_LABELS]
+    def get_project_name(self, tracker, login_mapping, parsed_data):
+        m = re.match('(.*?)github.com/(.*?)/(.*?)($|/.*)', parsed_data['url'])
+        return m and m.group(2) or ''
 
-        # label with number will be scrum points
-        digit_labels = [ label for label in label_names if label.isdigit()]
-
-        if digit_labels:
-            self.whiteboard = dict(p=int(digit_labels[0]))
-
-    def get_url(self):
-        return self.url
-
-    @property
-    def severity(self):
-        return self._severity
-
-    @severity.setter
-    def severity(self, value):
-        labels = [l.get('name') for l in value]
-        if u"enhancement" in labels:
-            self._severity = 'enhancement'
-        else:
-            self._severity = ''
-
-    @property
-    def project_name(self):
-        return self._project_name
-
-    @project_name.setter
-    def project_name(self, value):
-        m = re.match('(.*?)github.com/(.*?)/(.*?)($|/.*)', value)
-        if m:
-            self._project_name = m.group(2)
-        else:
-            self._project_name = value
-
-    @property
-    def component_name(self):
-        return self._component_name
-
-    @component_name.setter
-    def component_name(self, value):
-        m = re.match('(.*?)github.com/(.*?)/(.*?)($|/.*)', value)
-        if m:
-            self._component_name = m.group(3)
-        else:
-            self._component_name = value
-
-    def get_status(self):
-        if self.status == 'closed':
-            return 'CLOSED'
-        else:
-            try:
-                label = self.scrum_labels[0]
-                if label == 'to verify':
-                    return 'RESOLVED'
-            except IndexError:
-                return 'NEW'
-
-    def is_unassigned(self):
-        try:
-            label = self.scrum_labels[0]
-            if label == 'in process':
-                return False
-            else:
-                return True
-        except IndexError:
-            return True
-
-github_converter = Converter(
-    id='number',
-    number='id',
-    desc='title',
-    reporter=lambda d: d['user']['login'],
-    owner=lambda d:  d['assignee']['login'] if d['assignee'] else '',
-    priority=lambda d: '',
-    severity=lambda d: d['labels'],
-    status=lambda d: d['state'],
-    resolution=lambda d: 'none',
-    project_name=lambda d: d['html_url'],
-    component_name=lambda d: d['html_url'],
-    url=lambda d: d['html_url'],
-    deadline=lambda d: d['milestone']['due_on'] if d['milestone'] is not None else '',
-    opendate=lambda d: parse(d.get('created_at', '')),
-    changeddate=lambda d: parse(d.get('updated_at', '')),
-    dependson=lambda d: {},
-    blocked=lambda d: {},
-    labels=lambda d: d['labels']
-)
+    def get_component_name(self, tracker, login_mapping, parsed_data):
+        m = re.match('(.*?)github.com/(.*?)/(.*?)($|/.*)', parsed_data['url'])
+        return m and m.group(3) or ''
 
 
 class GithubFetcher(BasicAuthMixin, BaseFetcher):
-    bug_class = GithubBug
-    get_converter = lambda self: github_converter
+    BUG_PRODUCER_CLASS = GithubBugProducer
 
     MILESTONES_KEY = 'milestones_map' #klucz do mapowania nazwa_milestonea -> numer milestonea
     MILESTONES_TIMEOUT = 60*3

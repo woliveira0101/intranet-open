@@ -1,6 +1,4 @@
-import base64
 import datetime
-from functools import partial
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -8,10 +6,9 @@ import xml.etree.ElementTree as ET
 
 from intranet3.helpers import Converter, serialize_url, make_path
 from intranet3.log import EXCEPTION_LOG, INFO_LOG
-from intranet3 import memcache
 
 from .base import BaseFetcher
-from .bug import Bug
+from .nbug import BaseBugProducer, BaseScrumProducer
 from .request import RPC
 
 LOG = INFO_LOG(__name__)
@@ -21,50 +18,38 @@ ISSUE_STATE_RESOLVED = ['finished']
 ISSUE_STATE_UNRESOLVED = ['started','unstarted','unscheduled', 'accepted']
 
 
-class PivotalTrackerBug(Bug):
+class PivotalTrackerBugProducer(BaseBugProducer):
 
-    def get_url(self, number=None):
-        number = number if number else self.id
-        return make_path(self.tracker.url, '/story/show', number)
+    def parse(self, tracker, login_mapping, raw_data):
+        d = raw_data
+        return dict(
+            id=d['id'],
+            desc=d['desc'],
+            reporter=d['reporter'],
+            owner=d['owner'],
+            status=d['status'],
+            project_name=d['project_name'],
+            opendate=datetime.datetime.strptime(d['opendate'],'%Y/%m/%d %H:%M:%S %Z'),
+            changeddate=datetime.datetime.strptime(d['changeddate'],'%Y/%m/%d %H:%M:%S %Z'),
+            points=d['points'],
+        )
 
-    def get_status(self):
-        if self.status == 'delivered':
+    def get_status(self, tracker, login_mapping, parsed_data):
+        status = parsed_data['status']
+        if status == 'delivered':
             return 'CLOSED'
-        elif self.status in ISSUE_STATE_RESOLVED:
+        elif status in ISSUE_STATE_RESOLVED:
             return 'RESOLVED'
-        elif self.status in ISSUE_STATE_UNRESOLVED:
+        elif status in ISSUE_STATE_UNRESOLVED:
             return 'NEW'
         return 'NEW'
-
-    def is_unassigned(self):
-        return self.status in ('unstarted', 'rejected')
-
-
-pivotaltracker_converter = Converter(
-    id='id',
-    desc='desc',
-    reporter='reporter',
-    owner='owner',
-    status='status',
-    resolution=lambda d: '',
-    project_name='project_name',
-    opendate=lambda d: datetime.datetime.strptime(d['opendate'],'%Y/%m/%d %H:%M:%S %Z'),
-    changeddate=lambda d: datetime.datetime.strptime(d['changeddate'],'%Y/%m/%d %H:%M:%S %Z'),
-    priority='priority',
-    severity='priority',
-    component_name='component',
-    deadline='deadline',
-    whiteboard='whiteboard',
-)
-
 
 class PivotalTrackerTokenFetcher(BaseFetcher):
     TOKEN_MEMCACHE_KEY = '{tracker_type}-{tracker_id}-{user_id}-pivotal_token'
     TOKEN_MEMCACHE_TIMEOUT = 60*60*24
 
     TOKEN_URL = 'https://www.pivotaltracker.com/services/v3/tokens/active'
-    bug_class = PivotalTrackerBug
-    get_converter = lambda self: pivotaltracker_converter
+    BUG_PRODUCER_CLASS = PivotalTrackerBugProducer
 
 
     def __init__(self, tracker, credentials, user, login_mapping):
@@ -201,6 +186,6 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
                 project_name=story.find('project_id').text,
                 opendate=story.find('created_at').text,
                 changeddate=story.find('updated_at').text,
-                whiteboard={'p': points}
+                points=points,
             )
             yield bug_desc

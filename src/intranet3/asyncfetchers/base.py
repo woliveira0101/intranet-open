@@ -61,7 +61,7 @@ class FetcherMeta(type):
 
 class BaseFetcher(object):
     __metaclass__ = FetcherMeta
-    bug_class = None
+    BUG_PRODUCER_CLASS = None
     get_converter = None
     CACHE_TIMEOUT = 3 * 60  # 3 minutes
     SPRINT_REGEX = 's=%s(?!\S)'
@@ -148,27 +148,12 @@ class BaseFetcher(object):
 
     def received(self, data):
         """ Called when server returns whole response body """
-        converter = self.get_converter()
+        bug_producer = self.BUG_PRODUCER_CLASS(self.tracker, self.login_mapping)
         for bug_desc in self.parse(data):
-            bug = self.bug_class(
-                tracker=self.tracker,
-                **converter(bug_desc)
+            bug = bug_producer(
+                bug_desc,
             )
             self.bugs[bug.id] = bug
-
-    def resolve_user(self, orig_login):
-        login = orig_login.lower()
-        if login in self.login_mapping:
-            return self.login_mapping[login]
-        else:
-            return User(name=orig_login, email=orig_login)
-
-    def resolve(self, bug):
-        bug.owner = self.resolve_user(bug.owner)
-        bug.reporter = self.resolve_user(bug.reporter)
-        bug.project_id = SelectorMapping(self.tracker).match(
-            bug.id, bug.project_name, bug.component_name, bug.version,
-        )
 
     def get_result(self):
         self._greenlet.join(self.MAX_TIMEOUT)
@@ -181,7 +166,6 @@ class BaseFetcher(object):
 
         results = []
         for bug in self.bugs.itervalues():
-            self.resolve(bug)
             results.append(bug)
 
         return results
@@ -214,9 +198,6 @@ class BasicAuthMixin(object):
 
 
 class CSVParserMixin(object):
-    # bug object class
-    bug_class = None
-
     # CSV encoding
     encoding = 'utf-8'
 

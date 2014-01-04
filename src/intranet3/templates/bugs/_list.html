@@ -22,7 +22,7 @@
     {% for bug in bugs %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
         <td>{{ loop.index }}</td>
-        <td><a href="{{bug.get_url()}}" class="external">{{ bug.id }}</a></td>
+        <td><a href="{{bug.url}}" class="external">{{ bug.id }}</a></td>
         <td>{{ bug.desc }}</td>
         <td>{{ bug.reporter.name }}</td>
         <td>{{ bug.owner.name }}</td>
@@ -33,18 +33,8 @@
             <div style="clear: both;">({{ bug.status|lower }})</div>
         </td>
         <td>
-            {% for bug_id, value in bug.dependson.iteritems() %}
-            <a href="{{bug.get_url(bug_id)}}" class="external {% if value.resolved %}closed{% endif %}" title="{{ value.desc }}">
-                {{ bug_id }}
-            </a>{% if not loop.last %}, {% endif %}
-            {% endfor %}
         </td>
         <td>
-            {% for bug_id, value in bug.blocked.iteritems() %}
-            <a href="{{bug.get_url(bug_id)}}" class="external {% if value.resolved %}closed{% endif %}" title="{{ value.desc }}">
-                {{ bug_id }}
-            </a>{% if not loop.last %}, {% endif %}
-            {% endfor %}
         </td>
         <td>{{ bug.opendate.strftime('%Y-%m-%d') }}</td>
         <td>{{ bug.changeddate.strftime('%Y-%m-%d') }}</td>
