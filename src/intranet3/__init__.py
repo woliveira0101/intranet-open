@@ -1,3 +1,8 @@
+import gevent.monkey
+gevent.monkey.patch_all()
+import psycogreen.gevent
+psycogreen.gevent.patch_psycopg()
+
 import sys
 import os
 import ConfigParser
@@ -21,7 +26,6 @@ try:
     import uwsgi
 except:
     uwsgi = None
-
 
 @implementer(IAuthenticationPolicy)
 class CustomAuthenticationPolicy(AuthTktAuthenticationPolicy):
@@ -82,7 +86,8 @@ def main(global_config, **settings):
                 perm.append('g:freelancer')
         return perm
 
-    engine = engine_from_config(settings, 'sqlalchemy.')
+    engine = engine_from_config(settings)
+    engine.pool._use_threadlocal = True
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     session_factory = session_factory_from_settings(settings)

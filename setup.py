@@ -69,6 +69,7 @@ setup(
         'colander',
         'netaddr',
         'pastegevent',
+        'psycogreen',
         'redis==2.8.0',
     ],
     message_extractors = { 'src/intranet3': [
