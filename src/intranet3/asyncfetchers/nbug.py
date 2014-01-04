@@ -1,149 +1,155 @@
+from intranet3.models import Base, User
+from intranet3.models.project import SelectorMapping
+
 class Scrum(object):
-    def __init__(self, bug):
-        self.__bug = bug
+    ATTRIBUTES = {
+        # possible attributes
+        'points': 0,
+        'velocity': 0,
+    }
 
-    @property
-    def points(self):
-        return None
+    def __init__(self, bug, tracker, login_mapping, parsed_data):
 
-    @property
-    def velocity(self):
-        return 0.0
+        data = (bug, tracker, login_mapping, parsed_data)
+
+        attrs = self.get_attrs(*data)
+        for attr, default_value in self.ATTRIBUTES:
+            getter_name = 'get_%s' % attr
+            if hasattr(self, getter_name):
+                getter = getattr(self, getter_name)
+                value = getter(*data)
+            elif attr in attrs:
+                value = attrs[attr]
+            else:
+                value = default_value
+            setattr(self, attr, value)
+
+    def get_attrs(self, bug, tracker, login_mapping, parsed_data):
+        return parsed_data
+
+    def to_dict(self):
+        return {
+            attr: getattr(self, attr)
+            for attr in self.ATTRIBUTES.iterkeys()
+        }
 
 
 class Bug(object):
     Scrum = Scrum
 
+    ATTRIBUTES = {
+        # possible attributes
+        'id': '',
+        'time': 0.0,
+        'desc': '',
+        'reporter': User(name='unknown', email='unknown'),
+        'owner': User(name='unknown', email='unknown'),
+        'priority': '',
+        'severity': '',
+        'status': '',
+        'resolution': '',
+        'project_name': '',
+        'component_name': '',
+        'version': '',
+        'project_id': None,
+        'project': None,
+        'deadline': '',
+        'opendate': None,
+        'changeddate': None,
+        'dependson': {},
+        'blocked': {},
+        'labels': [],
+        'url': '#',
+    }
+
     def __init__(self, tracker, login_mapping, raw_data):
         # we shouldn't keep login_mapping inside Bug object
         # we do not need it to be pickled during memcached set
-        self.tracker = tracker
-        self.data = self.parse(raw_data)
-        self.owner = self.__resolve_user(
-            self.get_owner(self.data),
-            login_mapping,
-            )
-        self.reporter = self.__resolve_user(
-            self.get_reporter(self.data),
-            login_mapping,
-            )
-        self.scrum = self.Scrum(self)
 
-    def __resolve_user(self, orig_login, login_mapping):
+        parsed_data = self.parse(tracker, login_mapping, raw_data)
+
+        data = (tracker, login_mapping, parsed_data)
+
+        self.owner = self._resolve_user(
+            self.get_owner(*data),
+            login_mapping,
+        )
+        self.reporter = self._resolve_user(
+            self.get_reporter(*data),
+            login_mapping,
+        )
+
+        self.project_id = self.get_project_id(*data)
+
+        attrs = self.get_attrs(*data)
+        for attr, default_value in self.ATTRIBUTES:
+            # 3 ways of getting attribute value:
+            # 1. from get_{attr} method if exists
+            # 2. from get_attrs returned data
+            # 3. default value from ATTRIBUTES
+
+            getter_name = 'get_%s' % attr
+            if hasattr(self, getter_name):
+                getter = getattr(self, getter_name)
+                value = getter(*data)
+            elif attr in attrs:
+                value = attrs[attr]
+            else:
+                value = default_value
+
+            if attr in ('owner', 'reporter'):
+                # we need user object for those:
+                value = self._resolve_user(value, login_mapping)
+
+            setattr(self, attr, value)
+
+        self.scrum = self.Scrum(self, *data)
+
+    def _resolve_user(self, orig_login, login_mapping):
         return login_mapping.get(
             orig_login.lower(),
             User(name=orig_login, email=orig_login),
-            )
+        )
 
-    def parse(self, raw_data):
+    def to_dict(self):
+        result = {}
+        for attr in self.ATTRIBUTES.iterkeys():
+            value = getattr(self, attr)
+            if isinstance(value, (Scrum, Base)):
+                value = value.to_dict()
+
+            result[attr] = value
+
+        return result
+    #
+    # to override:
+    #
+
+    def parse(self, tracker, login_mapping, raw_data):
+        """
+        Parse raw_data initially,
+        parsed data will be provided to each getter method like
+        get_owner or get_attrs.
+        Also it will be provided to Scrum constructor.
+        """
         return raw_data
 
-    def get_owner(self, data):
+    def get_project_id(self, tracker, login_mapping, parsed_data):
+        return SelectorMapping(tracker).match(
+            parsed_data['id'],
+            parsed_data['product'],
+            parsed_data['component'],
+            parsed_data['version'],
+        )
+
+    def get_owner(self, tracker, login_mapping, parsed_data):
         """ Get tracker owner username """
         return None
 
-    def get_reporter(self, data):
+    def get_reporter(self, tracker, login_mapping, parsed_data):
         """ Get tracker reporter username """
         return None
 
-    @property
-    def id(self):
-        return None
-
-    @property
-    def desc(self):
-        return None
-
-    @property
-    def priority(self):
-        return None
-
-    @property
-    def severity(self):
-        return None
-
-    @property
-    def status(self):
-        return None
-
-    @property
-    def resolution(self):
-        return None
-
-    @property
-    def url(self):
-        return None
-
-    @property
-    def project(self):
-        return None
-
-    @property
-    def opendate(self):
-        return None
-
-    @property
-    def changeddate(self):
-        return None
-
-    @property
-    def dependson(self):
-        return {}
-
-    @property
-    def blocked(self):
-        return {}
-
-
-class BugzillaBug(Bug):
-    def get_owner(self, data):
-        return data['assigned_to']
-
-    def get_reporter(self, data):
-        return data['reporter']
-
-    @property
-    def id(self):
-        return self.data['bug_id']
-
-    @property
-    def desc(self):
-        return self.data['short_desc']
-
-    @property
-    def priority(self):
-        return self.data['priority']
-
-    @property
-    def severity(self):
-        return self.data['bug_severity']
-
-    @property
-    def status(self):
-        return self.data['bug_status']
-
-    @property
-    def resolution(self):
-        return self.data['resolution']
-
-    @property
-    def url(self):
-        self.tracker.get_bug_url(self.id)
-
-    @property
-    def project_id(self):
-        project_id = SelectorMapping(self.tracker).match(
-            self.id,
-            self.data['product'],
-            self.data['component'],
-            self.data['version'],
-            )
-        return project_id
-
-    @property
-    def opendate(self):
-        return None
-
-    @property
-    def changeddate(self):
-        return None
+    def get_attrs(self, tracker, login_mapping, raw_data):
+        """ Get the rest of attributes """
+        return raw_data

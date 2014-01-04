@@ -38,9 +38,6 @@ class FetcherMeta(type):
         'fetch_all_tickets',
         'fetch_bugs_for_query',
         'fetch_scrum',
-
-        'fetch_bug_titles_and_depends_on',
-        'fetch_dependons_for_ticket_ids',
     ]
 
     @staticmethod
