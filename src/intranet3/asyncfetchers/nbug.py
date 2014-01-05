@@ -111,9 +111,6 @@ class BaseBugProducer(object):
         self.scrum_producer = self.SCRUM_PRODUCER_CLASS(tracker, login_mapping)
 
     def __call__(self, raw_data):
-        # we shouldn't keep login_mapping inside Bug object
-        # we do not need it to be pickled during memcached set
-
         parsed_data = self.parse(self.tracker, self.login_mapping, raw_data)
 
         data = (self.tracker, self.login_mapping, parsed_data)

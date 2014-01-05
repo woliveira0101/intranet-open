@@ -134,16 +134,5 @@
             console.log('a');
             $('.hide').hide();
         });
-        {% if rows %}
-            $.post('{{ request.url_for('/times/tickets/titles') }}', {trackers_id: '{{ trackers_id}}', tickets_id: '{{ tickets_id }}' }, function(data){
-                $('.ajax_changeable').each(function(i){
-                    var identifier = $(this).attr('data-id');
-                    if(data[identifier]){
-                        $(this).parent().html('<i>'+data[identifier]+'</i>');
-                    }
-
-                });
-            });
-        {% endif %}
     });
 </script>
