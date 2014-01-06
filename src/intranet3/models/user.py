@@ -88,6 +88,7 @@ class User(Base):
     )
     stop_work = Column(Date, nullable=True, default=None)
     description = Column(String, nullable=True, default=None)
+    date_of_birth = Column(Date, nullable=True, default=None)
 
 
     presences = orm.relationship('PresenceEntry', backref='user', lazy='dynamic')
@@ -208,7 +209,9 @@ class User(Base):
             'phone_on_desk': self.phone_on_desk,
             'location': (self.location, location[0], location[1]),
             'start_work': self.start_work.isoformat() if self.start_work else None,
+            'start_full_time_work': self.start_full_time_work.isoformat() if self.start_full_time_work else None,
             'stop_work': self.stop_work.isoformat() if self.stop_work else None,
+            'date_of_birth': self.date_of_birth.isoformat() if self.date_of_birth else None,
             'groups': self.groups,
             'roles': self.roles,
             'avatar_url': '/api/images/users/%s' % self.id,

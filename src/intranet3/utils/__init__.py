@@ -1,7 +1,4 @@
-from pyramid.events import subscriber
-from pyramid.events import ContextFound
-
-_flash = None
+from pyramid.threadlocal import get_current_request
 
 def flash(message, klass=''):
     """
@@ -9,11 +6,6 @@ def flash(message, klass=''):
     Use only if you are sure it will be called in request context
     If you can use flash function in BaseView class
     """
-    if _flash:
-        _flash((klass, message))
-
-@subscriber(ContextFound)
-def _get_flash(event):
-    request = event.request
-    global _flash
-    _flash = event.request.session.flash
+    request = get_current_request()
+    if request:
+        request.session.flash((klass, message))

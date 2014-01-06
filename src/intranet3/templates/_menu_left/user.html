@@ -13,6 +13,7 @@
 <li><a href="{{ request.url_for('/employees/list/absence_pivot') }}"><i class="icon-chevron-right"></i>{% trans %}Leave entitlements{% endtrans %}</a></li>
 <li><a href="{{ request.url_for('/employees/list/late') }}"><i class="icon-chevron-right"></i>{% trans %}Excuses{% endtrans %}</a></li>
 <li><a href="{{ request.url_for('/tracker/list') }}"><i class="icon-chevron-right"></i>{% trans %}Trackers{% endtrans %}</a></li>
+<li><a href="{{ request.url_for('/team/view') }}"><i class="icon-chevron-right"></i>{% trans %}Teams{% endtrans %}</a></li>
 <li><a href="{{ request.url_for('/user/list') }}"><i class="icon-chevron-right"></i>{% trans %}Employees{% endtrans %}</a></li>
 {% if request.has_perm('scrum') %}
     <li><a href="{{ request.url_for('/client/map') }}"><i class="icon-chevron-right"></i>{% trans %}Clients{% endtrans %}</a></li>

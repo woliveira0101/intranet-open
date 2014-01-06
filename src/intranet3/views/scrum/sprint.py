@@ -13,7 +13,7 @@ from intranet3.models import Sprint, ApplicationConfig, Tracker, User, Project
 from intranet3 import helpers as h
 
 from intranet3.log import INFO_LOG, ERROR_LOG
-from intranet3.lib.scrum import SprintWrapper, get_velocity_chart_data, move_blocked_to_the_end
+from intranet3.lib.scrum import SprintWrapper, get_velocity_chart_data, move_blocked_to_the_end, BugUglyAdapter
 from intranet3.lib.times import TimesReportMixin, HTMLRow
 from intranet3.lib.bugs import Bugs
 from intranet3.forms.times import ProjectTimeForm
@@ -130,6 +130,7 @@ class Field(ClientProtectionMixin, BaseView):
 
 class BaseSprintView(BaseView):
     def tmpl_ctx(self):
+
         session = self.session
         sprint = self.v.get('sprint')
         if not sprint:
@@ -166,6 +167,7 @@ class BaseSprintView(BaseView):
         )
 
 
+
 @view_config(route_name='scrum_sprint_show', permission='client')
 class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
@@ -174,12 +176,37 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
         bugs = move_blocked_to_the_end(bugs)
         tracker = Tracker.query.get(sprint.project.tracker_id)
+
+        mean_velocity = self.get_mean_task_velocity()
+        for bug in bugs:
+            bugAdapter = BugUglyAdapter(bug)
+            bug.danger = bugAdapter.is_closed() \
+                        and (bugAdapter.velocity <= (0.7 * mean_velocity) \
+                        or bugAdapter.velocity >= (1.3 * mean_velocity))
+
         sw = SprintWrapper(sprint, bugs, self.request)
+
         return dict(
             tracker=tracker,
             bugs=sw.bugs,
             info=sw.get_info(),
+            str_date=self._sprint_daterange(sprint.start, sprint.end),
+            sprint_tabs=sw.get_tabs(),
         )
+
+    def _sprint_daterange(self, st, end):
+        return '%s - %s' % (st.strftime('%d-%m-%Y'), end.strftime('%d-%m-%Y'))
+
+    def get_mean_task_velocity(self):
+        sprints = Sprint.query.filter(Sprint.end >= datetime.date.today())
+        bugs = []
+        for sprint in sprints:
+            bugs += self._fetch_bugs(sprint)
+            bugs = [BugUglyAdapter(b) for b in bugs]
+        if len(bugs):
+            return sum([b.velocity for b in bugs if b.is_closed()]) / len(bugs)
+        else:
+            return 0.0
 
 
 @view_config(route_name='scrum_sprint_board', permission='client')
@@ -190,13 +217,13 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
 
         sw = SprintWrapper(sprint, bugs, self.request)
         board = sw.get_board()
-
         return dict(
             board=board,
             info=sw.get_info(),
             bug_list_url=lambda bugs_list: sprint.project.get_bug_list_url(
                 [bug.id for bugs in bugs_list.values() for bug in bugs]
             ),
+            sprint_tabs=sw.get_tabs()
         )
 
 
@@ -254,6 +281,7 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin,
                 [time[1] for time in participation_of_workers]
             ),
             trackers_id=trackers_id, tickets_id=tickets_id,
+            sprint_tabs=sw.get_tabs()
         )
 
 @view_config(route_name='scrum_sprint_charts', permission='client')
@@ -265,7 +293,7 @@ class Charts(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         burndown = sw.get_burndown_data()
         tracker = Tracker.query.get(sprint.project.tracker_id)
 
-        entries, _, _ = sw.get_worked_hours()
+        entries, sum_, bugs_sum = sw.get_worked_hours()
         entries.insert(0, ('Employee', 'Time'))
         piechart_data = json.dumps(entries)
 
@@ -275,6 +303,7 @@ class Charts(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
             charts_data=json.dumps(burndown),
             piechart_data=piechart_data,
             info=sw.get_info(),
+            sprint_tabs=sw.get_tabs()
         )
 
 
@@ -294,6 +323,7 @@ class Retros(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
             bugs=bugs,
             info=sw.get_info(),
             sprints=sprints,
+            sprint_tabs=sw.get_tabs()
         )
 
 
@@ -355,8 +385,8 @@ class Add(BaseView):
 
 
 @view_config(route_name='scrum_sprint_delete',
-    renderer='intranet3:templates/common/delete.html',
-    permission='scrum')
+             renderer='intranet3:templates/common/delete.html',
+             permission='scrum')
 class Delete(BaseView):
 
     def dispatch(self):
@@ -386,4 +416,24 @@ class Team(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
             sprint=sprint,
             info=sw.get_info(),
 
+        )
+
+@view_config(route_name='scrum_sprint_extra-tab', permission='client')
+class ExtraTab(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
+    def get(self):
+        sprint = self.v['sprint']
+        bugs = self._fetch_bugs(sprint)
+        sw = SprintWrapper(sprint, bugs, self.request)
+
+        tab_name = self.request.GET['tab_name']
+        tabs = sw.get_tabs()
+
+        extra_tab = dict(
+            name=tab_name,
+            link=dict(tabs)[tab_name]
+        )
+        return dict(
+            info=sw.get_info(),
+            sprint_tabs=tabs,
+            extra_tab=extra_tab,
         )

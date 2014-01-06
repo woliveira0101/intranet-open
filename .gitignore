@@ -1,6 +1,5 @@
 !.gitignore
 *.pyc
-db_migrations/*
 src/secret_keys.py
 *.egg-info
 .settings
@@ -20,6 +19,7 @@ twistd.pid
 
 *.tar.gz
 *.DS_Store
+.*swp
 
 venv
 node_modules
@@ -29,3 +29,5 @@ src/intranet3/static/js
 js/tmp
 
 *.directory
+
+config.ini

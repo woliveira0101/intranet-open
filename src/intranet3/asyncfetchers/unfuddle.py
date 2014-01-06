@@ -53,7 +53,6 @@ class UnfuddleMetadataFetcher(BasicAuthMixin, BaseFetcher):
     UNFUDDLE_DATA_TIMEOUT = 60*3
     DATA_API = '/api/v1/initializer.json'
 
-
     def before_fetch(self):
         url = self.tracker.url + self.DATA_API
         rpc = RPC(
@@ -71,6 +70,7 @@ class UnfuddleMetadataFetcher(BasicAuthMixin, BaseFetcher):
 
         users = self._get_users(jdata['people'])
         projects = self._get_projects(jdata['projects'])
+        whiteboard_field_numbers = self._get_whiteboard_number(jdata['projects'])
         components = self._get_components(jdata.get('components', []))
         milestones = self._get_milestones(jdata.get('milestones', []))
         custom_fields = self._get_custom_fields(jdata.get('custom_field_values', []))
@@ -81,8 +81,23 @@ class UnfuddleMetadataFetcher(BasicAuthMixin, BaseFetcher):
             'components': components,
             'milestones': milestones,
             'custom_fields': custom_fields,
+            'whiteboard_field_numbers': whiteboard_field_numbers,
         }
         return data
+
+    def _get_whiteboard_number(self, projects):
+        result = {}
+        for project in projects:
+            for field_number in range(1, 4):
+                ticket_filed_active = 'ticket_field%s_active' % field_number
+                ticket_filed_title = 'ticket_field%s_title' % field_number
+                ticket_filed_active = project[ticket_filed_active]
+                if not ticket_filed_active:
+                    continue
+                ticket_filed_title = project[ticket_filed_title]
+                if ticket_filed_title.lower().strip() == 'whiteboard':
+                    result[project['id']] = field_number
+        return result
 
     def _get_users(self, users):
         mapping = dict([ ( user['id'], user['username'] ) for user in users])
@@ -142,7 +157,7 @@ A comma or vertical bar separated list of report criteria composed as
             path = project_api % project_id
         else:
             path = api
-        return str(make_path(self.tracker.url, path))
+        return str(make_path(self.tracker.get_url(), path))
 
     def fetch(self, url):
         rpc = RPC(
@@ -257,9 +272,14 @@ A comma or vertical bar separated list of report criteria composed as
                 opendate=dateutil.parser.parse(ticket['created_at']),
                 changeddate=dateutil.parser.parse(ticket['updated_at']),
             )
-            whiteboard_field_id = ticket.get('field3_value_id')
-            key = str(ticket['project_id']), str(whiteboard_field_id)
-            whiteboard = self.unfuddle_data['custom_fields'].get(key, '')
-            bug_desc['whiteboard'] = whiteboard
+            try:
+                field_no = self.unfuddle_data['whiteboard_field_numbers'][ticket['project_id']]
+                whiteboard_field_id = ticket.get('field%s_value_id' % field_no)
+                key = str(ticket['project_id']), str(whiteboard_field_id)
+                whiteboard = self.unfuddle_data['custom_fields'].get(key)
+                if whiteboard:
+                    bug_desc['whiteboard'] = whiteboard
+            except Exception:
+                pass
 
             yield bug_desc

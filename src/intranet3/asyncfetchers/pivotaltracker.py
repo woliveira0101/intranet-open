@@ -142,7 +142,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
 
     def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version, resolved=False):
         filters = dict(
-            id=','.join(ticket_ids)
+            id=','.join(ticket_ids),
         )
         if resolved:
             filters['state'] = ','.join(ISSUE_STATE_UNRESOLVED)
@@ -153,6 +153,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
     def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
         rpcs = self.fetch('stories', filters=dict(
             label=sprint_name,
+            includedone='true',
         ))
         self.consume(rpcs)
 

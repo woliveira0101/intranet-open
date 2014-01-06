@@ -94,11 +94,15 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for client, time, time_percent in participation_of_workers %}
+                {% for user, time, time_percent in participation_of_workers %}
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td>{{ client }}</td>
-                        <td>{{ time }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>
+                            <a href="{{ request.url_for('/times/tickets/report', users=user.id, projects=form.data.projects, date_range=str_date, group_by_client=form.data.group_by_client, group_by_project=form.data.group_by_project, group_by_bugs=form.data.group_by_bugs, group_by_user=form.data.group_by_user, ticket_choice=form.data.ticket_choice ,bigger_than=form.data.bigger_than)}}">
+                                {{ time }}
+                            </a>
+                        </td>
                         <td class="chart-bar">
                             <div class="progress progress-striped">
                                 <div class="bar" style="width:{{ time_percent }}%"></div>
@@ -110,7 +114,11 @@
                 <tr>
                     <td></td>
                     <td align="right"><strong>{% trans %}Sum{% endtrans %}:</strong></td>
-                    <td class="sum-count">{{ participation_of_workers_sum }}</td>
+                    <td class="sum-count">
+                        <a href="{{ request.url_for('/times/tickets/report', projects=form.data.projects, date_range=str_date, group_by_client=form.data.group_by_client, group_by_project=form.data.group_by_project, group_by_bugs=form.data.group_by_bugs, group_by_user=form.data.group_by_user, ticket_choice=form.data.ticket_choice ,bigger_than=form.data.bigger_than)}}">
+                            {{ participation_of_workers_sum }}
+                        </a>
+                    </td>
                     <td></td>
                     <td></td>
                 </tr>

@@ -30,6 +30,7 @@ class ProjectForm(wtf.Form):
     definition_of_ready = wtf.TextAreaField(_("Definition of ready"))
     continuous_integration_url = wtf.StringField(_("Continuous integration link"))
     backlog_url = wtf.StringField(_("Backlog link"))
+    sprint_tabs = wtf.TextAreaField(_("Custom sprint tabs"))
 
     def validate_component_selector(self, field):
         if field.data and not self.project_selector.data:

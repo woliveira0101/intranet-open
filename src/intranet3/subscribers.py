@@ -64,8 +64,8 @@ def add_global(event):
 @subscriber(ContextFound)
 def csrf_validation(event):
     request = event.request
-    if request.registry.settings['DEBUG'] == 'True':
-        return
+    # if request.registry.settings['DEBUG'] == 'True':
+    #     return
     if not request.is_xhr and request.method == "POST":
         csrf_token = request.POST.get('csrf_token')
         if csrf_token is None or csrf_token != request.session.get_csrf_token():

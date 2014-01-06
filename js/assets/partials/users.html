@@ -5,6 +5,15 @@
                  <input ng-model="search.name"  type="text" placeholder="Employee's name">
                  <input type="text" ng-model="search.start_work" placeholder="Start work" date-range-picker>
                  <input type="text" ng-model="search.stop_work" placeholder="Stop work" date-range-picker>
+                 <select
+                     ng-model="search.time_works" title="Full time"
+                     ng-options="time_work.id as time_work.name for time_work in time_works"
+                     bs-select>
+                 </select>
+                 <select class="input-medium" ng-model="dob.chosen" ng-options="year for year in dob.years" ng-change="dob.select_year()">
+                 </select>
+                 <input class="input-mini" ng-show="dob.is_custom()" ng-model="dob.start" type="number"/>
+                 <input class="input-mini" ng-show="dob.is_custom()" ng-model="dob.end" type="number"/>
              </div>
              <div class="row below">
                <select
@@ -30,8 +39,8 @@
              </div>
         </form>
     </div>
-    <div class="tabs">
 
+    <div class="tabs">
     <ul class="nav nav-tabs">
        <li class="active"><a data-toggle="tab" ng-click="set_tab('employees')">Employees ({{ get_employees().length }})</a></li>
         <li class=""><a data-toggle="tab" ng-click="set_tab('freelancers')">Freelancers ({{ get_freelancers().length }})</a></li>
@@ -51,6 +60,7 @@
                 <th class="teams">Teams</th>
                 <th ng-click="predicate = 'start_work'; reverse=!reverse">Start work</th>
                 <th ng-click="predicate = 'stop_work'; reverse=!reverse">End work</th>
+                <th>Date of birth</th>
             </thead>
             <tbody>
                 <tr ng-repeat="user in get_users() | orderBy:predicate:reverse">
@@ -74,13 +84,15 @@
                     <td>
                         <div ng-repeat="team in user.teams">{{ team.name }}</div>
                     </td>
-                    <td>{{user.start_work}}</td>
-                    <td>{{user.stop_work}}</td>
+                    <td>{{ user.start_work }}</td>
+                    <td>{{ user.stop_work }}</td>
+                    <td>{{ user.date_of_birth }}</td>
                 </tr>
 
             </tbody>
          </table>
         </div>
     </div>
+
 </div>
 </div>

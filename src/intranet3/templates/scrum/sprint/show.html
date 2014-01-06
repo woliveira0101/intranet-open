@@ -28,8 +28,18 @@
                 <td>{{ bug.desc }}</td>
                 <td>{{ bug.owner.name }}</td>
                 <td>{{ bug.scrum.points }}</td>
-                <td>{{ '%.2f' % bug.sprint_time }} ({{ '%.2f' % bug.time }})</td>
-                <td>{{ (bug.scrum.velocity | round(2)) if bug.scrum.velocity else '-' }}</td>
+                <td>
+                    <a href="{{ request.url_for('/times/tickets/report', bug_id=bug.id, projects=bug.project_id, date_range=str_date, group_by_client='y', group_by_project='y', group_by_bugs='y',group_by_user='y', ticket_choice='all' ,bigger_than=0)}}">
+                        {{ '%.2f' % bug.sprint_time }}
+                    </a>
+                  (<a href="{{ request.url_for('/times/tickets/report', bug_id=bug.id, projects=bug.project_id, date_range='01-01-2000 - 01-01-2030', group_by_client='y', group_by_project='y', group_by_bugs='y',group_by_user='y', ticket_choice='all' ,bigger_than=0)}}">{{ '%.2f' % bug.time }}</a>)
+                </td>
+                <td>
+                    <span class="{{ 'velocity-opened' if not bug.scrum.is_closed else '' }}">{{ (bug.scrum.velocity | round(2)) }}</span>
+                    {% if bug.danger %}
+                        <div class="ui-icon ui-icon-alert task-danger" title="High mean devation"> </div>
+                    {% endif %}
+                </td>
                 <td>{{ bug.status }}</td>
             </tr>
             {% endfor %}

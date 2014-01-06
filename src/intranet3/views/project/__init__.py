@@ -80,6 +80,8 @@ class Edit(BaseView):
             project.definition_of_ready = form.definition_of_ready.data
             project.continuous_integration_url = form.continuous_integration_url.data
             project.backlog_url = form.backlog_url.data
+            project.status = form.status.data
+            project.sprint_tabs = form.sprint_tabs.data
             if self.request.has_perm('coordinator'):
                 project.name = form.name.data
                 coordinator_id = int(form.coordinator_id.data) if form.coordinator_id.data.isdigit() else None

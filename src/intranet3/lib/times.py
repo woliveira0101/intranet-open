@@ -129,7 +129,7 @@ class TimesReportMixin(object):
         )
         return uber_query
 
-    def _prepare_uber_query(self, start_date, end_date, projects, users, ticket_choice):
+    def _prepare_uber_query(self, start_date, end_date, projects, users, ticket_choice, bug_id=None):
         query = self.session.query
         uber_query = query(
             Client, Project, TimeEntry.ticket_id, User, Tracker,
@@ -139,6 +139,9 @@ class TimesReportMixin(object):
                                .filter(TimeEntry.project_id==Project.id)\
                                .filter(Project.tracker_id==Tracker.id)\
                                .filter(Project.client_id==Client.id)
+
+        if bug_id:
+            uber_query = uber_query.filter(TimeEntry.ticket_id==bug_id)
 
         if projects:
             uber_query = uber_query.filter(TimeEntry.project_id.in_(projects))
@@ -164,17 +167,16 @@ class TimesReportMixin(object):
     def _get_participation_of_workers(self, entries):
         participation_of_workers = {}
         participation_of_workers_sum = 0
-
         for client, project, bug_id, user, tracker, desc, date, time in entries:
-            if user.name not in participation_of_workers:
-                participation_of_workers[user.name] = time
+            if user not in participation_of_workers:
+                participation_of_workers[user] = time
             else:
-                participation_of_workers[user.name] += time
+                participation_of_workers[user] += time
 
             participation_of_workers_sum += time
 
-        participation_of_workers = [(name, round(time, 2), round(100*time/participation_of_workers_sum, 2))
-                                    for name, time in participation_of_workers.items()]
+        participation_of_workers = [(user, round(time, 2), round(100*time/participation_of_workers_sum, 2))
+                                    for user, time in participation_of_workers.items()]
         participation_of_workers.sort(key=lambda k: k[1], reverse=True)
         return participation_of_workers
 

@@ -1,0 +1,94 @@
+<div class="modal-header">
+    <button class="close" aria-hidden="true" ng-click="close()">x</button>
+    <h3>Absence / Holiday</h3>
+</div>
+
+<div id="absenceForm" class="modal-body modal-form">
+    <h6>IMPORTANT !!!!!!!</h6>
+    <div class="space">
+        Jeżeli nieobecność przecina koniec miesiąca lub roku, proszę ją rozbić na dwa wnioski urlopowe tak, aby dany wniosk miescił się w jednym miesiącu. W przypadku nieprawidłowości z wymiarem urlopu, proszę zgłosić się do asystentki.
+    </div>
+    <div class="space">
+        Według tych dat zostanie dodana nieobecność do kalendarza:
+    </div>
+
+    <form name="absenceForm" class="form-horizontal" ng-class="{submitted: form_submitted}" novalidate>
+        <div class="control-group">
+            <label class="control-label">Start</label>
+            <div class="controls">
+                <div class="errors" ng-show="errors.popup_date_start">{{errors.popup_date_start}}</div>
+                <div class="description">Format DD/MM/RRRR</div>
+                <input class="datepicker" name="popup_date_start" type="text" ng-model="absence.popup_date_start" ng-change="updateDays()" jqdatepicker default-date="today" required>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">End</label>
+            <div class="controls">
+                <div class="errors" ng-show="errors.popup_date_end">{{errors.popup_date_end}}</div>
+                <div class="description">Format DD/MM/RRRR</div>
+                <input class="datepicker" name="popup_date_end" type="text" ng-model="absence.popup_date_end" ng-change="updateDays()" jqdatepicker required>
+            </div>
+        </div>
+        <div class="errors" ng-show="errors.absence_days">{{errors.absence_days}}</div>
+        <div class="row-fluid">
+            <div class="control-group span4">
+                <label class="control-label">Liczba dni</label>
+                <input type="text" value="{{days}}" disabled>
+            </div>
+            <div class="control-group span4">
+                <label class="control-label">Wymiar</label>
+                <input type="text" value="{{mandated}}" disabled>
+            </div>
+            <div class="control-group span4">
+                <label class="control-label">Pozostało</label>
+                <input ng-class="{error: left < 0}" type="text" value="{{left}}" disabled>
+            </div>
+        </div>
+
+        <div class="clear"></div>
+        <div>
+            <b>Liczba dni</b>: Tyle dni urlopu zostanie dodane do przepracowanych godzin.
+        </div>
+        <div>
+            W przypadku brania urlopu za okres choroby należy wybrać urlop <b>planowany</b>.
+        </div>
+        <div>
+            <b>L4</b> jest tylko dla osób na umowę o pracę (godziny dopisują się do intranetu).
+        </div>
+        <div>
+            <b>Okolicznościowy</b> - tylko dla osób na umowę o pracę, opis należy dodać w uwagach.
+        </div>
+        <div class="space">
+            <b>Nieobecność</b> - dodaje się tylko do kalendarza, a nie do godzin przepracowanych.
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">Type</label>
+            <div class="controls">
+                <div class="description">Rodzaj</div>
+                <select name="popup_type" ng-model="absence.popup_type" required>
+                    <option value="planowany" selected="selected">Planned leave</option>
+                    <option value="zadanie">Leave at request</option>
+                    <option value="l4">Illness</option>
+                    <option value="okolicznosciowy">Compassionate leave</option>
+                    <option value="inne">Absence</option>
+                </select>
+            </div>
+        </div>
+        <div class="space">
+            Proszę o wpisanie, czy będzie się dostępnym pod telefonem i czy będzie się miało dostęp do Internetu.
+        </div>
+        <div class="control-group">
+            <label class="control-label">Remarks</label>
+            <div class="controls">
+                <div class="errors" ng-show="errors.popup_remarks">{{errors.popup_remarks}}</div>
+                <div class="description">Uwagi</div>
+                <textarea name="popup_remarks" ng-model="absence.popup_remarks" required></textarea>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" type="submit" ng-click="add()" ng-disabled="form_submitted">Submit</button>
+</div>

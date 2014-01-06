@@ -6,7 +6,7 @@ from calendar import timegm
 from sqlalchemy import func
 from sqlalchemy.sql import or_, and_
 
-from intranet3.models import User, TimeEntry
+from intranet3.models import User, TimeEntry, Project
 from intranet3 import helpers as h
 
 
@@ -33,14 +33,15 @@ class BugUglyAdapter(object):
 
     @property
     def points(self):
-        return float(self.whiteboard.get('p', 0.0))
+        try:
+            return float(self.whiteboard.get('p', 0.0))
+        except:
+            return 0.0
 
     @property
     def velocity(self):
-        if self.is_closed():
-            points = float(self.whiteboard.get('p', 0.0))
-            return (points / self.time * 8.0) if self.time else 0.0
-        return None
+        points = self.points
+        return (points / self.time * 8.0) if self.time else 0.0
 
     @classmethod
     def produce(cls, bugs):
@@ -164,33 +165,41 @@ class SprintWrapper(object):
             sum([e[1] for e in entries if e[2] and not e[2].startswith('M')])
         )
 
+    def get_tabs(self):
+        extra_tabs = self.session.query(Project)\
+                         .filter(Project.client_id == self.sprint.client_id)\
+                         .first()\
+                         .get_sprint_tabs
+        return extra_tabs
+
     def get_board(self):
-        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
-        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
-        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
-        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0)
+        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
+        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
+        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
+        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
 
         def append_bug(d, bug):
             if bug.scrum.is_blocked:
-                d['blocked'].append(bug)
+                d['bugs']['blocked'].append(bug)
             elif bug.scrum.points:
-                d['with_points'].append(bug)
+                d['bugs']['with_points'].append(bug)
             else:
-                d['without_points'].append(bug)
+                d['bugs']['without_points'].append(bug)
+            d['empty'] = False
 
         for bug in self.bugs:
             points = bug.scrum.points
             if bug.scrum.is_closed:
-                append_bug(completed['bugs'], bug)
+                append_bug(completed, bug)
                 completed['points'] += points
             elif bug.status == 'RESOLVED':
-                append_bug(toverify['bugs'], bug)
+                append_bug(toverify, bug)
                 toverify['points'] += points
             elif not bug.scrum.is_unassigned:
-                append_bug(inprocess['bugs'], bug)
+                append_bug(inprocess, bug)
                 inprocess['points'] += points
             else:
-                append_bug(todo['bugs'], bug)
+                append_bug(todo, bug)
                 todo['points'] += points
 
         return dict(
@@ -208,9 +217,12 @@ class SprintWrapper(object):
         total_hours = sum_worked_hours
         total_bugs_hours = sum_bugs_worked_hours
 
-        users = self.session.query(User)\
-                    .filter(User.id.in_(self.sprint.team.users))\
-                    .filter(User.is_active==True).all()
+        users = []
+        if self.sprint.team_id:
+            users = self.session.query(User)\
+                        .filter(User.id.in_(self.sprint.team.users))\
+                        .filter(User.is_active==True)\
+                        .order_by(User.name).all()
         result = dict(
             start=self.sprint.start.strftime('%Y-%m-%d'),
             end=self.sprint.end.strftime('%Y-%m-%d'),

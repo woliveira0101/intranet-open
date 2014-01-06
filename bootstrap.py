@@ -69,8 +69,11 @@ for k, v in sys.modules.items():
 
 is_jython = sys.platform.startswith('java')
 
-setuptools_source = 'http://peak.telecommunity.com/dist/ez_setup.py'
-distribute_source = 'http://python-distribute.org/distribute_setup.py'
+setuptools_source = ['http://peak.telecommunity.com/dist/ez_setup.py']
+distribute_source = [
+    'http://python-distribute.org/distribute_setup.py',
+    'https://gist.github.com/avalanchy/6986991/raw/'  # mirror
+]
 
 
 # parsing arguments
@@ -110,8 +113,8 @@ parser.add_option("--setup-source", action="callback", dest="setup_source",
                   callback=normalize_to_url, nargs=1, type="string",
                   help=("Specify a URL or file location for the setup file. "
                         "If you use Setuptools, this will default to " +
-                        setuptools_source + "; if you use Distribute, this "
-                        "will default to " + distribute_source + "."))
+                        setuptools_source[0] + "; if you use Distribute, this "
+                        "will default to " + distribute_source[0] + "."))
 parser.add_option("--download-base", action="callback", dest="download_base",
                   callback=normalize_to_url, nargs=1, type="string",
                   help=("Specify a URL or directory for downloading "
@@ -156,8 +159,11 @@ try:
     if not hasattr(pkg_resources, '_distribute'):
         raise ImportError
 except ImportError:
-    ez_code = urllib2.urlopen(
-        options.setup_source).read().replace('\r\n', '\n')
+    try:
+        ez_code = urllib2.urlopen(options.setup_source[0])
+    except urllib2.URLError:
+        ez_code = urllib2.urlopen(options.setup_source[1])
+    ez_code = ez_code.read().replace('\r\n', '\n')
     ez = {}
     exec ez_code in ez
     setup_args = dict(to_dir=eggs_dir, download_delay=0)

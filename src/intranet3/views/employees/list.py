@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import datetime
+import calendar
 
 from pyramid.view import view_config
 from pyramid.response import Response
 from sqlalchemy import desc
-
+from intranet3.utils.idate import first_day_of_month, last_day_of_month, first_day_of_quarter, last_day_of_quarter
 from intranet3.utils.views import BaseView
 from intranet3 import models as m
 from intranet3.models import User, Leave
@@ -188,3 +189,81 @@ class Delete(BaseView):
             absence.deleted = True
             self.session.add(absence)
         return Response('')
+
+
+oneday = datetime.timedelta(days=1)
+
+
+
+@view_config(route_name='employee_list_pivot')
+class Pivot(ApplyArgsMixin, BaseView):
+    @staticmethod
+    def _quarters_sum(v):
+        return sum(v[0:3]), sum(v[3:6]), sum(v[6:9]), sum(v[9:12]), sum(v[12:15]), sum(v[15:18]), sum(v[18:21]), sum(v[21:24])
+
+    @staticmethod
+    def _create_link_with_year(mode, year, role):
+        link = "/user/list#/?"
+        year = str(year)
+        if role:
+            link = "%srole=%s&" % (link, role)
+        date = "01-01-%s - 31-12-%s" % (year, year)
+        link = "%s%s=%s" % (link, mode, date)
+        return link
+
+    @staticmethod
+    def _create_link_with_month(mode, year, month, role):
+        link = "/user/list#/?"
+        month += 1
+        if role:
+            link = "%srole=%s&" % (link, role)
+        date = datetime.date(year, month, 1)
+        start_date = first_day_of_month(date).strftime('%d-%m-%Y')
+        stop_date = last_day_of_month(date).strftime('%d-%m-%Y')
+        date = "%s - %s" % (start_date, stop_date)
+        link = "%s%s=%s" % (link, mode, date)
+        return link
+
+    @staticmethod
+    def _create_link_with_quarter(mode, year, quarter, role):
+        link = "/user/list#/?"
+        month = 3 * quarter + 1
+        if role:
+            link = "%srole=%s&" % (link, role)
+        date = datetime.date(year, month, 1)
+        start_date = first_day_of_quarter(date).strftime('%d-%m-%Y')
+        stop_date = last_day_of_quarter(date).strftime('%d-%m-%Y')
+        date = "%s - %s" % (start_date, stop_date)
+        link = "%s%s=%s" % (link, mode, date)
+        return link
+
+    def get(self):
+        check_role = self.request.GET.get('role')
+        if not check_role or check_role == 'None':
+            pivot_q = self.session.query(User.id, User.name, User.start_work, User.stop_work, User.roles)\
+                                .filter(User.is_not_client())\
+                                .filter(User.is_active==True)\
+                                .order_by(User.name)
+        else:
+            pivot_q = self.session.query(User.id, User.name, User.start_work, User.stop_work, User.roles)\
+                                .filter(User.is_not_client())\
+                                .filter(User.is_active==True)\
+                                .filter(User.roles.op('&&')('{%s}'%(check_role)))\
+                                .order_by(User.name)
+
+        users = {}
+        for s in pivot_q:
+            if s.start_work:
+                users.setdefault(s.start_work.year, [0]*24)[s.start_work.month-1] += 1
+            if s.stop_work:
+                users.setdefault(s.stop_work.year, [0]*24)[s.stop_work.month-1+12] += 1
+        role = User.ROLES
+        return dict(
+            start=users,
+            roles=role,
+            check=check_role,
+            quarters_sum=self._quarters_sum,
+            link_with_year=self._create_link_with_year,
+            link_with_month=self._create_link_with_month,
+            link_with_quarter=self._create_link_with_quarter,
+        )

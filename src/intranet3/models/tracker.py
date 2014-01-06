@@ -105,6 +105,11 @@ class Tracker(Base):
     credentials = orm.relationship('TrackerCredentials', backref='tracker', lazy='dynamic')
     projects = orm.relationship('Project', backref='tracker', lazy='dynamic')
 
+    def get_url(self):
+        """ hack for unfuddle
+        """
+        return ''.join(self.url.split('[MARKER]'))
+
     def get_bug_url(self, id):
         """ Calculate URL for bug 'id' on this tracker """
         constructor = self.URL_CONSTRUCTORS[self.type]

@@ -1,19 +1,67 @@
 var App = angular.module('intranet');
 
-App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) {
+App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, $location, date_of_birth) {
     $scope.users = [];
     $scope.tab = 'employees';
     $scope.search = {
       name: '',
       start_work: {
+          start: undefined,
+          end: undefined
       },
       stop_work: {
       },
       locations: [],
       roles: [],
       groups: [],
-      teams: []
+      teams: [],
+      time_works: 0
     };
+
+    $scope.$watch(function(){ return $location.search()}, function(){
+      if ($location.search().start_work){
+        var date_start = $location.search().start_work.split(' - ');
+        $scope.search.start_work = {
+          start: new Date.parse(date_start[0].split('-').reverse().join('-')),
+          end: new Date.parse(date_start[1].split('-').reverse().join('-'))
+        }
+      }
+      if ($location.search().stop_work){
+        var date_stop = $location.search().stop_work.split(' - ');
+        $scope.search.stop_work = {
+          start: new Date.parse(date_stop[0].split('-').reverse().join('-')),
+          end: new Date.parse(date_stop[1].split('-').reverse().join('-'))
+        }
+      }
+    });
+
+    var t = _.template("<%= start %> - <%= end %>");
+    $scope.$watch('search.start_work', function(){
+      var start = $scope.search.start_work.start;
+      var end = $scope.search.start_work.end;
+
+      if(start && end){
+        start = start.toString('dd-MM-yyyy');
+        end = end.toString('dd-MM-yyyy');
+        $location.search('start_work', t({start:start, end:end}));
+      } else {
+        $location.search('start_work', '')
+      }
+    });
+
+    $scope.$watch('search.stop_work', function(){
+      var start = $scope.search.stop_work.start;
+      var end = $scope.search.stop_work.end;
+
+      if(start && end){
+        start = start.toString('dd-MM-yyyy');
+        end = end.toString('dd-MM-yyyy');
+        $location.search('stop_work', t({start:start, end:end}));
+      } else {
+        $location.search('stop_work', '')
+      }
+    });
+
 
     $scope.locations = [
         {
@@ -28,6 +76,20 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
     $scope.set_tab = function(name){
        $scope.tab = name;
     };
+    $scope.time_works = [
+        {
+            id: 0,
+            name: 'All'
+        },
+        {
+            id: 1,
+            name: 'Full time'
+        },
+        {
+            id: 2,
+            name: 'Part time'
+        }
+    ];
 
     $scope.roles = $filter('orderBy')(_.map($scope.G.ROLES, function(role){
       return {id: role[0], name: role[1]};
@@ -43,9 +105,13 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       })[1];
     };
 
+    $scope.dob = date_of_birth.create(1980, 1995);
+
     $http.get('/api/users?full=1&inactive=1').success(function(data){
       $scope.users = data.users;
+
       $http.get('/api/teams').success(function(data){
+        data.teams.push({'id':-1, 'name':' - No Team - ', 'users':[]});
         $scope.teams = $filter('orderBy')(data.teams, 'name');
         $scope.teams_to_user = {};
         $scope.user_to_teams = {};
@@ -69,12 +135,11 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
           $scope.search.teams = [];
         }, 0);
       });
+        $scope.dob.update_years($scope.users);
     });
-
 
     $scope.filtered_users = function(){
       var filtered_users = $scope.users;
-
       var f_name = $scope.search.name.toLowerCase();
       if(f_name){
         filtered_users = _.filter(filtered_users, function(user){
@@ -113,8 +178,12 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       if(f_teams.length > 0){
         filtered_users = _.filter(filtered_users, function(user){
           var u_teams = user.teams_ids;
-          var intersection = _.intersection(f_teams, u_teams);
-          return f_teams.length === intersection.length;
+          if(f_teams.indexOf(-1) >= 0){
+            return u_teams.length == 0;
+          } else {
+            var intersection = _.intersection(f_teams, u_teams);
+            return f_teams.length === intersection.length;
+          }
         });
       }
 
@@ -123,7 +192,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       if(start && end){
         filtered_users = _.filter(filtered_users, function(user){
           var u_start_work = Date.parse(user.start_work);
-          return !u_start_work || (start <= u_start_work  && u_start_work <= end);
+          return !u_start_work || (start <= u_start_work && u_start_work <= end);
         });
       }
 
@@ -132,9 +201,44 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter) 
       if(start && end){
         filtered_users = _.filter(filtered_users, function(user){
           var u_stop_work = Date.parse(user.stop_work);
-          return !u_stop_work || (start <= u_stop_work  && u_stop_work <= end);
+          return !!u_stop_work || (start <= u_stop_work && u_stop_work <= end);
+      });
+
+      filtered_users = _.filter(filtered_users, function(user){
+        var u_start_work = Date.parse(user.start_work);
+        return !$scope.search.start_work || !$scope.aditional_start || u_start_work <= $scope.aditional_start;
+      });
+
+      filtered_users = _.filter(filtered_users, function(user){
+        var u_stop_work = Date.parse(user.stop_work);
+        return !$scope.search.stop_work || !$scope.aditional_stop || u_stop_work <= $scope.aditional_stop;
         });
       }
+      if ($scope.search.time_works != 0 ){
+          if ($scope.search.time_works == 1) {
+            filtered_users = _.filter(filtered_users, function(user){
+                return Date.parse(user.start_full_time_work) < new Date();
+            });
+          }
+          else {
+              filtered_users = _.filter(filtered_users, function(user){
+                return Date.parse(user.start_full_time_work) > new Date();
+            });
+          }
+
+      }
+        var d_start = $scope.dob.start;
+        var d_end = $scope.dob.end;
+        if( d_start && d_end ){
+            filtered_users = _.filter(filtered_users, function(user){
+                var dob = user.date_of_birth;
+                if (dob){
+                    var year = dob.substring(0,4);
+                    dob = (year >= d_start) && (year <= d_end);
+                }
+                return dob;
+            });
+        }
 
       return filtered_users;
     };

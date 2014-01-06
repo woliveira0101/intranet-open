@@ -48,8 +48,10 @@ class Excel(BaseView):
                                .filter(Project.tracker_id==Tracker.id)\
                                .filter(Project.client_id==Client.id)
 
-        uber_query = uber_query.filter(TimeEntry.project_id.in_(projects))\
-                               .filter(TimeEntry.date>=start_date)\
+        if projects:
+            uber_query = uber_query.filter(TimeEntry.project_id.in_(projects))
+
+        uber_query = uber_query.filter(TimeEntry.date>=start_date)\
                                .filter(TimeEntry.date<=end_date)\
                                .filter(TimeEntry.deleted==False)
 
@@ -83,7 +85,7 @@ class Report(TimesReportMixin, BaseView):
 
         if not projects:
             projects = [p[0] for p in form.projects.choices]
-
+        bug_id = self.request.GET.get('bug_id')
         users = form.users.data
         bigger_than = form.bigger_than.data
         ticket_choice = form.ticket_choice.data
@@ -97,18 +99,14 @@ class Report(TimesReportMixin, BaseView):
         LOG(u'Tickets report %r - %r - %r' % (start_date, end_date, projects))
 
         uber_query = self._prepare_uber_query(
-            start_date, end_date, projects, users, ticket_choice,
+            start_date, end_date, projects, users, ticket_choice, bug_id
         )
 
         entries = uber_query.all()
-
         participation_of_workers = self._get_participation_of_workers(entries)
-
         tickets_id = ','.join([str(e[2]) for e in entries])
         trackers_id = ','.join([str(e[4].id) for e in entries])
-
         rows, entries_sum = HTMLRow.from_ordered_data(entries, group_by, bigger_than)
-
         return dict(
             rows=rows,
             entries_sum=entries_sum,
@@ -116,5 +114,8 @@ class Report(TimesReportMixin, BaseView):
             participation_of_workers=participation_of_workers,
             participation_of_workers_sum=sum([time[1] for time in participation_of_workers]),
             trackers_id=trackers_id, tickets_id=tickets_id,
+            str_date=self._sprint_daterange(start_date, end_date),
         )
 
+    def _sprint_daterange(self, st, end):
+        return '%s - %s' % (st.strftime('%d-%m-%Y'), end.strftime('%d-%m-%Y'))

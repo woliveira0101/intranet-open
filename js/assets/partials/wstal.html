@@ -10,6 +10,23 @@
                             </td>
                         </tr>
 
+                        <tr ng-show="get_absences().length > 0">
+                            <td colspan="2" class="lates-column-header">ABSENCE / HOLIDAY</td>
+                            <td class="lates-column-header-date"><span bs-tooltip="'Start date of absence'">From</span></td>
+                            <td class="lates-column-header-date"><span bs-tooltip="'End date of absence'">To</span></td>
+                        </tr>
+                        <tr class="absence-record" ng-repeat="user in get_absences()" data-placement="left" bs-tooltip="user.remarks">
+                            <td>
+                                <button class="close" aria-hidden="true" ng-click="openRemovalConfirmation(user)">×</button>
+                            </td>
+                            <td class="lates-column-user">
+                                <span class="name" ng-bind="user.name"></span>
+                                <span class="new-late-label" ng-show="newAbsencesIds.indexOf(user.absence_id) != -1">(NEW)</span>
+                            </td>
+                            <td class="lates-column-from">{{ user.start  && (set_date(user.start) | date:'dd.MM') || '-'}}</td>
+                            <td class="lates-column-to">{{ user.end  && (set_date(user.end) | date:'dd.MM') || '-'}}</td>
+                        </tr>
+
                         <tr ng-show="get_work_from_home().length > 0" class="late-light">
                             <td colspan="2" class="lates-column-header">WORK FROM HOME</td>
                             <td class="lates-column-header-date"><span>From</span></td>
@@ -43,24 +60,6 @@
                             <td class="lates-column-from">{{ user.start  && (set_time(user.start) | date:'HH:mm') || '-'}}</td>
                             <td class="lates-column-to">{{ user.end  && (set_time(user.end) | date:'HH:mm') || '-'}}</td>
                         </tr>
-
-
-                        <tr ng-show="get_absences().length > 0">
-                            <td colspan="2" class="lates-column-header">ABSENCE / HOLIDAY</td>
-                            <td class="lates-column-header-date"><span bs-tooltip="'Start date of absence'">From</span></td>
-                            <td class="lates-column-header-date"><span bs-tooltip="'End date of absence'">To</span></td>
-                        </tr>
-                        <tr class="absence-record" ng-repeat="user in get_absences()" data-placement="left" bs-tooltip="user.remarks">
-                            <td>
-                                <button class="close" aria-hidden="true" ng-click="openRemovalConfirmation(user)">×</button>
-                            </td>
-                            <td class="lates-column-user">
-                                <span class="name" ng-bind="user.name"></span>
-                                <span class="new-late-label" ng-show="newAbsencesIds.indexOf(user.absence_id) != -1">(NEW)</span>
-                            </td>
-                            <td class="lates-column-from">{{ user.start  && (set_time(user.start) | date:'MM.dd') || '-'}}</td>
-                            <td class="lates-column-to">{{ user.end  && (set_time(user.end) | date:'MM.dd') || '-'}}</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -68,9 +67,9 @@
     </div>
     <div id="floatBar">
         <div id="new-lates-button">
+            <div id="absences-quantity" title="Total absences/holiday quantity">{{ get_absences().length }}</div>
             <div id="work-from-home-quantity" title="Total work from home quantity">{{ get_work_from_home().length }}</div>
             <div id="lates-quantity" title="Total out of office quantity">{{ get_lates().length }}</div>
-            <div id="absences-quantity" title="Total absences/holiday quantity">{{ get_absences().length }}</div>
             <div ng-show="newLatesQuantity > 0" ng-click="show()" id="new-quantity" title="New lates and absences quantity">{{ newLatesQuantity }}</div>
         </div>
         <div ng-click="show()" class="badge" title="Click to show the list of lates and absences">
