@@ -1,5 +1,3 @@
-import tabulate
-
 from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS
 
 class Root(object):
@@ -65,17 +63,6 @@ class Root(object):
             dynamic.append((Allow, 'g:%s' % group, perms))
 
         return base + dynamic
-
-    @classmethod
-    def to_prettyprint(cls):
-        rows = [[one] + list(two) for one, two in cls.PERMS]
-        header = rows[0]
-        rows = rows[1:]
-        return tabulate.tabulate(
-            rows,
-            header,
-            tablefmt='grid',
-        )
 
     @classmethod
     def to_js(cls):
