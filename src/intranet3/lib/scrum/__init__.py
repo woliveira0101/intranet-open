@@ -23,6 +23,8 @@ class BugUglyAdapter(object):
         return getattr(self._bug, item)
 
     def is_closed(self):
+        if self.whiteboard.get('tested') == '1':
+            return True
 
         if self._bug.project.client_id == 20:
             return self._bug.get_status() == 'VERIFIED' and self._bug.get_resolution() == 'DEPLOYED'
