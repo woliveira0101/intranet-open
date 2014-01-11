@@ -1,3 +1,8 @@
+0.9.7 (11-01-2014)
+===========
+- new groups / permissions
+
+
 0.9.6 (28-11-2013)
 ===========
 - better mobile support
