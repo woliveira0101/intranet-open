@@ -19,7 +19,7 @@ from intranet3.lib.times import ProtectTimeEntriesMixin, user_can_modify_timeent
 
 LOG = INFO_LOG(__name__)
 
-@view_config(route_name='times_today', permission='freelancer')
+@view_config(route_name='times_today', permission='can_see_own_bugs')
 class Today(BaseView):
     def get(self):
         today = datetime.datetime.now().date()
@@ -42,7 +42,7 @@ class GetTimeEntriesMixin(object):
 
         return query
 
-@view_config(route_name='times_list', permission='freelancer')
+@view_config(route_name='times_list', permission='can_see_own_bugs')
 class List(GetTimeEntriesMixin, BaseView):
     def get(self):
         date_str = self.request.GET.get('date')
@@ -68,7 +68,7 @@ class List(GetTimeEntriesMixin, BaseView):
             can_modify=user_can_modify_timeentry(self.request.user, date),
         )
 
-@view_config(route_name='times_list_user')
+@view_config(route_name='times_list_user', permission='can_see_users_times')
 class ListUser(GetTimeEntriesMixin, BaseView):
     def get(self):
         date_str = self.request.GET.get('date')
@@ -76,9 +76,6 @@ class ListUser(GetTimeEntriesMixin, BaseView):
         user_id = self.request.GET.get('user_id')
         if self.request.user.id == int(user_id):
             return HTTPFound(self.request.url_for('/times/list', date=date_str))
-
-        if not self.request.has_perm('view') and user_id != self.request.user.id:
-            return HTTPForbidden()
 
         user = User.query.get(user_id)
         if user is None:
@@ -95,10 +92,10 @@ class ListUser(GetTimeEntriesMixin, BaseView):
             user=user,
             prev_date=previous_day(date), next_date=next_day(date),
             total_sum=total_sum,
-            can_modify=self.request.has_perm('admin'),
+            can_modify=self.request.has_perm('can_edit_users_timeentry'),
         )
 
-@view_config(route_name='times_list_bug')
+@view_config(route_name='times_list_bug', permission='can_view_times_reports')
 class ListBug(GetTimeEntriesMixin, BaseView):
     def get(self):
         project_id = self.request.GET.get('project_id')
@@ -119,7 +116,7 @@ class ListBug(GetTimeEntriesMixin, BaseView):
         )
 
 
-@view_config(route_name='times_add_entry_to_one_of_yourbugs')
+@view_config(route_name='times_add_entry_to_one_of_yourbugs', permission='can_see_own_bugs')
 class AddEntryToOneOfYourBugs(BaseView):
     def get(self):
         date = datetime.datetime.strptime(self.request.GET.get('date'), '%d.%m.%Y')
@@ -132,7 +129,7 @@ class AddEntryToOneOfYourBugs(BaseView):
         )
 
 
-@view_config(route_name='times_add', permission='freelancer')
+@view_config(route_name='times_add', permission='can_add_timeentry')
 class Add(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
     def _add_to_harvest(self, form):
         PROJECT_ID = 2904241 # TODO
@@ -243,7 +240,7 @@ class Add(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
         )
 
 
-@view_config(route_name='times_edit')
+@view_config(route_name='times_edit', permission='can_add_timeentry')
 class Edit(ProtectTimeEntriesMixin, BaseView):
     def get(self):
         timeentry = self.v['timeentry']
@@ -316,7 +313,7 @@ class Edit(ProtectTimeEntriesMixin, BaseView):
         )
 
 
-@view_config(route_name='times_delete', renderer='intranet3:templates/common/delete.html')
+@view_config(route_name='times_delete', renderer='intranet3:templates/common/delete.html', permission='can_add_timeentry')
 class Delete(ProtectTimeEntriesMixin, BaseView):
     def post(self):
         form = DeleteForm(self.request.POST)
@@ -383,7 +380,7 @@ class Delete(ProtectTimeEntriesMixin, BaseView):
             form=form
         )
 
-@view_config(route_name='times_ajax_add', renderer='json')
+@view_config(route_name='times_ajax_add', renderer='json', permission='can_add_timeentry')
 class AjaxAdd(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
     def post(self):
         if not self.request.is_xhr:
@@ -419,7 +416,7 @@ class AjaxAdd(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
         return dict(status='error', errors=errors)
 
 
-@view_config(route_name='times_start_timer', renderer='json')
+@view_config(route_name='times_start_timer', renderer='json', permission='can_add_timeentry')
 class StartTimer(GetTimeEntriesMixin, BaseView):
     def post(self):
         timeentry_id = self.request.GET.get('timeentry_id')
@@ -432,7 +429,7 @@ class StartTimer(GetTimeEntriesMixin, BaseView):
         else:
             return HTTPForbidden()
 
-@view_config(route_name='times_stop_timer', renderer='json')
+@view_config(route_name='times_stop_timer', renderer='json', permission='can_add_timeentry')
 class StopTimer(GetTimeEntriesMixin, BaseView):
     def post(self):
         timeentry_id = self.request.GET.get('timeentry_id')
@@ -454,7 +451,7 @@ class StopTimer(GetTimeEntriesMixin, BaseView):
         else:
             return HTTPForbidden()
 
-@view_config(route_name='times_freeze_time_entry', renderer='json')
+@view_config(route_name='times_freeze_time_entry', renderer='json', permission='can_add_timeentry')
 class FreezeTimeEntry(BaseView):
     """
         Mark time entry as frozen
@@ -470,7 +467,7 @@ class FreezeTimeEntry(BaseView):
         timeentry.modified_ts = datetime.datetime.now()
         return HTTPFound(back_url)
 
-@view_config(route_name='times_thaw_time_entry', renderer='json')
+@view_config(route_name='times_thaw_time_entry', renderer='json', permission='can_add_timeentry')
 class ThawTimeEntry(BaseView):
     """
         Mark time entry as unfrozen

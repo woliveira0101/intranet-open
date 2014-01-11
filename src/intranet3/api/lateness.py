@@ -15,7 +15,7 @@ from intranet3.forms.employees import LateApplicationForm
 hour9 = datetime.time(hour=9)
 
 
-@view_config(route_name='api_lateness', renderer='json')
+@view_config(route_name='api_lateness', renderer='json', permission='can_edit_presence')
 class LatenessApi(ApiView):
     def _add_event(self, date, explanation):
         datehour9 = datetime.datetime.combine(date, hour9)

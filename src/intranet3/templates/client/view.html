@@ -49,16 +49,19 @@
         <tr>
             <td>{% trans %}Note{% endtrans %}: </td> <td>{{ client.note or '' }}</td>
         </tr>
-        
+
     </table>
+
+    {% if request.has_perm('can_edit_clients') %}
     <div class="buttons">
         <a href="{{ request.url_for('/client/edit', client_id=client.id) }}" class="button btn btn-success">{% trans %}Edit{% endtrans %}</a>
     </div>
+    {% endif %}
 
     <div class="tabs head_project">
         <ul class="nav nav-tabs">
             <li class="title">{% trans %}Projects{% endtrans %}</li>
-            {% if request.has_perm('coordinator') %}
+            {% if request.has_perm('can_edit_projects') %}
             <li>
                 <a href="{{ request.url_for('/project/add', client_id=client.id) }}">{% trans %}Add{% endtrans %}</a>
             </li>
@@ -81,11 +84,13 @@
                 {% if project.active == True %}{% trans %}Yes{% endtrans %}{% else %}{% trans %}No{% endtrans %}{% endif %}
             </td>
             <td>
-                <a href="{{ request.url_for('/project/delete', project_id=project.id) }}" class="button btn btn-danger">{% trans %}Delete{% endtrans %}</a>
+                {% if request.has_perm('can_delete_projects') %}
+                    <a href="{{ request.url_for('/project/delete', project_id=project.id) }}" class="button btn btn-danger">{% trans %}Delete{% endtrans %}</a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
         </tbody>
     </table>
-    
+
 {% endblock %}

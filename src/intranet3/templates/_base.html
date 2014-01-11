@@ -2,17 +2,7 @@
 {% block container %}
 <div id="left_column">
     <ul class="nav nav-tabs nav-stacked left_ul {% if request.wants_mobile %}none{% endif %}">
-        {% if request.is_user_in_group('admin') %}
-            {% include "_menu_left/admin.html" %}
-        {% elif request.is_user_in_group('coordinator') %}
-            {% include "_menu_left/coordinator.html" %}
-        {% elif request.is_user_in_group('user') %}
-            {% include "_menu_left/user.html" %}
-        {% elif request.is_user_in_group('client') %}
-            {% include "_menu_left/client.html" %}
-        {% elif request.is_user_in_group('freelancer') %}
-            {% include "_menu_left/freelancer.html" %}
-        {% endif %}
+        {% include "menu_left.html" %}
     </ul>
     <ul id="mobileNavigation" class="{% if not request.wants_mobile %}none{% endif %}">
         <li>
@@ -36,7 +26,7 @@
     {% endif %}
     {% endwith %}
     {% block content %}<!-- main content area -->{% endblock %}
-    {% if request.has_perm('view') %}
+    {% if request.has_perm('can_view_presence') %}
         <div ng-include src="'wstal.html'"></div>
     {% endif %}
   </div>

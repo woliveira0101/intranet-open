@@ -23,7 +23,7 @@ LOG = INFO_LOG(__name__)
 ERROR = ERROR_LOG(__name__)
 
 
-@view_config(route_name='scrum_sprint_list', permission='client')
+@view_config(route_name='scrum_sprint_list', permission='can_view_sprints')
 class List(BaseView):
     def get(self):
         client = self.request.user.get_client()
@@ -110,7 +110,7 @@ class ClientProtectionMixin(object):
         if client.id != sprint.client_id:
             raise HTTPForbidden()
 
-@view_config(route_name='scrum_sprint_field', permission='client')
+@view_config(route_name='scrum_sprint_field', permission='can_view_sprints')
 class Field(ClientProtectionMixin, BaseView):
     def get(self):
         field = self.request.GET.get('field')
@@ -167,8 +167,7 @@ class BaseSprintView(BaseView):
         )
 
 
-
-@view_config(route_name='scrum_sprint_show', permission='client')
+@view_config(route_name='scrum_sprint_show', permission='can_view_sprints')
 class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
         sprint = self.v['sprint']
@@ -209,7 +208,7 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
             return 0.0
 
 
-@view_config(route_name='scrum_sprint_board', permission='client')
+@view_config(route_name='scrum_sprint_board', permission='can_view_sprints')
 class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
         sprint = self.v['sprint']
@@ -227,7 +226,7 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         )
 
 
-@view_config(route_name='scrum_sprint_times', permission='client')
+@view_config(route_name='scrum_sprint_times', permission='can_view_sprints')
 class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin,
             BaseSprintView):
     def dispatch(self):
@@ -284,7 +283,7 @@ class Times(ClientProtectionMixin, TimesReportMixin, FetchBugsMixin,
             sprint_tabs=sw.get_tabs()
         )
 
-@view_config(route_name='scrum_sprint_charts', permission='client')
+@view_config(route_name='scrum_sprint_charts', permission='can_view_sprints')
 class Charts(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
         sprint = self.v['sprint']
@@ -307,7 +306,7 @@ class Charts(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         )
 
 
-@view_config(route_name='scrum_sprint_retros', permission='client')
+@view_config(route_name='scrum_sprint_retros', permission='can_view_sprints')
 class Retros(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
         session = self.session
@@ -327,7 +326,7 @@ class Retros(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         )
 
 
-@view_config(route_name='scrum_sprint_edit', permission='scrum')
+@view_config(route_name='scrum_sprint_edit', permission='can_edit_sprints')
 class Edit(BaseView):
     def dispatch(self):
         sprint_id = self.request.GET.get('sprint_id')
@@ -356,7 +355,7 @@ class Edit(BaseView):
         )
 
 
-@view_config(route_name='scrum_sprint_add', permission='scrum')
+@view_config(route_name='scrum_sprint_add', permission='can_edit_sprints')
 class Add(BaseView):
     def dispatch(self):
         form = SprintForm(self.request.POST)
@@ -384,9 +383,7 @@ class Add(BaseView):
         )
 
 
-@view_config(route_name='scrum_sprint_delete',
-             renderer='intranet3:templates/common/delete.html',
-             permission='scrum')
+@view_config(route_name='scrum_sprint_delete', renderer='intranet3:templates/common/delete.html', permission='can_edit_sprints')
 class Delete(BaseView):
 
     def dispatch(self):
@@ -405,7 +402,7 @@ class Delete(BaseView):
             form=form
         )
 
-@view_config(route_name='scrum_sprint_team', permission='client')
+@view_config(route_name='scrum_sprint_team', permission='can_view_sprints')
 class Team(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
         sprint = self.v['sprint']
@@ -418,7 +415,7 @@ class Team(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
 
         )
 
-@view_config(route_name='scrum_sprint_extra-tab', permission='client')
+@view_config(route_name='scrum_sprint_extra-tab', permission='can_view_sprints')
 class ExtraTab(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
         sprint = self.v['sprint']

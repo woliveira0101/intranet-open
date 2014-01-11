@@ -18,7 +18,7 @@ class UserEditForm(wtf.Form):
 
     avatar = wtf.HiddenField()
     roles = wtf.SelectMultipleField(_(u'Role'), validators=[], choices=User.ROLES)
-    
+
     start_work  = wtf.DateField(_(u"Start work"), format='%d/%m/%Y', validators=[])
     start_full_time_work  = wtf.DateField(_(u"Start full time work"), format='%d/%m/%Y', validators=[validators.Optional()])
     stop_work = wtf.DateField(_(u"Stop work"), format='%d/%m/%Y', validators=[validators.Optional()])
@@ -36,5 +36,12 @@ class UserEditForm(wtf.Form):
     phone_on_desk = wtf.TextField(_(u"Deskphone"), validators=[validators.Optional()])
     irc = wtf.TextField(_(u"IRC"), validators=[validators.Optional()])
 
-    groups = wtf.SelectMultipleField(_(u'Groups'), validators=[], choices=(('freelancer','freelancer'),('user','user'),('admin','admin'), ('scrum', 'scrum')))
+    groups = wtf.SelectMultipleField(_(u'Groups'), validators=[], choices=((
+        ('freelancer','freelancer'),
+        ('employee','employee'),
+        ('admin','admin'),
+        ('scrum master', 'scrum master'),
+        ('hr', 'hr'),
+        ('business', 'business')
+    )))
 

@@ -14,6 +14,7 @@ from sqlalchemy import not_
 from intranet3 import memcache, config
 from intranet3.log import ERROR_LOG
 from intranet3.models import Base, DBSession
+from intranet3.utils import acl
 
 
 ERROR = ERROR_LOG(__name__)
@@ -43,13 +44,15 @@ class User(Base):
         ('CEO', 'CEO'),
     ]
     GROUPS = [
-        'user',
+        'employee',
         'admin',
         'client',
-        'scrum',
+        'scrum master',
         'cron',
         'coordinator',
         'freelancer',
+        'hr',
+        'business',
     ]
 
     id = Column(Integer, primary_key=True, nullable=False, index=True)
@@ -110,6 +113,20 @@ class User(Base):
         return ", ".join([group for group in self.groups])
 
     @reify
+    def all_perms(self):
+        """
+        Combine all perms for a user for js layer.
+        """
+        acls = acl.Root.to_js()
+        user_groups = self.groups
+        perms = [
+            perm for group, perms in acls.iteritems()
+            if group in user_groups for perm in perms
+        ]
+        perms = list(set(perms))
+        return perms
+
+    @reify
     def access_token(self):
         access_token = memcache.get(GOOGLE_ACCESS_TOKEN_MEMCACHE_KEY % self.id)
         if access_token:
@@ -161,7 +178,7 @@ class User(Base):
             return self.LOCATIONS[self.location][1]
         else:
             return self.LOCATIONS[self.location][0]
-    
+
 
     def get_client(self):
         from intranet3.models import Client

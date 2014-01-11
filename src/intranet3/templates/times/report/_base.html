@@ -10,7 +10,7 @@
             <li><a href="{{ request.url_for('/times/report/current_pivot') }}">{% trans %}Pivot{% endtrans %}</a></li>
         {% endif %}
 
-        {% if request.has_perm('admin') %}
+        {% if request.has_perm('can_see_users_times') %}
             {% if current_page == 'monthly' %}
             <li class="active"><a>{% trans %}Monthly{% endtrans %}</a></li>
             {% else %}

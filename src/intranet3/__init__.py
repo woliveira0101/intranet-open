@@ -12,7 +12,6 @@ from pyramid.config import Configurator
 from pyramid_beaker import session_factory_from_settings
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid.security import Allow, ALL_PERMISSIONS
 from werkzeug.contrib.cache import MemcachedCache
 
 from twisted.web.wsgi import WSGIResource
@@ -31,20 +30,6 @@ class CustomAuthenticationPolicy(AuthTktAuthenticationPolicy):
         return result
 
 
-class Root(object):
-    __acl__ = [
-        (Allow, 'g:freelancer', ('freelancer', 'client_or_freelancer')),
-        (Allow, 'g:client', ('client', 'client_or_freelancer')),
-        (Allow, 'g:user', ('view', 'freelancer', 'client', 'client_or_freelancer')),
-        (Allow, 'g:coordinator', ('view', 'client', 'freelancer', 'coordinator', 'client_or_freelancer', 'scrum')),
-        (Allow, 'g:scrum', ('scrum',)),
-        (Allow, 'g:cron', 'cron'),
-        (Allow, 'g:admin', ALL_PERMISSIONS)
-    ]
-
-    def __init__(self, request):
-        self.request = request
-
 config = None
 memcache = None
 
@@ -59,7 +44,7 @@ def main(global_config, **settings):
     memcache = MemcachedCache([config['MEMCACHE_URI']])
 
     from intranet3.models import DBSession, Base, User
-    from intranet3.utils import request
+    from intranet3.utils import request, acl
     from intranet3.views.auth import forbidden_view
 
     def groupfinder(userid, request):
@@ -85,7 +70,7 @@ def main(global_config, **settings):
         session_factory=session_factory,
         request_factory=request.Request,
         default_permission='view',
-        root_factory=Root,
+        root_factory=acl.Root,
     )
     pyramid_config.add_forbidden_view(forbidden_view)
 
