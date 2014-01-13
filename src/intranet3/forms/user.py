@@ -42,6 +42,7 @@ class UserEditForm(wtf.Form):
         ('admin','admin'),
         ('scrum master', 'scrum master'),
         ('hr', 'hr'),
-        ('business', 'business')
+        ('business', 'business'),
+        ('client', 'client'),
     )))
 

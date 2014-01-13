@@ -14,7 +14,7 @@ class Root(object):
         ('can_edit_presence',         (' ',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
         ('can_view_task_pivot',       (' ',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
         ('can_view_teams',            (' ',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
-        ('can_view_sprints',          (' ',          'A',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
+        ('can_view_sprints',          (' ',          'A',        ' ',           ' ',            ' ',        ' ',  'A',     )),
         ('client_stuff',              (' ',          'A',        ' ',           ' ',            ' ',        ' ',  'A',     )),
         ('can_edit_sprints',          (' ',          ' ',        'A',           'A',            ' ',        ' ',  ' ',     )),
         ('can_view_clients',          (' ',          ' ',        'A',           'A',            ' ',        ' ',  ' ',     )),
