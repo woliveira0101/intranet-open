@@ -2,6 +2,9 @@
 {% if request.is_user_in_one_of_groups('employee', 'freelancer') %}<li class="nav-head">{% trans %}Today{% endtrans %}:</li>{% endif %}
 {% if request.is_user_in_one_of_groups('employee', 'freelancer') %}<li><a href="{{ request.url_for('/times/today') }}"><i class="icon-chevron-right"></i>{% trans %}Hours{% endtrans %}</a></li>{% endif %}
 {% if request.is_user_in_one_of_groups('employee') %}<li><a href="{{ request.url_for('/presence/list') }}"><i class="icon-chevron-right"></i>{% trans %}Presences{% endtrans %}</a></li>{% endif %}
+{% if not request.is_user_in_one_of_groups('hr', 'admin') %}
+{% if request.is_user_in_one_of_groups('employee', 'freelancer') %}<li><a href="{{ request.url_for('/times/report/current_pivot') }}"><i class="icon-chevron-right"></i>{% trans %}Worked hours{% endtrans %}</a></li>{% endif %}
+{% endif %}
 
 <!-- TASKS -->
 <div class="space_li"></div>
