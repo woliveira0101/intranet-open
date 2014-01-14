@@ -19,7 +19,7 @@ from intranet3.lib.times import ProtectTimeEntriesMixin, user_can_modify_timeent
 
 LOG = INFO_LOG(__name__)
 
-@view_config(route_name='times_today', permission='can_see_own_bugs')
+@view_config(route_name='times_today', permission='can_add_timeentry')
 class Today(BaseView):
     def get(self):
         today = datetime.datetime.now().date()
@@ -42,7 +42,7 @@ class GetTimeEntriesMixin(object):
 
         return query
 
-@view_config(route_name='times_list', permission='can_see_own_bugs')
+@view_config(route_name='times_list', permission='can_add_timeentry')
 class List(GetTimeEntriesMixin, BaseView):
     def get(self):
         date_str = self.request.GET.get('date')
@@ -116,7 +116,7 @@ class ListBug(GetTimeEntriesMixin, BaseView):
         )
 
 
-@view_config(route_name='times_add_entry_to_one_of_yourbugs', permission='can_see_own_bugs')
+@view_config(route_name='times_add_entry_to_one_of_yourbugs', permission='can_add_timeentry')
 class AddEntryToOneOfYourBugs(BaseView):
     def get(self):
         date = datetime.datetime.strptime(self.request.GET.get('date'), '%d.%m.%Y')
