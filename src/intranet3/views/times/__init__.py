@@ -95,7 +95,7 @@ class ListUser(GetTimeEntriesMixin, BaseView):
             can_modify=self.request.has_perm('can_edit_users_timeentry'),
         )
 
-@view_config(route_name='times_list_bug', permission='can_view_times_reports')
+@view_config(route_name='times_list_bug', permission='can_see_users_times')
 class ListBug(GetTimeEntriesMixin, BaseView):
     def get(self):
         project_id = self.request.GET.get('project_id')
