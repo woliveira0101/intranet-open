@@ -73,6 +73,9 @@ class Edit(BaseView):
                     user.freelancer = True
                 else:
                     user.freelancer = False
+
+                if 'coordinator' in user.groups:
+                    groups.append('coordinator')
                 user.groups = groups
 
             if form.avatar.data:
