@@ -27,21 +27,19 @@ class User(Base):
     __tablename__ = 'user'
     LOCATIONS = {'poznan': (u'Poznań', 'P'), 'wroclaw': (u'Wrocław', 'W')}
     ROLES = [
-        ('INTERN', 'INTERN'),
-        ('P1', 'P1'),
-        ('P2', 'P2'),
-        ('P3', 'P3'),
-        ('P4', 'P4'),
-        ('FED', 'FED'),
         ('ADMIN', 'Admin'),
-        ('EXT EXPERT', 'External Expert'),
-        ('ANDROID', 'Android Dev'),
-        ('PROGRAMMER', 'Programmer'),
-        ('GRAPHIC', 'Graphic designer'),
-        ('FRONTEND', 'Frontend'),
-        ('TESTER', 'Tester'),
-        ('CEO A', 'CEO\'s Assistant'),
+        ('ACCOUNTANT', 'Accountant'),
+        ('BUSINESS DEV', 'Business Development'),
         ('CEO', 'CEO'),
+        ('CEO A', 'CEO\'s Assistant'),
+        ('CTO', 'CTO'),
+        ('MARKETING SPEC', 'Marketing Specialist'),
+        ('OFFICE MANAGER', 'Office Manager'),
+        ('PROGRAMMER', 'Programmer'),
+        ('RECRUITER', 'Recruiter'),
+        ('QA LEAD', 'QA Lead'),
+        ('TESTER', 'Tester'),
+        ('TECH LEAD', 'Tech Lead'),
     ]
     GROUPS = [
         'employee',

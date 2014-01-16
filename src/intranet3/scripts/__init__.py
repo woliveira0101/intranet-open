@@ -70,21 +70,21 @@ def make_admin(config_path):
 
 def migrate(config_path):
     from intranet3 import config
-    from intranet3.models import *
-    from sqlalchemy import func
+    from intranet3.models import DBSession, User
     session = DBSession()
+    roles_to_remove = ['P1', 'P2', 'P3', 'P4', 'FED', 'INTERN', 'EXT EXPERT',
+                       'ANDROID', 'GRAPHIC', 'FRONTEND']
 
-    results = session.query(User, func.count(Project.id), func.count(Client.id)) \
-        .outerjoin(Project, Project.coordinator_id==User.id) \
-        .outerjoin(Client, Client.coordinator_id==User.id) \
-        .group_by(User.id).all()
+    roles_to_replace = ['P1', 'P2', 'P3', 'P4', 'FED', 'ANDROID', 'FRONTEND']
 
-    for user, pc, cc in results:
-        if pc+cc > 0 and 'coordinator' not in user.groups:
-            groups = user.groups[:]
-            groups.append('coordinator')
-            user.groups = groups
-
+    results = session.query(User).all()
+    for user in results:
+        if user.roles:
+            if set(user.roles).intersection(roles_to_replace):
+                if 'PROGRAMMER' not in user.roles:
+                    user.roles.append('PROGRAMMER')
+            user.roles = filter(lambda r: r not in roles_to_remove, 
+                                user.roles)
     transaction.commit()
 
 def remove(config_path):
