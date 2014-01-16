@@ -72,10 +72,10 @@ def migrate(config_path):
     from intranet3 import config
     from intranet3.models import DBSession, User
     session = DBSession()
-    roles_to_remove = ['P1', 'P2', 'P3', 'P4', 'FED', 'INTERN', 'EXT EXPERT',
-                       'ANDROID', 'GRAPHIC', 'FRONTEND']
 
-    roles_to_replace = ['P1', 'P2', 'P3', 'P4', 'FED', 'ANDROID', 'FRONTEND']
+    roles_to_replace = ('P1', 'P2', 'P3', 'P4', 'FED', 'ANDROID', 'FRONTEND')
+    roles_to_remove = roles_to_replace + ('INTERN', 'EXT EXPERT', 'ANDROID',
+                                          'GRAPHIC')
 
     results = session.query(User).all()
     for user in results:
@@ -83,8 +83,8 @@ def migrate(config_path):
             if set(user.roles).intersection(roles_to_replace):
                 if 'PROGRAMMER' not in user.roles:
                     user.roles.append('PROGRAMMER')
-            user.roles = filter(lambda r: r not in roles_to_remove, 
-                                user.roles)
+            user.roles = [for role in roles if r not in roles_to_remove]
+
     transaction.commit()
 
 def remove(config_path):
