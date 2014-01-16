@@ -83,7 +83,7 @@ def migrate(config_path):
             if set(user.roles).intersection(roles_to_replace):
                 if 'PROGRAMMER' not in user.roles:
                     user.roles.append('PROGRAMMER')
-            user.roles = [for role in roles if r not in roles_to_remove]
+            user.roles = [r for r in user.roles if r not in roles_to_remove]
 
     transaction.commit()
 
