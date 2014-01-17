@@ -215,9 +215,11 @@ class TodayHours(CronView):
                 reverse=True,
             )
             output.append(u"")
-            time_link = base_url + self.request.url_for('/times/list_user',
+            time_link = base_url + self.request.url_for(
+                '/times/list_user',
                 user_id=user_id, 
-                date=date.strftime("%d.%m.%Y"))
+                date=date.strftime("%d.%m.%Y"),
+            )
             output.append(u"\t<a href=\"%s\">%s</a> (%.2f h):" % (time_link, user_name, user_sum[user_id]))
 
             for (description, time, project, client, ticket_id, bug_url,
