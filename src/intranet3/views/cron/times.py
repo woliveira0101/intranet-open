@@ -208,7 +208,6 @@ class TodayHours(CronView):
         )
         base_url = self.request.registry.settings['FRONTEND_PREFIX']
         for (user_id, user_name), entries in user_entries:
-
             entries = sorted(
                 entries,
                 key=itemgetter(1),
