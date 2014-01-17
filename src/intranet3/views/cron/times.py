@@ -193,7 +193,7 @@ class TodayHours(CronView):
             ticket_url = tracker.get_bug_url(ticket_id)
 
             total_sum += time
-            user_sum[user] += time
+            user_sum[uid] += time
             user_entries[(uid, user)].append((description, time, project, client,
                                        ticket_id, ticket_url, total_time)
             )
@@ -203,11 +203,12 @@ class TodayHours(CronView):
 
         user_entries = sorted(
             user_entries.iteritems(),
-            key=lambda u: user_sum[u[0]],
+            key=lambda u: user_sum[u[0][0]],
             reverse=True,
         )
         base_url = self.request.registry.settings['FRONTEND_PREFIX']
-        for user, entries in user_entries:
+        for (user_id, user_name), entries in user_entries:
+
             entries = sorted(
                 entries,
                 key=itemgetter(1),
@@ -215,9 +216,9 @@ class TodayHours(CronView):
             )
             output.append(u"")
             time_link = base_url + self.request.url_for('/times/list_user',
-                                                        user_id=user[0], 
-                                                        date=date.strftime("%d.%m.%Y"))
-            output.append(u"\t<a href=\"%s\">%s</a> (%.2f h):" % (time_link, user[1], user_sum[user[1]]))
+                user_id=user_id, 
+                date=date.strftime("%d.%m.%Y"))
+            output.append(u"\t<a href=\"%s\">%s</a> (%.2f h):" % (time_link, user_name, user_sum[user_id]))
 
             for (description, time, project, client, ticket_id, bug_url,
                  total_time) in entries:
