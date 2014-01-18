@@ -1,32 +1,45 @@
 <div id="sprint-editor" ng-controller="sprintEditCtrl" style="margin-left: 85px">
-  <a class="btn add-column" ng-click="add_column()">Add column</a>
+  <div>
+    <select ng-model="selected_board" ng-options="board.name for board in boards"></select>
+    <a class="btn" ng-click="choose()">Choose</a>
+    <a class="btn btn-danger" ng-show="selected_board.id !== undefined" ng-click="delete()">Delete selected board</a>
+  </div>
 
   <input type="hidden" name="board" ng-value="columns_json()">
-  <div id="task_board_container">
-    <table class="table table-bordered task_board">
-      <thead>
-      <tr>
-        <th ng-repeat="column in columns">
-          <input class="unsubmittable" type="text" ng-model="column.name">
-          <a class="btn btn-small" ng-click="add_section(column)">Add section</a>
-          <a ng-show="columns.length > 1" class="btn btn-small" ng-click="remove_column(column)">X</a>
-        </th>
-      </tr>
-      </thead>
-      <tbody>
+
+  <div class="row">
+    <div style="float: right">
+      <a class="btn add-column" ng-click="add_column()">Add column</a>
+
+    </div>
+    <div id="task_board_container">
+      <table class="table table-bordered task_board">
+        <thead>
+        <tr>
+          <th ng-repeat="column in columns">
+            <input class="unsubmittable" type="text" ng-model="column.name">
+            <a class="btn btn-small" ng-click="add_section(column)">Add section</a>
+            <a ng-show="columns.length > 1" ng-click="remove_column(column)"><i class="icon-remove"></i></a>
+          </th>
+        </tr>
+        </thead>
+        <tbody>
         <tr>
           <td ng-repeat="column in columns">
             <div class="board-column">
               <div class="frame_normal" ng-repeat="section in column.sections">
-                <div class="head_card"><span><input class="unsubmittable" type="text" ng-model="section.name"><a class="btn btn-small" ng-show="column.sections.length > 1" ng-click="remove_section(section, column.sections)">X</a></span></div>
+                <div class="head_card"><span><input class="unsubmittable" type="text" ng-model="section.name"><a ng-show="column.sections.length > 1" ng-click="remove_section(section, column.sections)"><i class="icon-remove"></i></a></span></div>
                 <textarea class="unsubmittable" ng-model="section.cond"></textarea>
                 <div class="clearfix"></div>
               </div>
             </div>
           </td>
         </tr>
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
+
   </div>
+  <a class="btn" ng-click="save()">Save this board</a>
 
 </div>

@@ -372,6 +372,7 @@ class Add(BaseView):
                 bugs_project_ids = map(int, form.bugs_project_ids.data),
                 start=form.start.data,
                 end=form.end.data,
+                board=form.board.data,
                 goal=form.goal.data,
                 retrospective_note = form.retrospective_note.data,
             )

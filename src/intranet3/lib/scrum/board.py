@@ -16,7 +16,10 @@ return bug
 
         query = self.TMPL % section['cond']
 
-        self.bugs = pyflwor.execute(query, namespace)
+        try:
+            self.bugs = pyflwor.execute(query, namespace)
+        except Exception:
+            self.bugs = []
 
         #those bugs that was taken should be removed from global bug list
 

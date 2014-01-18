@@ -112,6 +112,10 @@ def main(global_config, **settings):
 
     pyramid_config.add_route('api_team', '/api/teams/{team_id:\d+}')
     pyramid_config.add_route('api_teams', '/api/teams')
+
+    pyramid_config.add_route('api_board', '/api/boards/{board_id:\d+}')
+    pyramid_config.add_route('api_boards', '/api/boards')
+
     pyramid_config.add_route('api_users', '/api/users')
     pyramid_config.add_route('api_preview', '/api/preview')
     pyramid_config.add_route('api_images', '/api/images/{type:\w+}/{id:\d+}')

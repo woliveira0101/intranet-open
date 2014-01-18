@@ -27,5 +27,5 @@ from employees import Late, Absence, WrongTime
 from holiday import Holiday
 from presence import PresenceEntry
 from times import TimeEntry
-from sprint import Sprint
+from sprint import Sprint, SprintBoard
 from team import Team, TeamMember

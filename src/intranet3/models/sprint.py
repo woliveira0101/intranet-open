@@ -61,3 +61,22 @@ class Sprint(Base):
         self.mean_bugs_velocity = 8.0 * anchieved_points_sum / bugs_worked_hours_sum \
             if bugs_worked_hours_sum else 0.0
 
+
+class SprintBoard(Base):
+    __tablename__ = 'sprint_board'
+
+    id = Column(Integer, primary_key=True, nullable=False, index=True)
+    board = Column(Text, nullable=False, default='')
+    name = Column(Text, unique=True, nullable=False, default='')
+
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=True, index=True)
+    user = orm.relationship('User')
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            board=self.board,
+            name=self.name,
+            user_id=self.user_id,
+        )
+

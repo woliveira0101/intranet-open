@@ -31,3 +31,5 @@ js/tmp
 *.directory
 
 config.ini
+parser.out
+parsetab.py
