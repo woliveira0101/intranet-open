@@ -272,14 +272,9 @@ A comma or vertical bar separated list of report criteria composed as
                 opendate=dateutil.parser.parse(ticket['created_at']),
                 changeddate=dateutil.parser.parse(ticket['updated_at']),
             )
-            try:
-                field_no = self.unfuddle_data['whiteboard_field_numbers'][ticket['project_id']]
-                whiteboard_field_id = ticket.get('field%s_value_id' % field_no)
-                key = str(ticket['project_id']), str(whiteboard_field_id)
-                whiteboard = self.unfuddle_data['custom_fields'].get(key)
-                if whiteboard:
-                    bug_desc['whiteboard'] = whiteboard
-            except Exception:
-                pass
-
+            field_no = self.unfuddle_data['whiteboard_field_numbers'][ticket['project_id']]
+            whiteboard_field_id = ticket.get('field%s_value_id' % field_no)
+            key = str(ticket['project_id']), str(whiteboard_field_id)
+            whiteboard = self.unfuddle_data['custom_fields'].get(key, '')
+            bug_desc['whiteboard'] = whiteboard
             yield bug_desc
