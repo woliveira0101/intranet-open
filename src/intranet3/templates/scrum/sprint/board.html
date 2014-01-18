@@ -44,37 +44,18 @@
 </div>
 {%- endmacro %}
 
-{% macro column(bugs) -%}
-    {%  set with_points = bugs['with_points'] %}
-    {%  set without_points = bugs['without_points'] %}
-    {%  set blocked = bugs['blocked'] %}
-    {% if with_points %}
-    <div class="frame_normal">
-        <div class="head_card"><span>User stories</span></div>
-        {% for bug in with_points %}
-            {{ yellow_card(bug) }}
+{% macro render_column(column) -%}
+    {% for section in column.sections %}
+      <div class="frame_normal">
+        {% if section.name %}
+        <div class="head_card"><span>{{ section.name }}</span></div>
+        {% endif %}
+        {% for bug in section.bugs %}
+          {{ yellow_card(bug) }}
         {% endfor %}
         <div class="clearfix"></div>
-    </div>
-    {% endif %}
-    {% if without_points %}
-    <div class="frame_no_points">
-        <div class="head_card"><span>Tasks</span></div>
-        {% for bug in without_points %}
-            {{ yellow_card(bug) }}
-        {% endfor %}
-        <div class="clearfix"></div>
-    </div>
-    {% endif %}
-    {% if blocked %}
-    <div class="frame_blocked">
-        <div class="head_card"><span>Blocked</span></div>
-        {% for bug in blocked %}
-            {{ yellow_card(bug) }}
-        {% endfor %}
-        <div class="clearfix"></div>
-    </div>
-    {% endif %}
+      </div>
+    {% endfor %}
 {%- endmacro %}
 
 {% block body %}
@@ -83,34 +64,20 @@
     <table class="table table-bordered task_board">
         <thead>
             <tr>
-                <td {% if board['todo']['empty'] %} class="empty_column" {% endif %}>
-                    <a href="{{ bug_list_url(board['todo']['bugs']) }}">{% trans %}TODO{% endtrans %}</a>  <span class="badge badge-info">{{ board['todo']['points'] | int_or_float  }}</span>
-                </td>
-                <td {% if board['inprocess']['empty'] %} class="empty_column" {% endif %}>
-                    <a href="{{ bug_list_url(board['inprocess']['bugs']) }}">{% trans %}IN PROCESS{% endtrans %}</a>  <span class="badge badge-info">{{ board['inprocess']['points'] | int_or_float  }}</span>
-                </td>
-                <td {% if board['toverify']['empty'] %} class="empty_column" {% endif %}>
-                    <a href="{{ bug_list_url(board['toverify']['bugs']) }}">{% trans %}TO VERIFY{% endtrans %}</a>  <span class="badge badge-info">{{ board['toverify']['points'] | int_or_float  }}</span>
-                </td>
-                <td {% if board['completed']['empty'] %} class="empty_column" {% endif %}>
-                    <a href="{{ bug_list_url(board['completed']['bugs']) }}">{% trans %}COMPLETED{% endtrans %}</a>  <span class="badge badge-info">{{ board['completed']['points'] | int_or_float  }}</span>
-                </td>
+                {% for column in board.columns %}
+                  <td {% if column.bugs | length == 0 %} class="empty_column" {% endif %}>
+                    <a href="#">{{ column.name }}</a>  <span class="badge badge-info">{{ column.points | int_or_float  }}</span>
+                  </td>
+                {% endfor %}
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td class="board-column">
-                    {{ column(board['todo']['bugs']) }}
-                </td>
-                <td class="board-column">
-                    {{ column(board['inprocess']['bugs']) }}
-                </td>
-                <td class="board-column">
-                    {{ column(board['toverify']['bugs']) }}
-                </td>
-                <td class="board-column">
-                    {{ column(board['completed']['bugs']) }}
-                </td>
+                {% for column in board.columns %}
+                  <td class="board-column">
+                    {{ render_column(column) }}
+                  </td>
+                {% endfor %}
             </tr>
         </tbody>
     </table>

@@ -1,75 +1,12 @@
 import datetime
 import json
-import copy
 from calendar import timegm
 
 from sqlalchemy import func
-from sqlalchemy.sql import or_, and_
 
 from intranet3.models import User, TimeEntry, Project
 from intranet3 import helpers as h
-
-
-class BugUglyAdapter(object):
-    """
-    Temporary hack
-    """
-
-    def __init__(self, bug):
-        self._bug = bug
-        self._bug_tracker_type = bug.tracker.type # after saving to memcached
-
-    def __getattr__(self, item):
-        return getattr(self._bug, item)
-
-    def is_closed(self):
-
-        if self._bug.project.client_id == 20:
-            return self._bug.get_status() == 'VERIFIED' and self._bug.get_resolution() == 'DEPLOYED'
-        elif self._bug_tracker_type == 'pivotaltracker':
-            return self._bug.status in ('delivered', 'accepted')
-        else:
-            return self._bug.get_status() == 'CLOSED' or self._bug.get_status() == 'VERIFIED'
-
-    @property
-    def points(self):
-        try:
-            return float(self.whiteboard.get('p', 0.0))
-        except:
-            return 0.0
-
-    @property
-    def velocity(self):
-        points = self.points
-        return (points / self.time * 8.0) if self.time else 0.0
-
-    @classmethod
-    def produce(cls, bugs):
-        bugs = [BugUglyAdapter(bug) for bug in bugs]
-        bugs_dict = dict([(bug.id, bug) for bug in bugs])
-
-        # remove dependson and blocked bugs that are not in this sprint
-        for bug in bugs:
-            for dependon_bug in bug.dependson.keys():
-                if dependon_bug not in bugs_dict or bug.dependson[dependon_bug]['resolved']:
-                    del bug.dependson[dependon_bug]
-
-            # when bug is closed it does block nothing
-            if bug.is_closed():
-                bug.blocked = {}
-
-            for blocked_bug in bug.blocked.keys():
-                if blocked_bug not in bugs_dict:
-                    del bug.blocked[blocked_bug]
-
-        # add bug reference to dependson and blocked dictionaries
-        for bug in bugs:
-            for dependon_bug in bug.dependson.keys():
-                bug.dependson[dependon_bug]['bug'] = bugs_dict[dependon_bug]
-            for blocked_bug in bug.blocked.keys():
-                bug.blocked[blocked_bug]['bug'] = bugs_dict[blocked_bug]
-        return bugs
-
+from .board import Board
 
 def parse_whiteboard(wb):
     wb = wb.strip().replace('[', ' ').replace(']', ' ')
@@ -89,9 +26,9 @@ def move_blocked_to_the_end(bugs):
 class SprintWrapper(object):
     def __init__(self, sprint, bugs, request):
         self.sprint = sprint
-        self.bugs = bugs
         self.request = request
         self.session = request.db_session
+        self.board = Board(sprint, bugs)
 
     def _date_to_js(self, date):
         """Return unix epoc timestamp in miliseconds (in UTC)"""
@@ -106,8 +43,8 @@ class SprintWrapper(object):
             return []
         tseries = dict([(cdate, 0) for cdate in h.dates_between(sdate, edate) ])
 
-        for bug in self.bugs:
-            if bug.scrum.is_closed or bug.status == 'RESOLVED':
+        for bug in self.board.bugs:
+            if bug in self.board.completed_bugs:
                 for date in tseries.iterkeys():
                     if date < bug.changeddate.date():
                         tseries[date] += bug.scrum.points
@@ -128,25 +65,10 @@ class SprintWrapper(object):
         return dict(
             burndown=self._get_burndown(),
             burndown_axis=self._get_burndown_axis(),
-            total_points=self.get_points(),
+            total_points=self.board.points,
         )
 
-    def get_points_achieved(self):
-        points = sum([ bug.scrum.points for bug in self.bugs if bug.scrum.is_closed])
-        return points
-
-    def get_points(self):
-        points = sum([ bug.scrum.points for bug in self.bugs ])
-        return points
-
     def get_worked_hours(self):
-        # DEPRECIATED:
-        #bugs_ids = [(int(bug.project_id), bug.id) for bug in self.bugs]
-        #if not self.bugs:
-        #    return [], 0
-        #
-        #bug_ids_cond = or_(*[ and_(TimeEntry.project_id==p_id, TimeEntry.ticket_id==b_id)  for p_id, b_id in bugs_ids ])
-
         entries = self.session.query(User, func.sum(TimeEntry.time), TimeEntry.ticket_id)\
                               .filter(TimeEntry.user_id==User.id)\
                               .filter(TimeEntry.project_id==self.sprint.project_id) \
@@ -172,48 +94,10 @@ class SprintWrapper(object):
                          .get_sprint_tabs
         return extra_tabs
 
-    def get_board(self):
-        todo = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
-        inprocess = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
-        toverify = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
-        completed = dict(bugs=dict(blocked=[], with_points=[], without_points=[]), points=0, empty=True)
-
-        def append_bug(d, bug):
-            if bug.scrum.is_blocked:
-                d['bugs']['blocked'].append(bug)
-            elif bug.scrum.points:
-                d['bugs']['with_points'].append(bug)
-            else:
-                d['bugs']['without_points'].append(bug)
-            d['empty'] = False
-
-        for bug in self.bugs:
-            points = bug.scrum.points
-            if bug.scrum.is_closed:
-                append_bug(completed, bug)
-                completed['points'] += points
-            elif bug.status == 'RESOLVED':
-                append_bug(toverify, bug)
-                toverify['points'] += points
-            elif not bug.scrum.is_unassigned:
-                append_bug(inprocess, bug)
-                inprocess['points'] += points
-            else:
-                append_bug(todo, bug)
-                todo['points'] += points
-
-        return dict(
-            bugs=self.bugs,
-            todo=todo,
-            inprocess=inprocess,
-            toverify=toverify,
-            completed=completed,
-        )
-
     def get_info(self):
         entries, sum_worked_hours, sum_bugs_worked_hours = self.get_worked_hours()
-        points_achieved = self.get_points_achieved()
-        points = self.get_points()
+        points_achieved = self.board.points_achieved
+        points = self.board.points
         total_hours = sum_worked_hours
         total_bugs_hours = sum_bugs_worked_hours
 
@@ -227,7 +111,7 @@ class SprintWrapper(object):
             start=self.sprint.start.strftime('%Y-%m-%d'),
             end=self.sprint.end.strftime('%Y-%m-%d'),
             days_remaining=h.get_working_days(datetime.date.today(), self.sprint.end),
-            total_bugs = len(self.bugs),
+            total_bugs = len(self.board.bugs),
             users=users,
         )
         self.sprint.commited_points = points

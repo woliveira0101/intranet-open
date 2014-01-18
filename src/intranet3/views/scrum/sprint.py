@@ -13,7 +13,7 @@ from intranet3.models import Sprint, ApplicationConfig, Tracker, User, Project
 from intranet3 import helpers as h
 
 from intranet3.log import INFO_LOG, ERROR_LOG
-from intranet3.lib.scrum import SprintWrapper, get_velocity_chart_data, move_blocked_to_the_end, BugUglyAdapter
+from intranet3.lib.scrum import SprintWrapper, get_velocity_chart_data, move_blocked_to_the_end
 from intranet3.lib.times import TimesReportMixin, HTMLRow
 from intranet3.lib.bugs import Bugs
 from intranet3.forms.times import ProjectTimeForm
@@ -177,18 +177,19 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         bugs = move_blocked_to_the_end(bugs)
         tracker = Tracker.query.get(sprint.project.tracker_id)
 
-        mean_velocity = self.get_mean_task_velocity()
+        #mean_velocity = self.get_mean_task_velocity()
         for bug in bugs:
-            bugAdapter = BugUglyAdapter(bug)
-            bug.danger = bugAdapter.is_closed() \
-                        and (bugAdapter.velocity <= (0.7 * mean_velocity) \
-                        or bugAdapter.velocity >= (1.3 * mean_velocity))
+            bug.danger = False
+            #TODO:
+            #bug.danger = bugAdapter.is_closed() \
+            #            and (bugAdapter.velocity <= (0.7 * mean_velocity) \
+            #            or bugAdapter.velocity >= (1.3 * mean_velocity))
 
         sw = SprintWrapper(sprint, bugs, self.request)
 
         return dict(
             tracker=tracker,
-            bugs=sw.bugs,
+            bugs=sw.board.bugs,
             info=sw.get_info(),
             str_date=self._sprint_daterange(sprint.start, sprint.end),
             sprint_tabs=sw.get_tabs(),
@@ -202,7 +203,8 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         bugs = []
         for sprint in sprints:
             bugs += self._fetch_bugs(sprint)
-            bugs = [BugUglyAdapter(b) for b in bugs]
+            #bugs = [BugUglyAdapter(b) for b in bugs]
+
         if len(bugs):
             return sum([b.velocity for b in bugs if b.is_closed()]) / len(bugs)
         else:
@@ -216,9 +218,8 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         bugs = self._fetch_bugs(sprint)
 
         sw = SprintWrapper(sprint, bugs, self.request)
-        board = sw.get_board()
         return dict(
-            board=board,
+            board=sw.board,
             info=sw.get_info(),
             bug_list_url=lambda bugs_list: sprint.project.get_bug_list_url(
                 [bug.id for bugs in bugs_list.values() for bug in bugs]
