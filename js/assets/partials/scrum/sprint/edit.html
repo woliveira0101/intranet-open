@@ -1,0 +1,32 @@
+<div id="sprint-editor" ng-controller="sprintEditCtrl" style="margin-left: 85px">
+  <a class="btn add-column" ng-click="add_column()">Add column</a>
+
+  <input type="hidden" name="board" ng-value="columns_json()">
+  <div id="task_board_container">
+    <table class="table table-bordered task_board">
+      <thead>
+      <tr>
+        <th ng-repeat="column in columns">
+          <input class="unsubmittable" type="text" ng-model="column.name">
+          <a class="btn btn-small" ng-click="add_section(column)">Add section</a>
+          <a ng-show="columns.length > 1" class="btn btn-small" ng-click="remove_column(column)">X</a>
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td ng-repeat="column in columns">
+            <div class="board-column">
+              <div class="frame_normal" ng-repeat="section in column.sections">
+                <div class="head_card"><span><input class="unsubmittable" type="text" ng-model="section.name"><a class="btn btn-small" ng-show="column.sections.length > 1" ng-click="remove_section(section, column.sections)">X</a></span></div>
+                <textarea class="unsubmittable" ng-model="section.cond"></textarea>
+                <div class="clearfix"></div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

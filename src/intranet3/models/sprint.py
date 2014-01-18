@@ -33,6 +33,7 @@ class Sprint(Base):
     bugs_worked_hours = Column(Float, nullable=False, default=0.0)
 
     retrospective_note = Column(Text, nullable=False, default='')
+    board = Column(Text, nullable=False, default='')
 
     team_id = Column(Integer, ForeignKey('teams.id'), nullable=True, index=True)
     team = orm.relationship('Team')

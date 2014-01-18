@@ -1,0 +1,2 @@
+ALTER TABLE "sprint" DROP COLUMN "board";
+ALTER TABLE "sprint" ADD COLUMN "board" TEXT NOT NULL DEFAULT '';

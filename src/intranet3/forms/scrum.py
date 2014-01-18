@@ -1,12 +1,12 @@
 import wtforms as wtf
 from wtforms import validators
 from wtforms.widgets.core import html_params, HTMLString, text_type, escape
-
 from pyramid.i18n import TranslationStringFactory
 
 from intranet3.models import DBSession, Project, Sprint, Team
-
 from intranet3.forms.project import ScrumProjectChoices, ScrumBugsProjectChoices
+
+from .utils import JSONValidator
 
 _ = TranslationStringFactory('intranet3')
 
@@ -68,4 +68,5 @@ class SprintForm(wtf.Form):
     start  = wtf.DateField(_(u"Start date"), format='%d/%m/%Y', validators=[])
     end  = wtf.DateField(_(u"End date"), format='%d/%m/%Y', validators=[])
     goal = wtf.TextAreaField(_(u'Goal'), validators=[])
+    board = wtf.TextField(_(u"Board"), validators=[validators.Required(), JSONValidator()])
     retrospective_note = wtf.TextAreaField(_(u'Retrospective note'), validators=[])

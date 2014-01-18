@@ -1,5 +1,3 @@
-
-
 class ObjectTemporaryWrapper(object):
     """ Wrapper for models """
 

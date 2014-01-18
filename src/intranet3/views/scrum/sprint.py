@@ -344,11 +344,12 @@ class Edit(BaseView):
             sprint.start = form.start.data
             sprint.end = form.end.data
             sprint.goal = form.goal.data
+            sprint.board = form.board.data
             sprint.retrospective_note = form.retrospective_note.data
             self.session.add(sprint)
             self.flash(self._(u"Sprint edited"))
             LOG(u"Sprint edited")
-            url = self.request.url_for('/scrum/sprint/show', sprint_id=sprint.id)
+            url = self.request.url_for('/scrum/sprint/edit', sprint_id=sprint.id)
             return HTTPFound(location=url)
         return dict(
             form=form,

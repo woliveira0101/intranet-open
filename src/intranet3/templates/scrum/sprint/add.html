@@ -1,5 +1,12 @@
 {% extends "templates/_base.html" %}
 
+{% block head_script %}
+  <script>
+    var board = '{{ form.board.data | safe }}';
+
+  </script>
+{% endblock head_script %}
+
 {% block content %}
     <div class="page-header">
         <h1>{% trans %}Add sprint{% endtrans %}</h1>
@@ -60,6 +67,10 @@
 			$bugs_project_ids.change(function(){
 				refresh_projects();
 			});
+
+            $('form').submit(function(){
+              $('.unsubmittable').prop('disabled', true);
+            });
 
 		});
 	</script>

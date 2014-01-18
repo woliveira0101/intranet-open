@@ -1,3 +1,4 @@
+import json
 import datetime
 import dateutil.parser as dparser
 
@@ -77,6 +78,15 @@ class ListValidator(object):
                 proxy = FieldDataProxy(field, value)
                 for validator in self.validators:
                     validator(form, proxy)
+
+
+class JSONValidator(object):
+
+    def __call__(self, form, field):
+        try:
+            json.loads(field.data)
+        except:
+            raise ValidationError(_('Not json'))
 
 class DataValidator(object):
     def __init__(self, message=None, format='%Y-%m-%d'):
