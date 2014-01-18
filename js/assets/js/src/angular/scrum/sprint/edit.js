@@ -3,7 +3,7 @@ var App = angular.module('intranet');
 
 App.controller('sprintEditCtrl', function($scope) {
   if(board){
-    $scope.columns = angular.fromJson(board);
+    $scope.columns = board;
   } else {
     $scope.columns = [{name: 'example name', sections: [{name: 'example name', cond: ''}]}];
   }

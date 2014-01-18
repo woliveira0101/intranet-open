@@ -2,7 +2,7 @@
 
 {% block head_script %}
   <script>
-    var board = '{{ form.board.data | safe }}';
+    var board = {{ form.board.data | safe }};
 
   </script>
 {% endblock head_script %}

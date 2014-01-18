@@ -1,3 +1,4 @@
+import json
 import datetime
 
 from sqlalchemy.types import String, Integer, Date, DateTime, Text, Float
@@ -37,6 +38,9 @@ class Sprint(Base):
 
     team_id = Column(Integer, ForeignKey('teams.id'), nullable=True, index=True)
     team = orm.relationship('Team')
+
+    def get_board(self):
+        return json.loads(self.board)
 
     @property
     def velocity(self):
