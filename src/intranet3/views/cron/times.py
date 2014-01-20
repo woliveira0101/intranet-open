@@ -148,11 +148,11 @@ class TodayHours(CronView):
         return Response('ok')
 
     def _today_hours(self, date, projects, omit_users):
-        time_entries = self.session.query('user', 'description', 'time',
+        time_entries = self.session.query('uid', 'user', 'description', 'time',
             'project', 'client', 'ticket_id', 'tracker_id',
             'total_time').from_statement("""
                 SELECT
-                    u.name as "user", t.description as "description",
+                    u.id as "uid", u.name as "user", t.description as "description",
                     t.time as "time", p.name as "project", c.name as "client",
                     t.ticket_id as "ticket_id", p.tracker_id as "tracker_id",
                     (
@@ -184,7 +184,7 @@ class TodayHours(CronView):
         user_sum = defaultdict(lambda: 0.0)
         user_entries = defaultdict(lambda: [])
         trackers = {}
-        for (user, description, time, project, client, ticket_id, tracker_id,
+        for (uid, user, description, time, project, client, ticket_id, tracker_id,
              total_time) in time_entries:
             # Lazy dict filling
             if not tracker_id in trackers:
@@ -193,28 +193,33 @@ class TodayHours(CronView):
             ticket_url = tracker.get_bug_url(ticket_id)
 
             total_sum += time
-            user_sum[user] += time
-            user_entries[user].append((description, time, project, client,
+            user_sum[uid] += time
+            user_entries[(uid, user)].append((description, time, project, client,
                                        ticket_id, ticket_url, total_time)
             )
-
         output.append(self._(u"Daily hours report (${total_sum} h)",
                              total_sum='%.2f' % total_sum)
         )
 
         user_entries = sorted(
             user_entries.iteritems(),
-            key=lambda u: user_sum[u[0]],
+            key=lambda u: user_sum[u[0][0]],
             reverse=True,
         )
-        for user, entries in user_entries:
+        base_url = self.request.registry.settings['FRONTEND_PREFIX']
+        for (user_id, user_name), entries in user_entries:
             entries = sorted(
                 entries,
                 key=itemgetter(1),
                 reverse=True,
             )
             output.append(u"")
-            output.append(u"\t%s (%.2f h):" % (user, user_sum[user]))
+            time_link = base_url + self.request.url_for(
+                '/times/list_user',
+                user_id=user_id, 
+                date=date.strftime("%d.%m.%Y"),
+            )
+            output.append(u"\t<a href=\"%s\">%s</a> (%.2f h):" % (time_link, user_name, user_sum[user_id]))
 
             for (description, time, project, client, ticket_id, bug_url,
                  total_time) in entries:
