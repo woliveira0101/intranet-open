@@ -1,0 +1,8 @@
+<div class="modal-header">
+  <button class="close" aria-hidden="true" ng-click="close()">x</button>
+  <h3>Bugs</h3>
+</div>
+
+<span ng-show="bugs_error">There was something wrong with request</span>
+<img ng-show="!bugs && !bugs_error"src="/static/img/ajax.gif"/>
+<pre id="sprint-json-bugs" ng-show="bugs">{{ bugs }}</pre>

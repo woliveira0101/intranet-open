@@ -28,10 +28,7 @@ class ToDictMixin(object):
 
 class Scrum(ToDictMixin):
     def __init__(self):
-        self.is_blocked = False
-        self.is_closed = False
-        self.is_unassigned = ''
-        self.points = 0
+        self.points = None
         self.velocity = 0.0
 
 
@@ -65,10 +62,11 @@ class Bug(ToDictMixin):
         self.labels = []
 
     def __repr__(self):
-        return '<%s:%s:%s>' % (
+        return '<%s:%s:%s:%s>' % (
             self.__class__.__name__,
             self._tracker_type,
             self._tracker_name,
+            self.id,
         )
 
 
@@ -132,9 +130,12 @@ class BaseBugProducer(object):
 
             if attr in ('owner', 'reporter'):
                 # we need user object for those:
-                value = self._resolve_user(value, self.login_mapping)
-
-            if attr == 'id':
+                if value is not None:
+                    value = self._resolve_user(value, self.login_mapping)
+                else:
+                    # no owner ! it means that bug.owner will be None !
+                    value = None
+            elif attr == 'id':
                 value = str(value)
 
             setattr(bug, attr, value)

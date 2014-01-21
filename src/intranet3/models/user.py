@@ -154,7 +154,10 @@ class User(Base):
             return 0
     @property
     def avatar_url(self):
-        return '/api/images/users/%s' % self.id
+        if self.id:
+            return '/api/images/users/%s' % self.id
+        else:
+            return None
 
     def get_location(self, short=False):
         if short:

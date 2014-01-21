@@ -88,6 +88,10 @@ class Project(Base):
 
     __table_args__ = (UniqueConstraint('name', 'client_id', name='project_name_client_id_unique'), {})
 
+
+    def to_dict(self):
+        return {}
+
     @property
     def get_sprint_tabs(self):
         return re.findall('(.+)\|(.+)(?:\n|$)', self.sprint_tabs)

@@ -106,3 +106,8 @@ class Board(object):
     def points_achieved(self):
         return self.completed_column.points
 
+    def to_dict(self):
+        return [bug.to_dict() for bug in self.bugs]
+
+    def is_completed(self, bug):
+        return bug in self.completed_bugs

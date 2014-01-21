@@ -1,7 +1,7 @@
 <div id="sprint-editor" ng-controller="sprintEditCtrl" style="margin-left: 85px">
   <div>
-    <select ng-model="selected_board" ng-options="board.name for board in boards"></select>
-    <a class="btn" ng-click="choose()">Choose</a>
+    <select ng-disabled="boards.length == 0" ng-model="selected_board" ng-options="board.name for board in boards"></select>
+    <a class="btn" ng-click="choose()" ng-disabled="!selected_board.id">Copy here</a>
     <a class="btn btn-danger" ng-show="selected_board.id !== undefined" ng-click="delete()">Delete selected board</a>
   </div>
 
@@ -41,5 +41,6 @@
 
   </div>
   <a class="btn" ng-click="save()">Save this board</a>
+  <a class="btn" ng-click="show_bugs()">Show bugs</a>
 
 </div>

@@ -13,7 +13,7 @@ from intranet3.models import Sprint, ApplicationConfig, Tracker, User, Project
 from intranet3 import helpers as h
 
 from intranet3.log import INFO_LOG, ERROR_LOG
-from intranet3.lib.scrum import SprintWrapper, get_velocity_chart_data, move_blocked_to_the_end
+from intranet3.lib.scrum import SprintWrapper, get_velocity_chart_data
 from intranet3.lib.times import TimesReportMixin, HTMLRow
 from intranet3.lib.bugs import Bugs
 from intranet3.forms.times import ProjectTimeForm
@@ -174,7 +174,6 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         sprint = self.v['sprint']
         bugs = self._fetch_bugs(sprint)
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
-        bugs = move_blocked_to_the_end(bugs)
         tracker = Tracker.query.get(sprint.project.tracker_id)
 
         #mean_velocity = self.get_mean_task_velocity()
@@ -189,7 +188,7 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
 
         return dict(
             tracker=tracker,
-            bugs=sw.board.bugs,
+            board=sw.board,
             info=sw.get_info(),
             str_date=self._sprint_daterange(sprint.start, sprint.end),
             sprint_tabs=sw.get_tabs(),
@@ -201,14 +200,14 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get_mean_task_velocity(self):
         sprints = Sprint.query.filter(Sprint.end >= datetime.date.today())
         bugs = []
-        for sprint in sprints:
-            bugs += self._fetch_bugs(sprint)
+        #for sprint in sprints:
+            #bugs += self._fetch_bugs(sprint)
             #bugs = [BugUglyAdapter(b) for b in bugs]
-
-        if len(bugs):
-            return sum([b.velocity for b in bugs if b.is_closed()]) / len(bugs)
-        else:
-            return 0.0
+        #
+        #if len(bugs):
+        #    return sum([b.velocity for b in bugs if b.is_closed()]) / len(bugs)
+        #else:
+        return 0.0
 
 
 @view_config(route_name='scrum_sprint_board', permission='client')

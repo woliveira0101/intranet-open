@@ -115,6 +115,7 @@ def main(global_config, **settings):
 
     pyramid_config.add_route('api_board', '/api/boards/{board_id:\d+}')
     pyramid_config.add_route('api_boards', '/api/boards')
+    pyramid_config.add_route('api_sprint_bugs', '/api/sprint/{sprint_id:\d+}/bugs')
 
     pyramid_config.add_route('api_users', '/api/users')
     pyramid_config.add_route('api_preview', '/api/preview')

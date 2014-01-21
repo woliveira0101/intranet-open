@@ -1,7 +1,7 @@
 var App = angular.module('intranet');
 
 
-App.controller('sprintEditCtrl', function($scope, $http) {
+App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
   if(board){
     $scope.columns = board;
   } else {
@@ -12,16 +12,14 @@ App.controller('sprintEditCtrl', function($scope, $http) {
     return angular.toJson($scope.columns);
   };
 
-
-  $scope.selected_board = {
-    'name': '-----------',
-    'board': $scope.columns_json()
-  };
-
+  $scope.boards = [];
+  $scope.selected_board = undefined;
   $http.get('/api/boards').success(function(data){
     $scope.boards = data.boards;
-    $scope.boards.push($scope.selected_board);
     $scope.boards.reverse();
+    if($scope.boards.length > 0){
+      $scope.selected_board = $scope.boards[0];
+    }
   });
 
   $scope.choose = function(){
@@ -48,8 +46,8 @@ App.controller('sprintEditCtrl', function($scope, $http) {
 
     $http.post('/api/boards', data).success(function(response){
       data.id = response.id;
-      debugger;
       $scope.boards.push(data);
+      $scope.selected_board = $scope.boards[0];
     });
   };
 
@@ -69,5 +67,29 @@ App.controller('sprintEditCtrl', function($scope, $http) {
   $scope.remove_section = function(section, sections){
     var index = sections.indexOf(section);
     sections.splice(index, 1);
-  }
+  };
+
+  $scope.show_bugs = function(){
+    var d = $dialog.dialog({
+      resolve: {
+      }
+    });
+    d.open('scrum/sprint/bugsJson.html', 'sprintBugsJsonCtrl');
+
+  };
+});
+
+App.controller('sprintBugsJsonCtrl', function($scope, $http, dialog, $dialog){
+  $scope.close = function() {
+    dialog.close();
+  };
+  var promise = $http.get('/api/sprint/' + sprint_id + '/bugs')
+  promise.success(function(response){
+    $scope.bugs = JSON.stringify(angular.fromJson(response), undefined, 4);
+  });
+
+  $scope.bugs_error = false;
+  promise.error(function(response){
+    $scope.bugs_error = true
+  });
 });

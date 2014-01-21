@@ -13,7 +13,7 @@
                 {% if bug.blocked %}
                     <i data-original-title="{{ ' '.join(bug.blocked.keys()) }}" class="icon-exclamation-sign icon-red"></i>
                 {% endif %}
-                {% if not bug.scrum.is_unassigned and bug.owner.name %}
+                {% if bug.owner.name %}
                     <div class="assignee" data-original-title="{{ bug.owner.name }}">{{ bug.owner.name | initials(3) }}</div>
                 {% endif %}
                 <div class="desc_ticket">{{ bug.desc }}</div>
@@ -30,16 +30,16 @@
                 {% endif %}
             {% endfor %}
             {% endif %}
-            {% if bug.points %}
-                <div class="points points-inner priority_{{ bug.priority_number }}">{{ bug.points | int_or_float }}</div>
+            {% if bug.scrum.points != None %}
+                <div class="points points-inner priority_{{ bug.priority_number }}">{{ bug.scrum.points | int_or_float }}</div>
             {% endif %}
 
         {% if bug.dependson %}
         </div>
         {% endif %}
     </div>
-    {% if bug.points %}
-        <div class="points points-outer priority_{{ bug.priority_number }}">{{ bug.points | int_or_float }}</div>
+    {% if bug.scrum.points != None %}
+        <div class="points points-outer priority_{{ bug.priority_number }}">{{ bug.scrum.points | int_or_float }}</div>
     {% endif %}
 </div>
 {%- endmacro %}

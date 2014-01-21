@@ -19,8 +19,8 @@
             </tr>
             </thead>
             <tbody>
-            {% for bug in bugs %}
-            <tr class="{{ loop.cycle('odd', 'even') }} {{ bug.status | lower }} {% if bug.scrum.is_blocked %} blocked{% elif bug.scrum.is_unassigned %} unassigned{% endif %}">
+            {% for bug in board.bugs %}
+            <tr class="{{ loop.cycle('odd', 'even') }} {{ bug.status | lower }} {% if bug.scrum.is_blocked %} blocked{% elif bug.owner.id == None %} unassigned{% endif %}">
                 <td><a href="{{bug.url}}" class="external">{{ bug.id }}</a></td>
                 <td>{{ bug.project_name }}</td>
                 <td>{{ bug.component_name }}</td>
@@ -35,7 +35,7 @@
                   (<a href="{{ request.url_for('/times/tickets/report', bug_id=bug.id, projects=bug.project_id, date_range='01-01-2000 - 01-01-2030', group_by_client='y', group_by_project='y', group_by_bugs='y',group_by_user='y', ticket_choice='all' ,bigger_than=0)}}">{{ '%.2f' % bug.time }}</a>)
                 </td>
                 <td>
-                    <span class="{{ 'velocity-opened' if not bug.scrum.is_closed else '' }}">{{ (bug.scrum.velocity | round(2)) }}</span>
+                    <span class="{{ 'velocity-opened' if not board.is_completed(bug) else '' }}">{{ (bug.scrum.velocity | round(2)) }}</span>
                     {% if bug.danger %}
                         <div class="ui-icon ui-icon-alert task-danger" title="High mean devation"> </div>
                     {% endif %}

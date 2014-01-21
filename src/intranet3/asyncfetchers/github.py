@@ -28,7 +28,7 @@ class GithubBugProducer(BaseBugProducer):
             github_id=d['id'],
             desc=d['title'],
             reporter=d['user']['login'],
-            owner=d['assignee']['login'] if d['assignee'] else '',
+            owner=d['assignee']['login'] if d['assignee'] else None,
             status=d['state'],
             url=d['html_url'],
             opendate=parse(d.get('created_at', '')),

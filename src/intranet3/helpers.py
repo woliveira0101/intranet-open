@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import math
 import tempfile
@@ -262,3 +263,9 @@ def get_working_days(date_start, date_end):
                 days += 1
             date += diff
         return days
+
+def json_dumps_default(obj):
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
+    else:
+        return json.JSONEncoder().default(obj)

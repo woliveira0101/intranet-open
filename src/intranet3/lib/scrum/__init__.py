@@ -17,9 +17,6 @@ def parse_whiteboard(wb):
 
 def move_blocked_to_the_end(bugs):
     """Move blocked bugs to the end of the list"""
-    blocked_bugs = [bug for bug in bugs if bug.scrum.is_blocked]
-    bugs = [bug for bug in bugs if not bug.scrum.is_blocked]
-    bugs.extend(blocked_bugs)
     return bugs
 
 

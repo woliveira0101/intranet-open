@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import json
 import colander
 from pyramid.view import view_config, view_defaults
-from pyramid.httpexceptions import HTTPBadRequest, HTTPCreated, HTTPOk, HTTPNotFound
+from pyramid.httpexceptions import HTTPBadRequest, HTTPOk, HTTPNotFound, Response
 from sqlalchemy.exc import IntegrityError
 
 from intranet3.utils.views import ApiView
@@ -10,6 +11,10 @@ from intranet3 import models as m
 from intranet3.schemas.sprint import BoardSchema
 from intranet3.utils.decorators import has_perm
 from intranet3 import helpers as h
+
+from intranet3.views.scrum.sprint import FetchBugsMixin
+from intranet3.models import Sprint
+from intranet3.lib.scrum import SprintWrapper
 
 
 @view_config(route_name='api_boards', renderer='json', permission="can_manage_sprint_boards")
@@ -85,3 +90,22 @@ class Board(ApiView):
         self.session.delete(board)
 
         return HTTPOk('OK')
+
+@view_config(route_name='api_sprint_bugs', renderer='json', permission="can_manage_sprint_boards")
+class Bugs(FetchBugsMixin, ApiView):
+    def get(self):
+        sprint_id = self.request.matchdict.get('sprint_id')
+        sprint = Sprint.query.get(sprint_id)
+        bugs = self._fetch_bugs(sprint)
+
+        sw = SprintWrapper(sprint, bugs, self.request)
+        response = json.dumps([
+            bug.to_dict()
+            for bug in sw.board.bugs
+        ], default=h.json_dumps_default)
+
+        return Response(
+            response,
+            content_type='application/json',
+        )
+
