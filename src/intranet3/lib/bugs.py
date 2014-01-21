@@ -136,9 +136,6 @@ class Bugs(object):
         return bugs
 
     def get_sprint(self, sprint):
-        bugs = memcache.get(SCRUM_BUG_CACHE_KEY % sprint.id)
-        if bugs:
-            return bugs
         query = self.request.db_session.query
 
         project_ids = sprint.bugs_project_ids
@@ -190,7 +187,6 @@ class Bugs(object):
             bug.project = projects.get(bug.project_id)
 
         bugs = self.add_time(bugs, sprint=sprint)
-        memcache.set(SCRUM_BUG_CACHE_KEY % sprint.id, bugs, SCRUM_BUG_CACHE_TIMEOUT)
         return bugs
 
     @classmethod

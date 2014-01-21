@@ -71,7 +71,7 @@ class FetcherMeta(type):
                 kwargs,
             )
             # clear fetcher
-            self._parsed_data = None
+            self._parsed_data = []
             cached = memcache.get(self._memcached_key)
 
             if cached is not None:
@@ -106,14 +106,13 @@ class BaseFetcher(object):
         self.password = credentials.password
         self.user = user
         self.login_mapping = login_mapping
-        self.done = False
         self.error = None
         self.cache_key = None
         self.dependson_and_blocked_status = {}
         self.timeout = timeout
 
         # _parsed_data is set by metaclass if it is present in memached
-        self._parsed_data = None
+        self._parsed_data = []
         # _memcached_data is set by metaclass
         self._memcached_key = None
 
@@ -173,19 +172,14 @@ class BaseFetcher(object):
             reason = self.check_if_failed(response)
             if reason:
                 raise FetchException(reason)
-            self.received(response.text)
+            self._parsed_data.extend(self.parse(response.text))
 
-        self.done = True
+        memcache.set(self._memcached_key, self._parsed_data, self.CACHE_TIMEOUT)
 
     def check_if_failed(self, response):
         code = response.status_code
         if 200 > code > 299:
             return u'Received response %s' % code
-
-    def received(self, data):
-        """ Called when server returns whole response body """
-        self._parsed_data = self.parse(data)
-        memcache.set(self._memcached_key, self._parsed_data, self.CACHE_TIMEOUT)
 
     def get_result(self):
         if self._greenlet:
