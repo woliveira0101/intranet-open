@@ -1,16 +1,14 @@
 <div id="sprint-editor" ng-controller="sprintEditCtrl" style="margin-left: 85px">
   <div>
-    <select ng-disabled="boards.length == 0" ng-model="selected_board" ng-options="board.name for board in boards"></select>
-    <a class="btn" ng-click="choose()" ng-disabled="!selected_board.id">Copy here</a>
-    <a class="btn btn-danger" ng-show="selected_board.id !== undefined" ng-click="delete()">Delete selected board</a>
+    <a class="btn" ng-click="show_boards()">Show boards</a>
+    <a class="btn" ng-click="show_bugs()">Show bugs</a>
   </div>
 
   <input type="hidden" name="board" ng-value="columns_json()">
 
-  <div class="row">
+  <div class="row" style="margin: 20px 0">
     <div style="float: right">
       <a class="btn add-column" ng-click="add_column()">Add column</a>
-
     </div>
     <div id="task_board_container">
       <table class="table table-bordered task_board">
@@ -41,6 +39,5 @@
 
   </div>
   <a class="btn" ng-click="save()">Save this board</a>
-  <a class="btn" ng-click="show_bugs()">Show bugs</a>
 
 </div>

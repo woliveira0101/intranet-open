@@ -1,0 +1,9 @@
+<div class="modal-header">
+  <button class="close" aria-hidden="true" ng-click="close()">x</button>
+  <h3>Boards</h3>
+</div>
+<div id="boards-modal">
+  <select ng-disabled="boards.length == 0" ng-model="selected_board" ng-options="board.name for board in boards"></select>
+  <a class="btn" ng-click="clone()" ng-show="selected_board.id">Clone to current sprint</a>
+  <a class="btn btn-danger" ng-show="selected_board.id !== undefined" ng-click="delete()">Delete selected board</a>
+</div>

@@ -12,31 +12,6 @@ App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
     return angular.toJson($scope.columns);
   };
 
-  $scope.boards = [];
-  $scope.selected_board = undefined;
-  $http.get('/api/boards').success(function(data){
-    $scope.boards = data.boards;
-    $scope.boards.reverse();
-    if($scope.boards.length > 0){
-      $scope.selected_board = $scope.boards[0];
-    }
-  });
-
-  $scope.choose = function(){
-    $scope.columns = angular.fromJson($scope.selected_board.board);
-  };
-
-  $scope.delete = function(){
-    var r = confirm("Press a button!");
-    if(r === true){
-      $http.delete('/api/boards/' + $scope.selected_board.id).success(function(){
-        var index = $scope.boards.indexOf($scope.selected_board);
-        $scope.boards.splice(index, 1);
-        $scope.selected_board = $scope.boards[0];
-      });
-    }
-  };
-
   $scope.save = function(){
     var name = prompt('Name');
     var data = {
@@ -77,12 +52,51 @@ App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
     d.open('scrum/sprint/bugsJson.html', 'sprintBugsJsonCtrl');
 
   };
+  $scope.show_boards = function(){
+    var d = $dialog.dialog({
+      resolve: {
+        $callerScope: function() {return $scope}
+      }
+    });
+    d.open('scrum/sprint/boards.html', 'sprintBoardsCtrl');
+
+  };
 });
 
-App.controller('sprintBugsJsonCtrl', function($scope, $http, dialog, $dialog){
+App.controller('sprintBoardsCtrl', function($scope, $http, dialog, $dialog, $callerScope){
+  $scope.boards = [];
+  $scope.selected_board = undefined;
+  $http.get('/api/boards').success(function(data){
+    $scope.boards = data.boards;
+    $scope.boards.reverse();
+    if($scope.boards.length > 0){
+      $scope.selected_board = $scope.boards[0];
+    }
+  });
+
+
+  $scope.clone = function(){
+    $callerScope.columns = angular.fromJson($scope.selected_board.board);
+    $scope.close();
+  };
+
+  $scope.delete = function(){
+    var r = confirm("Press a button!");
+    if(r === true){
+      $http.delete('/api/boards/' + $scope.selected_board.id).success(function(){
+        var index = $scope.boards.indexOf($scope.selected_board);
+        $scope.boards.splice(index, 1);
+        $scope.selected_board = $scope.boards[0];
+      });
+    }
+  };
+
   $scope.close = function() {
     dialog.close();
   };
+});
+
+App.controller('sprintBugsJsonCtrl', function($scope, $http, dialog, $dialog){
   var promise = $http.get('/api/sprint/' + sprint_id + '/bugs')
   promise.success(function(response){
     $scope.bugs = JSON.stringify(angular.fromJson(response), undefined, 4);
