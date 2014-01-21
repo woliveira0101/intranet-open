@@ -15,10 +15,8 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 
 
 class GithubScrumProducer(BaseScrumProducer):
-
     def get_points(self, bug, tracker, login_mapping, parsed_data):
-        digit_labels = [ int(label) for label in parsed_data['labels'] if label.isdigit()]
-
+        digit_labels = [ int(label) for label in bug.labels if label.isdigit()]
         return digit_labels[0] if digit_labels else 0
 
 class GithubBugProducer(BaseBugProducer):

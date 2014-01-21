@@ -74,7 +74,7 @@ class Column(object):
 class Board(object):
     def __init__(self, sprint, bugs):
 
-        # we have to copy bugs, because each section is deleting their bugs
+        # we have to copy bugs, because each section is removing their bugs
         # from the list
 
         self.bugs = bugs[:]

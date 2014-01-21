@@ -33,7 +33,6 @@ class Scrum(ToDictMixin):
         self.is_unassigned = ''
         self.points = 0
         self.velocity = 0.0
-        self.labels = []
 
 
 class Bug(ToDictMixin):
@@ -63,7 +62,8 @@ class Bug(ToDictMixin):
         self.dependson = {}
         self.blocked = {}
         self.url = '#'
-    
+        self.labels = []
+
     def __repr__(self):
         return '<%s:%s:%s>' % (
             self.__class__.__name__,
