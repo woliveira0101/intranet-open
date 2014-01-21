@@ -14,15 +14,20 @@ return bug
         namespace = self._create_base_namespace()
         namespace['bugs'] = bugs
 
-        query = self.TMPL % section['cond']
+        condition = section['cond'].strip()
 
-        try:
-            self.bugs = pyflwor.execute(query, namespace)
-        except Exception:
-            self.bugs = []
+        if condition:
+            query = self.TMPL % section['cond']
+
+            try:
+                self.bugs = pyflwor.execute(query, namespace)
+            except Exception:
+                self.bugs = []
+        else:
+            # no condition == all bugs
+            self.bugs = bugs[:]
 
         #those bugs that was taken should be removed from global bug list
-
         for bug in self.bugs:
             bugs.remove(bug)
 

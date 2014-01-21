@@ -7,7 +7,7 @@ from requests.auth import HTTPBasicAuth
 
 from intranet3 import memcache
 from intranet3.helpers import decoded_dict
-from intranet3.log import DEBUG_LOG, ERROR_LOG, INFO_LOG
+from intranet3.log import DEBUG_LOG, ERROR_LOG
 from .request import RPC
 
 DEBUG = DEBUG_LOG(__name__)
