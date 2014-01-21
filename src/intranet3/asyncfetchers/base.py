@@ -1,5 +1,3 @@
-import sys
-import traceback
 import codecs
 import functools
 import csv
@@ -7,11 +5,13 @@ import csv
 import gevent
 from requests.auth import HTTPBasicAuth
 
-from intranet3.models import User
-from intranet3.models.project import SelectorMapping
+from intranet3 import memcache
 from intranet3.helpers import decoded_dict
+from intranet3.log import DEBUG_LOG, ERROR_LOG, INFO_LOG
 from .request import RPC
 
+DEBUG = DEBUG_LOG(__name__)
+ERROR = ERROR_LOG(__name__)
 
 class FetcherBaseException(Exception):
     pass
@@ -33,6 +33,15 @@ class FetcherBadDataError(FetcherBaseException):
 
 
 class FetcherMeta(type):
+    """
+    Metaclass for Fetcher classes.
+    It does three things:
+    1. Spawns greenlets when one of mcs.FETCHERS method is called
+    2. Generates self._memcache_key
+    3. Decides if use cached data from memcached.
+    """
+
+    MEMCACHED_KEY = '{tracker_id}-{login}-{method_name}-{args}-{kwargs}'
     FETCHERS = [
         'fetch_user_tickets',
         'fetch_all_tickets',
@@ -40,16 +49,39 @@ class FetcherMeta(type):
         'fetch_scrum',
     ]
 
-    @staticmethod
-    def __async(f):
+    @classmethod
+    def _gen_memcached_key(mcs, tracker_id, login, method_name, args, kwargs):
+        """
+        Fancy key generator (c)
+        """
+        args = str(args)
+        kwargs = str(kwargs)
+        return mcs.MEMCACHED_KEY.format(**locals()).replace(' ', '')
+
+    @classmethod
+    def __async(mcs, f):
         @functools.wraps(f)
         def func(*args, **kwargs):
             self = args[0]
+            self._memcached_key = mcs._gen_memcached_key(
+                self.tracker.id,
+                self.login,
+                f.func_name,
+                args[1:],
+                kwargs,
+            )
             # clear fetcher
-            self.bugs = {}
-            # start greenlet
-            self.before_fetch()
-            self._greenlet = gevent.Greenlet.spawn(f, *args, **kwargs)
+            self._parsed_data = None
+            cached = memcache.get(self._memcached_key)
+
+            if cached is not None:
+                DEBUG(u"Bugs found in cache for key %s" % self._memcached_key )
+                self._parsed_data = cached
+            else:
+                # start greenlet
+                DEBUG(u"Bugs not in cache for key %s" % self._memcached_key)
+                self.before_fetch()
+                self._greenlet = gevent.Greenlet.spawn(f, *args, **kwargs)
         return func
 
     def __new__(mcs, name, bases, attrs):
@@ -74,12 +106,16 @@ class BaseFetcher(object):
         self.password = credentials.password
         self.user = user
         self.login_mapping = login_mapping
-        self.bugs = {}
         self.done = False
         self.error = None
         self.cache_key = None
         self.dependson_and_blocked_status = {}
         self.timeout = timeout
+
+        # _parsed_data is set by metaclass if it is present in memached
+        self._parsed_data = None
+        # _memcached_data is set by metaclass
+        self._memcached_key = None
 
         self.traceback = None
         self.fetch_error = None
@@ -148,27 +184,28 @@ class BaseFetcher(object):
 
     def received(self, data):
         """ Called when server returns whole response body """
+        self._parsed_data = self.parse(data)
+        memcache.set(self._memcached_key, self._parsed_data, self.CACHE_TIMEOUT)
+
+    def get_result(self):
+        if self._greenlet:
+            self._greenlet.join(self.MAX_TIMEOUT)
+
+            if not self._greenlet.ready():
+                raise FetcherTimeout()
+
+            if not self._greenlet.successful():
+                raise self._greenlet.exception
+
         bug_producer = self.BUG_PRODUCER_CLASS(self.tracker, self.login_mapping)
-        for bug_desc in self.parse(data):
+        bugs = {}
+        for bug_desc in self._parsed_data:
             bug = bug_producer(
                 bug_desc,
             )
-            self.bugs[bug.id] = bug
+            bugs[bug.id] = bug
 
-    def get_result(self):
-        self._greenlet.join(self.MAX_TIMEOUT)
-
-        if not self._greenlet.ready():
-            raise FetcherTimeout()
-
-        if not self._greenlet.successful():
-            raise self._greenlet.exception
-
-        results = []
-        for bug in self.bugs.itervalues():
-            results.append(bug)
-
-        return results
+        return bugs.values()
 
     # methods that should be overridden:
 
@@ -216,6 +253,8 @@ class CSVParserMixin(object):
             data = data.split('\n')
 
         reader = csv.DictReader(data,  delimiter=self.delimiter)
+        result = []
         for bug_desc in reader:
             bug_desc = decoded_dict(bug_desc, encoding=self.encoding)
-            yield bug_desc
+            result.append(bug_desc)
+        return result

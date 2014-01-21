@@ -159,6 +159,8 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
 
     def parse(self, data):
         xml = ET.fromstring(data)
+
+        result = []
         for story in xml.findall('story'):
             owner_name_node = story.find('owned_by')
 
@@ -189,4 +191,5 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
                 changeddate=story.find('updated_at').text,
                 points=points,
             )
-            yield bug_desc
+            result.append(bug_desc)
+        return result

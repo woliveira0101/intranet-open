@@ -258,6 +258,7 @@ A comma or vertical bar separated list of report criteria composed as
             return
 
         tickets = jdata['groups'][0]['tickets']
+        result = []
         for ticket in tickets:
             bug_desc = dict(
                 tracker=self.tracker,
@@ -277,4 +278,5 @@ A comma or vertical bar separated list of report criteria composed as
             key = str(ticket['project_id']), str(whiteboard_field_id)
             whiteboard = self.unfuddle_data['custom_fields'].get(key, '')
             bug_desc['whiteboard'] = whiteboard
-            yield bug_desc
+            result.append(bug_desc)
+        return result
