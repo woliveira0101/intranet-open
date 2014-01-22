@@ -46,7 +46,7 @@ return bug
 
     @reify
     def points(self):
-        return sum(bug.scrum.points for bug in self.bugs)
+        return sum(bug.scrum.points for bug in self.bugs if bug.scrum.points)
 
 
 class Column(object):

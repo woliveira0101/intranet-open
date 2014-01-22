@@ -169,17 +169,17 @@ class BaseFetcher(object):
 
         for rpc in rpcs:
             response = rpc.get_result()
-            reason = self.check_if_failed(response)
-            if reason:
-                raise FetchException(reason)
+            self.check_if_failed(response)
             self._parsed_data.extend(self.parse(response.text))
 
+        self._parsed_data = self.after_parsing(self._parsed_data)
         memcache.set(self._memcached_key, self._parsed_data, self.CACHE_TIMEOUT)
 
     def check_if_failed(self, response):
         code = response.status_code
         if 200 > code > 299:
-            return u'Received response %s' % code
+            reason = u'Received response %s' % code
+            raise FetchException(reason)
 
     def get_result(self):
         if self._greenlet:
@@ -201,7 +201,10 @@ class BaseFetcher(object):
 
         return bugs.values()
 
-    # methods that should be overridden:
+    # methods that should/could be overridden:
+
+    def after_parsing(self, parsed_data):
+        return parsed_data
 
     def parse(self, data):
         raise NotImplementedError()

@@ -22,6 +22,7 @@ class RPC(object):
             *self._args,
             **self._kwargs
         )
+        return self
 
     def get_result(self):
         self._greenlet.join()

@@ -31,5 +31,5 @@ class IgozillaFetcher(BugzillaFetcher):
         return response.cookies
 
     def set_auth(self, session, data=None):
-        cookies = data
+        cookies = data or self._auth_data
         session.cookies.update(cookies)

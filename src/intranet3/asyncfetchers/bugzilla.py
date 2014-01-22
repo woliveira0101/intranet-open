@@ -1,14 +1,48 @@
+import requests
 from dateutil.parser import parse
+from xml.etree import ElementTree as ET
 
 from intranet3 import helpers as h
+from intranet3.models import User
 from .request import RPC
 from .base import BaseFetcher, BasicAuthMixin, CSVParserMixin
-from .nbug import BaseBugProducer, BaseScrumProducer
+from .nbug import BaseBugProducer, ToDictMixin, BaseScrumProducer
 
+
+class BlockedOrDependson(ToDictMixin):
+    def __init__(self, bug_id, status, description):
+        self.id = bug_id
+        self.status = status
+        self.desc = description
+        self.resolved = self.status in ('CLOSED', 'RESOLVED', 'VERIFIED')
+        self.url = '#'
+        self.owner = User(name='unknown')
+
+class BugzillaScrumProcuder(BaseScrumProducer):
+
+    def parse_whiteboard(self, wb):
+        wb = wb.strip().replace('[', ' ').replace(']', ' ')
+        if wb:
+            return dict(i.split('=', 1) for i in wb.split() if '=' in i)
+        return {}
+
+
+    def get_points(self, bug, tracker, login_mapping, parsed_data):
+        wb = self.parse_whiteboard(parsed_data.get('whiteboard', ''))
+        points = wb.get('p')
+        if points and points.strip().isdigit():
+            return int(points.strip())
 
 class BugzillaBugProducer(BaseBugProducer):
+    SCRUM_PRODUCER_CLASS = BugzillaScrumProcuder
     def parse(self, tracker, login_mapping, raw_data):
         d = raw_data
+
+        dependson = [BlockedOrDependson(**item) for item in d.get('dependson', [])]
+        dependson = [bug for bug in dependson if not bug.resolved]
+        blocked = [BlockedOrDependson(**item) for item in d.get('blocked', [])]
+        blocked = [bug for bug in blocked if not bug.resolved]
+
         return dict(
             id=d['bug_id'],
             desc=d['short_desc'],
@@ -25,13 +59,104 @@ class BugzillaBugProducer(BaseBugProducer):
             changeddate=parse(d.get('changeddate', '')),
             whiteboard=d['status_whiteboard'],
             version=d['version'],
+            dependson=dependson,
+            blocked=blocked,
         )
 
     def get_url(self, tracker, login_mapping, parsed_data):
         return tracker.url + '/show_bug.cgi?id=%s' % parsed_data['id']
 
+class FetchBlockedAndDependsonMixin(object):
 
-class BugzillaFetcher(CSVParserMixin, BasicAuthMixin, BaseFetcher):
+    def pre_parse(self, data):
+        # igozilla returns iso-8859-2, but does not declare it
+        data = data.replace(
+            '<?xml version="1.0" standalone="yes"?>',
+            '<?xml version="1.0" encoding="iso-8859-2" standalone="yes"?>'
+        )
+        #data = data.decode(self.encoding)
+        xml = ET.fromstring(data)
+        return xml
+
+
+    def parse_ids(self, data):
+        xml = self.pre_parse(data)
+        result = {}
+        for bug in xml.findall('bug'):
+            bug_id = bug.find('bug_id').text
+            blocked = [el.text for el in bug.findall('blocked')]
+            dependson = [el.text for el in bug.findall('dependson')]
+            result[bug_id] = (blocked, dependson)
+        return result
+
+    def parse_statuses(self, data):
+        xml = self.pre_parse(data)
+        result = {}
+        for bug in xml.findall('bug'):
+            bug_id = bug.find('bug_id').text
+            status = getattr(bug.find('bug_status'), 'text', None)
+            description = getattr(bug.find('short_desc'), 'text', None)
+            result[bug_id] = {
+                'bug_id': bug_id,
+                'status': status,
+                'description': description,
+            }
+        return result
+
+    def get_ids(self, ids):
+        url = '%s/show_bug.cgi' % self.tracker.url
+        params = dict(
+            ctype='xml',
+            id=ids,
+            field=['blocked', 'dependson', 'bug_id']
+        )
+        s = requests.Session()
+        self.set_auth(s)
+        result = s.request('GET', url, params=params)
+
+        return self.parse_ids(result.content)
+
+    def get_statuses(self, ids):
+        url = '%s/show_bug.cgi' % self.tracker.url
+        params = dict(
+            ctype='xml',
+            id=ids,
+            field=['bug_status', 'bug_id', 'short_desc']
+        )
+        s = requests.Session()
+        self.set_auth(s)
+        result = s.request('GET', url, params=params)
+
+        return self.parse_statuses(result.content)
+
+
+    def after_parsing(self, parsed_data):
+        ids = [bug['bug_id'] for bug in parsed_data]
+        blocked_and_dependson = self.get_ids(ids)
+        blocked_and_dependson_ids = []
+        for blocked, dependson in blocked_and_dependson.itervalues():
+            blocked_and_dependson_ids.extend(blocked)
+            blocked_and_dependson_ids.extend(dependson)
+
+        bad_statuses = self.get_statuses(
+            set(blocked_and_dependson_ids)
+        )
+
+        for bug_data in parsed_data:
+            bug_id = bug_data['bug_id']
+            blocked, dependson = blocked_and_dependson.get(bug_id, ([], []))
+            bug_data['blocked'] = [
+                bad_statuses[bug_id]
+                for bug_id in blocked
+            ]
+            bug_data['dependson'] = [
+                bad_statuses[bug_id]
+                for bug_id in dependson
+            ]
+
+        return parsed_data
+
+class BugzillaFetcher(FetchBlockedAndDependsonMixin, CSVParserMixin, BasicAuthMixin, BaseFetcher):
     BUG_PRODUCER_CLASS = BugzillaBugProducer
 
     COLUMNS = (

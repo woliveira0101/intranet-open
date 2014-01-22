@@ -20,8 +20,10 @@ class ToDictMixin(object):
         result = {}
         for attr in self.get_attrs():
             value = getattr(self, attr)
-            if isinstance(value, (Scrum, Base)):
+            if hasattr(value, 'to_dict'):
                 value = value.to_dict()
+            if isinstance(value, (list, tuple, set)):
+                value = [v.to_dict() for v in value]
             result[attr] = value
         return result
 

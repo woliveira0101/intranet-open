@@ -8,26 +8,24 @@
         {% if bug.dependson %}
         <div class="container_card_blocked">
         {% endif %}
-            <div class="yellow_card {% if bug.scrum.is_blocked %}blocked{% endif %}">
+            <div class="yellow_card {% if bug.dependson %}blocked{% endif %}">
                 <div class="number_ticket"><a target="_blank" href="{{ bug.url }}">{{ bug.id }}</a></div>
                 {% if bug.blocked %}
-                    <i data-original-title="{{ ' '.join(bug.blocked.keys()) }}" class="icon-exclamation-sign icon-red"></i>
+                    <i data-original-title="{% for bug in bug.blocked %}{{ bug.id }}{% if not loop.last %},{% endif %}{% endfor %}" class="icon-exclamation-sign icon-red"></i>
                 {% endif %}
                 {% if bug.owner.name %}
                     <div class="assignee" data-original-title="{{ bug.owner.name }}">{{ bug.owner.name | initials(3) }}</div>
                 {% endif %}
                 <div class="desc_ticket">{{ bug.desc }}</div>
             </div>
-            {% if bug.is_blocked %}
-            {% for dbug_id, dbug_desc in bug.dependson.iteritems() %}
-                {% if 'bug' in dbug_desc %}
+            {% if bug.dependson %}
+            {% for dbug in bug.dependson %}
                 <div class="yellow_card">
                     <div class="number_ticket">
-                        <a target="_blank" href="{{ dbug_desc['bug'].get_url() }}">{{ dbug_id }}</a>
+                        <a target="_blank" href="{{ dbug.url }}">{{ dbug.id }}</a>
                     </div>
-                    <div class="assignee" data-original-title="{{ dbug_desc['bug'].owner.name }}">{{ dbug_desc['bug'].owner.name | initials(3) }}</div>
+                    <div class="assignee" data-original-title="{{ dbug.owner.name }}">{{ dbug.owner.name | initials(3) }}</div>
                 </div>
-                {% endif %}
             {% endfor %}
             {% endif %}
             {% if bug.scrum.points != None %}
