@@ -18,12 +18,7 @@ App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
       'name': name,
       'board': angular.toJson($scope.columns)
     };
-
-    $http.post('/api/boards', data).success(function(response){
-      data.id = response.id;
-      $scope.boards.push(data);
-      $scope.selected_board = $scope.boards[0];
-    });
+    $http.post('/api/boards', data);
   };
 
   $scope.add_column = function(){
@@ -64,7 +59,6 @@ App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
 });
 
 App.controller('sprintBoardsCtrl', function($scope, $http, dialog, $dialog, $callerScope){
-  $scope.boards = [];
   $scope.selected_board = undefined;
   $http.get('/api/boards').success(function(data){
     $scope.boards = data.boards;
@@ -106,4 +100,8 @@ App.controller('sprintBugsJsonCtrl', function($scope, $http, dialog, $dialog){
   promise.error(function(response){
     $scope.bugs_error = true
   });
+
+  $scope.close = function() {
+    dialog.close();
+  };
 });

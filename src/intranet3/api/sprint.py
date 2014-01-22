@@ -2,16 +2,14 @@
 
 import json
 import colander
-from pyramid.view import view_config, view_defaults
+from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest, HTTPOk, HTTPNotFound, Response
 from sqlalchemy.exc import IntegrityError
 
-from intranet3.utils.views import ApiView
 from intranet3 import models as m
-from intranet3.schemas.sprint import BoardSchema
-from intranet3.utils.decorators import has_perm
 from intranet3 import helpers as h
-
+from intranet3.utils.views import ApiView
+from intranet3.schemas.sprint import BoardSchema
 from intranet3.views.scrum.sprint import FetchBugsMixin
 from intranet3.models import Sprint
 from intranet3.lib.scrum import SprintWrapper
@@ -108,4 +106,3 @@ class Bugs(FetchBugsMixin, ApiView):
             response,
             content_type='application/json',
         )
-
