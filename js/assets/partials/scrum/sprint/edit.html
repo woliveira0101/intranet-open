@@ -1,7 +1,7 @@
 <div id="sprint-editor" ng-controller="sprintEditCtrl" style="margin-left: 85px">
   <div>
     <a class="btn" ng-click="show_boards()">Show boards</a>
-    <a class="btn" ng-click="show_bugs()">Show bugs</a>
+    <a class="btn" ng-show="sprintId" ng-click="show_bugs()">Show bugs</a>
   </div>
 
   <input type="hidden" name="board" ng-value="columns_json()">

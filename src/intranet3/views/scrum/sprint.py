@@ -382,7 +382,7 @@ class Add(BaseView):
             url = self.request.url_for('/scrum/sprint/show', sprint_id=sprint.id)
             return HTTPFound(location=url)
         return dict(
-            form=form
+            form=form,
         )
 
 

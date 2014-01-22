@@ -2,6 +2,7 @@ var App = angular.module('intranet');
 
 
 App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
+  $scope.sprintId = sprint_id;
   if(board){
     $scope.columns = board;
   } else {
@@ -40,10 +41,7 @@ App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
   };
 
   $scope.show_bugs = function(){
-    var d = $dialog.dialog({
-      resolve: {
-      }
-    });
+    var d = $dialog.dialog();
     d.open('scrum/sprint/bugsJson.html', 'sprintBugsJsonCtrl');
 
   };
