@@ -148,7 +148,6 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
     def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
                              component_selector=None, version=None,
                              resolved=False):
-        import ipdb; ipdb.set_trace()
         if resolved:
             return
         super(GithubFetcher, self).fetch_bugs_for_query(
