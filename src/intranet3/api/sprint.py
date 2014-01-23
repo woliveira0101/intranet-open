@@ -100,7 +100,7 @@ class Bugs(FetchBugsMixin, ApiView):
         response = json.dumps([
             bug.to_dict()
             for bug in sw.board.bugs
-        ], default=h.json_dumps_default)
+        ], default=h.json_dumps_default, sort_keys=True)
 
         return Response(
             response,
