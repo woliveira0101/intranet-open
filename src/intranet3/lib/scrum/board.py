@@ -1,3 +1,5 @@
+import copy
+
 import pyflwor
 from pyramid.decorator import reify
 
@@ -77,6 +79,7 @@ class Board(object):
         # we have to copy bugs, because each section is removing their bugs
         # from the list
 
+        self._resolve_blocked_and_dependson(bugs)
         self.bugs = bugs[:]
         bugs = bugs[:]
 
@@ -89,6 +92,32 @@ class Board(object):
         ]
 
         self.columns = list(reversed(self.columns))
+
+    def _resolve_blocked_and_dependson(self, bugs):
+        """
+        Replace ids of blocked and dependson bug with real bugs from sprint
+        """
+        id_to_bug = {
+            bug.id: bug
+            for bug in bugs
+        }
+
+        def resolve_bug(blocked_or_dependson, id_to_bug):
+            def copy_bug(bug):
+                bug = copy.deepcopy(bug)
+                bug.blocked = []
+                bug.dependson = []
+                return bug
+
+            result = []
+            for bod in blocked_or_dependson:
+                if bod.id in id_to_bug:
+                    result.append(copy_bug(id_to_bug[bod.id]))
+            return result
+
+        for bug in bugs:
+            bug.blocked = resolve_bug(bug.blocked, id_to_bug)
+            bug.dependson = resolve_bug(bug.dependson, id_to_bug)
 
     @reify
     def completed_column(self):
