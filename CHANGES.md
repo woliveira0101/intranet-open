@@ -1,7 +1,11 @@
+0.9.8 (23-01-2014)
+===========
+- new roles
+- links in daily hours report
+
 0.9.7 (11-01-2014)
 ===========
 - new groups / permissions
-
 
 0.9.6 (28-11-2013)
 ===========
