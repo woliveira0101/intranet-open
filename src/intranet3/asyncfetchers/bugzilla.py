@@ -6,7 +6,7 @@ from intranet3 import helpers as h
 from intranet3.models import User
 from .request import RPC
 from .base import BaseFetcher, BasicAuthMixin, CSVParserMixin
-from .nbug import BaseBugProducer, ToDictMixin, BaseScrumProducer
+from .bug import BaseBugProducer, ToDictMixin, BaseScrumProducer
 
 
 class BlockedOrDependson(ToDictMixin):

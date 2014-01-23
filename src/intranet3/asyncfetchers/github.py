@@ -7,7 +7,7 @@ from intranet3.helpers import Converter, serialize_url
 from intranet3.log import INFO_LOG, EXCEPTION_LOG
 
 from .base import BaseFetcher, BasicAuthMixin, FetcherBadDataError
-from .nbug import BaseBugProducer, BaseScrumProducer
+from .bug import BaseBugProducer, BaseScrumProducer
 from .request import RPC
 
 LOG = INFO_LOG(__name__)
