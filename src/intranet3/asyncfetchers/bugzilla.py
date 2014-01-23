@@ -246,3 +246,39 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin, CSVParserMixin, BasicAuthMi
         body = h.serialize_url('', **params)
         rpc = RPC('POST', url, data=body)
         self.consume(rpc)
+
+    def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
+                             component_selector=None, version=None, resolved=False):
+        super(BugzillaFetcher, self).fetch_bugs_for_query(
+            ticket_ids,
+            project_selector,
+            component_selector,
+            version,
+            resolved,
+        )
+        if resolved:
+            bug_status = ['RESOLVED', 'VERIFIED']
+        else:
+            bug_status = [
+                'NEW',
+                'ASSIGNED',
+                'REOPENED',
+                'UNCONFIRMED',
+                'CONFIRMED',
+                'WAITING',
+            ]
+
+        params = dict(
+            ctype='csv'
+        )
+        params['bug_status'] = bug_status
+        if ticket_ids:
+            params.update(bug_id=','.join(str(id) for id in ticket_ids))
+        elif project_selector:
+            params.update(product=project_selector)
+            if component_selector:
+                params.update(component=component_selector)
+        url = '%s/buglist.cgi' % self.tracker.url
+        body = h.serialize_url('', **params)
+        rpc = RPC('POST', url, data=body)
+        self.consume(rpc)

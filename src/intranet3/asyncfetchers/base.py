@@ -95,7 +95,7 @@ class BaseFetcher(object):
     __metaclass__ = FetcherMeta
     BUG_PRODUCER_CLASS = None
     get_converter = None
-    CACHE_TIMEOUT = 3 * 60  # 3 minutes
+    CACHE_TIMEOUT = 3 * 60 * 10  # 3 minutes
     SPRINT_REGEX = 's=%s(?!\S)'
     MAX_TIMEOUT = 30 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 
@@ -217,8 +217,14 @@ class BaseFetcher(object):
         """ Start fetching tickets for all users in mapping """
         raise NotImplementedError()
 
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version, resolved=False):
+    def fetch_bugs_for_query(self, ticket_ids=None,project_selector=None,
+                             component_selector=None, version=None,
+                             resolved=False):
         """ Start fetching all bugs matching given criteria """
+        if not ticket_ids and not project_selector:
+            raise TypeError(
+                'fetch_bugs_for_query takes ticket_ids or project_selector'
+            )
         raise NotImplementedError()
 
     def fetch_scrum(self, sprint_name, project_id, component_id=None):

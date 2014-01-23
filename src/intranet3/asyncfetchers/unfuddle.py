@@ -209,7 +209,12 @@ A comma or vertical bar separated list of report criteria composed as
         rpc = self.fetch(full_url)
         self.consume(rpc)
 
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version, resolved=False):
+    def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
+                             component_selector=None,
+                             version=None, resolved=False):
+        if not ticket_ids and not project_selector:
+            raise TypeError('fetch_bugs_for_query takes ticket_ids and project_selector')
+
         url = self.api_url(project_selector) + '?'
         if resolved:
             conditions_string = self.get_resolved_conditions()
@@ -273,10 +278,15 @@ A comma or vertical bar separated list of report criteria composed as
                 opendate=dateutil.parser.parse(ticket['created_at']),
                 changeddate=dateutil.parser.parse(ticket['updated_at']),
             )
-            field_no = self.unfuddle_data['whiteboard_field_numbers'][ticket['project_id']]
-            whiteboard_field_id = ticket.get('field%s_value_id' % field_no)
-            key = str(ticket['project_id']), str(whiteboard_field_id)
-            whiteboard = self.unfuddle_data['custom_fields'].get(key, '')
+
+            fields_no = self.unfuddle_data['whiteboard_field_numbers']
+            field_no = fields_no.get(ticket['project_id'])
+            if field_no:
+                whiteboard_field_id = ticket.get('field%s_value_id' % field_no)
+                key = str(ticket['project_id']), str(whiteboard_field_id)
+                whiteboard = self.unfuddle_data['custom_fields'].get(key, '')
+            else:
+                whiteboard = ''
             bug_desc['whiteboard'] = whiteboard
             result.append(bug_desc)
         return result

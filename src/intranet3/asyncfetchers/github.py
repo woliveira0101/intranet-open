@@ -145,9 +145,19 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             url
         ))
 
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version, resolved=False):
+    def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
+                             component_selector=None, version=None,
+                             resolved=False):
+        import ipdb; ipdb.set_trace()
         if resolved:
             return
+        super(GithubFetcher, self).fetch_bugs_for_query(
+            ticket_ids,
+            project_selector,
+            component_selector,
+            version,
+            resolved,
+        )
 
         params = self.common_url_params()
         if ticket_ids:

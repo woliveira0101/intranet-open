@@ -99,7 +99,17 @@ class TracFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
         url = serialize_url(self.tracker.url + '/query?', **params)
         self.fetch(url)
 
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version, resolved=False):
+    def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
+                             component_selector=None, version=None,
+                             resolved=False):
+        super(TracFetcher, self).fetch_bugs_for_query(
+            ticket_ids,
+            project_selector,
+            component_selector,
+            version,
+            resolved,
+        )
+
         if resolved:
             params = self.resolved_common_url_params()
         else:
@@ -107,10 +117,10 @@ class TracFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
 
         if ticket_ids:
             params.update(id=[str(id) for id in ticket_ids])
-        else:
-            if project_selector:
-                params.update(client_name=project_selector)
-                if component_selector:
-                    params.update(component=component_selector)
+        elif project_selector:
+            params.update(client_name=project_selector)
+            if component_selector:
+                params.update(component=component_selector)
+
         url = serialize_url(self.tracker.url + '/query?', **params)
         self.fetch(url)

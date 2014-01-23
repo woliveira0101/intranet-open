@@ -140,7 +140,16 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
             state=state,
         ))
 
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version, resolved=False):
+    def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
+                             component_selector=None, version=None,
+                             resolved=False):
+        super(PivotalTrackerFetcher, self).fetch_bugs_for_query(
+            ticket_ids,
+            project_selector,
+            component_selector,
+            version,
+            resolved,
+        )
         filters = dict(
             id=','.join(ticket_ids),
         )

@@ -40,6 +40,8 @@ class GroupedBugsMixin(object):
                 client = bug.project.client_id if bug.project else None
 
                 user = bug.reporter if resolved else bug.owner
+                if not user or not client:
+                    continue
                 client_sums[client] += 1
                 project_sums[project] += 1
                 people_sums[user.id] += 1
