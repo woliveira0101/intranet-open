@@ -1,0 +1,101 @@
+[DEFAULT]
+; uwsgi loads ini file without paste.deply so we have to setup this manually :/
+here = /Users/konradrotkiewicz/work/envs/green_intranet/parts/etc
+
+###
+# app configuration
+# http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/environment.html
+###
+[app:main]
+use = egg:intranet3
+
+pyramid.reload_templates = true
+pyramid.debug_authorization = true
+pyramid.debug_notfound = true
+pyramid.debug_routematch = true
+pyramid.default_locale_name = en
+pyramid.includes =
+    pyramid_tm
+	pyramid_beaker
+	pyramid_jinja2
+	pyramid_exclog
+
+pyramid.autoroute.root_module = intranet3.views
+sqlalchemy.url = postgresql://postgres:postgres@localhost:5432/intranet2
+sqlalchemy.pool_size = 20
+sqlalchemy.pool_timeout = 60
+sqlalchemy.pool_recycle = 3600
+jinja2.extensions = jinja2.ext.with_
+jinja2.directories = intranet3:templates
+venusian.ignore = intranet3.asyncfetcher
+
+session.type = file
+session.data_dir = %(here)s/../../var/beaker/sessions/data
+session.lock_dir = %(here)s/../../var/beaker/sessions/lock
+session.secret = /dsaoifhjaoghowghweroguwew
+session.cookie_on_exception = true
+session.auto = True
+
+
+DEBUG = True
+CRON_DISABLE = True
+CRON_URL = http://localhost:5000
+TASK_URL = http://localhost:5000
+CRON_SECRET_KEY = W2E9dPw31zBesck6m5a2/lp7Mdh6CVO
+TASK_SECRET_KEY = W2E9dPw31zBesck6m5a2/lp7Mdh6CVO
+REPEATER_FILE = %(here)s/../../var/repeater.pickle
+MEMCACHE_URI = 127.0.0.1:11211
+FRONTEND_PREFIX = http://localhost:5000
+DATASTORE_SYMMETRIC_PASSWORD = W2E9dPw31zBesck6m5a2/lp7Mdh6CVOPSsYC5WFhiZorPCIvQ/SDWQop8Ytg5PkQQV+KZx9UYOwWncMunbsesA==
+AVATAR_PATH = %(here)s/../../var/thumbs/
+SESSION_KEY = s0ecret
+# gogole credentials for localhost:5000 !
+GOOGLE_CLIENT_ID = 317757513490-7jdrej7gk02l97va89vbfi10qbg78qet.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET = wVhyUuQjKH6xgYlM4RcTymaR
+GOOGLE_DEVELOPERS_KEY = AIzaSyCuzRrhRTNYmppML9EIxbCVCKXWc6HhUXU
+MANAGER_EMAIL = my@example.com
+COMPANY_DOMAIN = example.pl
+COMPANY_MAILING_LIST = group@example.com
+ACCOUNTANT_EMAIL = accountant@example.com
+# ldap or google
+AUTH_TYPE = ldap
+
+# By default, the toolbar only appears for clients from IP addresses
+# '127.0.0.1' and '::1'.
+# debugtoolbar.hosts = 127.0.0.1 ::1
+
+###
+# wsgi server configuration
+###
+
+[server:main]
+use = egg:pastegevent#gevent_patched
+host = 127.0.0.1
+port = 5000
+
+###
+# logging configuration
+# http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/logging.html
+###
+
+[loggers]
+keys = root
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[formatter_generic]
+format = %(asctime)s %(levelname)s [%(name)s] %(message)s
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = DEBUG
+formatter = generic
+
+[logger_root]
+level = DEBUG
+handlers = console

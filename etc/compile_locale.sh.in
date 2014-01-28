@@ -1,5 +1,0 @@
-#!/bin/bash
-
-./bin/python-console setup.py extract_messages -o ./src/intranet3/locale/messages.pot
-./bin/python-console setup.py init_catalog -l pl -i ./src/intranet3/locale/messages.pot -d ./src/intranet3/locale
-./bin/python-console setup.py compile_catalog -d ./src/intranet3/locale

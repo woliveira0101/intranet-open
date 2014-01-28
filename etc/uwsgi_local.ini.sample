@@ -1,0 +1,17 @@
+[uwsgi]
+buildout-dir = %d/../..
+master = true
+paste = config:%d/config.ini
+paste-logger = true
+single-interpreter = true
+lazy = true
+gevent = 100
+gevent-monkey-patch = true
+include = %d/../uwsgi/uwsgi.xml
+
+honour-stdin = true
+http = 127.0.0.1:5000
+
+;socket = /tmp/uwsgi.sock
+;daemonize = %d../../var/log/uwsgi.log
+;pidfile = %d../../var/uwsgi.pid

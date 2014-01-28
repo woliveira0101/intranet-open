@@ -1,19 +1,20 @@
+[DEFAULT]
+; uwsgi loads ini file without paste.deply so we have to setup this manually :/
+here = /Users/konradrotkiewicz/work/envs/green_intranet/parts/etc
+
 ###
 # app configuration
 # http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/environment.html
 ###
-
 [app:main]
 use = egg:intranet3
 
-# reloading is not working because we are using twisted !
-pyramid.reload_templates = false
-pyramid.debug_authorization = false
-pyramid.debug_notfound = false
-pyramid.debug_routematch = false
+pyramid.reload_templates = true
+pyramid.debug_authorization = true
+pyramid.debug_notfound = true
+pyramid.debug_routematch = true
 pyramid.default_locale_name = en
 pyramid.includes =
-    pyramid_debugtoolbar
     pyramid_tm
 	pyramid_beaker
 	pyramid_jinja2
@@ -26,13 +27,12 @@ sqlalchemy.pool_timeout = 60
 sqlalchemy.pool_recycle = 3600
 jinja2.extensions = jinja2.ext.with_
 jinja2.directories = intranet3:templates
-venusian.ignore = intranet3.loader
+venusian.ignore = intranet3.asyncfetcher
 
 session.type = file
-session.url = 127.0.0.1:11211
-session.data_dir = ${buildout:directory}/var/beaker/sessions/data
-session.lock_dir = ${buildout:directory}/var/beaker/sessions/lock
-session.secret = /AqcOMcps/3NEE7oEOayDn53A25iEFFl
+session.data_dir = %(here)s/../../var/beaker/sessions/data
+session.lock_dir = %(here)s/../../var/beaker/sessions/lock
+session.secret = /dsaoifhjaoghowghweroguwew
 session.cookie_on_exception = true
 session.auto = True
 
@@ -40,19 +40,21 @@ session.auto = True
 DEBUG = True
 CRON_DISABLE = True
 CRON_URL = http://localhost:5000
-CRON_SECRET_KEY = 8ubMb4p3mEm3hHaAc7aSa6k6vOJf2brZ
+TASK_URL = http://localhost:5000
+CRON_SECRET_KEY = W2E9dPw31zBesck6m5a2/lp7Mdh6CVO
+TASK_SECRET_KEY = W2E9dPw31zBesck6m5a2/lp7Mdh6CVO
+REPEATER_FILE = %(here)s/../../var/repeater.pickle
 MEMCACHE_URI = 127.0.0.1:11211
-REPEATER_FILE = ${buildout:directory}/var/repeater.pickle
 FRONTEND_PREFIX = http://localhost:5000
-DATASTORE_SYMMETRIC_PASSWORD = ItzxcWGXj78jjCSUaTGc4csEbC3axyinBK69JJlahDJb9ON16u08AFcIBheob2KDkbbczEjF4qD9
-AVATAR_PATH = ${buildout:directory}/var/thumbs/
+DATASTORE_SYMMETRIC_PASSWORD = W2E9dPw31zBesck6m5a2/lp7Mdh6CVOPSsYC5WFhiZorPCIvQ/SDWQop8Ytg5PkQQV+KZx9UYOwWncMunbsesA==
+AVATAR_PATH = %(here)s/../../var/thumbs/
 SESSION_KEY = s0ecret
 # gogole credentials for localhost:5000 !
 GOOGLE_CLIENT_ID = 317757513490-7jdrej7gk02l97va89vbfi10qbg78qet.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET = wVhyUuQjKH6xgYlM4RcTymaR
 GOOGLE_DEVELOPERS_KEY = AIzaSyCuzRrhRTNYmppML9EIxbCVCKXWc6HhUXU
-MANAGER_EMAIL = example@example.com
-COMPANY_DOMAIN = example.com
+MANAGER_EMAIL = my@example.com
+COMPANY_DOMAIN = example.pl
 COMPANY_MAILING_LIST = group@example.com
 ACCOUNTANT_EMAIL = accountant@example.com
 # ldap or google
@@ -67,7 +69,7 @@ AUTH_TYPE = ldap
 ###
 
 [server:main]
-use = egg:waitress#main
+use = egg:pastegevent#gevent_patched
 host = 127.0.0.1
 port = 5000
 
@@ -77,10 +79,10 @@ port = 5000
 ###
 
 [loggers]
-keys = root, intranet3, twisted, sql
+keys = root, intranet3, sql
 
 [handlers]
-keys = console, mainfile, twistedfile, sqlfile, intranet3file
+keys = console, sqlfile, intranet3file
 
 [formatters]
 keys = generic
@@ -94,48 +96,30 @@ args = (sys.stderr,)
 level = DEBUG
 formatter = generic
 
-[handler_twistedfile]
-class = handlers.TimedRotatingFileHandler
-args = (os.path.join(r'${buildout:directory}', 'var', 'log', 'twisted.log'), 'MIDNIGHT')
-level = DEBUG
-formatter = generic
-
 [handler_intranet3file]
 class = handlers.TimedRotatingFileHandler
-args = (os.path.join(r'${buildout:directory}', 'var', 'log', 'intranet.log'), 'MIDNIGHT')
+args = ('%(here)s/../../var/log/intranet.log', 'MIDNIGHT')
 level = DEBUG
 formatter = generic
 
 [handler_sqlfile]
 class = handlers.TimedRotatingFileHandler
-args = (os.path.join(r'${buildout:directory}', 'var', 'log', 'sqlalchemy.log'), 'MIDNIGHT')
-level = DEBUG
-formatter = generic
-
-[handler_mainfile]
-class = handlers.TimedRotatingFileHandler
-args = (os.path.join(r'${buildout:directory}', 'var', 'log', 'main.log'), 'MIDNIGHT')
+args = ('%(here)s/../../var/log/sqlalchemy.log', 'MIDNIGHT')
 level = DEBUG
 formatter = generic
 
 [logger_root]
 level = DEBUG
-handlers = console, mainfile
-
-[logger_twisted]
-level = DEBUG
-handlers = twistedfile
-qualname = twisted
-propagate = 0
+handlers = intranet3file
 
 [logger_sql]
-level = DEBUG
+level = ERROR
 handlers = sqlfile
 qualname = sqlalchemy
 propagate = 0
 
 [logger_intranet3]
 level = DEBUG
-handlers = console, intranet3file
+handlers = intranet3file
 qualname = intranet3
 propagate = 0
