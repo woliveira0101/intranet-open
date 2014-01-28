@@ -29,8 +29,14 @@ class PivotalTrackerBugProducer(BaseBugProducer):
             owner=d['owner'],
             status=d['status'],
             project_name=d['project_name'],
-            opendate=datetime.datetime.strptime(d['opendate'],'%Y/%m/%d %H:%M:%S %Z'),
-            changeddate=datetime.datetime.strptime(d['changeddate'],'%Y/%m/%d %H:%M:%S %Z'),
+            opendate=datetime.datetime.strptime(
+                d['opendate'],
+                '%Y/%m/%d %H:%M:%S %Z',
+            ),
+            changeddate=datetime.datetime.strptime(
+                d['changeddate'],
+                '%Y/%m/%d %H:%M:%S %Z',
+            ),
             points=d['points'],
         )
 
@@ -67,7 +73,8 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
         self.email = email
         self.login = login
         self.login_mapping = dict([
-            (k.split(';')[1], v) for k, v in login_mapping.iteritems() if ';' in k
+            (k.split(';')[1], v)
+            for k, v in login_mapping.iteritems() if ';' in k
         ])
 
     def get_auth(self):
@@ -102,7 +109,10 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
     def prepare_url(self, project_id='', endpoint='', filters={}):
         tracker_url = self.tracker.url.replace('http://', 'https://')
         url = make_path(tracker_url, self.api_url, project_id, endpoint) + '?'
-        filter_param = ' '.join([ '%s:%s' % (filter_name, filter) for filter_name, filter in filters.iteritems()])
+        filter_param = ' '.join([
+            '%s:%s' % (filter_name, filter)
+            for filter_name, filter in filters.iteritems()
+        ])
         full_url = serialize_url(url, filter=filter_param)
         return full_url
 

@@ -38,9 +38,15 @@ class BugzillaBugProducer(BaseBugProducer):
     def parse(self, tracker, login_mapping, raw_data):
         d = raw_data
 
-        dependson = [BlockedOrDependson(tracker=tracker, **item) for item in d.get('dependson', [])]
+        dependson = [
+            BlockedOrDependson(tracker=tracker, **item)
+            for item in d.get('dependson', [])
+        ]
         dependson = [bug for bug in dependson if not bug.resolved]
-        blocked = [BlockedOrDependson(tracker=tracker, **item) for item in d.get('blocked', [])]
+        blocked = [
+            BlockedOrDependson(tracker=tracker, **item)
+            for item in d.get('blocked', [])
+        ]
         blocked = [bug for bug in blocked if not bug.resolved]
 
         return dict(
@@ -156,7 +162,8 @@ class FetchBlockedAndDependsonMixin(object):
 
         return parsed_data
 
-class BugzillaFetcher(FetchBlockedAndDependsonMixin, CSVParserMixin, BasicAuthMixin, BaseFetcher):
+class BugzillaFetcher(FetchBlockedAndDependsonMixin,
+                      CSVParserMixin, BasicAuthMixin, BaseFetcher):
     BUG_PRODUCER_CLASS = BugzillaBugProducer
 
     COLUMNS = (
@@ -248,7 +255,8 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin, CSVParserMixin, BasicAuthMi
         self.consume(rpc)
 
     def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
-                             component_selector=None, version=None, resolved=False):
+                             component_selector=None, version=None,
+                             resolved=False):
         super(BugzillaFetcher, self).fetch_bugs_for_query(
             ticket_ids,
             project_selector,
@@ -256,6 +264,7 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin, CSVParserMixin, BasicAuthMi
             version,
             resolved,
         )
+
         if resolved:
             bug_status = ['RESOLVED', 'VERIFIED']
         else:

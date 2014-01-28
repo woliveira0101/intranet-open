@@ -72,7 +72,11 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
         return milestone_map
 
     def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
-        base_url = '%srepos/%s/%s/' % (self.tracker.url, project_id, component_id)
+        base_url = '%srepos/%s/%s/' % (
+            self.tracker.url,
+            project_id,
+            component_id,
+        )
         milestones_url = ''.join((base_url, 'milestones'))
         issues_url = ''.join((base_url, 'issues?'))
 
@@ -142,7 +146,7 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
 
         self.consume(RPC(
             'GET',
-            url
+            url,
         ))
 
     def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
@@ -163,7 +167,10 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             self._wanted_ticket_ids = ticket_ids
 
         if project_selector and component_selector:
-            uri = self.tracker.url + "repos/%s/%s/issues?" % (project_selector, component_selector[0])
+            uri = self.tracker.url + "repos/%s/%s/issues?" % (
+                project_selector,
+                component_selector[0],
+            )
             url = serialize_url(uri, **params)
 
             self.consume(RPC(

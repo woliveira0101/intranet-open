@@ -70,10 +70,14 @@ class UnfuddleMetadataFetcher(BasicAuthMixin, BaseFetcher):
 
         users = self._get_users(jdata['people'])
         projects = self._get_projects(jdata['projects'])
-        whiteboard_field_numbers = self._get_whiteboard_number(jdata['projects'])
+        whiteboard_field_numbers = self._get_whiteboard_number(
+            jdata['projects']
+        )
         components = self._get_components(jdata.get('components', []))
         milestones = self._get_milestones(jdata.get('milestones', []))
-        custom_fields = self._get_custom_fields(jdata.get('custom_field_values', []))
+        custom_fields = self._get_custom_fields(
+            jdata.get('custom_field_values', [])
+        )
 
         data = {
             'users': users,
@@ -100,24 +104,30 @@ class UnfuddleMetadataFetcher(BasicAuthMixin, BaseFetcher):
         return result
 
     def _get_users(self, users):
-        mapping = dict([ ( user['id'], user['username'] ) for user in users])
+        mapping = dict([( user['id'], user['username'] ) for user in users])
         mapping[None] = 'nobody'
         return mapping
 
     def _get_projects(self, projects):
-        mapping = dict([ ( str(p['id']), p['title'] ) for p in projects])
+        mapping = dict([(str(p['id']), p['title'] ) for p in projects])
         return mapping
 
     def _get_components(self, components):
-        mapping = dict([ ( str(c['id']), c['name'] ) for c in components])
+        mapping = dict([(str(c['id']), c['name'] ) for c in components])
         return mapping
 
     def _get_milestones(self, milestones):
-        mapping = dict([ ( (str(m['project_id']), str(m['title'])), m['id'] ) for m in milestones])
+        mapping = dict([
+            ((str(m['project_id']), str(m['title'])), m['id'] )
+            for m in milestones
+        ])
         return mapping
 
     def _get_custom_fields(self, custom_fields):
-        mapping = dict([ ( (str(cf['project_id']), str(cf['id'])), cf['value'] ) for cf in custom_fields])
+        mapping = dict([
+            ((str(cf['project_id']), str(cf['id'])), cf['value'] )
+            for cf in custom_fields
+        ])
         return mapping
 
 
@@ -175,25 +185,42 @@ A comma or vertical bar separated list of report criteria composed as
     def get_user_conditions(self, all=False):
         if all:
             unfuddle_login_mapping = self.unfuddle_data['users']
-            unfuddle_user_reverse_map = dict((v,k) for k, v in unfuddle_login_mapping.iteritems())
-            user_ids = [ unfuddle_user_reverse_map.get(username) for username in self.login_mapping.keys()]
-            user_conditions = [ 'assignee-eq-%s' % user_id for user_id in user_ids if user_id]
+            unfuddle_user_reverse_map = dict(
+                (v,k) for k, v in unfuddle_login_mapping.iteritems()
+            )
+            user_ids = [
+                unfuddle_user_reverse_map.get(username)
+                for username in self.login_mapping.keys()
+            ]
+            user_conditions = [
+                'assignee-eq-%s' % user_id
+                for user_id in user_ids if user_id
+            ]
             user_conditions = '|'.join(user_conditions)
         else:
             user_conditions = 'assignee-eq-current'
         return user_conditions
 
     def get_ticket_conditions(self, ticket_ids):
-        ticket_conditions = [ 'number-eq-%s' % ticket_id for ticket_id in ticket_ids ]
+        ticket_conditions = [
+            'number-eq-%s' % ticket_id
+            for ticket_id in ticket_ids
+        ]
         ticket_conditions = '|'.join(ticket_conditions)
         return ticket_conditions
 
     def fetch_user_tickets(self, resolved=False):
         url = self.api_url() + '?'
         if resolved:
-            conditions_string = '%s,%s' % (self.get_user_conditions(), self.get_resolved_conditions())
+            conditions_string = '%s,%s' % (
+                self.get_user_conditions(),
+                self.get_resolved_conditions(),
+            )
         else:
-            conditions_string = '%s,%s' % (self.get_user_conditions(), self.get_unresolved_conditions())
+            conditions_string = '%s,%s' % (
+                self.get_user_conditions(),
+                self.get_unresolved_conditions(),
+            )
         full_url = serialize_url(url, conditions_string=conditions_string)
         rpc = self.fetch(full_url)
         self.consume(rpc)
@@ -201,9 +228,15 @@ A comma or vertical bar separated list of report criteria composed as
     def fetch_all_tickets(self, resolved=False):
         url = self.api_url() + '?'
         if resolved:
-            conditions_string = '%s,%s' % (self.get_resolved_conditions(), self.get_user_conditions(all=True))
+            conditions_string = '%s,%s' % (
+                self.get_resolved_conditions(),
+                self.get_user_conditions(all=True),
+            )
         else:
-            conditions_string = '%s,%s' % (self.get_unresolved_conditions(), self.get_user_conditions(all=True))
+            conditions_string = '%s,%s' % (
+                self.get_unresolved_conditions(),
+                self.get_user_conditions(all=True),
+            )
 
         full_url = serialize_url(url, conditions_string=conditions_string)
         rpc = self.fetch(full_url)
@@ -213,7 +246,9 @@ A comma or vertical bar separated list of report criteria composed as
                              component_selector=None,
                              version=None, resolved=False):
         if not ticket_ids and not project_selector:
-            raise TypeError('fetch_bugs_for_query takes ticket_ids and project_selector')
+            raise TypeError(
+                'fetch_bugs_for_query takes ticket_ids and project_selector'
+            )
 
         url = self.api_url(project_selector) + '?'
         if resolved:
@@ -229,11 +264,15 @@ A comma or vertical bar separated list of report criteria composed as
         self.consume(rpc)
 
     def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
-        projects_reversed = dict((v,k) for k, v in self.unfuddle_data['projects'].iteritems())
+        projects_reversed = dict(
+            (v,k) for k, v in self.unfuddle_data['projects'].iteritems()
+        )
         _project_id = projects_reversed.get(project_id)
         if not _project_id:
-            error = 'Could match project selector "%s" to Unfuddle project names' % project_id
+            error = 'Could match project selector "%s" ' \
+                    'to Unfuddle project names' % project_id
             raise FetcherBadDataError(error)
+
         url = self.api_url() + '?'
         milestone_id = self.unfuddle_data['milestones'].get((str(_project_id), sprint_name))
         if not milestone_id:
@@ -269,12 +308,24 @@ A comma or vertical bar separated list of report criteria composed as
                 tracker=self.tracker,
                 id=ticket['number'],
                 desc=ticket['summary'],
-                reporter=unfuddle_login_mapping.get(ticket['reporter_id'], 'unknown'),
-                owner=unfuddle_login_mapping.get(ticket['assignee_id'], 'unknown'),
-                status=ticket['status'],
+                reporter=unfuddle_login_mapping.get(
+                    ticket['reporter_id'],
+                    'unknown',
+                ),
+                owner=unfuddle_login_mapping.get(
+                    ticket['assignee_id'],
+                    'unknown',
+                ),
+                project_name=unfuddle_project_mapping.get(
+                    str(ticket['project_id']),
+                    'unknown',
+                ),
+                component_name=unfuddle_component_mapping.get(
+                    str(ticket['component_id']),
+                    'unknown',
+                ),
                 priority=self.PRIORITY_MAP[ticket['priority']],
-                project_name=unfuddle_project_mapping.get(str(ticket['project_id']),'unknown'),
-                component_name=unfuddle_component_mapping.get(str(ticket['component_id']),'unknown'),
+                status=ticket['status'],
                 opendate=dateutil.parser.parse(ticket['created_at']),
                 changeddate=dateutil.parser.parse(ticket['updated_at']),
             )
