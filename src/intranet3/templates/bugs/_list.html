@@ -33,8 +33,18 @@
             <div style="clear: both;">({{ bug.status|lower }})</div>
         </td>
         <td>
+          {% for bug_ in bug.blocked %}
+            <a href="{{ bug.url }}" class="external {% if bug_.resolved %}closed{% endif %}" title="{{ bug_.desc }}">
+                {{ bug_.id }}
+            </a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
         </td>
         <td>
+          {% for bug_ in bug.dependson %}
+            <a href="{{ bug.url }}" class="external {% if bug_.resolved %}closed{% endif %}" title="{{ bug_.desc }}">
+              {{ bug_.id }}
+            </a>{% if not loop.last %}, {% endif %}
+          {% endfor %}
         </td>
         <td>{{ bug.opendate.strftime('%Y-%m-%d') }}</td>
         <td>{{ bug.changeddate.strftime('%Y-%m-%d') }}</td>

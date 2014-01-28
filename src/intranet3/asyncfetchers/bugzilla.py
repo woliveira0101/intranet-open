@@ -10,12 +10,12 @@ from .bug import BaseBugProducer, ToDictMixin, BaseScrumProducer
 
 
 class BlockedOrDependson(ToDictMixin):
-    def __init__(self, bug_id, status, description):
+    def __init__(self, bug_id, status, description, tracker):
         self.id = bug_id
         self.status = status
         self.desc = description
         self.resolved = self.status in ('CLOSED', 'RESOLVED', 'VERIFIED')
-        self.url = '#'
+        self.url = tracker.url + '/show_bug.cgi?id=%s' % bug_id
         self.owner = User(name='unknown')
 
 class BugzillaScrumProcuder(BaseScrumProducer):
@@ -38,9 +38,9 @@ class BugzillaBugProducer(BaseBugProducer):
     def parse(self, tracker, login_mapping, raw_data):
         d = raw_data
 
-        dependson = [BlockedOrDependson(**item) for item in d.get('dependson', [])]
+        dependson = [BlockedOrDependson(tracker=tracker, **item) for item in d.get('dependson', [])]
         dependson = [bug for bug in dependson if not bug.resolved]
-        blocked = [BlockedOrDependson(**item) for item in d.get('blocked', [])]
+        blocked = [BlockedOrDependson(tracker=tracker, **item) for item in d.get('blocked', [])]
         blocked = [bug for bug in blocked if not bug.resolved]
 
         return dict(
