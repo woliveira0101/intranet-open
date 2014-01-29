@@ -3,6 +3,8 @@ var App = angular.module('intranet');
 App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, $location, date_of_birth) {
     $scope.users = [];
     $scope.tab = 'employees';
+    $scope.roles_counter = {};
+    $scope.groups_counter = {};
     $scope.search = {
       name: '',
       start_work: {
@@ -91,14 +93,6 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
         }
     ];
 
-    $scope.roles = $filter('orderBy')(_.map($scope.G.ROLES, function(role){
-      return {id: role[0], name: role[1]};
-    }), 'name');
-
-    $scope.groups = $filter('orderBy')(_.map($scope.G.GROUPS, function(group){
-      return {id: group, name: group};
-    }), 'name');
-
     $scope.to_pretty_role = function(role){
       return _.find(G.ROLES, function(a_role){
         return a_role[0] === role;
@@ -109,6 +103,23 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
 
     $http.get('/api/users?full=1&inactive=1').success(function(data){
       $scope.users = data.users;
+
+      _.each($scope.users, function(user) {
+        if (user.is_active == true) {
+          _.each(user.roles, function(role) {
+            if ($scope.roles_counter.hasOwnProperty(role))
+              $scope.roles_counter[role] += 1;
+            else
+              $scope.roles_counter[role] = 1;
+          });
+          _.each(user.groups, function(group) {
+            if ($scope.groups_counter.hasOwnProperty(group))
+              $scope.groups_counter[group] += 1;
+            else
+              $scope.groups_counter[group] = 1;
+          });
+        }
+      });
 
       $http.get('/api/teams').success(function(data){
         data.teams.push({'id':-1, 'name':' - No Team - ', 'users':[]});
@@ -135,10 +146,25 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
           $scope.search.teams = [];
         }, 0);
       });
-        $scope.dob.update_years($scope.users);
+      $scope.dob.update_years($scope.users);
+
+      $scope.roles = $filter('orderBy')(_.map($scope.G.ROLES, function(role){
+        var counter = '';
+        if ($scope.roles_counter.hasOwnProperty(role[0]))
+          counter = ' (' + $scope.roles_counter[role[0]] + ')';
+        return {id: role[0], name: role[1] + counter};
+      }), 'name');
+
+      $scope.groups = $filter('orderBy')(_.map($scope.G.GROUPS, function(group){
+        var counter = '';
+        if ($scope.groups_counter.hasOwnProperty(group))
+          counter = ' (' + $scope.groups_counter[group] + ')';
+        return {id: group, name: group + counter};
+      }), 'name');
+
     });
 
-    $scope.filtered_users = function(){
+    $scope.filtered_users = function() {
       var filtered_users = $scope.users;
       var f_name = $scope.search.name.toLowerCase();
       if(f_name){
