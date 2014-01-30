@@ -197,15 +197,15 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         return '%s - %s' % (st.strftime('%d-%m-%Y'), end.strftime('%d-%m-%Y'))
 
     def get_mean_task_velocity(self):
-        sprints = Sprint.query.filter(Sprint.end >= datetime.date.today())
-        bugs = []
-        for sprint in sprints:
-            bugs += self._fetch_bugs(sprint)
-            bugs = [BugUglyAdapter(b) for b in bugs]
-        if len(bugs):
-            return sum([b.velocity for b in bugs if b.is_closed()]) / len(bugs)
-        else:
-            return 0.0
+        #sprints = Sprint.query.filter(Sprint.end >= datetime.date.today())
+        #bugs = []
+        #for sprint in sprints:
+        #    bugs += self._fetch_bugs(sprint)
+        #    bugs = [BugUglyAdapter(b) for b in bugs]
+        #if len(bugs):
+        #    return sum([b.velocity for b in bugs if b.is_closed()]) / len(bugs)
+        #else:
+        return 0.0
 
 
 @view_config(route_name='scrum_sprint_board', permission='can_view_sprints')
