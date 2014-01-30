@@ -26,7 +26,7 @@ class Root(object):
         ('can_see_inactive_users',       (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
         ('can_edit_users',               (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
         ('can_see_users_times',          (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
-        ('can_view_time_report',         (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
+        ('can_view_time_report',         (' ',          ' ',        ' ',           ' ',            'A',        ' ',  'A',     )),
         ('can_view_time_client_report',  (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
 
         # ADMIN ONLY:
