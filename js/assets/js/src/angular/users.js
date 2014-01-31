@@ -107,16 +107,20 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       _.each($scope.users, function(user) {
         if (user.is_active == true) {
           _.each(user.roles, function(role) {
-            if ($scope.roles_counter.hasOwnProperty(role))
+            if ($scope.roles_counter.hasOwnProperty(role)) {
               $scope.roles_counter[role] += 1;
-            else
+            }
+            else {
               $scope.roles_counter[role] = 1;
+            }
           });
           _.each(user.groups, function(group) {
-            if ($scope.groups_counter.hasOwnProperty(group))
+            if ($scope.groups_counter.hasOwnProperty(group)) {
               $scope.groups_counter[group] += 1;
-            else
+            }
+            else {
               $scope.groups_counter[group] = 1;
+            }
           });
         }
       });
@@ -148,20 +152,23 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       });
       $scope.dob.update_years($scope.users);
 
-      $scope.roles = $filter('orderBy')(_.map($scope.G.ROLES, function(role){
+      $scope.roles = _.map($scope.G.ROLES, function(role) {
         var counter = '';
-        if ($scope.roles_counter.hasOwnProperty(role[0]))
+        if ($scope.roles_counter.hasOwnProperty(role[0])) {
           counter = ' (' + $scope.roles_counter[role[0]] + ')';
+        }
         return {id: role[0], name: role[1] + counter};
-      }), 'name');
+      });
+      $scope.roles = $filter('orderBy')($scope.roles, 'name')
 
-      $scope.groups = $filter('orderBy')(_.map($scope.G.GROUPS, function(group){
+      $scope.groups = _.map($scope.G.GROUPS, function(group){
         var counter = '';
-        if ($scope.groups_counter.hasOwnProperty(group))
+        if ($scope.groups_counter.hasOwnProperty(group)) {
           counter = ' (' + $scope.groups_counter[group] + ')';
+        }
         return {id: group, name: group + counter};
-      }), 'name');
-
+      });
+      $scope.groups = $filter('orderBy')($scope.groups, 'name')
     });
 
     $scope.filtered_users = function() {
