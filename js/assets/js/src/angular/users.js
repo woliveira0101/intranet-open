@@ -157,7 +157,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
         if ($scope.roles_counter.hasOwnProperty(role[0])) {
           counter = ' (' + $scope.roles_counter[role[0]] + ')';
         }
-        return {id: role[0], name: role[1] + counter};
+        return {id: role[0], name: role[1], counter: counter};
       });
       $scope.roles = $filter('orderBy')($scope.roles, 'name')
 
@@ -166,7 +166,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
         if ($scope.groups_counter.hasOwnProperty(group)) {
           counter = ' (' + $scope.groups_counter[group] + ')';
         }
-        return {id: group, name: group + counter};
+        return {id: group, name: group, counter: counter};
       });
       $scope.groups = $filter('orderBy')($scope.groups, 'name')
     });
