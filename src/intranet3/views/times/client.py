@@ -201,6 +201,7 @@ class Pivot(BaseView):
         pivot = {}
         for p in pivot_q:
             pivot.setdefault((p.id, p.name, p.color), [0]*12)[p.date.month-1] = int(round(p.time))
+        pivot = sorted(pivot.iteritems(), key=lambda p: p[0][1])
 
         stats_q = self.session.query('date', 'time').from_statement("""
         SELECT date_trunc('month', t.date) as date, SUM(t.time) as time

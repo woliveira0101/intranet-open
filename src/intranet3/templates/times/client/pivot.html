@@ -18,7 +18,6 @@
         google.load('visualization', '1.0', {'packages':['corechart']});
         google.setOnLoadCallback(drawChart);
 
-
         function drawChart() {
                 var barChart = new google.visualization.BarChart(document.getElementById('bar_chart_div'));
                 var pieChart = new google.visualization.PieChart(document.getElementById('pie_chart_div'));
@@ -29,7 +28,6 @@
                 var barOptions = {
                     legend: {position: 'none'},
                     chartArea: {left: 0, width: '100%', height: {{ (pivot | length)*26 }}, top: 0},
-                    animation: { duration: 200 },
                     bar: { groupWidth: '100%' },
                     hAxis: {
                         maxValue: 3000,
@@ -170,7 +168,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    {% for (client_id, client_name, client_color), data in pivot | dictsort %}
+                    {% for (client_id, client_name, client_color), data in pivot %}
                         {% set quarters = quarters_sum(data) %}
                         <tr class="client_row {% if loop.last %} last_client {% endif %}">
                             <td class="client">{{ client_name }}</td>
