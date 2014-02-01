@@ -73,6 +73,7 @@ setup(
         'psycogreen',
         'redis==2.8.0',
         'pyflwor',
+        'uwsgi',
     ],
     message_extractors = { 'src/intranet3': [
         ('**.py', 'python', None ),

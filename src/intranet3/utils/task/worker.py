@@ -2,9 +2,10 @@ import requests
 from .taskqueue import TaskQueue
 
 from intranet3 import config
-from intranet3.log import DEBUG_LOG
+from intranet3.log import DEBUG_LOG, ERROR_LOG
 
 DEBUG = DEBUG_LOG(__name__)
+ERROR = ERROR_LOG(__name__)
 
 class Worker(object):
     USER_AGENT = 'Intranet 3 Task'
@@ -22,16 +23,21 @@ class Worker(object):
             return
 
         DEBUG('Exceuting task %s' % task)
-        response = requests.post(
-            self.task_url_prefix + task.url,
-            data=task.payload,
-            headers=self.headers
-        )
-        code = response.status_code
-        if 200 <= code < 300:
-            DEBUG('Task executed sucessfuly')
+        try:
+            response = requests.post(
+                self.task_url_prefix + task.url,
+                data=task.payload,
+                headers=self.headers,
+                timeout=600,
+            )
+        except Exception as e:
+            ERROR('Task %s failed %s' % (task, e))
         else:
-            DEBUG('Task failed with status %s' % code)
+            code = response.status_code
+            if 200 <= code < 300:
+                DEBUG('Task %s executed sucessfuly' % task)
+            else:
+                ERROR('Task %s failed with status %s' % (task, code))
         #TODO retry ?
 
 worker = Worker()

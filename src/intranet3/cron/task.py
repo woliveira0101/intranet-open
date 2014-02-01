@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-from pprint import pformat
+import requests
 
-from intranet3.log import INFO_LOG, EXCEPTION_LOG, WARN_LOG
-from intranet3.utils.mail_fetcher import MailCheckerTask
+from intranet3.log import INFO_LOG, EXCEPTION_LOG, WARN_LOG, ERROR_LOG
 from intranet3 import config
-from failsafe import Repeater, RequiredAction
 
 LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
-WARN= WARN_LOG(__name__)
+WARN = WARN_LOG(__name__)
+ERROR = ERROR_LOG(__name__)
 
 class URLCronTask(object):
 
@@ -24,26 +23,36 @@ class URLCronTask(object):
     def get_headers(self):
         """ Generate request headers (as a dictionary) """
         return {
-            'User-Agent': [self.USER_AGENT],
-            'X-Intranet-Cron': [config['CRON_SECRET_KEY']]
+            'User-Agent': self.USER_AGENT,
+            'X-Intranet-Cron': config['CRON_SECRET_KEY']
         }
 
     def request(self, url, headers, method='GET'):
-        LOG(u'Will request URL %s with headers %s, method %s' % (url, pformat(headers), method))
-        deferred = self.client.request(
-            method,
-            url,
-            Headers(headers)
-        )
-        deferred.addCallbacks(self.on_success, self.on_failure)
+        LOG(u'Will request URL %s with method %s' % (url, method))
+        try:
+            response = requests.request(
+                method,
+                url,
+                headers=headers,
+                timeout=60,
+            )
+        except Exception as e:
+            ERROR(u'Cron function [%s] ended with failure %s' % (
+                self.task_name,
+                e
+            ))
+        else:
+            if 199 < response.status_code < 300:
+                LOG(u'Cron function [%s] done' % (self.task_name))
+            else:
+                ERROR(u'Cron function [%s] ended with failure (code %s): %s' % (
+                    self.task_name,
+                    response.status_code,
+                    response.content,
+                ))
 
-    def on_failure(self, err):
         self.busy = False
-        EXCEPTION(u"Cron task [%s] failed: %s" % (self.task_name, err))
 
-    def on_success(self, resp):
-        self.busy = False
-        LOG(u'Cron function [%s] finished (status code %s)' % (self.task_name, resp.code))
 
     def __call__(self, *args, **kwargs):
         LOG(u'Cron function [%s] starting (%s)' % (self.task_name, self.repeated))

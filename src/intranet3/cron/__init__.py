@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
-
-
 from task import URLCronTask
 from intranet3.log import INFO_LOG, EXCEPTION_LOG, WARN_LOG
 from intranet3.utils.mail_fetcher import MailCheckerTask
-from failsafe import Repeater, RequiredAction
+
 
 LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
-WARN= WARN_LOG(__name__)
-
+WARN = WARN_LOG(__name__)
 
 sync_holidays = URLCronTask(
     u'Holidays synchronization ',
@@ -59,32 +56,32 @@ missed_hours = URLCronTask(
     '/cron/times/missed_hours',
 )
 
-repeater = Repeater(
-    RequiredAction('sync_client_hours', lambda date: '/cron/time/client_hours'),
-)
+#repeater = Repeater(
+#    RequiredAction('sync_client_hours', lambda date: '/cron/time/client_hours'),
+#)
+
 
 cron_tasks = (
-    #func, cron_line
-#    (clean, (-1, -1, -1, -1, -1)),
-#    (sync_holidays, '1 0 * * *'),
-#    (resolved_notification, '0 7 * * *'),
-#    (missing_hours_notification, '0 19 * * *'),
-#    (repeater, '1 0 1,2,3,4,5 * *'), # at 00:01 every first 5 days of month
-#    (report_with_today_hours, '1 0 * * *'), # at 00:01 every day
-#    (report_with_today_hours_without_ticket, '1 0 * * *'), # at 00:01 every day
-#    (report_with_hours_added_for_prev_months, '1 0 * * *'), # at 00:01 every day
+#    (func, cron_line),
+     (clean, (0, 3, -1, -1, -1)),
+     (sync_holidays, (1, 0, -1, -1, -1)),
+     (resolved_notification, (0, 7, -1, -1, -1)),
+     (missing_hours_notification, (0, 19, -1, -1, -1)),
+     (report_with_today_hours, (1, 0, -1, -1, -1)), # at 00:01 every day
+     (report_with_today_hours_without_ticket, (1, 0, -1, -1, -1)), # at 00:01 every day
+     (report_with_hours_added_for_prev_months, (1, 0, -1, -1, -1)), # at 00:01 every day
 
-#    (tickets_report_with_excel, '1 1 2 * *'),
-#    (annually_time_report_email, '1 0 28 * *'),
-#    (old_bugs_report_email, '1 0 1 * * '),
-#    (missed_hours, '1 0 1,2 * *'), # at 00:01 every first 2 days of month
+     (tickets_report_with_excel, (1, 1, 2, -1, -1)),
+     (annually_time_report_email, (1, 0, 28, -1, -1)),
+     (old_bugs_report_email, (1, 0, 1, -1, -1)),
+     (missed_hours, (1, 0, 1, -1, -1)), # at 00:01 every first 2 days of month
 )
 
 from intranet3.utils.task.worker import worker
 
 timer_tasks = (
-    #(mailer, 60), # every 60 second
-    (worker, 1), # every 60 second
+    (mailer, 60), # every 60 second
+    (worker, 1), # every 1 second
 )
 
 def run_cron_tasks():
