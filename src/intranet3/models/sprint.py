@@ -40,7 +40,20 @@ class Sprint(Base):
     team = orm.relationship('Team')
 
     def get_board(self):
-        return json.loads(self.board)
+        if self.board:
+            return json.loads(self.board)
+
+        return [
+            {
+                'name': 'TODO',
+                'sections': [
+                    {
+                        'name': '',
+                        "cond": ''
+                    }
+                ]
+            }
+        ]
 
     @property
     def velocity(self):
