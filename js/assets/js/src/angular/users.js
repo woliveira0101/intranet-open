@@ -153,19 +153,13 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       $scope.dob.update_years($scope.users);
 
       $scope.roles = _.map($scope.G.ROLES, function(role) {
-        var counter = '';
-        if ($scope.roles_counter.hasOwnProperty(role[0])) {
-          counter = ' (' + $scope.roles_counter[role[0]] + ')';
-        }
+        var counter = $scope.roles_counter[role[0]]
         return {id: role[0], name: role[1], counter: counter};
       });
       $scope.roles = $filter('orderBy')($scope.roles, 'name')
 
       $scope.groups = _.map($scope.G.GROUPS, function(group){
-        var counter = '';
-        if ($scope.groups_counter.hasOwnProperty(group)) {
-          counter = ' (' + $scope.groups_counter[group] + ')';
-        }
+        var counter = $scope.groups_counter[group];
         return {id: group, name: group, counter: counter};
       });
       $scope.groups = $filter('orderBy')($scope.groups, 'name')
