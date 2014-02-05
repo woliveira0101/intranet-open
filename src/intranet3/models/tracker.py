@@ -150,12 +150,6 @@ class TrackerCredentials(Base):
         """
         Returns dict user login -> user object for given tracker
         """
-        if tracker.type == 'pivotaltracker':
-            return dict(
-                (user.name.lower(), user)
-                    for user in User.query.all()
-            )
-
         creds_query = DBSession.query(cls, User)\
                                .filter(cls.tracker_id==tracker.id)\
                                .filter(cls.user_id==User.id)
