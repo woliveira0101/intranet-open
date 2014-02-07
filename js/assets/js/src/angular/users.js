@@ -3,8 +3,6 @@ var App = angular.module('intranet');
 App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, $location, date_of_birth) {
     $scope.users = [];
     $scope.tab = 'employees';
-    $scope.roles_counter = {};
-    $scope.groups_counter = {};
     $scope.search = {
       name: '',
       start_work: {
@@ -104,23 +102,19 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
     $http.get('/api/users?full=1&inactive=1').success(function(data){
       $scope.users = data.users;
 
+      var roles_counter = _.object(_.map($scope.G.ROLES, function(role) {
+        return [role[0], 0];
+      }));
+      var groups_counter =  _.object(_.map($scope.G.GROUPS, function(group) {
+        return [group, 0];
+      }));
       _.each($scope.users, function(user) {
         if (user.is_active == true) {
           _.each(user.roles, function(role) {
-            if ($scope.roles_counter.hasOwnProperty(role)) {
-              $scope.roles_counter[role] += 1;
-            }
-            else {
-              $scope.roles_counter[role] = 1;
-            }
+            roles_counter[role] += 1;
           });
           _.each(user.groups, function(group) {
-            if ($scope.groups_counter.hasOwnProperty(group)) {
-              $scope.groups_counter[group] += 1;
-            }
-            else {
-              $scope.groups_counter[group] = 1;
-            }
+            groups_counter[group] += 1;
           });
         }
       });
@@ -153,13 +147,13 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       $scope.dob.update_years($scope.users);
 
       $scope.roles = _.map($scope.G.ROLES, function(role) {
-        var counter = $scope.roles_counter[role[0]]
+        var counter = roles_counter[role[0]];
         return {id: role[0], name: role[1], counter: counter};
       });
       $scope.roles = $filter('orderBy')($scope.roles, 'name')
 
       $scope.groups = _.map($scope.G.GROUPS, function(group){
-        var counter = $scope.groups_counter[group];
+        var counter = groups_counter[group];
         return {id: group, name: group, counter: counter};
       });
       $scope.groups = $filter('orderBy')($scope.groups, 'name')

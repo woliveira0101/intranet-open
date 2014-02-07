@@ -1,4 +1,4 @@
-var App = angular.module('intranet', ['ngDragDrop', 'ngRoute', 'ui.bootstrap', '$strap.directives', 'groupRoleFormater']);
+var App = angular.module('intranet', ['ngDragDrop', 'ngRoute', 'ui.bootstrap', '$strap.directives']);
 
 App.config(function($httpProvider, $routeProvider, $locationProvider) {
   $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
