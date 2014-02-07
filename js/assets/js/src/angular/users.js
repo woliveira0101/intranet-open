@@ -201,7 +201,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       if(start && end){
         filtered_users = _.filter(filtered_users, function(user){
           var u_stop_work = Date.parse(user.stop_work);
-          return start <= u_stop_work && u_stop_work <= end;
+          return !!u_stop_work && (start <= u_stop_work && u_stop_work <= end);
       });
 
       filtered_users = _.filter(filtered_users, function(user){
