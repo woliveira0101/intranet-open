@@ -102,23 +102,6 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
     $http.get('/api/users?full=1&inactive=1').success(function(data){
       $scope.users = data.users;
 
-      var roles_counter = _.object(_.map($scope.G.ROLES, function(role) {
-        return [role[0], 0];
-      }));
-      var groups_counter =  _.object(_.map($scope.G.GROUPS, function(group) {
-        return [group, 0];
-      }));
-      _.each($scope.users, function(user) {
-        if (user.is_active == true) {
-          _.each(user.roles, function(role) {
-            roles_counter[role] += 1;
-          });
-          _.each(user.groups, function(group) {
-            groups_counter[group] += 1;
-          });
-        }
-      });
-
       $http.get('/api/teams').success(function(data){
         data.teams.push({'id':-1, 'name':' - No Team - ', 'users':[]});
         $scope.teams = $filter('orderBy')(data.teams, 'name');
@@ -145,6 +128,24 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
         }, 0);
       });
       $scope.dob.update_years($scope.users);
+
+      var roles_counter = _.object(_.map($scope.G.ROLES, function(role) {
+        return [role[0], 0];
+      }));
+      var groups_counter =  _.object(_.map($scope.G.GROUPS, function(group) {
+        return [group, 0];
+      }));
+      _.each($scope.users, function(user) {
+        if (user.is_active == false) {
+          return;
+        }
+        _.each(user.roles, function(role) {
+          roles_counter[role] += 1;
+        });
+        _.each(user.groups, function(group) {
+          groups_counter[group] += 1;
+        });
+      });
 
       $scope.roles = _.map($scope.G.ROLES, function(role) {
         var counter = roles_counter[role[0]];
