@@ -91,14 +91,6 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
         }
     ];
 
-    $scope.roles = $filter('orderBy')(_.map($scope.G.ROLES, function(role){
-      return {id: role[0], name: role[1]};
-    }), 'name');
-
-    $scope.groups = $filter('orderBy')(_.map($scope.G.GROUPS, function(group){
-      return {id: group, name: group};
-    }), 'name');
-
     $scope.to_pretty_role = function(role){
       return _.find(G.ROLES, function(a_role){
         return a_role[0] === role;
@@ -135,10 +127,40 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
           $scope.search.teams = [];
         }, 0);
       });
-        $scope.dob.update_years($scope.users);
+      $scope.dob.update_years($scope.users);
+
+      var roles_counter = _.object(_.map($scope.G.ROLES, function(role) {
+        return [role[0], 0];
+      }));
+      var groups_counter =  _.object(_.map($scope.G.GROUPS, function(group) {
+        return [group, 0];
+      }));
+      _.each($scope.users, function(user) {
+        if (user.is_active == false) {
+          return;
+        }
+        _.each(user.roles, function(role) {
+          roles_counter[role] += 1;
+        });
+        _.each(user.groups, function(group) {
+          groups_counter[group] += 1;
+        });
+      });
+
+      $scope.roles = _.map($scope.G.ROLES, function(role) {
+        var counter = roles_counter[role[0]];
+        return {id: role[0], name: role[1], counter: counter};
+      });
+      $scope.roles = $filter('orderBy')($scope.roles, 'name')
+
+      $scope.groups = _.map($scope.G.GROUPS, function(group){
+        var counter = groups_counter[group];
+        return {id: group, name: group, counter: counter};
+      });
+      $scope.groups = $filter('orderBy')($scope.groups, 'name')
     });
 
-    $scope.filtered_users = function(){
+    $scope.filtered_users = function() {
       var filtered_users = $scope.users;
       var f_name = $scope.search.name.toLowerCase();
       if(f_name){

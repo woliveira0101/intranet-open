@@ -18,12 +18,12 @@
              <div class="row below">
                <select
                    ng-model="search.groups" multiple title="Choose group"
-                   ng-options="group.id as group.name for group in groups"
+                   ng-options="group.id as group.name + ' (' + group.counter + ')' for group in groups"
                    bs-select>
                </select>
                 <select
                      ng-model="search.roles" multiple title="Choose role"
-                     ng-options="role.id as role.name for role in roles"
+                     ng-options="role.id as role.name + ' (' + role.counter + ')' for role in roles"
                      bs-select>
                 </select>
                 <select
