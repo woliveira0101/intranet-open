@@ -1,10 +1,8 @@
 import datetime
 import json
-import copy
 from calendar import timegm
 
 from sqlalchemy import func
-from sqlalchemy.sql import or_, and_
 
 from intranet3.models import User, TimeEntry, Project
 from intranet3 import helpers as h
@@ -187,7 +185,7 @@ class SprintWrapper(object):
                 d['bugs']['with_points'].append(bug)
             else:
                 d['bugs']['without_points'].append(bug)
-            d['empty'] = False;
+            d['empty'] = False
 
         for bug in self.bugs:
             points = bug.points
@@ -203,6 +201,10 @@ class SprintWrapper(object):
             else:
                 append_bug(todo, bug)
                 todo['points'] += points
+
+        for item in (todo, inprocess, toverify, completed):
+            for bugs in item['bugs'].values():
+                bugs.sort(cmp=h.sorting_by_priority)
 
         return dict(
             bugs=self.bugs,
