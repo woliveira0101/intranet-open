@@ -1,7 +1,8 @@
 import base64
-import datetime
 import xml.etree.ElementTree as ET
 from functools import partial
+import dateutil.parser
+import json
 
 from intranet3.asyncfetchers.base import BaseFetcher, Bug, cached_bug_fetcher
 from intranet3.helpers import Converter, serialize_url, make_path
@@ -12,7 +13,7 @@ LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
 
 ISSUE_STATE_RESOLVED = ['finished']
-ISSUE_STATE_UNRESOLVED = ['started','unstarted','unscheduled', 'accepted']
+ISSUE_STATE_UNRESOLVED = ['started', 'unstarted', 'unscheduled', 'accepted']
 
 
 class PivotalTrackerBug(Bug):
@@ -42,8 +43,8 @@ pivotaltracker_converter = Converter(
     status='status',
     resolution=lambda d: '',
     project_name='project_name',
-    opendate=lambda d: datetime.datetime.strptime(d['opendate'],'%Y/%m/%d %H:%M:%S %Z'),
-    changeddate=lambda d: datetime.datetime.strptime(d['changeddate'],'%Y/%m/%d %H:%M:%S %Z'),
+    opendate=lambda d: dateutil.parser.parse(d['opendate']),
+    changeddate=lambda d: dateutil.parser.parse(d['changeddate']),
     priority='priority',
     severity='priority',
     component_name='component',
@@ -61,11 +62,10 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
     bug_class = PivotalTrackerBug
     get_converter = lambda self: pivotaltracker_converter
 
-
     def __init__(self, tracker, credentials, login_mapping):
         super(PivotalTrackerTokenFetcher, self).__init__(tracker, credentials, login_mapping)
         try:
-            email, login =  credentials.login.split(';')
+            email, login = credentials.login.split(';')
         except Exception:
             email, login = '', ''
         self.email = email
@@ -92,7 +92,7 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
 
     def get_token(self, callback):
         if not self._token:
-            key =  self.TOKEN_MEMCACHE_KEY.format(tracker_type=self.tracker.type, tracker_id=self.tracker.id, user_id=self.user.id)
+            key = self.TOKEN_MEMCACHE_KEY.format(tracker_type=self.tracker.type, tracker_id=self.tracker.id, user_id=self.user.id)
             token = memcache.get(key)
             if not token:
                 self.fetch_token(callback)
@@ -103,40 +103,58 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
             callback()
 
     def parse_token(self, callback, data):
-        key =  self.TOKEN_MEMCACHE_KEY.format(tracker_type=self.tracker.type, tracker_id=self.tracker.id, user_id=self.user.id)
+        key = self.TOKEN_MEMCACHE_KEY.format(tracker_type=self.tracker.type, tracker_id=self.tracker.id, user_id=self.user.id)
         data = ET.fromstring(data)
         self._token = data.find('guid').text
         memcache.set(key, self._token, timeout=self.TOKEN_MEMCACHE_TIMEOUT)
-
         callback()
 
 
 class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
-    api_url = 'services/v3/projects'
+
+    api_url = 'services/v5/projects'
+    default_fields = 'owned_by,requested_by,estimate,:default'
 
     def __init__(self, *args, **kwargs):
         super(PivotalTrackerFetcher, self).__init__(*args, **kwargs)
         self._project_ids = None
 
-    def prepare_url(self, project_id='', endpoint='', filters={}):
+    def prepare_url(self, project_id='', endpoint='', params={}):
         tracker_url = self.tracker.url.replace('http://', 'https://')
-        url = make_path(tracker_url, self.api_url, project_id, endpoint) + '?'
-        filter_param = ' '.join([ '%s:%s' % (filter_name, filter) for filter_name, filter in filters.iteritems()])
-        full_url = serialize_url(url, filter=filter_param)
-        return full_url
+        url = make_path(tracker_url, self.api_url, project_id, endpoint)
+        if params:
+            url += '?'
+            url = serialize_url(url, **params)
+        return url
 
-    def fetch(self, endpoint, filters={}, callback=None):
+    def fetch(self, endpoint, params={}, callback=None, project_selector=None):
         if not self._token:
-            self_callback = partial(self.fetch, endpoint, filters=filters, callback=callback)
+            self_callback = partial(
+                self.fetch,
+                endpoint,
+                params=params,
+                callback=callback,
+                project_selector=project_selector,
+            )
             self.get_token(self_callback)
         elif self._project_ids is None:
-            self_callback = partial(self.fetch, endpoint, filters=filters, callback=callback)
-            self.get_projects(self_callback)
+            self_callback = partial(
+                self.fetch,
+                endpoint,
+                params=params,
+                callback=callback,
+                project_selector=project_selector,
+            )
+            if project_selector:
+                self._project_ids = [project_selector, ]
+                self_callback()
+            else:
+                self.get_projects(self_callback)
         else:
             headers = self.get_headers()
             callback = callback or self.responded
             for project_id in self._project_ids:
-                url = self.prepare_url(project_id, endpoint, filters)
+                url = self.prepare_url(project_id, endpoint, params)
                 self.request(url, headers, callback)
 
     def get_projects(self, callback):
@@ -145,75 +163,153 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         self.request(
             url,
             headers,
-            partial(self.responded, on_success=partial(self.parse_project, callback)),
+            partial(
+                self.responded,
+                on_success=partial(self.parse_project, callback),
+            )
         )
 
     def parse_project(self, callback, data):
-        xml = ET.fromstring(data)
-        self._project_ids = [p.text for p in xml.findall('project/id')]
+        project_json = json.loads(data)
+        self._project_ids = [p['id'] for p in project_json]
         callback()
+
+    def _get_filters(
+            self, owners=None, ids=None, label=None,
+            states=None, include_done=False):
+        filter_params = []
+        if owners:
+            owners = ' or '.join(
+                ['owner:"%s"' % x for x in owners]
+            )
+            owners = '(%s)' % owners
+            filter_params.append(owners)
+        if states:
+            states = ','.join(states)
+            states = 'state:%s' % states
+            filter_params.append(states)
+        if label:
+            filter_params.append('label:"%s" ' % label)
+        url_and = ' and '.join(filter_params)
+
+        filter_params = []
+        if ids:
+            filter_params.append('id:%s ' % ','.join([str(i) for i in ids]))
+        if include_done:
+            filter_params.append('includedone:true')
+        url_space = ' '.join(filter_params)
+
+        url = '%s %s' % (url_and, url_space)
+        return url
 
     @cached_bug_fetcher(lambda: u'user')
     def fetch_user_tickets(self):
-        self.fetch('stories', filters=dict(
-            owner='"%s"' % self.login,
-            state=','.join(ISSUE_STATE_UNRESOLVED),
-        ))
+        params = {
+            'fields': self.default_fields,
+            'filter': self._get_filters(
+                owners=[self.login],
+                states=ISSUE_STATE_UNRESOLVED
+            )
+        }
+        self.fetch('stories', params=params)
 
     @cached_bug_fetcher(lambda: u'all')
     def fetch_all_tickets(self):
-        self.fetch('stories', filters=dict(
-            state=','.join(ISSUE_STATE_UNRESOLVED),
-            includedone='true',
-        ))
+        params = {
+            'fields': self.default_fields,
+            'filter': self._get_filters(
+                owners=self.login_mapping.keys(),
+                states=ISSUE_STATE_UNRESOLVED,
+                include_done=True,
+            )
+        }
+        self.fetch('stories', params=params)
 
     @cached_bug_fetcher(lambda: u'user-resolved')
     def fetch_user_resolved_tickets(self):
-        self.fetch('stories', filters=dict(
-            owner='"%s"' % self.login,
-            state=','.join(ISSUE_STATE_RESOLVED),
-            includedone='true',
-        ))
+        params = {
+            'fields': self.default_fields,
+            'filter': self._get_filters(
+                owners=[self.login],
+                states=ISSUE_STATE_RESOLVED,
+                include_done=True,
+            )
+        }
+        self.fetch('stories', params=params)
 
     @cached_bug_fetcher(lambda: u'all-resolved')
     def fetch_all_resolved_tickets(self):
-        self.fetch('stories', filters=dict(
-            state=','.join(ISSUE_STATE_RESOLVED),
-            includedone='true',
-        ))
+        params = {
+            'fields': self.default_fields,
+            'filter': self._get_filters(
+                owners=self.login_mapping.keys(),
+                states=ISSUE_STATE_RESOLVED,
+                include_done=True,
+            )
+        }
+        self.fetch('stories', params=params)
 
-    def fetch_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
-        self.fetch('stories', filters=dict(
-            id=','.join(ticket_ids),
-            includedone='true',
-        ))
+    def fetch_bugs_for_query(
+            self, ticket_ids, project_selector,
+            component_selector, version):
+        params = {
+            'fields': self.default_fields,
+            'filter': self._get_filters(
+                owners=self.login_mapping.keys(),
+                ids=ticket_ids,
+                include_done=True,
+            )
+        }
+        self.fetch(
+            'stories',
+            params=params,
+            project_selector=project_selector,
+        )
 
-    def fetch_resolved_bugs_for_query(self, ticket_ids, project_selector, component_selector, version):
-        self.fetch('stories', filters=dict(
-            id=','.join(ticket_ids),
-            state=','.join(ISSUE_STATE_RESOLVED),
-            includedone='true',
-        ))
+    def fetch_resolved_bugs_for_query(
+            self, ticket_ids, project_selector,
+            component_selector, version):
+        params = {
+            'fields': self.default_fields,
+            'filter': self._get_filters(
+                owners=self.login_mapping.keys(),
+                ids=ticket_ids,
+                states=ISSUE_STATE_RESOLVED,
+                include_done=True,
+            )
+        }
+        self.fetch(
+            'stories',
+            params=params,
+            project_selector=project_selector,
+        )
 
     def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
-        self.fetch('stories', filters=dict(
-            label=sprint_name,
-            includedone='true',
-        ))
+        params = {
+            'fields': self.default_fields,
+            'filter': self._get_filters(
+                label=sprint_name,
+                include_done=True,
+            )
+        }
+        self.fetch('stories', params=params, project_selector=project_id)
 
     def fetch_bug_titles_and_depends_on(self, ticket_ids):
         ids = []
-        for id in ticket_ids:
-            if id:
-                ids.append(str(id))
-        self.fetch(
-            'stories',
-            filters=dict(
-                includedone='true',
-                id=','.join(ids)
-            ),
-            callback=partial(self.responded, on_success=self.ticket_title_response),
+        for id_ in ticket_ids:
+            if id_:
+                ids.append(str(id_))
+        params = {
+            'filter': self._get_filters(
+                ids=ids,
+                include_done=True,
+            )
+        }
+        callback = partial(
+            self.responded,
+            on_success=self.ticket_title_response
         )
+        self.fetch('stories', params=params, callback=callback)
 
     def ticket_title_response(self, data):
         try:
@@ -228,39 +324,30 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
             self.success()
 
     def _parse(self, data):
-        xml = ET.fromstring(data)
+        stories = json.loads(data)
         converter = self.get_converter()
-        self.users = {}
-        for story in xml.findall('story'):
-            owner_name_node = story.find('owned_by')
-            owner_name = owner_name_node and owner_name_node.text or ''
+        for story in stories:
+            points = story.get('estimate')
+            points = int(points) if points else 0
 
-            if owner_name_node is not None:
-                owner_name = owner_name_node.text
-            else:
-                owner_name = ''
+            project_name = str(story['project_id'])
 
-            points = story.find('estimate')
-            try:
-                points = points.text
-            except AttributeError:
-                points = 0
-
-            if not points:
-                points = 0
-            points = int(points)
+            owned_by = story.get('owned_by')
+            owner = owned_by.get('name') if owned_by else ''
 
             bug_desc = dict(
                 tracker=self.tracker,
-                id=story.find('id').text,
-                desc=story.find('name').text,
-                reporter=story.find('requested_by').text,
-                owner=owner_name,
-                status=story.find('current_state').text,
-                project_name=story.find('project_id').text,
-                opendate=story.find('created_at').text,
-                changeddate=story.find('updated_at').text,
-                whiteboard={'p': points}
+                id=story['id'],
+                desc=story['name'],
+                reporter=story['requested_by']['name'],
+                owner=owner,
+                status=story['current_state'],
+                project_name=project_name,
+                opendate=story['created_at'],
+                changeddate=story['updated_at'],
+                whiteboard={
+                    'p': points,
+                },
             )
             yield self.bug_class(
                 tracker=self.tracker,
