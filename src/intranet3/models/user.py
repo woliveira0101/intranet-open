@@ -8,7 +8,6 @@ from sqlalchemy import Column, ForeignKey, orm, or_
 from sqlalchemy.types import String, Boolean, Integer, Date, Enum, Text
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql.expression import exists
 from sqlalchemy import not_
 
 from intranet3 import memcache, config
@@ -84,10 +83,16 @@ class User(Base):
         nullable=True,
         default=None,
     )
+
+    start_work_experience = Column(
+        Date,
+        nullable=True,
+        default=None,
+    )
+
     stop_work = Column(Date, nullable=True, default=None)
     description = Column(String, nullable=True, default=None)
     date_of_birth = Column(Date, nullable=True, default=None)
-
 
     presences = orm.relationship('PresenceEntry', backref='user', lazy='dynamic')
     credentials = orm.relationship('TrackerCredentials', backref='user', lazy='dynamic')

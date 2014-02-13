@@ -27,6 +27,7 @@
                 {{ form_field(form.location, 'Office location') }}
                 {{ form_field(form.start_work, _('Start work'), class='datepicker') }}
                 {% if request.has_perm('can_edit_users') %}
+                    {{ form_field(form.start_work_experience, _('Start work experience'), title=form.start_work_experience.description) }}
                     {% with field=form.start_full_time_work %}
                     <div>
                         <dl>
@@ -77,6 +78,7 @@
     $(document).ready(function(){
         var $full_time_work_checkbox = $('#if_full_time_work'),
             $full_time_work_datefield = $('#start_full_time_work'),
+            $start_work_experience = $('#start_work_experience'),
             full_time_date = $full_time_work_datefield.val();
         if(full_time_date) {
             $full_time_work_checkbox.prop('checked', true);
@@ -95,6 +97,12 @@
                 $full_time_work_datefield.val("");
                 $full_time_work_datefield.css('visibility', 'hidden');
             }
+        });
+        $start_work_experience.tooltip({
+            container: 'body',
+            animation: false,
+            html: true,
+            template: '<div class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
         });
     });
 
