@@ -65,13 +65,15 @@ class Pivot(MonthMixin, BaseView):
             users_w = User.query.filter(User.is_not_client()) \
                                 .filter(User.is_active==True) \
                                 .filter(User.location=='wroclaw') \
-                                .order_by(User.freelancer, User.name) \
-                                .all()
+                                .order_by(User.is_freelancer(), User.name)
+            users_w = users_w.all()
+
             users_p = User.query.filter(User.is_not_client()) \
                                 .filter(User.is_active==True) \
                                 .filter(User.location=='poznan') \
-                                .order_by(User.freelancer, User.name) \
-                                .all()
+                                .order_by(User.is_freelancer(), User.name)
+            users_p = users_p.all()
+
             locations = {
                 'wroclaw': [u'Wrocław', len(users_w)],
                 'poznan': [u'Poznań', len(users_p)],

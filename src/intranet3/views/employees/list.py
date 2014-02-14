@@ -77,7 +77,10 @@ class Absence(ApplyArgsMixin, BaseView):
 class AbsencePivot(BaseView):
     def get(self):
         year = self.request.GET.get('year', datetime.date.today().year)
-        users = User.query.filter(User.is_not_client()).filter(User.is_active==True).filter(User.freelancer==False).all()
+        users = User.query.filter(User.is_not_client())\
+                          .filter(User.is_active==True)\
+                          .filter(User.is_not_freelancer())
+        users = users.all()
 
         used = Leave.get_used_for_year(year)
         applications = m.Absence.get_for_year(year)

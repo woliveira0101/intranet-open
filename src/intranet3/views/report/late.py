@@ -66,7 +66,7 @@ class AnnuallyReportMixin(object):
         data = query.all()
         users = User.query.filter(User.is_active==True)\
                           .filter(User.is_not_client())\
-                          .filter(User.freelancer==False)\
+                          .filter(User.is_not_freelancer())\
                           .order_by(User.name).all()
 
         _excuses = excuses.presence()

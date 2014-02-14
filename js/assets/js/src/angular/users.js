@@ -268,13 +268,13 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
     $scope.get_employees = function(){
       return _.filter($scope.filtered_users(), function(user){
         var not_client = _.indexOf(user.groups, 'client') === -1;
-        var not_freelancer = !user.freelancer;
+        var not_freelancer = !_.contains(user.groups, "freelancer");
         return user.is_active && not_client && not_freelancer;
       });
     };
     $scope.get_freelancers = function(){
       return _.filter($scope.filtered_users(), function(user){
-        return user.is_active && user.freelancer;
+        return user.is_active && _.contains(user.groups, "freelancer");
       });
     };
     $scope.get_clients = function(){

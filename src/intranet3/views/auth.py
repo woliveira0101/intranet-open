@@ -89,6 +89,7 @@ def callback(request):
             email=email,
             refresh_token=credentials.refresh_token or '',
             groups=[group],
+            roles=[],
         )
 
         session.add(user)

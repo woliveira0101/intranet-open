@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import base64
-import mimetypes
-import datetime
-import calendar
 
 from pyramid.view import view_config
 from pyramid.exceptions import Forbidden
@@ -14,7 +10,6 @@ from intranet3.utils.views import BaseView
 from intranet3.models import User
 from intranet3.forms.user import UserEditForm
 from intranet3.log import INFO_LOG
-from intranet3 import helpers as h
 from intranet3.api.preview import Preview
 
 
@@ -68,11 +63,6 @@ class Edit(BaseView):
 
             if self.request.has_perm('can_add_user_to_group'):
                 groups = form.groups.data
-                if "freelancer" in groups:
-                    groups.remove('freelancer')
-                    user.freelancer = True
-                else:
-                    user.freelancer = False
 
                 if 'coordinator' in user.groups:
                     groups.append('coordinator')
@@ -89,9 +79,6 @@ class Edit(BaseView):
                 return HTTPFound(location=self.request.url_for('/user/edit', user_id=user_id))
             else:
                 return HTTPFound(location=self.request.url_for('/user/edit'))
-
-        if user.freelancer:
-            form.groups.data = user.groups + ['freelancer']
         return dict(id=user.id, user=user, form=form)
 
 

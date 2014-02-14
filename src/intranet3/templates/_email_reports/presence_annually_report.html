@@ -22,7 +22,7 @@
             {% else %}
                 <tr style="background-color: #f9f9f9">
             {% endif %}
-                <td>{{ user.name }}{% if user.freelancer %}({% if user.is_programmer %}P{% endif %}{% if user.is_frontend_developer %}F{% endif %}{% if user.is_graphic_designer %}G{% endif %}){% endif %}</td>
+                <td>{{ user.name }}</td>
 
                 {% set user_data = data.get(user.id) %}
                 {% set user_stats = stats.get(user.id) %}

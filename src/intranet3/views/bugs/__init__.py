@@ -19,10 +19,10 @@ class FilterMixin(object):
 class GroupedBugsMixin(object):
         def get_all(self, resolved, all_projects=True):
             bugs = Bugs(self.request).get_all(resolved)
-            people = m.User.query.order_by(m.User.freelancer, m.User.name)\
-                                .filter(m.User.is_not_client())\
-                                .filter(m.User.is_active==True)\
-                                .all()
+            people = m.User.query.order_by(m.User.is_freelancer(), m.User.name)\
+                                 .filter(m.User.is_not_client())\
+                                 .filter(m.User.is_active==True)
+            people = people.all()
 
             entries = self.session.query(m.Client, m.Project)\
                                   .filter(m.Client.id == m.Project.client_id)\

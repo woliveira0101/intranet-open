@@ -25,24 +25,12 @@
                 <td>{{ user.email }}</td>
             </tr>
             <tr>
-                <td>{% trans %}Groups{% endtrans %}</td>
+                <td>{% trans %}Groups{% endtrans %}:</td>
                 <td>{{ user.user_groups }}</td>
             </tr>
             <tr>
-                <td>{% trans %}Freelancer{% endtrans %}</td>
-                <td>{% if user.freelancer %}✔{% endif %}</td>
-            </tr>
-            <tr>
-                <td>{% trans %}Programmer{% endtrans %}:</td>
-                <td>{% if user.is_programmer %}✔{% endif %}</td>
-            </tr>
-            <tr>
-                <td>{% trans %}Frontend developer{% endtrans %}:</td>
-                <td>{% if user.is_frontend_developer %}✔{% endif %}</td>
-            </tr>
-            <tr>
-                <td>{% trans %}Graphic designer{% endtrans %}:</td>
-                <td>{% if user.is_graphic_designer%}✔{% endif %}</td>
+                <td>{% trans %}Roles{% endtrans %}:</td>
+                <td> {{ user.user_roles }}</td>
             </tr>
             <tr>
                 <td>A{% trans %}vailability calendar{% endtrans %}:</td>

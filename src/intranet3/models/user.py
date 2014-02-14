@@ -57,14 +57,10 @@ class User(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     name = Column(String, nullable=False)
     admin = Column(Boolean, default=False, nullable=False)
-    freelancer = Column(Boolean, default=False, nullable=False)
     employment_contract = Column(Boolean, default=False, nullable=False)
 
     is_active = Column(Boolean, default=True, nullable=False)
 
-    is_programmer = Column(Boolean, default=False, nullable=False)
-    is_frontend_developer = Column(Boolean, default=False, nullable=False)
-    is_graphic_designer = Column(Boolean, default=False, nullable=False)
     levels = Column(Integer, nullable=False, default=0)
 
     roles = Column(postgresql.ARRAY(String))
@@ -110,6 +106,11 @@ class User(Base):
     @property
     def user_groups(self):
         return ", ".join([group for group in self.groups])
+
+    @property
+    def user_roles(self):
+        ROLES_DICT = dict(self.ROLES)
+        return ", ".join([ROLES_DICT[role] for role in self.roles])
 
     @reify
     def all_perms(self):
@@ -168,6 +169,7 @@ class User(Base):
             return leave.number
         else:
             return 0
+
     @property
     def avatar_url(self):
         return '/api/images/users/%s' % self.id
@@ -201,6 +203,14 @@ class User(Base):
         # <@ = http://www.postgresql.org/docs/8.3/static/functions-array.html
         return User.groups.op('@>')('{client}')
 
+    @classmethod
+    def is_freelancer(cls):
+        return User.groups.op('@>')('{freelancer}')
+
+    @classmethod
+    def is_not_freelancer(cls):
+        return not_(cls.is_freelancer())
+
     def to_dict(self, full=False):
         result =  {
             'id': self.id,
@@ -209,13 +219,11 @@ class User(Base):
         }
         if full:
             groups = self.groups
-            if self.freelancer and not 'freelancer' in groups:
-                groups.append('freelancer')
             location = self.LOCATIONS[self.location]
             result.update({
             'email': self.email,
             'is_active': self.is_active,
-            'freelancer': self.freelancer,
+            'freelancer': 'freelancer' in self.groups,
             'is_client': 'client' in self.groups,
             'tasks_link': self.tasks_link,
             'availability_link': self.availability_link,
