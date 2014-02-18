@@ -81,11 +81,12 @@ class User(Base):
 
     start_work = Column(
         Date, nullable=False,
-        default=lambda: datetime.date.today() + datetime.timedelta(days=365 * 30),
+        default=lambda: datetime.date.today(),
     )
     start_full_time_work = Column(
-        Date, nullable=False,
-        default=lambda: datetime.date.today() + datetime.timedelta(days=365 * 30),
+        Date,
+        nullable=True,
+        default=None,
     )
     stop_work = Column(Date, nullable=True, default=None)
     description = Column(String, nullable=True, default=None)

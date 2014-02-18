@@ -75,37 +75,26 @@
 {% block tail_script %}
     <script type="text/javascript">
     $(document).ready(function(){
-        var $if_full_time_work = $('#if_full_time_work'),
-            $full_time_work = $('#start_full_time_work');
-        var today = Date.today(), full_time_start_date = Date.parseExact($full_time_work.val(), 'dd/MM/yyyy');
-
-        if(full_time_start_date != null && today.compareTo(full_time_start_date) < 0){
-            // not working full time
-            $if_full_time_work.prop('checked', false);
-            $full_time_work.css('visibility', 'hidden');
-        } else {
-            // working full time
-            $if_full_time_work.prop('checked', true);
-            $full_time_work.css('visibility', 'visible');
+        var $full_time_work_checkbox = $('#if_full_time_work'),
+            $full_time_work_datefield = $('#start_full_time_work'),
+            full_time_date = $full_time_work_datefield.val();
+        if(full_time_date) {
+            $full_time_work_checkbox.prop('checked', true);
+            $full_time_work_datefield.css('visibility', 'visible');
         }
-
-        full_time_start_date = Date.today();
-
-        $if_full_time_work.change(function(){
+        else {
+            $full_time_work_checkbox.prop('checked', false);
+            $full_time_work_datefield.css('visibility', 'hidden');
+        }
+        $full_time_work_checkbox.change(function(){
             var $this = $(this);
-            if($this.prop('checked')){
-                $full_time_work.val(full_time_start_date.toString('dd/MM/yyyy'));
-                $full_time_work.css('visibility', 'visible');
+            if($this.prop('checked')) {
+                $full_time_work_datefield.val(Date.today().toString('dd/MM/yyyy'));
+                $full_time_work_datefield.css('visibility', 'visible');
             } else {
-                var date_in_future = Date.today().add({years: 30});
-                $full_time_work.val(date_in_future.toString('dd/MM/yyyy'));
-                $full_time_work.css('visibility', 'hidden');
+                $full_time_work_datefield.val("");
+                $full_time_work_datefield.css('visibility', 'hidden');
             }
-        });
-
-        $full_time_work.change(function(){
-            var $this = $(this);
-            full_time_start_date = Date.parseExact($this.val(), 'dd/MM/yyyy')
         });
     });
 
