@@ -52,9 +52,7 @@ def main(global_config, **settings):
             perm = ['g:cron']
         else:
             user = User.query.get(userid)
-            perm = [ 'g:%s' % g for g in user.groups ]
-            if user.freelancer:
-                perm.append('g:freelancer')
+            perm = ['g:%s' % g for g in user.groups]
         return perm
 
     engine = engine_from_config(settings, 'sqlalchemy.')

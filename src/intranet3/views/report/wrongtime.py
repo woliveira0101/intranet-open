@@ -40,7 +40,7 @@ class AnnuallyReportMixin(object):
 
         users = User.query.filter(User.is_active==True)\
                           .filter(User.is_not_client())\
-                          .order_by(User.freelancer, User.name)
+                          .order_by(User.is_freelancer(), User.name)
 
         entries_grouped = {}
         _excuses = excuses.wrongtime()

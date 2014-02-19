@@ -214,7 +214,7 @@ class Users(ApiView):
             )
         else:
             users = users.filter(User.is_not_client())\
-                         .filter(User.freelancer==False)
+                         .filter(User.is_not_freelancer())
             return dict(
                 users=[u.to_dict() for u in users],
             )

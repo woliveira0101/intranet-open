@@ -16,8 +16,7 @@
             <th class="name_project">{% trans %}Project{% endtrans %}</th>
             <th class="number_all">&nbsp;</th>
             {% for user in people %}
-            <th class="x-user-tooltip-{{user.id}} username{% if user.freelancer %} freelancer{% endif %} name_user"><a href="{{ request.url_for('/user/view', user_id=user.id) }}" title="{% if user.freelancer %}freelancer {% endif %}{{ user.email }}">{{ user.name.replace(' ', '&nbsp;')|safe }}{% if user.freelancer %}&nbsp;({% if user.is_programmer %}P{% endif %}{% if user.is_frontend_developer %}F{% endif %}{% if user.is_graphic_designer %}G{% endif %}){% endif %}</a></th>
-            {% endfor %}
+            <th class="x-user-tooltip-{{user.id}} username{% if 'freelancer' in user.groups %} freelancer{% endif %} name_user"><a href="{{ request.url_for('/user/view', user_id=user.id) }}" title="{% if 'freelancer' in user.groups %}freelancer {% endif %}{{ user.email }}">{{ user.name.replace(' ', '&nbsp;')|safe }}{% if 'freelancer' in user.groups %}&nbsp;{% endif %}</a></th> {% endfor %}
         </tr>
     </thead>
     <tbody>
