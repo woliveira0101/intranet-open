@@ -239,12 +239,12 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       if ($scope.search.time_works != 0 ){
           if ($scope.search.time_works == 1) {
             filtered_users = _.filter(filtered_users, function(user){
-                return Date.parse(user.start_full_time_work) < new Date();
+              return user.start_full_time_work != null;
             });
           }
           else {
               filtered_users = _.filter(filtered_users, function(user){
-                return Date.parse(user.start_full_time_work) > new Date();
+                return user.start_full_time_work == null;
             });
           }
 

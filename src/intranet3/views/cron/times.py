@@ -502,10 +502,8 @@ class MissedHours(CronView):
                 t.deleted = FALSE AND
                 NOT ( u.freelancer ) AND
                 t.user_id = u.id AND
-                u.is_active = true AND (
-                   (u.start_full_time_work IS NOT NULL AND t.date >= u.start_full_time_work AND t.date >= :date_start) OR
-                   (u.start_full_time_work IS NULL AND t.date >= :date_start)
-                )
+                u.is_active = true AND
+                (u.start_full_time_work IS NOT NULL AND t.date >= u.start_full_time_work AND t.date >= :date_start)
             GROUP BY
                 u.email
         """).params(date_start=self.start)
@@ -532,9 +530,11 @@ class MissedHours(CronView):
 
     def _get_not_full_time_employees(self):
         users = User.query\
-                    .filter(User.start_full_time_work>datetime.date.today())\
-                    .order_by(User.name)\
-                    .all()
+                    .filter(User.is_active==True)\
+                    .filter(User.is_not_client())\
+                    .filter(User.start_full_time_work==None)\
+                    .order_by(User.name)
+        users = users.all()
         return users
 
     def _get_data(self):
@@ -551,10 +551,8 @@ class MissedHours(CronView):
                 t.user_id = u.id AND
                 t.deleted = FALSE AND
                 NOT ( u.freelancer ) AND
-                u.is_active = true AND (
-                  (u.start_full_time_work IS NOT NULL AND t.date >= u.start_full_time_work AND t.date >= :date_start) OR
-                  (u.start_full_time_work IS NULL AND t.date >= :date_start)
-                ) AND
+                u.is_active = true AND
+                (u.start_full_time_work IS NOT NULL AND t.date >= u.start_full_time_work AND t.date >= :date_start) AND
                 t.date <= :date_end
             GROUP BY
                 u.id,

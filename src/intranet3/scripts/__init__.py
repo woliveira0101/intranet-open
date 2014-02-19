@@ -68,24 +68,23 @@ def make_admin(config_path):
     session.add(user)
     transaction.commit()
 
+
 def migrate(config_path):
-    from intranet3 import config
     from intranet3.models import DBSession, User
+    import datetime
     session = DBSession()
 
-    roles_to_replace = ('P1', 'P2', 'P3', 'P4', 'FED', 'ANDROID', 'FRONTEND')
-    roles_to_remove = roles_to_replace + ('INTERN', 'EXT EXPERT', 'ANDROID',
-                                          'GRAPHIC')
+    users = session.query(User)
 
-    results = session.query(User).all()
-    for user in results:
-        if user.roles:
-            if set(user.roles).intersection(roles_to_replace):
-                if 'PROGRAMMER' not in user.roles:
-                    user.roles.append('PROGRAMMER')
-            user.roles = [r for r in user.roles if r not in roles_to_remove]
+    for user in users:
+        try:
+            if user.start_full_time_work > datetime.date.today():
+                user.start_full_time_work = None
+        except TypeError:
+            continue
 
     transaction.commit()
+
 
 def remove(config_path):
     from intranet3.models import *
