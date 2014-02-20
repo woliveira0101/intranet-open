@@ -61,8 +61,12 @@
                 <td>{{ user.get_location() }}</td>
             </tr>
             <tr>
-                <td>{% trans %}Start wor{% endtrans %}k:</td>
+                <td>{% trans %}Start work{% endtrans %}:</td>
                 <td>{% if user.start_work %}{{ user.start_work.strftime('%d/%m/%Y') or ''}}{% else %}{% endif %}</td>
+            </tr>
+            <tr>
+                <td>{% trans %}Start work experience{% endtrans %}:</td>
+                <td>{% if user.start_work_experience %}{{ user.start_work_experience.strftime('%Y') }}{% endif %}</td>
             </tr>
             <tr>
                 <td>{% trans %}Description{% endtrans %}:</td>

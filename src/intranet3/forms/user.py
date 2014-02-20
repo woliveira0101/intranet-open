@@ -13,6 +13,15 @@ _ = TranslationStringFactory('intranet3')
 class UserEditForm(wtf.Form):
     """ Admin edits freelancer's profile """
 
+    start_work_experience_tooltip = u"""
+    Rok rozpoczęcia pracy zawodowej, dzięki czemu będziemy mogli
+    policzyć automatycznie doświadczenie. Jeżeli ktoś pracował przez
+    4 lata na pół etatu, to należy to potraktować jako 2 lata, czyli
+    dodać dwa do roku rozpoczęcia pracy zawodowej. Bierzemy pod uwagę
+    tylko pracę w branży wynikającej ze stanowiska, czyli jak
+    programista pracował jako kelner to tego mu nie wliczamy.
+    """
+
     employment_contract = wtf.BooleanField(_(u"Employment contract"), validators=[])
     is_active = wtf.BooleanField(_(u"Is active"), validators=[])
 
@@ -27,6 +36,12 @@ class UserEditForm(wtf.Form):
     location = wtf.SelectField(
         _(u"Office location"),
         choices=[('', u'--None--')] + [(k, v[0]) for k, v in User.LOCATIONS.items()]
+    )
+    start_work_experience = wtf.DateField(
+        _(u"Start work experience"),
+        validators=[validators.Optional()],
+        description=start_work_experience_tooltip,
+        format="%Y",
     )
 
     availability_link = wtf.TextField(_(u"Availability calendar link"), validators=[validators.Optional(), validators.URL()])

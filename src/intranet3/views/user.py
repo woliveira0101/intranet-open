@@ -57,6 +57,7 @@ class Edit(BaseView):
             user.roles = form.roles.data
             if self.request.has_perm('can_edit_users'):
                 user.is_active = form.is_active.data
+                user.start_work_experience = form.start_work_experience.data or None
                 user.start_full_time_work = form.start_full_time_work.data or None
                 user.stop_work = form.stop_work.data or None
                 user.employment_contract = form.employment_contract.data
