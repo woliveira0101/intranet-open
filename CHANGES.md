@@ -1,3 +1,13 @@
+0.9.9 (20-02-2014)
+===========
+- groups and roles counter in employee view
+- css fix in presence view
+- hide external user from pivotal project's bugs
+- removed is_programmer, is_frontend_developer, is_graphics designer and freelancer from user model
+- fixed start_full_time_work field, now null mean part time work
+- added new field, start_work_experience
+- bug fixes
+
 0.9.8 (23-01-2014)
 ===========
 - new roles
