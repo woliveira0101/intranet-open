@@ -9,7 +9,9 @@
     <div class="pic_user">
         <img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" />
         <div class="buttons btn_user">
-            {% if request.has_perm('can_edit_users') or request.user.id == user.id %}
+            {% if request.user.id == user.id %}
+                <a href="{{ request.url_for('/user/edit') }}" class="button btn btn-success">Edit</a>
+            {% elif request.has_perm('can_edit_users') %}
                 <a href="{{ request.url_for('/user/edit', user_id=user.id) }}" class="button btn btn-success">Edit</a>
             {% endif %}
         </div>

@@ -28,6 +28,7 @@ class Root(object):
         ('can_see_users_times',          (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
         ('can_view_time_report',         (' ',          ' ',        ' ',           ' ',            'A',        ' ',  'A',     )),
         ('can_view_time_client_report',  (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
+        ('can_view_project_client_times',(' ',          ' ',        ' ',           'A',            ' ',        ' ',  'A',     )),
 
         # ADMIN ONLY:
         ('can_edit_config',              (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),
