@@ -26,7 +26,7 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 MAX_TIMEOUT = 20 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 MAX_TICKETS_PER_REQUEST = 50 # max number of ticket ids to include in a single request to tracker
 
-@view_config(route_name='project_client_times', permission='client_stuff')
+@view_config(route_name='project_client_times', permission='can_view_project_client_times')
 class Times(TimesReportMixin, BaseView):
     def dispatch(self):
         client = self.request.user.get_client()

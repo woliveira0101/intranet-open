@@ -6,7 +6,9 @@
             <li class="title">{{ project.name }}</li>
             <li class="{% if current_page == 'backlog' %}active{% endif %}"><a href="{{ request.url_for('/project/client/backlog', project_id=project.id) }}">{% trans %}Backlog{% endtrans %}</a></li>
             <li class="{% if current_page == 'sprints' %}active{% endif %}"><a href="{{ request.url_for('/project/client/sprints', project_id=project.id) }}">{% trans %}Sprints{% endtrans %}</a></li>
+            {% if request.has_perm('can_view_project_client_times') %}
             <li class="{% if current_page == 'times' %}active{% endif %}"><a href="{{ request.url_for('/project/client/times', projects=project.id) }}">{% trans %}Time reports{% endtrans %}</a></li>
+            {% endif %}
         </ul>
     </div>
     <div class="stats-container row-fluid">
