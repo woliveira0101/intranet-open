@@ -67,7 +67,7 @@ setup(
         'Mock',
         'markdown',
         'iso8601',
-        'colander',
+        'colander>=1.0b',
         'netaddr',
         'pastegevent',
         'psycogreen',
