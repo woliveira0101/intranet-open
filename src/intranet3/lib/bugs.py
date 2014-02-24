@@ -44,7 +44,6 @@ class Bugs(object):
             fetcher_callback(fetcher) # initialize query
         bugs = []
 
-
         for fetcher in fetchers:
             try:
                 fbugs = fetcher.get_result()

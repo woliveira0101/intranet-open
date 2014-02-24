@@ -19,6 +19,7 @@ class RPC(object):
     def start(self):
         self._greenlet = gevent.spawn(
             self.s.request,
+            verify=False,
             *self._args,
             **self._kwargs
         )
@@ -26,4 +27,5 @@ class RPC(object):
 
     def get_result(self):
         self._greenlet.join()
+
         return self._greenlet.value

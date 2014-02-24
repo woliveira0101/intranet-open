@@ -3,11 +3,12 @@ import datetime
 import requests
 from requests.auth import HTTPBasicAuth
 import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import ParseError
 
 from intranet3.helpers import Converter, serialize_url, make_path
 from intranet3.log import EXCEPTION_LOG, INFO_LOG
 
-from .base import BaseFetcher
+from .base import BaseFetcher, FetcherBadDataError
 from .bug import BaseBugProducer, BaseScrumProducer
 from .request import RPC
 
@@ -81,9 +82,16 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
         response = requests.get(
             self.TOKEN_URL,
             auth=HTTPBasicAuth(self.email, self.password),
+            verify=False,
         )
-        data = ET.fromstring(response.content)
-        token = data.find('guid').text
+        try:
+            data = ET.fromstring(response.content)
+            token = data.find('guid').text
+        except ParseError:
+            raise FetcherBadDataError(
+                'Authentication error on tracker %s, check login and password.'
+                % self.tracker.name,
+            )
         return token
 
     def set_auth(self, session, data=None):
