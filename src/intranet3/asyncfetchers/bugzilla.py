@@ -26,7 +26,6 @@ class BugzillaScrumProcuder(BaseScrumProducer):
             return dict(i.split('=', 1) for i in wb.split() if '=' in i)
         return {}
 
-
     def get_points(self, bug, tracker, login_mapping, parsed_data):
         wb = self.parse_whiteboard(parsed_data.get('whiteboard', ''))
         points = wb.get('p')
@@ -118,7 +117,7 @@ class FetchBlockedAndDependsonMixin(object):
         )
         s = requests.Session()
         self.set_auth(s)
-        result = s.request('GET', url, params=params)
+        result = s.request('GET', url, params=params, verify=False)
 
         return self.parse_ids(result.content)
 
@@ -131,7 +130,7 @@ class FetchBlockedAndDependsonMixin(object):
         )
         s = requests.Session()
         self.set_auth(s)
-        result = s.request('GET', url, params=params)
+        result = s.request('GET', url, params=params, verify=False)
 
         return self.parse_statuses(result.content)
 

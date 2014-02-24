@@ -81,6 +81,7 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
         response = requests.get(
             self.TOKEN_URL,
             auth=HTTPBasicAuth(self.email, self.password),
+            verify=False,
         )
         data = ET.fromstring(response.content)
         token = data.find('guid').text

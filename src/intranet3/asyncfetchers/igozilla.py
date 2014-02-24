@@ -2,6 +2,7 @@ import urllib
 
 import requests
 
+from .base import FetcherBadDataError
 from .bugzilla import BugzillaFetcher
 from intranet3.log import INFO_LOG, DEBUG_LOG
 
@@ -27,7 +28,13 @@ class IgozillaFetcher(BugzillaFetcher):
             self.tracker.url.encode('utf-8') + '/query.cgi',
             form_data,
             headers=headers,
+            verify=False,
         )
+        if not response.cookies:
+            raise FetcherBadDataError(
+                'Authentication error on tracker %s, check login and password.'
+                % self.tracker.name,
+            )
         return response.cookies
 
     def set_auth(self, session, data=None):

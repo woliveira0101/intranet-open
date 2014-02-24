@@ -13,6 +13,7 @@ from .request import RPC
 DEBUG = DEBUG_LOG(__name__)
 ERROR = ERROR_LOG(__name__)
 
+
 class FetcherBaseException(Exception):
     pass
 
@@ -23,6 +24,7 @@ class FetchException(FetcherBaseException):
 
 class FetcherTimeout(FetcherBaseException):
     pass
+
 
 class FetcherBadDataError(FetcherBaseException):
     """
