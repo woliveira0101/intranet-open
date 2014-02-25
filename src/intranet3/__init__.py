@@ -163,7 +163,12 @@ def main(global_config, **settings):
         'TEMPLATE_DIR': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates'),
     })
 
-    if uwsgi:
+    is_production = (
+        'DEBUG' not in settings or
+        settings.get('DEBUG', '').lower() == 'false'
+    )
+
+    if uwsgi and is_production:
         from intranet3.cron import run_cron_tasks
         run_cron_tasks()
 

@@ -8,7 +8,6 @@ from intranet3.lib.bugs import Bugs
 from intranet3.log import INFO_LOG, DEBUG_LOG, EXCEPTION_LOG
 from intranet3.models import User, Project
 from intranet3.utils import mail
-from intranet3.utils.task import deferred
 from intranet3.utils.views import CronView
 
 
@@ -31,8 +30,13 @@ class OldBugsReport(CronView):
             )
             title = u'Lista najstarszych niezamkniętych bugów\nwe wszystkich projektach'
         else: # Coordinator
+            bugs_filtered = [
+                b for b in bugs
+                if b.project is not None and
+                b.project.coordinator_id == coordinator_id
+            ]
             bugs_filtered = sorted(
-                [b for b in bugs if b.project.coordinator_id == coordinator_id],
+                bugs_filtered,
                 key=lambda b: b.changeddate.replace(tzinfo=None),
             )
             title = u'Lista najstarszych niezamkniętych bugów\nw projektach w których jesteś koordynatorem'
@@ -46,12 +50,13 @@ class OldBugsReport(CronView):
                 data,
                 request=self.request
             )
-            deferred.defer(
-                mail.send,
-                email,
-                self._(u'[Intranet3] Old bugs report'),
-                html_message=response,
-            )
+
+            with mail.EmailSender() as email_sender:
+                email_sender.send(
+                    email,
+                    self._(u'[Intranet3] Old bugs report'),
+                    html_message=response,
+                )
 
     def action(self):
         coordinators = self.session.query(Project.coordinator_id, User.email) \

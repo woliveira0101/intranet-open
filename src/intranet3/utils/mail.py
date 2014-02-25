@@ -36,6 +36,12 @@ class EmailSender(object):
         self.server.starttls()
         self.server.login(user, secret)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.server.close()
+
     @staticmethod
     def __create_mimeobj(file_path):
         file_name = file_path.split('/')[-1]
@@ -90,9 +96,9 @@ class EmailSender(object):
 
         # Create the message part
         if message is not None and html_message is None:
-            msg = MIMEText(message, "plain")
+            msg = MIMEText(message, "plain", "utf-8")
         elif message is None and html_message is not None:
-            msg = MIMEText(html_message, "html")
+            msg = MIMEText(html_message, "html", "utf-8")
         else:
             msg = MIMEMultipart("alternative")
             msg.attach(MIMEText(message, "plain"))
@@ -113,7 +119,6 @@ class EmailSender(object):
 
         if replay_to:
             msg['Reply-To'] = replay_to
-
 
         self.server.sendmail(
             self.user,

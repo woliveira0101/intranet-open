@@ -9,7 +9,6 @@ from intranet3 import config
 from intranet3 import helpers as h
 from intranet3.utils.views import ApiView
 from intranet3.utils import google_calendar as cal
-from intranet3.utils.task import deferred
 from intranet3.utils import mail
 from intranet3.models import Absence, Holiday, TimeEntry
 from intranet3.api.presence import MEMCACHED_NOTIFY_KEY
@@ -94,15 +93,15 @@ ${name}"""
             remarks=remarks,
             name=name,
         )
-        return deferred.defer(
-            mail.send,
-            config['ACCOUNTANT_EMAIL'],
-            topic,
-            body,
-            cc=email,
-            sender_name=name,
-            replay_to=','.join([self.request.user.email]),
-        )
+        with mail.EmailSender() as email_sender:
+            email_sender.send(
+                config['ACCOUNTANT_EMAIL'],
+                topic,
+                body,
+                cc=email,
+                sender_name=name,
+                replay_to=','.join([self.request.user.email]),
+            )
 
     def post(self):
         absence = self.request.json.get('absence')
