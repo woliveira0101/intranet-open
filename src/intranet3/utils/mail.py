@@ -36,6 +36,12 @@ class EmailSender(object):
         self.server.starttls()
         self.server.login(user, secret)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.server.close()
+
     @staticmethod
     def __create_mimeobj(file_path):
         file_name = file_path.split('/')[-1]
@@ -114,15 +120,11 @@ class EmailSender(object):
         if replay_to:
             msg['Reply-To'] = replay_to
 
-
         self.server.sendmail(
             self.user,
             to,
             msg.as_string(),
         )
-
-    def close_connection(self):
-        self.server.quit()
 
 
 def send(to, topic, message=None, html_message=None,

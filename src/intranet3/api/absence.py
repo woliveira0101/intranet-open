@@ -82,7 +82,6 @@ ${name}"""
         email = self.request.user.email
         today = datetime.date.today()
         topic, body = self.TYPES[type]
-        email_sender = mail.EmailSender()
 
         body = self._(
             body,
@@ -94,15 +93,15 @@ ${name}"""
             remarks=remarks,
             name=name,
         )
-        email_sender.send(
-            config['ACCOUNTANT_EMAIL'],
-            topic,
-            body,
-            cc=email,
-            sender_name=name,
-            replay_to=','.join([self.request.user.email]),
-        )
-        email_sender.close_connection()
+        with mail.EmailSender() as email_sender:
+            email_sender.send(
+                config['ACCOUNTANT_EMAIL'],
+                topic,
+                body,
+                cc=email,
+                sender_name=name,
+                replay_to=','.join([self.request.user.email]),
+            )
 
     def post(self):
         absence = self.request.json.get('absence')

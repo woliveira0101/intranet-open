@@ -51,13 +51,12 @@ class OldBugsReport(CronView):
                 request=self.request
             )
 
-            email_sender.send(
-                email,
-                self._(u'[Intranet3] Old bugs report'),
-                html_message=response,
-            )
-            email_sender.close_connection()
-
+            with mail.EmailSender() as email_sender:
+                email_sender.send(
+                    email,
+                    self._(u'[Intranet3] Old bugs report'),
+                    html_message=response,
+                )
 
     def action(self):
         coordinators = self.session.query(Project.coordinator_id, User.email) \

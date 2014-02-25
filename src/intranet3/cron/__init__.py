@@ -78,7 +78,7 @@ cron_tasks = (
 )
 
 timer_tasks = (
-    #(mailer, 60), # every 60 second
+    (mailer, 60), # every 60 second
 )
 
 def run_cron_tasks():
