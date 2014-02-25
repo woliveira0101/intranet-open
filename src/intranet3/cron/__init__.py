@@ -77,11 +77,8 @@ cron_tasks = (
      (missed_hours, (1, 0, 1, -1, -1)), # at 00:01 every first 2 days of month
 )
 
-from intranet3.utils.task.worker import worker
-
 timer_tasks = (
-    (mailer, 60), # every 60 second
-    (worker, 1), # every 1 second
+    #(mailer, 60), # every 60 second
 )
 
 def run_cron_tasks():

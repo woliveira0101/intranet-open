@@ -8,7 +8,6 @@ from intranet3.utils.views import CronView
 from intranet3.models import User, Holiday
 from intranet3.log import INFO_LOG, DEBUG_LOG, EXCEPTION_LOG
 from intranet3.utils import mail
-from intranet3.utils.task import deferred
 from intranet3.lib.bugs import Bugs
 
 LOG = INFO_LOG(__name__)
@@ -32,6 +31,7 @@ Twój intranet
 
     def _remind_missing_hours(self, email, name, hours, date):
         """ remind (via email) everyone about their missing hours """
+        email_sender = mail.EmailSender()
         LOG(u"Starting email reminder for user %s" % (email, ))
         time_list_url = self.request.url_for('/times/list', date=date.strftime('%d.%m.%Y'))
         hours_url = self.settings['FRONTEND_PREFIX'] + time_list_url
@@ -43,8 +43,7 @@ Twój intranet
             date=date.strftime('%d.%m.%Y'),
         )
         topic = self._(u"[intranet] brakujące godziny z dnia ${date}", date=date.strftime('%d.%m.%Y'))
-        deferred.defer(
-            mail.send,
+        email_sender.send(
             email,
             topic,
             message,
@@ -91,6 +90,7 @@ class ResolvedBugs(CronView):
     def _remind_resolved_bugs_user(self, user):
         """ remind (via email) user to close his resolved bugs """
         LOG(u"Starting email reminder for user %s" % (user.email, ))
+        email_sender = mail.EmailSender()
         my_bugs_url = self.request.url_for('/bugs/my', resolved=1)
         list_url = self.settings['FRONTEND_PREFIX'] + my_bugs_url
 
@@ -113,8 +113,7 @@ class ResolvedBugs(CronView):
         message = u'\n'.join(output)
 
         topic = self._(u"[intranet] ${num} zgłoszeń do zamknięcia", num=len(bugs))
-        deferred.defer(
-            mail.send,
+        email_sender.send(
             user.email,
             topic,
             message,

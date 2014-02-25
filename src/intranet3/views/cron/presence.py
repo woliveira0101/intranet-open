@@ -10,7 +10,6 @@ from intranet3.models import ApplicationConfig
 from intranet3.utils.views import CronView
 from intranet3.log import INFO_LOG, EXCEPTION_LOG
 from intranet3.utils import mail
-from intranet3.utils.task import deferred
 from intranet3.views.report.late import AnnuallyReportMixin
 
 LOG = INFO_LOG(__name__)
@@ -23,14 +22,15 @@ class Report(AnnuallyReportMixin, CronView):
     """
     DISALBED
     """
+
+    email_sender = mail.EmailSender()
     def action(self):
         today = datetime.date.today()
         data = self._annually_report(today.year)
         data['config'] = self.request.registry.settings
         response = render('intranet3:templates/_email_reports/presence_annually_report.html', data, self.request)
         response = response.replace('\n', '').replace('\t', '')
-        deferred.defer(
-            mail.send,
+        self.email_sender.send(
             config['MANAGER_EMAIL'],
             self._(u'[Intranet2] Late report'),
             html_message=response,

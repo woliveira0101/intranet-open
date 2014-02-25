@@ -90,9 +90,9 @@ class EmailSender(object):
 
         # Create the message part
         if message is not None and html_message is None:
-            msg = MIMEText(message, "plain")
+            msg = MIMEText(message, "plain", "utf-8")
         elif message is None and html_message is not None:
-            msg = MIMEText(html_message, "html")
+            msg = MIMEText(html_message, "html", "utf-8")
         else:
             msg = MIMEMultipart("alternative")
             msg.attach(MIMEText(message, "plain"))

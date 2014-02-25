@@ -19,7 +19,6 @@ from intranet3.utils import gdocs
 from intranet3.utils.views import CronView
 from intranet3.views.report.wrongtime import AnnuallyReportMixin
 from intranet3.models import TimeEntry, Tracker, Project, Client, User, ApplicationConfig, Holiday
-from intranet3.utils.task import deferred
 from intranet3.utils import mail
 from intranet3.log import WARN_LOG, ERROR_LOG, DEBUG_LOG, INFO_LOG, EXCEPTION_LOG
 
@@ -55,6 +54,7 @@ class ExcelReport(CronView):
         return row
 
     def action(self):
+        email_sender = mail.EmailSender()
         today = datetime.date.today()
         query = self.session.query
         uber_query = query(
@@ -96,8 +96,7 @@ class ExcelReport(CronView):
         wbk.save(file_path)
         topic = '[intranet] Excel with projects hours'
         message = 'Excel with projects hours'
-        deferred.defer(
-            mail.send,
+        email_sender.send(
             config['MANAGER_EMAIL'],
             topic,
             message,
@@ -108,15 +107,19 @@ class ExcelReport(CronView):
 
 @view_config(route_name='cron_wrongtime_report', permission='cron')
 class WrongTimeReport(AnnuallyReportMixin, CronView):
+
     def action(self):
+        email_sender = mail.EmailSender()
         today = datetime.date.today()
         data = self._annually_report(today.year)
         data['config'] = self.settings
-        response = render('intranet3:templates/_email_reports/time_annually_report.html', data, request=self.request)
+        response = render(
+            'intranet3:templates/_email_reports/time_annually_report.html',
+            data,
+            request=self.request,
+        )
         response = response.replace('\n', '').replace('\t', '')
-
-        deferred.defer(
-            mail.send,
+        email_sender.send(
             config['MANAGER_EMAIL'],
             self._(u'[Intranet2] Wrong time record report'),
             html_message=response,
@@ -139,6 +142,7 @@ class TodayHours(CronView):
         return Response('ok')
 
     def _today_hours(self, date, projects, omit_users):
+        email_sender = mail.EmailSender()
         time_entries = self.session.query('user', 'description', 'time',
             'project', 'client', 'ticket_id', 'tracker_id',
             'total_time').from_statement("""
@@ -164,7 +168,6 @@ class TodayHours(CronView):
                 ORDER BY u.name, c.name, p.name
             """).params(date=date, projects=tuple(projects),
                         users=tuple(omit_users)).all()
-
         if not time_entries:
             s = u"No time entries for report with hours added on %s" % date
             LOG(s)
@@ -223,8 +226,7 @@ class TodayHours(CronView):
         message = u'<br />\n'.join(output).replace('\t', '&emsp;&emsp;')
 
         topic = self._(u"[intranet] Daily hours report")
-        deferred.defer(
-            mail.send,
+        email_sender.send(
             config['MANAGER_EMAIL'],
             topic,
             html_message=message,
@@ -248,6 +250,7 @@ class DailyHoursWithoutTicket(CronView):
 
 
     def _today_hours_without_ticket(self, date, projects, omit_users):
+        email_sender = mail.EmailSender()
         if not omit_users:
             # because u.id NOT IN (,) returns error
             omit_users = (987654321,)
@@ -268,7 +271,6 @@ class DailyHoursWithoutTicket(CronView):
             u.id NOT IN :users
         ORDER BY u.name, c.name, p.name
         """).params(date=date, projects=tuple(projects), users=tuple(omit_users)).all()
-
 
         if not time_entries:
             LOG(u"No time entries for report with hours without ticket added on %s" % (date,))
@@ -296,8 +298,7 @@ class DailyHoursWithoutTicket(CronView):
         message = u'\n'.join(output)
 
         topic = self._(u"[intranet] Daily hours report without bugs")
-        deferred.defer(
-            mail.send,
+        email_sender.send(
             config['MANAGER_EMAIL'],
             topic,
             message,
@@ -315,6 +316,7 @@ class HoursForPreviousMonths(CronView):
         return Response('ok')
 
     def _hours_for_previous_months(self, date):
+        email_sender = mail.EmailSender()
         current_month_start = datetime.date(date.year, date.month, 1)
         time_entries = self.session.query(
             'user', 'client', 'project', 'time',
@@ -358,8 +360,7 @@ class HoursForPreviousMonths(CronView):
         message = u'\n'.join(output)
 
         topic = self._(u"[intranet] Report with hours added for the previous months")
-        deferred.defer(
-            mail.send,
+        email_sender.send(
             config['MANAGER_EMAIL'],
             topic,
             message,
@@ -454,6 +455,7 @@ class MissedHours(CronView):
         return start, end
 
     def _send_email(self):
+        email_sender = mail.EmailSender
         data = self._get_data()
         data['not_full_time_users'] = self._get_not_full_time_employees()
         data['quarters'] = 'Q%s' % idate.quarter_number(self.start), 'Q%s' % idate.quarter_number(self.end)
@@ -464,8 +466,7 @@ class MissedHours(CronView):
             request=self.request
         )
         response = response.replace('\n', '').replace('\t', '')
-        deferred.defer(
-            mail.send,
+        email_sender.send(
             config['MANAGER_EMAIL'],
             self._(u'[Intranet2] Missed hours'),
             html_message=response,
