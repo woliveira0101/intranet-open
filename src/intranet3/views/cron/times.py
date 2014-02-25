@@ -100,8 +100,9 @@ class ExcelReport(CronView):
             config['MANAGER_EMAIL'],
             topic,
             message,
-            file_path=file_path
+            file_path=file_path,
         )
+        email_sender.close_connection()
         return Response('ok')
 
 
@@ -124,6 +125,7 @@ class WrongTimeReport(AnnuallyReportMixin, CronView):
             self._(u'[Intranet2] Wrong time record report'),
             html_message=response,
         )
+        email_sender.close_connection()
         return Response('ok')
 
 
@@ -231,6 +233,7 @@ class TodayHours(CronView):
             topic,
             html_message=message,
         )
+        email_sender.close_connection()
         LOG(u"Report with hours on %s - started" % (date,))
         return message
 
@@ -303,6 +306,7 @@ class DailyHoursWithoutTicket(CronView):
             topic,
             message,
         )
+        email_sender.close_connection()
         LOG(u"Report with hours without ticket on %s - started" % (date,))
         return message
 
@@ -365,6 +369,7 @@ class HoursForPreviousMonths(CronView):
             topic,
             message,
         )
+        email_sender.close_connection()
         LOG(u"Report with hours added for previous months - started")
         return message
 
@@ -471,6 +476,7 @@ class MissedHours(CronView):
             self._(u'[Intranet2] Missed hours'),
             html_message=response,
         )
+        email_sender.close_connection()
         return data
 
     def _get_first_day_of_work(self):

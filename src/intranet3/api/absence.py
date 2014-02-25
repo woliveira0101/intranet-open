@@ -102,6 +102,7 @@ ${name}"""
             sender_name=name,
             replay_to=','.join([self.request.user.email]),
         )
+        email_sender.close_connection()
 
     def post(self):
         absence = self.request.json.get('absence')

@@ -121,6 +121,9 @@ class EmailSender(object):
             msg.as_string(),
         )
 
+    def close_connection(self):
+        self.server.quit()
+
 
 def send(to, topic, message=None, html_message=None,
          sender_name=None, cc=None, replay_to=None, file_path=None):

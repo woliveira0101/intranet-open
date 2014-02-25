@@ -23,18 +23,19 @@ class Report(AnnuallyReportMixin, CronView):
     DISALBED
     """
 
-    email_sender = mail.EmailSender()
     def action(self):
+        email_sender = mail.EmailSender()
         today = datetime.date.today()
         data = self._annually_report(today.year)
         data['config'] = self.request.registry.settings
         response = render('intranet3:templates/_email_reports/presence_annually_report.html', data, self.request)
         response = response.replace('\n', '').replace('\t', '')
-        self.email_sender.send(
+        email_sender.send(
             config['MANAGER_EMAIL'],
             self._(u'[Intranet2] Late report'),
             html_message=response,
         )
+        email_sender.close_connection()
         return Response('ok')
 
 

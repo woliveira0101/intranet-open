@@ -48,6 +48,7 @@ Twój intranet
             topic,
             message,
         )
+        email_sender.close_connection()
         LOG(u"Email reminder for user %s started" % (email, ))
         return message
 
@@ -118,6 +119,7 @@ class ResolvedBugs(CronView):
             topic,
             message,
         )
+        email_sender.close_connection()
         LOG(u"Email reminder for user %s started" % (user.email, ))
         return message
 

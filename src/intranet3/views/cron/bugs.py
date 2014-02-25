@@ -19,8 +19,6 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 @view_config(route_name='cron_bugs_oldbugsreport', permission='cron')
 class OldBugsReport(CronView):
 
-    email_sender = mail.EmailSender()
-
     def _send_report(self, coordinator_id, email, bugs):
         # Bugs filtering & ordering
         # Coordinator gets bugs from his projects, manager gets bugs from
@@ -32,11 +30,13 @@ class OldBugsReport(CronView):
             )
             title = u'Lista najstarszych niezamkniętych bugów\nwe wszystkich projektach'
         else: # Coordinator
+            bugs_filtered = [
+                b for b in bugs
+                if b.project is not None and
+                b.project.coordinator_id == coordinator_id
+            ]
             bugs_filtered = sorted(
-                [b for b in bugs
-                 if b.project is not None and
-                 b.project.coordinator_id == coordinator_id
-                ],
+                bugs_filtered,
                 key=lambda b: b.changeddate.replace(tzinfo=None),
             )
             title = u'Lista najstarszych niezamkniętych bugów\nw projektach w których jesteś koordynatorem'
@@ -50,11 +50,13 @@ class OldBugsReport(CronView):
                 data,
                 request=self.request
             )
-            self.email_sender.send(
+
+            email_sender.send(
                 email,
                 self._(u'[Intranet3] Old bugs report'),
                 html_message=response,
             )
+            email_sender.close_connection()
 
 
     def action(self):
