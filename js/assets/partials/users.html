@@ -28,12 +28,12 @@
                 </select>
                 <select
                      ng-model="search.locations" multiple title="Choose location"
-                     ng-options="c.id as c.name for c in locations"
+                     ng-options="c.id as c.name + ' (' + c.counter + ')' for c in locations"
                      bs-select>
                 </select>
                 <select
                      ng-model="search.teams" multiple title="Choose team"
-                     ng-options="team.id as team.name for team in teams"
+                     ng-options="team.id as team.name + ' (' + team.active_user_counter + ')' for team in teams"
                      bs-select>
                 </select>
              </div>
