@@ -35,7 +35,7 @@ class ProjectForm(wtf.Form):
     def validate_component_selector(self, field):
         if field.data and not self.project_selector.data:
             raise validators.ValidationError(_(u"Cannot define component without a project"))
-        
+
     def validate_ticket_id_selector(self, field):
         if field.data and (self.project_selector.data or self.component_selector.data):
             raise validators.ValidationError(_(u"Ticket ID selector disables project and component selectors"))
@@ -49,17 +49,17 @@ class ProjectForm(wtf.Form):
 
 
 class ImportProjectForm(ProjectForm):
-    
+
     def is_submitted(self):
         """
-        Checks if form has been submitted. The default case is if the HTTP 
+        Checks if form has been submitted. The default case is if the HTTP
         method is **PUT** or **POST**.
         """
         return False
 
 
 class ProjectChoices(EntityChoices):
-    
+
     def __init__(self, empty=False, empty_title=u'-- None --',
                  skip_inactive=False, client=None,
                  additional_filter=lambda query: query):
@@ -101,7 +101,9 @@ class ScrumProjectChoices(ProjectChoices):
             query = query.filter(Project.active==True)
         query = query.order_by(Client.name, Project.name)
         query = self.a_filter(query).distinct()
-        query = query.filter(Project.tracker_id.in_([1,10,12,13,9,18]))
+
+        # WTF?
+        query = query.filter(Project.tracker_id.in_([1,10,12,13,9,18,19]))
         return query
 
     def __iter__(self):
