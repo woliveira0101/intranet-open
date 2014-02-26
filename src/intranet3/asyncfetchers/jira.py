@@ -5,7 +5,6 @@ from dateutil.parser import parse as dateparse
 from intranet3.asyncfetchers.base import (
     BaseFetcher,
     BasicAuthMixin,
-    CSVParserMixin,
 )
 from intranet3.asyncfetchers.bug import (
     BaseBugProducer,
@@ -57,7 +56,7 @@ class JiraBugProducer(BaseBugProducer):
     def _get_component_name(self, fields):
         return ', '.join([c['name'] for c in fields['components']])
 
-    def parse_link(self, dep, tracker):
+    def _parse_link(self, dep, tracker):
         fields = dep['fields']
         return BlockedOrDependson(
             key=dep['key'],
@@ -71,14 +70,14 @@ class JiraBugProducer(BaseBugProducer):
         return dateparse(date_to_parse) if date_to_parse else ''
 
     def _get_depends_on(self, fields, tracker):
-        return [self.parse_link(link, tracker) for link in fields['subtasks']]
+        return [self._parse_link(link, tracker) for link in fields['subtasks']]
 
     def _get_blocked(self, dep, tracker):
         links = [
             link['outwardIssue'] for link in dep['issuelinks']
             if link['type']['name'] == 'Blocks' and 'outwardIssue' in link
         ]
-        return [self.parse_link(link, tracker) for link in links]
+        return [self._parse_link(link, tracker) for link in links]
 
     def get_url(self, tracker, login_mapping, parsed_data):
         key = parsed_data['key']
@@ -116,7 +115,7 @@ class JiraQueryBuilder(object):
              'fields': self._fields}
 
 
-class JiraFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
+class JiraFetcher(BasicAuthMixin, BaseFetcher):
     """
     Fetcher for Jira bugs
     Issues statuses must follow jira classic workflow scheme
@@ -189,7 +188,6 @@ class JiraFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
     def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
                              component_selector=None, version=None,
                              resolved=False):
-        """ Start fetching all bugs matching given criteria """
         url = self.query(
             resolved=resolved,
             ticket_ids=ticket_ids,
