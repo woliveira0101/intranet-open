@@ -92,7 +92,8 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       $scope.users = data.users;
 
       $http.get('/api/teams').success(function(data){
-        data.teams.push({'id':-1, 'name':' - No Team - ', 'users':[]});
+        var users_without_team = {'id':-1, 'name':' - No Team - ', 'users':[], 'active_user_counter': 0};
+
         _.each(data['teams'], function(team) {
           team.active_user_counter = 0;
         });
@@ -109,8 +110,11 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
              user.teams_ids.push(team.id);
             }
           });
+          if (user.is_active == true && !_.contains(user.groups, 'client') && user.teams.length == 0) {
+            users_without_team.active_user_counter += 1;
+          }
         });
-
+        data['teams'].push(users_without_team);
         $scope.teams = $filter('orderBy')(data.teams, 'name');
         $scope.search.teams = [1]; //szczuczka aby wymusić odświeżenie -- spowodowane kiepska implementacja dyrektywy bs-select
         $timeout(function(){
