@@ -17,7 +17,7 @@
 {% if request.is_user_in_one_of_groups('admin', 'client', 'coordinator', 'employee', 'business') %}<li class="nav-head">{% trans %}Projects{% endtrans %}:</li>{% endif %}
 {% if request.is_user_in_one_of_groups('admin', 'client', 'employee') %}<li><a href="{{ request.url_for('/scrum/sprint/list') }}"><i class="icon-chevron-right"></i>{% trans %}Sprints{% endtrans %}</a></li>{% endif %}
 {% if request.is_user_in_one_of_groups('admin', 'coordinator', 'scrum master') %}<li><a href="{{ request.url_for('/client/map') }}"><i class="icon-chevron-right"></i>{% trans %}Clients/Projects{% endtrans %}</a></li>{% endif %}
-{% if request.is_user_in_one_of_groups('admin', 'business', 'client', 'coordinator', 'client') %}<li><a href="{{ request.url_for('/times/tickets/report') }}"><i class="icon-chevron-right"></i>{% trans %}Time reports{% endtrans %}</a></li>{% endif %}
+{% if request.is_user_in_one_of_groups('admin', 'business', 'client', 'coordinator', 'client', 'scrum master') %}<li><a href="{{ request.url_for('/times/tickets/report') }}"><i class="icon-chevron-right"></i>{% trans %}Time reports{% endtrans %}</a></li>{% endif %}
 {% if request.is_user_in_one_of_groups('admin', 'business', 'coordinator') %}<li><a href="{{ request.url_for('/times/client/current_pivot') }}"><i class="icon-chevron-right"></i>{% trans %}Client pivot{% endtrans %}</a></li>{% endif %}
 
 
