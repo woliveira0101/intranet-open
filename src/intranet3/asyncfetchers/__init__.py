@@ -5,6 +5,7 @@ from .unfuddle import UnfuddleFetcher
 from .github import GithubFetcher
 from .trac import TracFetcher
 from .fake import FakeFetcher
+from .jira import JiraFetcher
 
 from .base import FetchException, FetcherTimeout, FetcherBaseException, FetcherBadDataError
 
@@ -16,6 +17,7 @@ FETCHERS = {
    'github': GithubFetcher,
    'trac': TracFetcher,
    'harvest': FakeFetcher,
+   'jira': JiraFetcher,
 }
 
 def get_fetcher(tracker, credentials, user, login_mapping):

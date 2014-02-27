@@ -17,11 +17,11 @@ TRACKER_TYPES["pivotaltracker"] = u"PivotalTracker"
 TRACKER_TYPES["harvest"] = u"Harvest"
 TRACKER_TYPES["unfuddle"] = u"Unfuddle"
 TRACKER_TYPES["github"] = u"Github"
+TRACKER_TYPES["jira"] = u"Jira"
 # TODO: if you need those fetchers, take them from 8a57e8ae3cc83f3d14b173351ee2d615aaaad402
 # and convert to use greenlet
 #TRACKER_TYPES["cookie_trac"] = u"Cookie-Login Trac"
 #TRACKER_TYPES["bitbucket"] = u"Bitbucket"
-#TRACKER_TYPES["jira"] = u"Jira"
 
 trackers_login_validators = {
     'all': {
