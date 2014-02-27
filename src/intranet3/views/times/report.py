@@ -103,17 +103,25 @@ class Pivot(MonthMixin, BaseView):
         count_of_required_hours_to_today = {}
 
         for user in users:
-            sftw = user.start_full_time_work or datetime.date(1970, 1, 1)
+            sftw = user.start_full_time_work
+            if sftw:
+                if sftw > month_end:
+                    start_work = datetime.date(today.year+10, 1, 1)
+                elif sftw < month_start:
+                    start_work = month_start
+                else:
+                    start_work = sftw
 
-            if sftw > month_end:
-                start_work = datetime.date(today.year+10, 1, 1)
-            elif sftw < month_start:
-                start_work = month_start
+                month_hours = h.get_working_days(start_work, month_end) * 8
+
+                today_ = today if today < month_end else month_end
+                hours_to_today = h.get_working_days(start_work, today_) * 8
+
+                count_of_required_month_hours[user.id] = month_hours
+                count_of_required_hours_to_today[user.id] = hours_to_today
             else:
-                start_work = sftw
-
-            count_of_required_month_hours[user.id] = h.get_working_days(start_work, month_end) * 8
-            count_of_required_hours_to_today[user.id] = h.get_working_days(start_work, today if today < month_end else month_end) * 8
+                count_of_required_month_hours[user.id] = 0
+                count_of_required_hours_to_today[user.id] = 0
 
         # move current user to the front of the list
         current_user_index = None
