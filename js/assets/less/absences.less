@@ -35,7 +35,6 @@
                 padding-left: 0px;
                 padding-right: 0px;
                 background: #e0e0e0;
-
                 &.day {
                     border: solid 1px @absences-border;
                 }
@@ -84,9 +83,14 @@
            }
             &.absent {
                 background: @absences-absent;
-                border-right: solid 1px @absences-absent;
+                border-right: solid 1px @absences-border;
                 &.last {
                     border-right-color: @absences-border;
+                }
+                &.late {
+                    &.inactive {
+                        background: @absences-absent;
+                    }
                 }
                 overflow-x: hidden;
                 white-space: nowrap;
