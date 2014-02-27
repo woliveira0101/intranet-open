@@ -3,6 +3,7 @@ import copy
 import pyflwor
 from pyramid.decorator import reify
 
+
 class Section(object):
     TMPL = """
 for bug in <bugs>
@@ -32,7 +33,6 @@ return bug
         #those bugs that was taken should be removed from global bug list
         for bug in self.bugs:
             bugs.remove(bug)
-
 
     @staticmethod
     def _create_base_namespace():
