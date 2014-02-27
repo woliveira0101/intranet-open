@@ -61,7 +61,7 @@ class TracFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
             status=['resolved', 'verified'],
         ))
         return params
-        
+
     def single_user_params(self):
         return dict(
             owner=self.login

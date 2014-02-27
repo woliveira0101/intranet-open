@@ -3,7 +3,7 @@ import json
 import re
 from dateutil.parser import parse
 
-from intranet3.helpers import Converter, serialize_url
+from intranet3.helpers import serialize_url
 from intranet3.log import INFO_LOG, EXCEPTION_LOG
 
 from .base import BaseFetcher, BasicAuthMixin, FetcherBadDataError
@@ -16,11 +16,14 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 
 class GithubScrumProducer(BaseScrumProducer):
     def get_points(self, bug, tracker, login_mapping, parsed_data):
-        digit_labels = [ int(label) for label in bug.labels if label.isdigit()]
+        digit_labels = [int(label) for label in bug.labels if label.isdigit()]
         return digit_labels[0] if digit_labels else 0
 
+
 class GithubBugProducer(BaseBugProducer):
+
     SCRUM_PRODUCER_CLASS = GithubScrumProducer
+
     def parse(self, tracker, login_mapping, raw_data):
         d = raw_data
         result = dict(
@@ -49,7 +52,8 @@ class GithubBugProducer(BaseBugProducer):
 class GithubFetcher(BasicAuthMixin, BaseFetcher):
     BUG_PRODUCER_CLASS = GithubBugProducer
 
-    MILESTONES_KEY = 'milestones_map' #klucz do mapowania nazwa_milestonea -> numer milestonea
+    #klucz do mapowania nazwa_milestonea -> numer milestonea
+    MILESTONES_KEY = 'milestones_map'
     MILESTONES_TIMEOUT = 60*3
 
     def __init__(self, *args, **kwargs):

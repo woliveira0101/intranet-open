@@ -5,6 +5,7 @@ from dateutil.parser import parse as dateparse
 from intranet3.asyncfetchers.base import (
     BaseFetcher,
     BasicAuthMixin,
+    FetcherBaseException,
 )
 from intranet3.asyncfetchers.bug import (
     BaseBugProducer,
@@ -172,7 +173,11 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
         return query.get_url(self.tracker.url)
 
     def parse(self, data):
-        data = json.loads(data)
+        try:
+            data = json.loads(data)
+        except ValueError:
+            raise FetcherBaseException()
+
         return data['issues']
 
     def fetch_user_tickets(self, resolved=False):

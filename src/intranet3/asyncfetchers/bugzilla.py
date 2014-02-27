@@ -18,6 +18,7 @@ class BlockedOrDependson(ToDictMixin):
         self.url = tracker.url + '/show_bug.cgi?id=%s' % bug_id
         self.owner = User(name='unknown')
 
+
 class BugzillaScrumProcuder(BaseScrumProducer):
 
     def parse_whiteboard(self, wb):
@@ -32,8 +33,11 @@ class BugzillaScrumProcuder(BaseScrumProducer):
         if points and points.strip().isdigit():
             return int(points.strip())
 
+
 class BugzillaBugProducer(BaseBugProducer):
+
     SCRUM_PRODUCER_CLASS = BugzillaScrumProcuder
+
     def parse(self, tracker, login_mapping, raw_data):
         d = raw_data
 
@@ -53,9 +57,9 @@ class BugzillaBugProducer(BaseBugProducer):
             desc=d['short_desc'],
             reporter=d['reporter'],
             owner=d['assigned_to'],
-            priority=d.get('priority', ''), # + '/' + d['priority'],
+            priority=d.get('priority', ''),  # + '/' + d['priority'],
             severity=d.get('bug_severity', ''),
-            status=d.get('bug_status', ''), # + '/' + d['resolution'],
+            status=d.get('bug_status', ''),  # + '/' + d['resolution'],
             resolution=d.get('resolution', ''),
             project_name=d['product'],
             component_name=d['component'],
@@ -71,6 +75,7 @@ class BugzillaBugProducer(BaseBugProducer):
     def get_url(self, tracker, login_mapping, parsed_data):
         return tracker.url + '/show_bug.cgi?id=%s' % parsed_data['id']
 
+
 class FetchBlockedAndDependsonMixin(object):
 
     def pre_parse(self, data):
@@ -82,7 +87,6 @@ class FetchBlockedAndDependsonMixin(object):
         #data = data.decode(self.encoding)
         xml = ET.fromstring(data)
         return xml
-
 
     def parse_ids(self, data):
         xml = self.pre_parse(data)
@@ -134,7 +138,6 @@ class FetchBlockedAndDependsonMixin(object):
 
         return self.parse_statuses(result.content)
 
-
     def after_parsing(self, parsed_data):
         ids = [bug['bug_id'] for bug in parsed_data]
         blocked_and_dependson = self.get_ids(ids)
@@ -161,6 +164,7 @@ class FetchBlockedAndDependsonMixin(object):
 
         return parsed_data
 
+
 class BugzillaFetcher(FetchBlockedAndDependsonMixin,
                       CSVParserMixin, BasicAuthMixin, BaseFetcher):
     BUG_PRODUCER_CLASS = BugzillaBugProducer
@@ -184,12 +188,12 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin,
 
     def resolved_common_url_params(self):
         return {
-            'bug_status':['RESOLVED', 'VERIFIED'],
-            'ctype':'csv',
-            'emailreporter1':'1',
-            'field0-0-0':'resolution',
-            'type0-0-0':'notequals',
-            'value0-0-0':'LATER'
+            'bug_status': ['RESOLVED', 'VERIFIED'],
+            'ctype': 'csv',
+            'emailreporter1': '1',
+            'field0-0-0': 'resolution',
+            'type0-0-0': 'notequals',
+            'value0-0-0': 'LATER'
         }
 
     def single_user_params(self):

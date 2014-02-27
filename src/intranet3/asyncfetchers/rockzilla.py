@@ -3,9 +3,10 @@ from .igozilla import IgozillaFetcher
 
 KEYINGREDIENT_TRACKER_ID = 10
 
+
 class RockzillaFetcher(IgozillaFetcher):
 
-    delimiter=','
+    delimiter = ','
     SPRINT_REGEX = 's=%s'
 
     def __init__(self, *args, **kwargs):

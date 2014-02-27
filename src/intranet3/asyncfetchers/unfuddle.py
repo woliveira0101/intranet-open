@@ -3,11 +3,19 @@ import dateutil.parser
 
 from pyramid.decorator import reify
 
-from intranet3.helpers import Converter, serialize_url, make_path
+from intranet3.helpers import (
+    serialize_url,
+    make_path
+)
 from intranet3.log import EXCEPTION_LOG, INFO_LOG
 
-from .base import BaseFetcher, BasicAuthMixin, FetcherBadDataError
-from .bug import BaseScrumProducer, BaseBugProducer
+from .base import (
+    BaseFetcher,
+    BasicAuthMixin,
+    FetcherBadDataError,
+    FetcherBaseException,
+)
+from .bug import BaseBugProducer
 from .request import RPC
 
 LOG = INFO_LOG(__name__)
@@ -17,25 +25,12 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 class UnfuddleBugProducer(BaseBugProducer):
 
     def parse(self, tracker, login_mapping, raw_data):
-        d = raw_data
-        return dict(
-            id=d['id'],
-            desc=d['desc'],
-            reporter=d['reporter'],
-            owner=d['owner'],
-            status=d['status'],
-            project_name=d['project_name'],
-            opendate=d['opendate'],
-            changeddate=d['changeddate'],
-            priority=d['priority'],
-            component_name=d['component_name'],
-            whiteboard=d['whiteboard'],
-        )
+        return raw_data
 
     def get_url(self, tracker, login_mapping, parsed_data):
-        id, project_name = parsed_data['id'], parsed_data['project_name']
+        id, project_id = parsed_data['id'], parsed_data['project_id']
         url = make_path(tracker.url, '/a#/projects/%s/tickets/by_number/%s')
-        url = url % (project_name, id)
+        url = url % (project_id, id)
         return url
 
     def get_status(self, tracker, login_mapping, parsed_data):
@@ -66,12 +61,16 @@ class UnfuddleMetadataFetcher(BasicAuthMixin, BaseFetcher):
     @reify
     def unfuddle_data(self):
         response = self._unfuddle_data_rpc.get_result()
-        jdata = json.loads(response.content)
 
-        users = self._get_users(jdata['people'])
-        projects = self._get_projects(jdata['projects'])
+        try:
+            jdata = json.loads(response.content)
+        except ValueError:
+            raise FetcherBaseException()
+
+        users = self._get_users(jdata.get('people', []))
+        projects = self._get_projects(jdata.get('projects', []))
         whiteboard_field_numbers = self._get_whiteboard_number(
-            jdata['projects']
+            jdata.get('projects', [])
         )
         components = self._get_components(jdata.get('components', []))
         milestones = self._get_milestones(jdata.get('milestones', []))
@@ -104,28 +103,36 @@ class UnfuddleMetadataFetcher(BasicAuthMixin, BaseFetcher):
         return result
 
     def _get_users(self, users):
-        mapping = dict([( user['id'], user['username'] ) for user in users])
+        mapping = dict([
+            (user['id'], user['username']) for user in users
+        ])
         mapping[None] = 'nobody'
         return mapping
 
     def _get_projects(self, projects):
-        mapping = dict([(str(p['id']), p['title'] ) for p in projects])
+        mapping = dict([
+            (str(p['id']), p['title'])
+            for p in projects
+        ])
         return mapping
 
     def _get_components(self, components):
-        mapping = dict([(str(c['id']), c['name'] ) for c in components])
+        mapping = dict([
+            (str(c['id']), c['name'])
+            for c in components
+        ])
         return mapping
 
     def _get_milestones(self, milestones):
         mapping = dict([
-            ((str(m['project_id']), str(m['title'])), m['id'] )
+            ((str(m['project_id']), str(m['title'])), m['id'])
             for m in milestones
         ])
         return mapping
 
     def _get_custom_fields(self, custom_fields):
         mapping = dict([
-            ((str(cf['project_id']), str(cf['id'])), cf['value'] )
+            ((str(cf['project_id']), str(cf['id'])), cf['value'])
             for cf in custom_fields
         ])
         return mapping
@@ -135,18 +142,22 @@ class UnfuddleFetcher(UnfuddleMetadataFetcher):
     """
 conditions-string:
 A comma or vertical bar separated list of report criteria composed as
-      "field-expr-value, field-expr-value | field-expr-value"
+    "field-expr-value, field-expr-value | field-expr-value"
 
-      "field" is one of the following: [number, summary, priority, status, resolution, milestone, component,  version,
-                                        severity, reporter, assignee, created_at, updated_at, last_comment_at, due_on,
-                                        field_1, field_2, field_3]
-      "expr" is one of the following: [eq, neq, gt, lt, gteq, lteq]
-      "value" is an appropriate value for the given field; "value" can also be "current" for fields that represent people.
+    "field" is one of the following: [number, summary, priority, status,
+        resolution, milestone, component,  version, severity, reporter,
+        assignee, created_at, updated_at, last_comment_at, due_on,
+        field_1, field_2, field_3]
+    "expr" is one of the following: [eq, neq, gt, lt, gteq, lteq]
+    "value" is an appropriate value for the given field; "value" can also be
+        "current" for fields that represent people.
 
-    Note: The comma acts as the AND operator and the vertical bar as the OR operator
-    Example: "assignee-eq-current,status-eq-closed|status-eq-resolved,milestone-eq-34584"
-               translates into
-             Assignee is the Current user AND (Status is Closed OR Status is Resolved) AND Milestone is 34584
+    Note: The comma acts as the AND operator and the vertical bar as the OR
+        operator
+    Example: "assignee-eq-current,status-eq-closed|status-eq-resolved"
+        translates into
+        Assignee is the Current user AND (Status is Closed OR Status is
+                                          Resolved)
     """
     PRIORITY_MAP = {
         '1': 'Lowest',
@@ -161,8 +172,12 @@ A comma or vertical bar separated list of report criteria composed as
         super(UnfuddleFetcher, self).__init__(*args, **kwargs)
 
     def api_url(self, project_id=None):
-        api = '/api/v1/ticket_reports/dynamic.json' # all projects
-        project_api = '/api/v1/projects/%s/ticket_reports/dynamic.json' # particular project
+        # all projects
+        api = '/api/v1/ticket_reports/dynamic.json'
+
+        # particular project
+        project_api = '/api/v1/projects/%s/ticket_reports/dynamic.json'
+
         if project_id:
             path = project_api % project_id
         else:
@@ -186,7 +201,7 @@ A comma or vertical bar separated list of report criteria composed as
         if all:
             unfuddle_login_mapping = self.unfuddle_data['users']
             unfuddle_user_reverse_map = dict(
-                (v,k) for k, v in unfuddle_login_mapping.iteritems()
+                (v, k) for k, v in unfuddle_login_mapping.iteritems()
             )
             user_ids = [
                 unfuddle_user_reverse_map.get(username)
@@ -265,7 +280,7 @@ A comma or vertical bar separated list of report criteria composed as
 
     def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
         projects_reversed = dict(
-            (v,k) for k, v in self.unfuddle_data['projects'].iteritems()
+            (v, k) for k, v in self.unfuddle_data['projects'].iteritems()
         )
         _project_id = projects_reversed.get(project_id)
         if not _project_id:
@@ -274,7 +289,9 @@ A comma or vertical bar separated list of report criteria composed as
             raise FetcherBadDataError(error)
 
         url = self.api_url() + '?'
-        milestone_id = self.unfuddle_data['milestones'].get((str(_project_id), sprint_name))
+        milestone_id = self.unfuddle_data['milestones'].get(
+            (str(_project_id), sprint_name)
+        )
         if not milestone_id:
             error = 'Wrong sprint name'
             raise FetcherBadDataError(error)
@@ -287,19 +304,25 @@ A comma or vertical bar separated list of report criteria composed as
     def parse(self, data):
         """
         Available fields:
-        u'field3_value_id', u'number', u'assignee_id', u'due_on', u'reporter_id', u'field2_value_id',
-        u'resolution_description_format', u'id', u'description_format', u'priority', u'hours_estimate_initial',
-        u'project_id', u'hours_estimate_current', u'status', u'description', u'field1_value_id', u'severity_id',
-        u'version_id', u'updated_at', u'milestone_id', u'resolution_description', u'component_id', u'created_at',
-        u'summary', u'resolution'
+        u'field3_value_id', u'number', u'assignee_id', u'due_on',
+        u'reporter_id', u'field2_value_id', u'resolution_description_format',
+        u'id', u'description_format', u'priority', u'hours_estimate_initial',
+        u'project_id', u'hours_estimate_current', u'status', u'description',
+        u'field1_value_id', u'severity_id', u'version_id', u'updated_at',
+        u'milestone_id', u'resolution_description', u'component_id',
+        u'created_at', u'summary', u'resolution'
         """
         unfuddle_login_mapping = self.unfuddle_data['users']
         unfuddle_project_mapping = self.unfuddle_data['projects']
         unfuddle_component_mapping = self.unfuddle_data['components']
 
-        jdata = json.loads(data)
-        if len(jdata['groups']) ==0:
-            return
+        try:
+            jdata = json.loads(data)
+        except ValueError:
+            raise FetcherBaseException()
+
+        if len(jdata['groups']) == 0:
+            return []
 
         tickets = jdata['groups'][0]['tickets']
         result = []
@@ -308,6 +331,7 @@ A comma or vertical bar separated list of report criteria composed as
                 tracker=self.tracker,
                 id=ticket['number'],
                 desc=ticket['summary'],
+                project_id=ticket['project_id'],
                 reporter=unfuddle_login_mapping.get(
                     ticket['reporter_id'],
                     'unknown',

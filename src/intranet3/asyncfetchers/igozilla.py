@@ -10,10 +10,11 @@ from intranet3.log import INFO_LOG, DEBUG_LOG
 LOG = INFO_LOG(__name__)
 DEBUG = DEBUG_LOG(__name__)
 
+
 class IgozillaFetcher(BugzillaFetcher):
-    
+
     encoding = 'utf-8'
-    delimiter=','
+    delimiter = ','
 
     def get_auth(self):
         form_fields = {

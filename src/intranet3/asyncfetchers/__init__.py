@@ -7,18 +7,24 @@ from .trac import TracFetcher
 from .fake import FakeFetcher
 from .jira import JiraFetcher
 
-from .base import FetchException, FetcherTimeout, FetcherBaseException, FetcherBadDataError
+from .base import (
+    FetchException,
+    FetcherTimeout,
+    FetcherBaseException,
+    FetcherBadDataError,
+)
 
 FETCHERS = {
-   'bugzilla': BugzillaFetcher,
-   'rockzilla': RockzillaFetcher,
-   'pivotaltracker': PivotalTrackerFetcher,
-   'unfuddle': UnfuddleFetcher,
-   'github': GithubFetcher,
-   'trac': TracFetcher,
-   'harvest': FakeFetcher,
-   'jira': JiraFetcher,
+    'bugzilla': BugzillaFetcher,
+    'rockzilla': RockzillaFetcher,
+    'pivotaltracker': PivotalTrackerFetcher,
+    'unfuddle': UnfuddleFetcher,
+    'github': GithubFetcher,
+    'trac': TracFetcher,
+    'harvest': FakeFetcher,
+    'jira': JiraFetcher,
 }
+
 
 def get_fetcher(tracker, credentials, user, login_mapping):
     type = tracker.type
