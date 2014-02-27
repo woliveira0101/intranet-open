@@ -23,7 +23,10 @@ class ToDictMixin(object):
             if hasattr(value, 'to_dict'):
                 value = value.to_dict()
             if isinstance(value, (list, tuple, set)):
-                value = [v.to_dict() for v in value]
+                value = [
+                    v.to_dict() if hasattr(v, 'to_dict') else v
+                    for v in value
+                ]
             result[attr] = value
         return result
 

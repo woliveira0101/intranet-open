@@ -1,43 +1,42 @@
 <div id="sprint-editor" ng-controller="sprintEditCtrl" style="margin-left: 85px">
-  <div>
-    <a class="btn" ng-click="show_boards()">Show boards</a>
-    <a class="btn" ng-show="sprintId" ng-click="show_bugs()">Show bugs</a>
-  </div>
+	<div>
+		<a class="btn" ng-click="show_boards()">Show boards</a>
+		<a class="btn" ng-show="sprintId" ng-click="show_bugs()">Show bugs</a>
+	</div>
 
-  <input type="hidden" name="board" ng-value="columns_json()">
+	<input type="hidden" name="board" ng-value="columns_json()">
 
-  <div class="row" style="margin: 20px 0">
-    <div style="float: right">
-      <a class="btn add-column" ng-click="add_column()">Add column</a>
-    </div>
-    <div id="task_board_container">
-      <table class="table table-bordered task_board">
-        <thead>
-        <tr>
-          <th ng-repeat="column in columns">
-            <input class="unsubmittable" type="text" ng-model="column.name">
-            <a class="btn btn-small" ng-click="add_section(column)">Add section</a>
-            <a ng-show="columns.length > 1" ng-click="remove_column(column)"><i class="icon-remove"></i></a>
-          </th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-          <td ng-repeat="column in columns">
-            <div class="board-column">
-              <div class="frame_normal" ng-repeat="section in column.sections">
-                <div class="head_card"><span><input class="unsubmittable" type="text" ng-model="section.name"><a ng-show="column.sections.length > 1" ng-click="remove_section(section, column.sections)"><i class="icon-remove"></i></a></span></div>
-                <textarea class="unsubmittable" ng-model="section.cond"></textarea>
-                <div class="clearfix"></div>
-              </div>
-            </div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
+	<a class="add-column btn add-column" ng-click="add_column()">Add column</a>
 
-  </div>
-  <a class="btn" ng-click="save()">Save this board</a>
+	<div id="task_board_container">
+		<table class="table table-bordered task_board">
+			<thead>
+				<tr>
+					<th ng-repeat="column in columns">
+						<a class="board-remove" ng-show="columns.length > 1" ng-click="remove_column(column)"><i class="icon-remove"></i></a>
+						<span class="field">
+							<input class="unsubmittable" type="text" ng-model="column.name" placeholder="Column name">
+						</span>
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td ng-repeat="column in columns">
+						<div class="board-column">
+							<div class="board-section" ng-repeat="section in column.sections">
+								<a class="board-remove" ng-show="column.sections.length > 1" ng-click="remove_section(section, column.sections)"><i class="icon-remove"></i></a>
+								<span class="field"><input class="unsubmittable" type="text" ng-model="section.name" placeholder="Section name"></span>
+								<span class="field"><textarea class="unsubmittable" ng-model="section.cond" placeholder="Query"></textarea></span>
+							</div>
+							<a class="btn btn-small" ng-click="add_section(column)">Add section</a>
+						</div>
+
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<a class="btn" ng-click="save()">Save this board</a>
 
 </div>

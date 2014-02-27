@@ -1586,26 +1586,56 @@ form.box_edit_user dl dt {
 }
 
 #sprint-editor {
-  .add-column {
-    margin: 60px 10px 0 0;
-    padding: 30px;
-  }
-
-
-  #task_board_container {
-    overflow: auto;
-    width: 85%;
-    .board-column {
-      width: 360px;
-
+    .field {
+        display: block;
+        overflow: hidden;
+        padding-right: 15px;
     }
-  }
+    #task_board_container {
+        overflow: auto;
+        margin-bottom: 10px;
+        .board-column {
+            min-width: 170px;
+        }
+    }
+    table {
+        background-color: rgb(255, 251, 250);
+        border-top: 2px solid @grayLight;
+        border-bottom: 2px solid @grayLight;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        input, textarea {
+            width: 100%;
+        }
+        th {
+            cursor: auto;
+        }
+        td {
+            text-align: center;
+        }
+    }
+    .board-remove {
+        float: right;
+        padding: 7px;
+        cursor: pointer;
+        &:hover {
+            background-color: @grayLight;
+        }
+    }
+    .board-section {
+        border-top: 2px solid @grayLight;
+        padding-top: 5px;
+
+        &:first-child {
+            border-top: none;
+            padding-top: 0px;
+        }
+    }
+    .add-column {
+        float: right;
+    }
 
 }
-
-
-
-
 
 /* end of sprint */
 

@@ -6,7 +6,7 @@ App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
   if(board){
     $scope.columns = board;
   } else {
-    $scope.columns = [{name: 'example name', sections: [{name: 'example name', cond: ''}]}];
+    $scope.columns = [{name: '', sections: [{name: '', cond: ''}]}];
   }
 
   $scope.columns_json = function(){
@@ -23,11 +23,11 @@ App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
   };
 
   $scope.add_column = function(){
-    $scope.columns.push({name: 'example name', sections: [{name: 'example name', cond: ''}]})
+    $scope.columns.push({name: '', sections: [{name: '', cond: ''}]})
   };
 
   $scope.add_section = function(column){
-    column.sections.push({name: 'example', cond: ''})
+    column.sections.push({name: '', cond: ''})
   };
 
   $scope.remove_column = function(column){
