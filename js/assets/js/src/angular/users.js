@@ -62,17 +62,6 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       }
     });
 
-
-    $scope.locations = [
-        {
-            id:'poznan',
-            name:'Poznań'
-        },
-        {
-            id:'wroclaw',
-            name:'Wrocław'
-        }
-    ];
     $scope.set_tab = function(name){
        $scope.tab = name;
     };
@@ -103,25 +92,30 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       $scope.users = data.users;
 
       $http.get('/api/teams').success(function(data){
-        data.teams.push({'id':-1, 'name':' - No Team - ', 'users':[]});
-        $scope.teams = $filter('orderBy')(data.teams, 'name');
-        $scope.teams_to_user = {};
-        $scope.user_to_teams = {};
-        _.each(data, function(team){
-          $scope.teams_to_user[team['id']] = team['users'];
+        var users_without_team = {'id':-1, 'name':' - No Team - ', 'users':[], 'active_user_counter': 0};
+
+        _.each(data['teams'], function(team) {
+          team.active_user_counter = 0;
         });
 
-        _.each($scope.users, function(user){
+        _.each($scope.users, function(user) {
           user.teams = [];
           user.teams_ids = [];
-          _.each($scope.teams, function(team){
-            if(team.users.indexOf(user.id) >= 0){
+          _.each(data['teams'], function(team) {
+            if(_.contains(team.users, user.id)) {
+             if (user.is_active) {
+              team.active_user_counter += 1;
+             }
              user.teams.push(team);
              user.teams_ids.push(team.id);
             }
           });
+          if (user.is_active == true && !_.contains(user.groups, 'client') && user.teams.length == 0) {
+            users_without_team.active_user_counter += 1;
+          }
         });
-
+        data['teams'].push(users_without_team);
+        $scope.teams = $filter('orderBy')(data.teams, 'name');
         $scope.search.teams = [1]; //szczuczka aby wymusić odświeżenie -- spowodowane kiepska implementacja dyrektywy bs-select
         $timeout(function(){
           $scope.search.teams = [];
@@ -135,6 +129,8 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       var groups_counter =  _.object(_.map($scope.G.GROUPS, function(group) {
         return [group, 0];
       }));
+      var location_counter = {'wroclaw': 0, 'poznan': 0};
+
       _.each($scope.users, function(user) {
         if (user.is_active == false) {
           return;
@@ -145,8 +141,21 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
         _.each(user.groups, function(group) {
           groups_counter[group] += 1;
         });
+        location_counter[user.location[0]] += 1;
       });
 
+      $scope.locations = [
+        {
+            id:'poznan',
+            name:'Poznań',
+            counter: location_counter['poznan']
+        },
+        {
+            id:'wroclaw',
+            name:'Wrocław',
+            counter: location_counter['wroclaw']
+        }
+      ];
       $scope.roles = _.map($scope.G.ROLES, function(role) {
         var counter = roles_counter[role[0]];
         return {id: role[0], name: role[1], counter: counter};
