@@ -55,31 +55,47 @@ missed_hours = URLCronTask(
     u'Missed hours report',
     '/cron/times/missed_hours',
 )
-
-#repeater = Repeater(
-#    RequiredAction('sync_client_hours', lambda date: '/cron/time/client_hours'),
-#)
-
+sync_client_hours = URLCronTask(
+    u'Client hours synchronization',
+    '/cron/times/client_hours',
+)
 
 cron_tasks = (
-#    (func, cron_line),
-     (clean, (0, 3, -1, -1, -1)),
-     (sync_holidays, (1, 0, -1, -1, -1)),
-     (resolved_notification, (0, 7, -1, -1, -1)),
-     (missing_hours_notification, (0, 19, -1, -1, -1)),
-     (report_with_today_hours, (1, 0, -1, -1, -1)), # at 00:01 every day
-     (report_with_today_hours_without_ticket, (1, 0, -1, -1, -1)), # at 00:01 every day
-     (report_with_hours_added_for_prev_months, (1, 0, -1, -1, -1)), # at 00:01 every day
+    # (func, cron_line),
+    (clean, (0, 3, -1, -1, -1)),
+    (sync_holidays, (1, 0, -1, -1, -1)),
+    (resolved_notification, (0, 7, -1, -1, -1)),
+    (missing_hours_notification, (0, 19, -1, -1, -1)),
 
-     (tickets_report_with_excel, (1, 1, 2, -1, -1)),
-     (annually_time_report_email, (1, 0, 28, -1, -1)),
-     (old_bugs_report_email, (1, 0, 1, -1, -1)),
-     (missed_hours, (1, 0, 1, -1, -1)), # at 00:01 every first 2 days of month
+    # at 00:01 every first 5 days of month
+    # uwsgi doesn't accept list of days unfortunately
+    (sync_client_hours, (1, 0, 1, -1, -1)),
+    (sync_client_hours, (1, 0, 2, -1, -1)),
+    (sync_client_hours, (1, 0, 3, -1, -1)),
+    (sync_client_hours, (1, 0, 4, -1, -1)),
+    (sync_client_hours, (1, 0, 5, -1, -1)),
+
+    # at 00:01 every day
+    (report_with_today_hours, (1, 0, -1, -1, -1)),
+
+    # at 00:01 every day
+    (report_with_today_hours_without_ticket, (1, 0, -1, -1, -1)),
+
+    # at 00:01 every day
+    (report_with_hours_added_for_prev_months, (1, 0, -1, -1, -1)),
+
+    (tickets_report_with_excel, (1, 1, 2, -1, -1)),
+    (annually_time_report_email, (1, 0, 28, -1, -1)),
+    (old_bugs_report_email, (1, 0, 1, -1, -1)),
+
+    # at 00:01 every first 2 days of month
+    (missed_hours, (1, 0, 1, -1, -1)),
 )
 
 timer_tasks = (
-    (mailer, 60), # every 60 second
+    (mailer, 60),  # every 60 second
 )
+
 
 def run_cron_tasks():
     from uwsgidecorators import cron, timer
@@ -93,5 +109,3 @@ def run_cron_tasks():
         f, sec = task
         timer_job = timer(sec)
         timer_job(f)
-
-
