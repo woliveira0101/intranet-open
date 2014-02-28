@@ -12,6 +12,8 @@ include = %d/../uwsgi/uwsgi.xml
 honour-stdin = true
 http = 127.0.0.1:5000
 
+py-autoreload = 1
+
 ;socket = /tmp/uwsgi.sock
 ;daemonize = %d../../var/log/uwsgi.log
 ;pidfile = %d../../var/uwsgi.pid
