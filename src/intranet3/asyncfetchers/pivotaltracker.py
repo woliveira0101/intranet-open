@@ -25,34 +25,17 @@ ISSUE_STATE_UNRESOLVED = ['started', 'unstarted', 'unscheduled', 'accepted']
 class PivotalTrackerBugProducer(BaseBugProducer):
 
     def parse(self, tracker, login_mapping, raw_data):
-        d = raw_data
-        return dict(
-            id=d['id'],
-            desc=d['desc'],
-            reporter=d['reporter'],
-            owner=d['owner'],
-            status=d['status'],
-            project_name=d['project_name'],
+        raw_data.update(dict(
             opendate=datetime.datetime.strptime(
-                d['opendate'],
+                raw_data['opendate'],
                 '%Y/%m/%d %H:%M:%S %Z',
             ),
             changeddate=datetime.datetime.strptime(
-                d['changeddate'],
+                raw_data['changeddate'],
                 '%Y/%m/%d %H:%M:%S %Z',
             ),
-            points=d['points'],
-        )
-
-    def get_status(self, tracker, login_mapping, parsed_data):
-        status = parsed_data['status']
-        if status == 'delivered':
-            return 'CLOSED'
-        elif status in ISSUE_STATE_RESOLVED:
-            return 'RESOLVED'
-        elif status in ISSUE_STATE_UNRESOLVED:
-            return 'NEW'
-        return 'NEW'
+        ))
+        return raw_data
 
 
 class PivotalTrackerTokenFetcher(BaseFetcher):
@@ -208,6 +191,12 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
                 points = 0
             points = int(points)
 
+
+            try:
+                labels = story.find('labels').text.split(',')
+            except:
+                labels = []
+
             bug_desc = dict(
                 tracker=self.tracker,
                 id=story.find('id').text,
@@ -218,6 +207,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
                 project_name=story.find('project_id').text,
                 opendate=story.find('created_at').text,
                 changeddate=story.find('updated_at').text,
+                labels=labels,
                 points=points,
             )
             result.append(bug_desc)
