@@ -5,13 +5,19 @@ from dateutil.parser import parse as dateparse
 from intranet3.asyncfetchers.base import (
     BaseFetcher,
     BasicAuthMixin,
+    FetcherBadDataError,
+    FetchException,
 )
 from intranet3.asyncfetchers.bug import (
     BaseBugProducer,
     ToDictMixin,
 )
 from intranet3.asyncfetchers.request import RPC
+from intranet3.log import ERROR_LOG, INFO_LOG
 from intranet3.models import User
+
+LOG = INFO_LOG(__name__)
+ERROR = ERROR_LOG(__name__)
 
 
 class BlockedOrDependson(ToDictMixin):
@@ -130,6 +136,15 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
     def fetch(self, url):
         return RPC('GET', url)
 
+    def check_if_failed(self, response):
+        if response.status_code == 401:
+            login_reason = response.headers['x-seraph-loginreason']
+            if 'AUTHENTICATED_FAILED' in login_reason:
+                raise FetcherBadDataError(
+                    "You don't have proper credentials for tracker {}"
+                    .format(self.tracker.name))
+        super(JiraFetcher, self).check_if_failed(response)
+
     def get_fields_list(self):
         return ','.join(self.FIELDS)
 
@@ -172,7 +187,12 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
         return query.get_url(self.tracker.url)
 
     def parse(self, data):
-        data = json.loads(data)
+        try:
+            data = json.loads(data)
+        except ValueError as e:
+            ERROR('Error while parsing jira response:\n%s' % e)
+            raise FetchException(e)
+
         return data['issues']
 
     def fetch_user_tickets(self, resolved=False):

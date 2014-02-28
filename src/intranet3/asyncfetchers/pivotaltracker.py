@@ -5,18 +5,21 @@ from requests.auth import HTTPBasicAuth
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ParseError
 
-from intranet3.helpers import Converter, serialize_url, make_path
+from intranet3.helpers import (
+    serialize_url,
+    make_path
+)
 from intranet3.log import EXCEPTION_LOG, INFO_LOG
 
 from .base import BaseFetcher, FetcherBadDataError
-from .bug import BaseBugProducer, BaseScrumProducer
+from .bug import BaseBugProducer
 from .request import RPC
 
 LOG = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
 
 ISSUE_STATE_RESOLVED = ['finished']
-ISSUE_STATE_UNRESOLVED = ['started','unstarted','unscheduled', 'accepted']
+ISSUE_STATE_UNRESOLVED = ['started', 'unstarted', 'unscheduled', 'accepted']
 
 
 class PivotalTrackerBugProducer(BaseBugProducer):
@@ -51,13 +54,13 @@ class PivotalTrackerBugProducer(BaseBugProducer):
             return 'NEW'
         return 'NEW'
 
+
 class PivotalTrackerTokenFetcher(BaseFetcher):
     TOKEN_MEMCACHE_KEY = '{tracker_type}-{tracker_id}-{user_id}-pivotal_token'
     TOKEN_MEMCACHE_TIMEOUT = 60*60*24
 
     TOKEN_URL = 'https://www.pivotaltracker.com/services/v3/tokens/active'
     BUG_PRODUCER_CLASS = PivotalTrackerBugProducer
-
 
     def __init__(self, tracker, credentials, user, login_mapping):
         super(PivotalTrackerTokenFetcher, self).__init__(
@@ -67,7 +70,7 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
             login_mapping,
         )
         try:
-            email, login =  credentials.login.split(';')
+            email, login = credentials.login.split(';')
         except Exception:
             email, login = '', ''
 
@@ -101,7 +104,6 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
 
 class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
     api_url = 'services/v3/projects'
-
 
     def __init__(self, *args, **kwargs):
         super(PivotalTrackerFetcher, self).__init__(*args, **kwargs)
@@ -140,7 +142,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         if resolved:
             state = ','.join(ISSUE_STATE_RESOLVED)
         else:
-            state =','.join(ISSUE_STATE_UNRESOLVED)
+            state = ','.join(ISSUE_STATE_UNRESOLVED)
 
         rpcs = self.fetch('stories', filters=dict(
             owner='"%s"' % self.login,

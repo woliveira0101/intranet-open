@@ -1,4 +1,4 @@
-from intranet3.models import Base, User
+from intranet3.models import User
 from intranet3.models.project import SelectorMapping
 from intranet3.priorities import PRIORITIES
 
@@ -48,9 +48,9 @@ class Bug(ToDictMixin):
         self.reporter = User(name='unknown', email='unknown')
         self.owner = User(name='unknown', email='unknown')
         self.priority = ''
-        self.priority_number = 5 # 1 - 5
+        self.priority_number = 5  # 1 - 5
         self.severity = ''
-        self.severity_number = 5 # 1 - 5
+        self.severity_number = 5  # 1 - 5
         self.status = ''
         self.resolution = ''
         self.project_name = ''

@@ -77,7 +77,7 @@ class FetcherMeta(type):
             cached = memcache.get(self._memcached_key)
 
             if cached is not None:
-                DEBUG(u"Bugs found in cache for key %s" % self._memcached_key )
+                DEBUG(u"Bugs found in cache for key %s" % self._memcached_key)
                 self._parsed_data = cached
             else:
                 # start greenlet
@@ -93,15 +93,17 @@ class FetcherMeta(type):
                 attrs[attr_name] = mcs.__async(attr)
         return type.__new__(mcs, name, bases, attrs)
 
+
 class BaseFetcher(object):
     __metaclass__ = FetcherMeta
     BUG_PRODUCER_CLASS = None
     get_converter = None
     CACHE_TIMEOUT = 3 * 60 * 10  # 3 minutes
     SPRINT_REGEX = 's=%s(?!\S)'
-    MAX_TIMEOUT = 30 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
+    MAX_TIMEOUT = 30  # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 
-    def __init__(self, tracker, credentials, user, login_mapping, timeout=MAX_TIMEOUT):
+    def __init__(self, tracker, credentials, user, login_mapping,
+                 timeout=MAX_TIMEOUT):
         self._greenlet = None
         self.tracker = tracker
         self.login = credentials.login
@@ -175,11 +177,12 @@ class BaseFetcher(object):
             self._parsed_data.extend(self.parse(response.text))
 
         self._parsed_data = self.after_parsing(self._parsed_data)
-        memcache.set(self._memcached_key, self._parsed_data, self.CACHE_TIMEOUT)
+        memcache.set(self._memcached_key, self._parsed_data,
+                     self.CACHE_TIMEOUT)
 
     def check_if_failed(self, response):
         code = response.status_code
-        if 200 > code > 299:
+        if code < 200 or code > 299:
             reason = u'Received response %s' % code
             raise FetchException(reason)
 
@@ -193,7 +196,8 @@ class BaseFetcher(object):
             if not self._greenlet.successful():
                 raise self._greenlet.exception
 
-        bug_producer = self.BUG_PRODUCER_CLASS(self.tracker, self.login_mapping)
+        bug_producer = self.BUG_PRODUCER_CLASS(self.tracker,
+                                               self.login_mapping)
         bugs = {}
         for bug_desc in self._parsed_data:
             bug = bug_producer(
@@ -219,7 +223,7 @@ class BaseFetcher(object):
         """ Start fetching tickets for all users in mapping """
         raise NotImplementedError()
 
-    def fetch_bugs_for_query(self, ticket_ids=None,project_selector=None,
+    def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
                              component_selector=None, version=None,
                              resolved=False):
         """ Start fetching all bugs matching given criteria """
@@ -244,7 +248,7 @@ class CSVParserMixin(object):
     encoding = 'utf-8'
 
     # CSV delimited
-    delimiter=','
+    delimiter = ','
 
     def parse(self, data):
         if codecs.BOM_UTF8 == data[:3]:

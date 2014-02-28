@@ -296,7 +296,7 @@ class EveryonesProject(FilterMixin, BaseView):
         projects = self.session.query(m.Client, m.Project).filter(m.Client.id==m.Project.client_id).order_by(m.Client.name, m.Project.name)
         tracker = project.tracker
         bugs = Bugs(self.request).get_project(project, resolved)
-        if bugs:
+        if bugs is not None:
             # will not be able to fetch, because user does not have credentials for this tracker
             bugs = sorted(bugs, cmp=h.sorting_by_severity)
             return dict(unable=False, bugs=bugs, projects=projects, project=project, tracker=tracker, resolved=resolved)
