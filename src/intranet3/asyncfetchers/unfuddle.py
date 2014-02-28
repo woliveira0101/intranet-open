@@ -13,7 +13,7 @@ from .base import (
     BaseFetcher,
     BasicAuthMixin,
     FetcherBadDataError,
-    FetcherBaseException,
+    FetchException,
 )
 from .bug import BaseBugProducer
 from .request import RPC
@@ -65,7 +65,7 @@ class UnfuddleMetadataFetcher(BasicAuthMixin, BaseFetcher):
         try:
             jdata = json.loads(response.content)
         except ValueError:
-            raise FetcherBaseException()
+            raise FetchException()
 
         users = self._get_users(jdata.get('people', []))
         projects = self._get_projects(jdata.get('projects', []))
@@ -183,6 +183,14 @@ A comma or vertical bar separated list of report criteria composed as
         else:
             path = api
         return str(make_path(self.tracker.get_url(), path))
+
+    def check_if_failed(self, response):
+        if response.status_code == 401:
+            if response.cookies['authenticated'] == 'false':
+                raise FetcherBadDataError(
+                    "You don't have proper credentials for tracker {}"
+                    .format(self.tracker.name))
+        super(UnfuddleFetcher, self).check_if_failed(response)
 
     def fetch(self, url):
         rpc = RPC(
@@ -319,7 +327,7 @@ A comma or vertical bar separated list of report criteria composed as
         try:
             jdata = json.loads(data)
         except ValueError:
-            raise FetcherBaseException()
+            raise FetchException()
 
         if len(jdata['groups']) == 0:
             return []

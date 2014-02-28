@@ -182,7 +182,7 @@ class BaseFetcher(object):
 
     def check_if_failed(self, response):
         code = response.status_code
-        if 200 > code > 299:
+        if code < 200 or code > 299:
             reason = u'Received response %s' % code
             raise FetchException(reason)
 
