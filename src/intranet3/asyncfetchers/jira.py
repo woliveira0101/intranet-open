@@ -5,15 +5,19 @@ from dateutil.parser import parse as dateparse
 from intranet3.asyncfetchers.base import (
     BaseFetcher,
     BasicAuthMixin,
-    FetcherBaseException,
     FetcherBadDataError,
+    FetchException,
 )
 from intranet3.asyncfetchers.bug import (
     BaseBugProducer,
     ToDictMixin,
 )
 from intranet3.asyncfetchers.request import RPC
+from intranet3.log import ERROR_LOG, INFO_LOG
 from intranet3.models import User
+
+LOG = INFO_LOG(__name__)
+ERROR = ERROR_LOG(__name__)
 
 
 class BlockedOrDependson(ToDictMixin):
@@ -185,8 +189,9 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
     def parse(self, data):
         try:
             data = json.loads(data)
-        except ValueError:
-            raise FetcherException()
+        except ValueError as e:
+            ERROR('Error while parsing jira response:\n%s' % e)
+            raise FetchException(e)
 
         return data['issues']
 

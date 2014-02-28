@@ -7,7 +7,7 @@ from intranet3.helpers import (
     serialize_url,
     make_path
 )
-from intranet3.log import EXCEPTION_LOG, INFO_LOG
+from intranet3.log import ERROR_LOG, INFO_LOG
 
 from .base import (
     BaseFetcher,
@@ -19,7 +19,7 @@ from .bug import BaseBugProducer
 from .request import RPC
 
 LOG = INFO_LOG(__name__)
-EXCEPTION = EXCEPTION_LOG(__name__)
+ERROR = ERROR_LOG(__name__)
 
 
 class UnfuddleBugProducer(BaseBugProducer):
@@ -64,8 +64,9 @@ class UnfuddleMetadataFetcher(BasicAuthMixin, BaseFetcher):
 
         try:
             jdata = json.loads(response.content)
-        except ValueError:
-            raise FetchException()
+        except ValueError as e:
+            ERROR('Error while parsing unfuddle response: \n%s' % e)
+            raise FetchException(e)
 
         users = self._get_users(jdata.get('people', []))
         projects = self._get_projects(jdata.get('projects', []))
@@ -326,8 +327,9 @@ A comma or vertical bar separated list of report criteria composed as
 
         try:
             jdata = json.loads(data)
-        except ValueError:
-            raise FetchException()
+        except ValueError as e:
+            ERROR('Error while parsing unfuddle response:\n%s' % e)
+            raise FetchException(e)
 
         if len(jdata['groups']) == 0:
             return []
