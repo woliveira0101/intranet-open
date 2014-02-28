@@ -1,4 +1,4 @@
-# Intranet 
+# Intranet
 
 Application for managing a company.
 
@@ -97,7 +97,7 @@ First install python-dev:
 user~$ sudo apt-get install python-dev
 ```
 #### PIL dependencies
-Install PIL JPEG and ZLIB system dependencies. 
+Install PIL JPEG and ZLIB system dependencies.
 ```bash
 user~$ sudo apt-get install libjpeg62 libjpeg62-dev zlib1g-dev
 ```
@@ -124,7 +124,7 @@ In section 4[#](#4-run-intranets-buildout), after PIL installation table like th
   --- ZLIB (PNG/ZIP) support available
   *** FREETYPE2 support not available
   *** LITTLECMS support not available
-  -------------------------------------------------------------------- 
+  --------------------------------------------------------------------
 ```
 
 #### PyOpenSSL dependencies
@@ -156,7 +156,7 @@ user~$ sudo apt-get install build-essential
 
 ### 4. Run Intranet's buildout
 ```bash
-python bootstrap.py -d 
+python bootstrap.py -d
 ```
 - `-d` Use Distribute rather than Setuptools
 
@@ -198,7 +198,7 @@ grunt dev
 
 - Run development server
 ```bash
-./bin/run config.ini
+./bin/uwsgi parts/etc/uwsgi_local.ini
 ```
 
 I'll just leave this here [http://localhost:5000/](http://localhost:5000/)
@@ -234,7 +234,7 @@ sqlalchemy.pool_timeout = 60
 sqlalchemy.pool_recycle = 3600
 jinja2.extensions = jinja2.ext.with_
 jinja2.directories = intranet3:templates
-jinja2.filters = 
+jinja2.filters =
 	slugify = intranet3.utils.filters.slugify
 	parse_user_email = intranet3.utils.filters.parse_user_email
 	parse_datetime_to_miliseconds = intranet3.utils.filters.parse_datetime_to_miliseconds
