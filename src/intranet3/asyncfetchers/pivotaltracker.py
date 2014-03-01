@@ -87,7 +87,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
 
     def get_project_ids(self):
         rpc = self.get_rpc()
-        rpc._args = ['GET', self.prepare_url()]
+        rpc.url = self.prepare_url()
         rpc.start()
         response = rpc.get_result()
         return self.parse_project(response.content)
@@ -133,7 +133,7 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         project_ids = self.get_project_ids()
         for project_id in project_ids:
             url = self.prepare_url(project_id, endpoint, params)
-            rpcs.append(RPC('GET', url))
+            rpcs.append(RPC(url=url))
         return rpcs
 
     def parse_project(self, data):

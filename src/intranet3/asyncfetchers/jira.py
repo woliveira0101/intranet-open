@@ -134,7 +134,7 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
               'updated', 'labels', 'subtasks', 'issuelinks']
 
     def fetch(self, url):
-        return RPC('GET', url)
+        return RPC(url=url)
 
     def check_if_failed(self, response):
         if response.status_code == 401:

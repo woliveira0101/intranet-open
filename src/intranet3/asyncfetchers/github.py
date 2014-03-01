@@ -62,7 +62,7 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
     def fetch_milestones(self, url):
         url = str(url)
         rpc = self.get_rpc()
-        rpc._args = ['GET', url]
+        rpc.url = url
         rpc.start()
         response = rpc.get_result()
         return self.parse_milestones(response.content)
@@ -107,8 +107,8 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             )
         )
 
-        self.consume(RPC('GET', opened_bugs_url))
-        self.consume(RPC('GET', closed_bugs_url))
+        self.consume(RPC(url=opened_bugs_url))
+        self.consume(RPC(url=closed_bugs_url))
 
     @staticmethod
     def common_url_params():
@@ -136,10 +136,7 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
         params.update(self.single_user_params())
         url = serialize_url(self.tracker.url + 'issues?', **params)
 
-        self.consume(RPC(
-            'GET',
-            url
-        ))
+        self.consume(RPC(url=url))
 
     def fetch_all_tickets(self, resolved=False):
         if resolved:
@@ -148,10 +145,7 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
         params.update(self.all_users_params())
         url = serialize_url(self.tracker.url + 'issues?', **params)
 
-        self.consume(RPC(
-            'GET',
-            url,
-        ))
+        self.consume(RPC(url=url))
 
     def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
                              component_selector=None, version=None,
@@ -177,10 +171,7 @@ class GithubFetcher(BasicAuthMixin, BaseFetcher):
             )
             url = serialize_url(uri, **params)
 
-            self.consume(RPC(
-                'GET',
-                url,
-            ))
+            self.consume(RPC(url=url))
 
     def parse(self, data):
         json_data = json.loads(data)

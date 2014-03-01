@@ -5,12 +5,14 @@ import requests
 
 
 class RPC(object):
-    def __init__(self, *args, **kwargs):
-        self._args = args
-        self._kwargs = {}
-        if 'data' in kwargs:
-            self._kwargs['data'] = kwargs.pop('data')
-        self.s = requests.Session(**kwargs)
+    def __init__(self, url=None, method='GET', **kwargs):
+        method = method.upper()
+
+        self.method = method
+        self.url = url
+        self.kwargs = kwargs
+
+        self.s = requests.Session()
         self._greenlet = None
 
     def basic_auth(self, login, password):
@@ -19,9 +21,10 @@ class RPC(object):
     def start(self):
         self._greenlet = gevent.spawn(
             self.s.request,
+            self.method,
+            self.url,
             verify=False,
-            *self._args,
-            **self._kwargs
+            **self.kwargs
         )
         return self
 

@@ -36,10 +36,7 @@ class TracFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
     BUG_PRODUCER_CLASS = TracBugProducer
 
     def fetch(self, url):
-        self.consume(RPC(
-            'GET',
-            url,
-        ))
+        self.consume(RPC(url=url))
 
     def common_url_params(self):
         return dict(

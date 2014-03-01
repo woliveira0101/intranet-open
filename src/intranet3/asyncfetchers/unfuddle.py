@@ -50,10 +50,7 @@ class UnfuddleMetadataFetcher(BasicAuthMixin, BaseFetcher):
 
     def before_fetch(self):
         url = self.tracker.url + self.DATA_API
-        rpc = RPC(
-            'GET',
-            url
-        )
+        rpc = RPC(url=url)
         self.apply_auth(rpc)
         rpc.start()
         self._unfuddle_data_rpc = rpc
@@ -194,10 +191,7 @@ A comma or vertical bar separated list of report criteria composed as
         super(UnfuddleFetcher, self).check_if_failed(response)
 
     def fetch(self, url):
-        rpc = RPC(
-            'GET',
-            url,
-        )
+        rpc = RPC(url=url)
         return rpc
 
     def get_resolved_conditions(self):

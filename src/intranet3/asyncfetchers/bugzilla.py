@@ -234,7 +234,7 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin,
         url = '%s/buglist.cgi' % self.tracker.url
 
         body = h.serialize_url('', **params)
-        rpc = RPC('POST', url, data=body)
+        rpc = RPC(url=url, method='POST', data=body)
         self.consume(rpc)
 
     def fetch_user_tickets(self, resolved=False):
@@ -244,7 +244,7 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin,
 
         url = '%s/buglist.cgi' % self.tracker.url
         body = h.serialize_url('', **params)
-        rpc = RPC('POST', url, data=body)
+        rpc = RPC(url=url, method='POST', data=body)
         self.consume(rpc)
 
     def fetch_all_tickets(self, resolved=False):
@@ -254,7 +254,7 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin,
 
         url = '%s/buglist.cgi' % self.tracker.url
         body = h.serialize_url('', **params)
-        rpc = RPC('POST', url, data=body)
+        rpc = RPC(url=url, method='POST', data=body)
         self.consume(rpc)
 
     def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
@@ -292,5 +292,5 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin,
                 params.update(component=component_selector)
         url = '%s/buglist.cgi' % self.tracker.url
         body = h.serialize_url('', **params)
-        rpc = RPC('POST', url, data=body)
+        rpc = RPC(url=url, method='POST', data=body)
         self.consume(rpc)
