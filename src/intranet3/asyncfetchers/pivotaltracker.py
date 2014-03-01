@@ -1,14 +1,12 @@
-import datetime
+import json
 
 import requests
 from requests.auth import HTTPBasicAuth
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ParseError
+import dateutil.parser
 
-from intranet3.helpers import (
-    serialize_url,
-    make_path
-)
+from intranet3.helpers import serialize_url, make_path
 from intranet3.log import EXCEPTION_LOG, INFO_LOG
 
 from .base import BaseFetcher, FetcherBadDataError
@@ -26,15 +24,9 @@ class PivotalTrackerBugProducer(BaseBugProducer):
 
     def parse(self, tracker, login_mapping, raw_data):
         raw_data.update(dict(
-            opendate=datetime.datetime.strptime(
-                raw_data['opendate'],
-                '%Y/%m/%d %H:%M:%S %Z',
-            ),
-            changeddate=datetime.datetime.strptime(
-                raw_data['changeddate'],
-                '%Y/%m/%d %H:%M:%S %Z',
-            ),
-        ))
+            opendate=dateutil.parser.parse(raw_data['opendate']),
+            changeddate=dateutil.parser.parse(raw_data['changeddate']),
+            ))
         return raw_data
 
 
@@ -86,7 +78,8 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
 
 
 class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
-    api_url = 'services/v3/projects'
+    api_url = 'services/v5/projects'
+    default_fields = 'owned_by,requested_by,estimate,:default'
 
     def __init__(self, *args, **kwargs):
         super(PivotalTrackerFetcher, self).__init__(*args, **kwargs)
@@ -99,49 +92,87 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
         response = rpc.get_result()
         return self.parse_project(response.content)
 
-    def prepare_url(self, project_id='', endpoint='', filters={}):
+    def prepare_url(self, project_id='', endpoint='', params={}):
         tracker_url = self.tracker.url.replace('http://', 'https://')
-        url = make_path(tracker_url, self.api_url, project_id, endpoint) + '?'
-        filter_param = ' '.join([
-            '%s:%s' % (filter_name, filter)
-            for filter_name, filter in filters.iteritems()
-        ])
-        full_url = serialize_url(url, filter=filter_param)
-        return full_url
+        url = make_path(tracker_url, self.api_url, project_id, endpoint)
+        if params:
+            url += '?'
+            url = serialize_url(url, **params)
+        return url
 
-    def fetch(self, endpoint, filters={}):
+    def _get_filters(
+            self, owners=None, ids=None, label=None,
+            states=None, include_done=False):
+        filter_params = []
+        if owners:
+            owners = ' or '.join(
+                ['owner:"%s"' % x for x in owners]
+            )
+            owners = '(%s)' % owners
+            filter_params.append(owners)
+        if states:
+            states = ','.join(states)
+            states = 'state:%s' % states
+            filter_params.append(states)
+        if label:
+            filter_params.append('label:"%s" ' % label)
+        url_and = ' and '.join(filter_params)
+
+        filter_params = []
+        if ids:
+            filter_params.append('id:%s ' % ','.join([str(i) for i in ids]))
+        if include_done:
+            filter_params.append('includedone:true')
+        url_space = ' '.join(filter_params)
+
+        url = '%s %s' % (url_and, url_space)
+        return url
+
+    def fetch(self, endpoint, params={}):
         rpcs = []
         project_ids = self.get_project_ids()
         for project_id in project_ids:
-            url = self.prepare_url(project_id, endpoint, filters)
+            url = self.prepare_url(project_id, endpoint, params)
             rpcs.append(RPC('GET', url))
         return rpcs
 
     def parse_project(self, data):
-        xml = ET.fromstring(data)
-        return [p.text for p in xml.findall('project/id')]
+        project_json = json.loads(data)
+        return [p['id'] for p in project_json]
 
     def fetch_user_tickets(self, resolved=False):
         if resolved:
-            state = ','.join(ISSUE_STATE_RESOLVED)
+            states = ISSUE_STATE_RESOLVED
         else:
-            state = ','.join(ISSUE_STATE_UNRESOLVED)
+            states = ISSUE_STATE_UNRESOLVED
 
-        rpcs = self.fetch('stories', filters=dict(
-            owner='"%s"' % self.login,
-            state=state,
-        ))
+        params = {
+            'fields': self.default_fields,
+            'filter': self._get_filters(
+                owners=[self.login],
+                states=states,
+            )
+        }
+
+        rpcs = self.fetch('stories', params=params)
         self.consume(rpcs)
 
     def fetch_all_tickets(self, resolved=False):
         if resolved:
-            state = ','.join(ISSUE_STATE_RESOLVED)
+            states = ISSUE_STATE_RESOLVED
         else:
-            state = ','.join(ISSUE_STATE_UNRESOLVED)
+            states = ISSUE_STATE_UNRESOLVED
 
-        self.fetch('stories', filters=dict(
-            state=state,
-        ))
+        params = {
+            'fields': self.default_fields,
+            'filter': self._get_filters(
+                owners=self.login_mapping.keys(),
+                states=states,
+                include_done=True,
+            )
+        }
+        rpcs = self.fetch('stories', params=params)
+        return self.consume(rpcs)
 
     def fetch_bugs_for_query(self, ticket_ids=None, project_selector=None,
                              component_selector=None, version=None,
@@ -153,62 +184,58 @@ class PivotalTrackerFetcher(PivotalTrackerTokenFetcher):
             version,
             resolved,
         )
-        filters = dict(
-            id=','.join(ticket_ids),
-        )
+        params = {
+            'fields': self.default_fields,
+            'filter': self._get_filters(
+                owners=self.login_mapping.keys(),
+                ids=ticket_ids,
+                include_done=True,
+            )
+        }
         if resolved:
-            filters['state'] = ','.join(ISSUE_STATE_UNRESOLVED)
+            params['filters']['states'] = ISSUE_STATE_RESOLVED
 
-        rpcs = self.fetch('stories', filters=filters)
+        rpcs = self.fetch('stories', params=params)
         self.consume(rpcs)
 
     def fetch_scrum(self, sprint_name, project_id=None, component_id=None):
-        rpcs = self.fetch('stories', filters=dict(
-            label=sprint_name,
-            includedone='true',
-        ))
+        params = {
+            'fields': self.default_fields,
+            'filter': self._get_filters(
+                label=sprint_name,
+                include_done=True,
+            )
+        }
+        rpcs = self.fetch('stories', params=params)
         self.consume(rpcs)
 
     def parse(self, data):
-        xml = ET.fromstring(data)
+        stories = json.loads(data)
 
         result = []
-        for story in xml.findall('story'):
-            owner_name_node = story.find('owned_by')
+        for story in stories:
+            points = story.get('estimate')
+            project_name = str(story['project_id'])
 
-            if owner_name_node is not None:
-                owner_name = owner_name_node.text
-            else:
-                owner_name = ''
+            owner = None
+            owned_by = story.get('owned_by')
+            if owned_by:
+                owner = owned_by.get('name')
 
-            points = story.find('estimate')
-            try:
-                points = points.text
-            except AttributeError:
-                points = 0
-
-            if not points:
-                points = 0
-            points = int(points)
-
-
-            try:
-                labels = story.find('labels').text.split(',')
-            except:
-                labels = []
+            labels = [l['name'] for l in story['labels']]
 
             bug_desc = dict(
-                tracker=self.tracker,
-                id=story.find('id').text,
-                desc=story.find('name').text,
-                reporter=story.find('requested_by').text,
-                owner=owner_name,
-                status=story.find('current_state').text,
-                project_name=story.find('project_id').text,
-                opendate=story.find('created_at').text,
-                changeddate=story.find('updated_at').text,
-                labels=labels,
+                id=story['id'],
+                desc=story['name'],
+                reporter=story['requested_by']['name'],
+                owner=owner,
+                status=story['current_state'],
+                project_name=project_name,
+                opendate=story['created_at'],
+                changeddate=story['updated_at'],
                 points=points,
+                labels=labels,
+                url=story['url'],
             )
             result.append(bug_desc)
         return result

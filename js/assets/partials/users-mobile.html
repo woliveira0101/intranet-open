@@ -5,7 +5,7 @@
        <li class="active"><a data-toggle="tab" ng-click="set_tab('employees')">Employees ({{ get_employees().length }})</a></li>
         <li class=""><a data-toggle="tab" ng-click="set_tab('freelancers')">Freelancers ({{ get_freelancers().length }})</a></li>
         <li class=""><a data-toggle="tab" ng-click="set_tab('clients')">Clients ({{ get_clients().length }})</a></li>
-        <li ng-show="G.user.has_perm('admin')" class=""><a data-toggle="tab" ng-click="set_tab('inactive')">Inactive ({{ get_inactive().length }})</a></li>
+        <li ng-show="G.user.has_perm('can_see_inactive_users')" class=""><a data-toggle="tab" ng-click="set_tab('inactive')">Inactive ({{ get_inactive().length }})</a></li>
     </ul>
 
     <div class="tab-content">

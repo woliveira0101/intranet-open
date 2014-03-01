@@ -8,6 +8,7 @@ from intranet3.models import User, TimeEntry, Project
 from intranet3 import helpers as h
 from .board import Board
 
+
 def parse_whiteboard(wb):
     wb = wb.strip().replace('[', ' ').replace(']', ' ')
     if wb:

@@ -46,7 +46,7 @@ class ApplyArgsMixin(object):
 
         return query
 
-@view_config(route_name='employee_list_late')
+@view_config(route_name='employee_list_late', permission='hr_stuff')
 class Late(ApplyArgsMixin, BaseView):
     def get(self):
         query = m.Late.query.filter(m.Late.deleted==False).order_by(desc(m.Late.added_ts))
@@ -55,7 +55,7 @@ class Late(ApplyArgsMixin, BaseView):
         form = FilterForm(formdata=self.request.GET)
         return dict(lates=lates, form=form)
 
-@view_config(route_name='employee_list_wrong_time')
+@view_config(route_name='employee_list_wrong_time', permission='hr_stuff')
 class WrongTime(ApplyArgsMixin, BaseView):
     def get(self):
         query = m.WrongTime.query.filter(m.WrongTime.deleted==False).order_by(desc(m.WrongTime.added_ts))
@@ -64,7 +64,7 @@ class WrongTime(ApplyArgsMixin, BaseView):
         form = FilterForm(formdata=self.request.GET)
         return dict(wrongtimes=wrongtimes, form=form)
 
-@view_config(route_name='employee_list_absence')
+@view_config(route_name='employee_list_absence', permission='hr_stuff')
 class Absence(ApplyArgsMixin, BaseView):
     def get(self):
         query = m.Absence.query.filter(m.Absence.deleted==False).order_by(desc(m.Absence.added_ts))
@@ -73,11 +73,14 @@ class Absence(ApplyArgsMixin, BaseView):
         form = FilterForm(formdata=self.request.GET)
         return dict(absences=absences, form=form)
 
-@view_config(route_name='employee_list_absence_pivot')
+@view_config(route_name='employee_list_absence_pivot', permission='hr_stuff')
 class AbsencePivot(BaseView):
     def get(self):
         year = self.request.GET.get('year', datetime.date.today().year)
-        users = User.query.filter(User.is_not_client()).filter(User.is_active==True).filter(User.freelancer==False).all()
+        users = User.query.filter(User.is_not_client())\
+                          .filter(User.is_active==True)\
+                          .filter(User.is_not_freelancer())
+        users = users.all()
 
         used = Leave.get_used_for_year(year)
         applications = m.Absence.get_for_year(year)
@@ -92,7 +95,7 @@ class AbsencePivot(BaseView):
             str=str,
         )
 
-@view_config(route_name='employee_list_mandated_leave_change', renderer='json')
+@view_config(route_name='employee_list_mandated_leave_change', renderer='json', permission='hr_stuff')
 class MandatedLeaveChange(BaseView):
     def post(self):
         args = self.request.json
@@ -131,7 +134,7 @@ class MandatedLeaveChange(BaseView):
         return dict(status='ok')
 
 
-@view_config(route_name='employee_list_justify', renderer='json')
+@view_config(route_name='employee_list_justify', renderer='json', permission='hr_stuff')
 class Justify(BaseView):
     def post(self):
         _id = self.request.POST.get('id')
@@ -149,7 +152,8 @@ class Justify(BaseView):
             self.session.add(wrongtime)
         return Response('')
 
-@view_config(route_name='employee_list_review', renderer='json')
+
+@view_config(route_name='employee_list_review', renderer='json', permission='hr_stuff')
 class Review(BaseView):
     def post(self):
         _id = self.request.POST.get('id')
@@ -171,7 +175,8 @@ class Review(BaseView):
 
         return Response('')
 
-@view_config(route_name='employee_list_delete', renderer='json')
+
+@view_config(route_name='employee_list_delete', renderer='json', permission='hr_stuff')
 class Delete(BaseView):
     def post(self):
         _id = self.request.POST.get('id')
@@ -194,8 +199,7 @@ class Delete(BaseView):
 oneday = datetime.timedelta(days=1)
 
 
-
-@view_config(route_name='employee_list_pivot')
+@view_config(route_name='employee_list_pivot', permission='hr_stuff')
 class Pivot(ApplyArgsMixin, BaseView):
     @staticmethod
     def _quarters_sum(v):

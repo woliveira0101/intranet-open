@@ -110,7 +110,7 @@ def defer(obj, *args, **kwargs):
     return add(url=DEFAULT_TASK_URL, payload=pickled)
 
 
-@view_config(route_name='deferred', renderer='json', permission='task')
+#@view_config(route_name='deferred', renderer='json', permission='task')
 class DeferredHandler(TaskView):
     """A view class that processes deferred invocations."""
 

@@ -18,22 +18,22 @@
              <div class="row below">
                <select
                    ng-model="search.groups" multiple title="Choose group"
-                   ng-options="group.id as group.name for group in groups"
+                   ng-options="group.id as group.name + ' (' + group.counter + ')' for group in groups"
                    bs-select>
                </select>
                 <select
                      ng-model="search.roles" multiple title="Choose role"
-                     ng-options="role.id as role.name for role in roles"
+                     ng-options="role.id as role.name + ' (' + role.counter + ')' for role in roles"
                      bs-select>
                 </select>
                 <select
                      ng-model="search.locations" multiple title="Choose location"
-                     ng-options="c.id as c.name for c in locations"
+                     ng-options="c.id as c.name + ' (' + c.counter + ')' for c in locations"
                      bs-select>
                 </select>
                 <select
                      ng-model="search.teams" multiple title="Choose team"
-                     ng-options="team.id as team.name for team in teams"
+                     ng-options="team.id as team.name + ' (' + team.active_user_counter + ')' for team in teams"
                      bs-select>
                 </select>
              </div>
@@ -45,7 +45,7 @@
        <li class="active"><a data-toggle="tab" ng-click="set_tab('employees')">Employees ({{ get_employees().length }})</a></li>
         <li class=""><a data-toggle="tab" ng-click="set_tab('freelancers')">Freelancers ({{ get_freelancers().length }})</a></li>
         <li class=""><a data-toggle="tab" ng-click="set_tab('clients')">Clients ({{ get_clients().length }})</a></li>
-        <li ng-show="G.user.has_perm('admin')" class=""><a data-toggle="tab" ng-click="set_tab('inactive')">Inactive ({{ get_inactive().length }})</a></li>
+        <li ng-show="G.user.has_perm('can_see_inactive_users')" class=""><a data-toggle="tab" ng-click="set_tab('inactive')">Inactive ({{ get_inactive().length }})</a></li>
     </ul>
 
     <div class="tab-content">

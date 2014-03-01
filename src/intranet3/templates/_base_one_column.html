@@ -34,8 +34,11 @@
               has_perm: function(perm){
                 // yeah, I know this is wrong
                 // works for admin permissions only
-                return _.indexOf(this.groups, perm) >= 0;
-              }
+                var base = _.indexOf(this.perms, perm) >= 0;
+                var all = _.indexOf(this.perms, '__ALL__') >= 0;
+                return base || all;
+              },
+              perms: {{ request.user.all_perms | tojson }}
             };
             G.ROLES = {{ request.user.ROLES | tojson }};
             G.GROUPS = {{ request.user.GROUPS | tojson }};
@@ -71,7 +74,7 @@
                     <li>
                         <a class="brand" {{ 'style=color:red' if request.registry.settings['DEBUG'] | is_true }} href="{{ request.url_for('/') }}">Intranet</a>
                     </li>
-                    {% if request.has_perm('view') %}
+                    {% if request.has_perm('can_edit_presence') %}
                     <li class="fast-access {% if request.wants_mobile %}none{% endif %}">
                     <ul class="nav">
                       <li class="dropdown">
@@ -102,7 +105,7 @@
                       {% else %}
                         <li class="user-area">
                         {% trans %}Logged in as{% endtrans %}
-                        {% if request.user.freelancer %}
+                        {% if request.is_user_in_group('freelancer') %}
                             <em>Freelancer</em> <a id="username" href="{{ request.url_for('/user/edit') }}">{{ request.user.name }}</a>
                         {% elif request.is_user_in_group('client') %}
                             <em>Client</em> <a id="username">{{ request.user.name }}</a>

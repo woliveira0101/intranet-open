@@ -10,9 +10,11 @@
         <div id="user_edit_form">
             <form class="user_profile box box_edit_user" action="{{ request.path_qs }}" method="post" accept-charset="utf-8">
                 {{ csrf_field }}
-                {% if request.has_perm('admin') %}
+                {% if request.has_perm('can_edit_users') %}
                     {{ form_field(form.is_active, _('Uncheck if no longer works here')) }}
-                    {{ form_field(form.groups, _('Privilages for views, by default new employees get user and freelancers')) }}
+                {% endif %}
+                {% if request.has_perm('can_add_user_to_group') %}
+                    {{ form_field(form.groups, _('Privilages for views')) }}
                 {% endif %}
                 {{ form_field(form.roles, 'Role') }}
 
@@ -24,7 +26,8 @@
                 {{ form_field(form.irc, 'IRC') }}
                 {{ form_field(form.location, 'Office location') }}
                 {{ form_field(form.start_work, _('Start work'), class='datepicker') }}
-                {% if request.has_perm('admin') %}
+                {% if request.has_perm('can_edit_users') %}
+                    {{ form_field(form.start_work_experience, _('Start work experience'), title=form.start_work_experience.description) }}
                     {% with field=form.start_full_time_work %}
                     <div>
                         <dl>
@@ -56,7 +59,7 @@
                         <dt>{% trans %}Image{% endtrans %}:</dt>
                         <dd id="my-avatar">
                             <img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" />
-                            <a href="#" id="upload-btn"></a>
+                            <span id="upload-btn"></span>
                             <div id="upload-progress"></div>
                         </dd>
                     </dl>
@@ -73,37 +76,33 @@
 {% block tail_script %}
     <script type="text/javascript">
     $(document).ready(function(){
-        var $if_full_time_work = $('#if_full_time_work'),
-            $full_time_work = $('#start_full_time_work');
-        var today = Date.today(), full_time_start_date = Date.parseExact($full_time_work.val(), 'dd/MM/yyyy');
-
-        if(full_time_start_date != null && today.compareTo(full_time_start_date) < 0){
-            // not working full time
-            $if_full_time_work.prop('checked', false);
-            $full_time_work.css('visibility', 'hidden');
-        } else {
-            // working full time
-            $if_full_time_work.prop('checked', true);
-            $full_time_work.css('visibility', 'visible');
+        var $full_time_work_checkbox = $('#if_full_time_work'),
+            $full_time_work_datefield = $('#start_full_time_work'),
+            $start_work_experience = $('#start_work_experience'),
+            full_time_date = $full_time_work_datefield.val();
+        if(full_time_date) {
+            $full_time_work_checkbox.prop('checked', true);
+            $full_time_work_datefield.css('visibility', 'visible');
         }
-
-        full_time_start_date = Date.today();
-
-        $if_full_time_work.change(function(){
+        else {
+            $full_time_work_checkbox.prop('checked', false);
+            $full_time_work_datefield.css('visibility', 'hidden');
+        }
+        $full_time_work_checkbox.change(function(){
             var $this = $(this);
-            if($this.prop('checked')){
-                $full_time_work.val(full_time_start_date.toString('dd/MM/yyyy'));
-                $full_time_work.css('visibility', 'visible');
+            if($this.prop('checked')) {
+                $full_time_work_datefield.val(Date.today().toString('dd/MM/yyyy'));
+                $full_time_work_datefield.css('visibility', 'visible');
             } else {
-                var date_in_future = Date.today().add({years: 30});
-                $full_time_work.val(date_in_future.toString('dd/MM/yyyy'));
-                $full_time_work.css('visibility', 'hidden');
+                $full_time_work_datefield.val("");
+                $full_time_work_datefield.css('visibility', 'hidden');
             }
         });
-
-        $full_time_work.change(function(){
-            var $this = $(this);
-            full_time_start_date = Date.parseExact($this.val(), 'dd/MM/yyyy')
+        $start_work_experience.tooltip({
+            container: 'body',
+            animation: false,
+            html: true,
+            template: '<div class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
         });
     });
 

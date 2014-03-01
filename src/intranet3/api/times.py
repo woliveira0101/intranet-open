@@ -19,7 +19,6 @@ from intranet3.views.times import GetTimeEntriesMixin
 from intranet3.schemas.times import AddEntrySchema, EditEntrySchema
 
 
-#@view_config(route_name='api_time_collection', renderer='json', permission='freelancer')
 class TimeCollection(GetTimeEntriesMixin, ApiView):
 
     def _entries_serializer(self, objs):
@@ -48,7 +47,7 @@ class TimeCollection(GetTimeEntriesMixin, ApiView):
                 raise HTTPForbidden()
 
         if self.request.method == "GET":
-            if user.freelancer and not is_same_user:
+            if 'freelancer' in user.groups and not is_same_user:
                 raise HTTPForbidden()
 
     def _get_params(self):
@@ -108,7 +107,6 @@ class TimeCollection(GetTimeEntriesMixin, ApiView):
         return HTTPCreated('OK')
 
 
-#@view_config(route_name='api_time', renderer='json', permission='freelancer')
 class Time(ApiView):
 
     def protect(self):
@@ -136,7 +134,7 @@ class Time(ApiView):
                 raise HTTPBadRequest()
 
         if self.request.method == "GET":
-            if self.request.user.freelancer and not is_same_user:
+            if self.request.is_user_in_group('freelancer') and not is_same_user:
                 raise HTTPForbidden()
 
     def get(self):

@@ -35,7 +35,7 @@
         </thead>
         <tbody>
             {% for user in users %}
-            <tr class="{{ loop.cycle('odd', 'even') }}{% if user == request.user %} current_user{% endif%}{% if user.freelancer %} freelancer{% endif %}">
+            <tr class="{{ loop.cycle('odd', 'even') }}{% if user == request.user %} current_user{% endif%}{% if 'freelancer' in user.groups %} freelancer{% endif %}">
                 <td class="index">{{ loop.index }}</td>
                 <td class="username">
                     <a href="{{ request.url_for('/user/view', user_id=user.id) }}">{{ user.name }}</a>

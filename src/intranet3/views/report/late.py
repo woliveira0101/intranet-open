@@ -17,7 +17,7 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 am9 = datetime.time(9,0,0)
 deltazero = datetime.timedelta(0)
 
-@view_config(route_name='report_late_current', permission='admin')
+@view_config(route_name='report_late_current', permission='hr_stuff')
 class Current(BaseView):
     def get(self):
         today = datetime.date.today()
@@ -66,7 +66,7 @@ class AnnuallyReportMixin(object):
         data = query.all()
         users = User.query.filter(User.is_active==True)\
                           .filter(User.is_not_client())\
-                          .filter(User.freelancer==False)\
+                          .filter(User.is_not_freelancer())\
                           .order_by(User.name).all()
 
         _excuses = excuses.presence()
@@ -88,7 +88,7 @@ class AnnuallyReportMixin(object):
         )
 
 
-@view_config(route_name='report_late_annually', permission='admin')
+@view_config(route_name='report_late_annually', permission='hr_stuff')
 class Annually(AnnuallyReportMixin, BaseView):
     def get(self):
         year = self.request.GET.get('year')
@@ -96,7 +96,7 @@ class Annually(AnnuallyReportMixin, BaseView):
         return self._annually_report(year)
 
 
-@view_config(route_name='report_late_monthly', permission='admin')
+@view_config(route_name='report_late_monthly', permission='hr_stuff')
 class Monthly(MonthMixin, BaseView):
 
     def _group_by_user_monthly(self, data, user_id):

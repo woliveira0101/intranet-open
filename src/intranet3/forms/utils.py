@@ -12,6 +12,7 @@ from intranet3.models import DBSession, User
 
 _ = TranslationStringFactory('intranet3')
 
+
 class TimeField(wtf.TextField):
     """
     TimeField, which stores a `datetime.time`.
@@ -24,6 +25,7 @@ class TimeField(wtf.TextField):
             except ValueError:
                 self.data = None
                 raise ValueError(self.gettext('Not a valid time value'))
+
 
 class StarredPasswordField(wtf.PasswordField):
 
@@ -97,6 +99,20 @@ class DataValidator(object):
         if self.message is None:
             self.message = field.gettext(_('This field is required.'))
         if not field.data or not isinstance(field.data, datetime.date):
+            raise ValidationError(self.message)
+
+
+class MinYearValidator(object):
+
+    def __init__(self, _min=1900, message=None):
+        self._min = _min
+        if not message:
+            message = u'Year must be more than %i' % self._min
+        self.message = message
+
+    def __call__(self, form, field):
+        date = field.data or None
+        if date and date.year < self._min:
             raise ValidationError(self.message)
 
 

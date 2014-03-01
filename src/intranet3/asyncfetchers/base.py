@@ -196,8 +196,10 @@ class BaseFetcher(object):
             if not self._greenlet.successful():
                 raise self._greenlet.exception
 
-        bug_producer = self.BUG_PRODUCER_CLASS(self.tracker,
-                                               self.login_mapping)
+        bug_producer = self.BUG_PRODUCER_CLASS(
+            self.tracker,
+            self.login_mapping
+        )
         bugs = {}
         for bug_desc in self._parsed_data:
             bug = bug_producer(

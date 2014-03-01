@@ -68,24 +68,23 @@ def make_admin(config_path):
     session.add(user)
     transaction.commit()
 
+
 def migrate(config_path):
-    from intranet3 import config
-    from intranet3.models import *
-    from sqlalchemy import func
+    from intranet3.models import DBSession, User
+    import datetime
     session = DBSession()
 
-    results = session.query(User, func.count(Project.id), func.count(Client.id)) \
-        .outerjoin(Project, Project.coordinator_id==User.id) \
-        .outerjoin(Client, Client.coordinator_id==User.id) \
-        .group_by(User.id).all()
+    users = session.query(User)
 
-    for user, pc, cc in results:
-        if pc+cc > 0 and 'coordinator' not in user.groups:
-            groups = user.groups[:]
-            groups.append('coordinator')
-            user.groups = groups
+    for user in users:
+        try:
+            if user.start_full_time_work > datetime.date.today():
+                user.start_full_time_work = None
+        except TypeError:
+            continue
 
     transaction.commit()
+
 
 def remove(config_path):
     from intranet3.models import *

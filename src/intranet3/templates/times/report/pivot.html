@@ -33,7 +33,7 @@
         <tbody>
             {% set last_location = None %}
             {% for user in users %}
-            <tr class="{{ loop.cycle('odd', 'even') }}{% if user == request.user %} current_user{% endif%}{% if user.freelancer %} freelancer{% endif %}{% if last_location and user.location != last_location %} new-city{% endif %}">
+            <tr class="{{ loop.cycle('odd', 'even') }}{% if user == request.user %} current_user{% endif%}{% if 'freelancer' in user.groups %} freelancer{% endif %}{% if last_location and user.location != last_location %} new-city{% endif %}">
                 {% if user != request.user and user.location != last_location %}
                     {% set last_location = user.location %}
                     <td class="city-vertical" rowspan="{{ locations[user.location][1] }}" data-scrolltable="leftHeader"><span>{{ locations[user.location][0] }}</span></td>
@@ -41,12 +41,7 @@
                     <td class="city-vertical" data-scrolltable="leftHeader"></td>
                 {% endif %}
                 <td class="username" data-scrolltable="leftHeader">
-                    <a class="x-user-tooltip-{{user.id}}" href="{{ request.url_for('/user/view', user_id=user.id) }}">
-                        {{ user.name }}
-                        {% if user.freelancer %}
-                        ({% if user.is_programmer %}P{% endif %}{% if user.is_frontend_developer %}F{% endif %}{% if user.is_graphic_designer %}G{% endif %})
-                        {% endif %}
-                    </a>
+                    <a class="x-user-tooltip-{{user.id}}" href="{{ request.url_for('/user/view', user_id=user.id) }}">{{ user.name }}</a>
                 </td>
                 {% for date in dates %}
                 <td class="time {% if date == today %}current_date {% endif %}{% if late[user.id][date] %}{% if excuses[user.id][date.strftime('%Y-%m-%d')] %}late-light {% else %}late {% endif %}{% endif %}">

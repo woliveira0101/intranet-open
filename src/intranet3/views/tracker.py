@@ -46,14 +46,14 @@ class UserCredentialsMixin(object):
                                        .filter(TrackerCredentials.tracker_id==tracker.id).first()
 
 
-@view_config(route_name='tracker_list', permission='client_or_freelancer')
+@view_config(route_name='tracker_list', permission='can_see_own_bugs')
 class List(UserCredentialsMixin, BaseView):
     def get(self):
         trackers = self._get_current_users_credentials()
         return dict(trackers=trackers)
 
 
-@view_config(route_name='tracker_view', permission='admin')
+@view_config(route_name='tracker_view', permission='can_edit_trackers')
 class View(BaseView):
     def get(self):
         tracker_id = self.request.GET.get('tracker_id')
@@ -61,7 +61,7 @@ class View(BaseView):
         return dict(tracker=tracker, TRACKER_TYPES=TRACKER_TYPES)
 
 
-@view_config(route_name='tracker_add', permission='admin')
+@view_config(route_name='tracker_add', permission='can_edit_trackers')
 class Add(BaseView):
     def get(self):
         form = TrackerForm()
@@ -97,7 +97,7 @@ def _add_tracker_login_validator(tracker_name, form):
     for validator_name, validator in validators.items():
         getattr(form, validator_name).validators = validators[validator_name]
 
-@view_config(route_name='tracker_login', permission='client_or_freelancer')
+@view_config(route_name='tracker_login', permission='can_see_own_bugs')
 class Login(UserCredentialsMixin, BaseView):
     def get(self):
         tracker_id = self.request.GET.get('tracker_id')
@@ -132,7 +132,7 @@ class Login(UserCredentialsMixin, BaseView):
             return HTTPFound(location=url)
         return dict(form=form, tracker=tracker)
 
-@view_config(route_name='tracker_edit', permission='admin')
+@view_config(route_name='tracker_edit', permission='can_edit_trackers')
 class Edit(BaseView):
     def get(self):
         tracker_id = self.request.GET.get('tracker_id')
@@ -157,9 +157,7 @@ class Edit(BaseView):
 
 
 
-@view_config(route_name='tracker_delete',
-             renderer='intranet3:templates/common/delete.html',
-             permission='admin')
+@view_config(route_name='tracker_delete', renderer='intranet3:templates/common/delete.html', permission='can_edit_trackers')
 class Delete(BaseView):
 
     def dispatch(self):
@@ -181,9 +179,7 @@ class Delete(BaseView):
         )
 
 
-@view_config(route_name='tracker_delete_login',
-             renderer='intranet3:templates/common/delete.html',
-             permission='client_or_freelancer')
+@view_config(route_name='tracker_delete_login', renderer='intranet3:templates/common/delete.html', permission='can_see_own_bugs')
 class DeleteLogin(BaseView):
     def dispatch(self):
         tracker_id = self.request.GET.get('tracker_id')

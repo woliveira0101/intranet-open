@@ -17,7 +17,6 @@ from pyramid.config import Configurator
 from pyramid_beaker import session_factory_from_settings
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid.security import Allow, ALL_PERMISSIONS
 from werkzeug.contrib.cache import MemcachedCache
 
 from intranet3.utils.redis_lib import Redis
@@ -26,6 +25,7 @@ try:
     import uwsgi
 except:
     uwsgi = None
+
 
 @implementer(IAuthenticationPolicy)
 class CustomAuthenticationPolicy(AuthTktAuthenticationPolicy):
@@ -40,21 +40,6 @@ class CustomAuthenticationPolicy(AuthTktAuthenticationPolicy):
                 result = -2 # cron userid
         return result
 
-
-class Root(object):
-    __acl__ = [
-        (Allow, 'g:freelancer', ('freelancer', 'client_or_freelancer')),
-        (Allow, 'g:client', ('client', 'client_or_freelancer')),
-        (Allow, 'g:user', ('view', 'freelancer', 'client', 'client_or_freelancer')),
-        (Allow, 'g:coordinator', ('view', 'client', 'freelancer', 'coordinator', 'client_or_freelancer', 'scrum')),
-        (Allow, 'g:scrum', ('scrum',)),
-        (Allow, 'g:cron', 'cron'),
-        (Allow, 'g:task', 'task'),
-        (Allow, 'g:admin', ALL_PERMISSIONS)
-    ]
-
-    def __init__(self, request):
-        self.request = request
 
 config = None
 memcache = None
@@ -72,7 +57,7 @@ def main(global_config, **settings):
     memcache = MemcachedCache([config['MEMCACHE_URI']])
 
     from intranet3.models import DBSession, Base, User
-    from intranet3.utils import request
+    from intranet3.utils import request, acl
 
     def groupfinder(userid, request):
         if userid == -1: ## cron userid
@@ -81,9 +66,7 @@ def main(global_config, **settings):
             perm = ['g:task']
         else:
             user = User.query.get(userid)
-            perm = [ 'g:%s' % g for g in user.groups ]
-            if user.freelancer:
-                perm.append('g:freelancer')
+            perm = ['g:%s' % g for g in user.groups]
         return perm
 
     engine = engine_from_config(settings)
@@ -100,7 +83,7 @@ def main(global_config, **settings):
         session_factory=session_factory,
         request_factory=request.Request,
         default_permission='view',
-        root_factory=Root,
+        root_factory=acl.Root,
     )
 
     pyramid_config.add_static_view('static', 'static', cache_max_age=3600)

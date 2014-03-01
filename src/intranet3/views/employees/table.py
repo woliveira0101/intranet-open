@@ -15,7 +15,7 @@ from intranet3 import helpers as h
 locale = Locale('en', 'US')
 
 
-@view_config(route_name='employee_table_absences')
+@view_config(route_name='employee_table_absences', permission='can_view_users')
 class Absences(BaseView):
     WEEKDAYS = None
 
@@ -145,11 +145,13 @@ class Absences(BaseView):
         users_p = User.query.filter(User.is_not_client()) \
                             .filter(User.is_active==True) \
                             .filter(User.location=='poznan') \
-                            .order_by(User.freelancer, User.name).all()
+                            .order_by(User.is_freelancer(), User.name)
+        users_p = users_p.all()
         users_w = User.query.filter(User.is_not_client()) \
                             .filter(User.is_active==True) \
                             .filter(User.location=='wroclaw') \
-                            .order_by(User.freelancer, User.name).all()
+                            .order_by(User.is_freelancer(), User.name)
+        users_w = users_w.all()
         
         user_groups = [
             (u'Poznań', len(users_p)),

@@ -62,17 +62,6 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       }
     });
 
-
-    $scope.locations = [
-        {
-            id:'poznan',
-            name:'Poznań'
-        },
-        {
-            id:'wroclaw',
-            name:'Wrocław'
-        }
-    ];
     $scope.set_tab = function(name){
        $scope.tab = name;
     };
@@ -91,14 +80,6 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
         }
     ];
 
-    $scope.roles = $filter('orderBy')(_.map($scope.G.ROLES, function(role){
-      return {id: role[0], name: role[1]};
-    }), 'name');
-
-    $scope.groups = $filter('orderBy')(_.map($scope.G.GROUPS, function(group){
-      return {id: group, name: group};
-    }), 'name');
-
     $scope.to_pretty_role = function(role){
       return _.find(G.ROLES, function(a_role){
         return a_role[0] === role;
@@ -111,34 +92,84 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       $scope.users = data.users;
 
       $http.get('/api/teams').success(function(data){
-        data.teams.push({'id':-1, 'name':' - No Team - ', 'users':[]});
-        $scope.teams = $filter('orderBy')(data.teams, 'name');
-        $scope.teams_to_user = {};
-        $scope.user_to_teams = {};
-        _.each(data, function(team){
-          $scope.teams_to_user[team['id']] = team['users'];
+        var users_without_team = {'id':-1, 'name':' - No Team - ', 'users':[], 'active_user_counter': 0};
+
+        _.each(data['teams'], function(team) {
+          team.active_user_counter = 0;
         });
 
-        _.each($scope.users, function(user){
+        _.each($scope.users, function(user) {
           user.teams = [];
           user.teams_ids = [];
-          _.each($scope.teams, function(team){
-            if(team.users.indexOf(user.id) >= 0){
+          _.each(data['teams'], function(team) {
+            if(_.contains(team.users, user.id)) {
+             if (user.is_active) {
+              team.active_user_counter += 1;
+             }
              user.teams.push(team);
              user.teams_ids.push(team.id);
             }
           });
+          if (user.is_active == true && !_.contains(user.groups, 'client') && user.teams.length == 0) {
+            users_without_team.active_user_counter += 1;
+          }
         });
-
+        data['teams'].push(users_without_team);
+        $scope.teams = $filter('orderBy')(data.teams, 'name');
         $scope.search.teams = [1]; //szczuczka aby wymusić odświeżenie -- spowodowane kiepska implementacja dyrektywy bs-select
         $timeout(function(){
           $scope.search.teams = [];
         }, 0);
       });
-        $scope.dob.update_years($scope.users);
+      $scope.dob.update_years($scope.users);
+
+      var roles_counter = _.object(_.map($scope.G.ROLES, function(role) {
+        return [role[0], 0];
+      }));
+      var groups_counter =  _.object(_.map($scope.G.GROUPS, function(group) {
+        return [group, 0];
+      }));
+      var location_counter = {'wroclaw': 0, 'poznan': 0};
+
+      _.each($scope.users, function(user) {
+        if (user.is_active == false) {
+          return;
+        }
+        _.each(user.roles, function(role) {
+          roles_counter[role] += 1;
+        });
+        _.each(user.groups, function(group) {
+          groups_counter[group] += 1;
+        });
+        location_counter[user.location[0]] += 1;
+      });
+
+      $scope.locations = [
+        {
+            id:'poznan',
+            name:'Poznań',
+            counter: location_counter['poznan']
+        },
+        {
+            id:'wroclaw',
+            name:'Wrocław',
+            counter: location_counter['wroclaw']
+        }
+      ];
+      $scope.roles = _.map($scope.G.ROLES, function(role) {
+        var counter = roles_counter[role[0]];
+        return {id: role[0], name: role[1], counter: counter};
+      });
+      $scope.roles = $filter('orderBy')($scope.roles, 'name')
+
+      $scope.groups = _.map($scope.G.GROUPS, function(group){
+        var counter = groups_counter[group];
+        return {id: group, name: group, counter: counter};
+      });
+      $scope.groups = $filter('orderBy')($scope.groups, 'name')
     });
 
-    $scope.filtered_users = function(){
+    $scope.filtered_users = function() {
       var filtered_users = $scope.users;
       var f_name = $scope.search.name.toLowerCase();
       if(f_name){
@@ -201,7 +232,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       if(start && end){
         filtered_users = _.filter(filtered_users, function(user){
           var u_stop_work = Date.parse(user.stop_work);
-          return !!u_stop_work || (start <= u_stop_work && u_stop_work <= end);
+          return !!u_stop_work && (start <= u_stop_work && u_stop_work <= end);
       });
 
       filtered_users = _.filter(filtered_users, function(user){
@@ -217,12 +248,12 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       if ($scope.search.time_works != 0 ){
           if ($scope.search.time_works == 1) {
             filtered_users = _.filter(filtered_users, function(user){
-                return Date.parse(user.start_full_time_work) < new Date();
+              return user.start_full_time_work != null;
             });
           }
           else {
               filtered_users = _.filter(filtered_users, function(user){
-                return Date.parse(user.start_full_time_work) > new Date();
+                return user.start_full_time_work == null;
             });
           }
 
@@ -246,13 +277,13 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
     $scope.get_employees = function(){
       return _.filter($scope.filtered_users(), function(user){
         var not_client = _.indexOf(user.groups, 'client') === -1;
-        var not_freelancer = !user.freelancer;
+        var not_freelancer = !_.contains(user.groups, "freelancer");
         return user.is_active && not_client && not_freelancer;
       });
     };
     $scope.get_freelancers = function(){
       return _.filter($scope.filtered_users(), function(user){
-        return user.is_active && user.freelancer;
+        return user.is_active && _.contains(user.groups, "freelancer");
       });
     };
     $scope.get_clients = function(){

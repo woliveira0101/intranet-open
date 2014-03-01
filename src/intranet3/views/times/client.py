@@ -21,7 +21,7 @@ LOG = INFO_LOG(__name__)
 oneday = datetime.timedelta(days=1)
 
 
-@view_config(route_name='times_client_report', permission='coordinator')
+@view_config(route_name='times_client_report', permission='can_view_time_client_report')
 class Report(BaseView):
     def _get_start_end_of_month(self, date):
         year = date.year
@@ -90,7 +90,7 @@ class Report(BaseView):
         )
 
 
-@view_config(route_name='times_client_per_client_per_employee_excel', permission='coordinator')
+@view_config(route_name='times_client_per_client_per_employee_excel', permission='can_view_time_client_report')
 class PerClientPerEmployeeExcel(BaseView):
     def _to_excel(self, rows):
         wbk = xlwt.Workbook()
@@ -155,14 +155,14 @@ class PerClientPerEmployeeExcel(BaseView):
         return response
 
 
-@view_config(route_name='times_client_current_pivot', permission='coordinator')
+@view_config(route_name='times_client_current_pivot', permission='can_view_time_client_report')
 class CurrentPivot(BaseView):
     def get(self):
         today = datetime.date.today()
         return HTTPFound(self.request.url_for('/times/client/pivot', year=today.year))
 
 
-@view_config(route_name='times_client_pivot', permission='coordinator')
+@view_config(route_name='times_client_pivot', permission='can_view_time_client_report')
 class Pivot(BaseView):
     @staticmethod
     def _quarters_sum(v):
@@ -201,6 +201,7 @@ class Pivot(BaseView):
         pivot = {}
         for p in pivot_q:
             pivot.setdefault((p.id, p.name, p.color), [0]*12)[p.date.month-1] = int(round(p.time))
+        pivot = sorted(pivot.iteritems(), key=lambda p: p[0][1])
 
         stats_q = self.session.query('date', 'time').from_statement("""
         SELECT date_trunc('month', t.date) as date, SUM(t.time) as time

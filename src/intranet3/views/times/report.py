@@ -24,7 +24,7 @@ DEBUG = DEBUG_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
 
 
-@view_config(route_name='times_report_current_pivot', permission='freelancer')
+@view_config(route_name='times_report_current_pivot', permission='can_add_timeentry')
 class CurrentPivot(BaseView):
     def get(self):
         today = datetime.datetime.now().date()
@@ -32,7 +32,7 @@ class CurrentPivot(BaseView):
         return HTTPFound(location=url)
 
 
-@view_config(route_name='times_report_pivot', permission='freelancer')
+@view_config(route_name='times_report_pivot', permission='can_add_timeentry')
 class Pivot(MonthMixin, BaseView):
     def get(self):
         month_start, month_end = self._get_month()
@@ -56,7 +56,7 @@ class Pivot(MonthMixin, BaseView):
           AND t.date <= :month_end
         GROUP BY t.user_id, t.date;
         """).params(month_start=month_start, month_end=month_end)
-        if not self.request.has_perm('view'):
+        if not self.request.has_perm('can_see_users_times'):
             users = [self.request.user] # TODO do we need to constrain entries also?
             locations= {
                 self.request.user.location: ('', 1)
@@ -65,13 +65,15 @@ class Pivot(MonthMixin, BaseView):
             users_w = User.query.filter(User.is_not_client()) \
                                 .filter(User.is_active==True) \
                                 .filter(User.location=='wroclaw') \
-                                .order_by(User.freelancer, User.name) \
-                                .all()
+                                .order_by(User.is_freelancer(), User.name)
+            users_w = users_w.all()
+
             users_p = User.query.filter(User.is_not_client()) \
                                 .filter(User.is_active==True) \
                                 .filter(User.location=='poznan') \
-                                .order_by(User.freelancer, User.name) \
-                                .all()
+                                .order_by(User.is_freelancer(), User.name)
+            users_p = users_p.all()
+
             locations = {
                 'wroclaw': [u'Wrocław', len(users_w)],
                 'poznan': [u'Poznań', len(users_p)],
@@ -101,17 +103,25 @@ class Pivot(MonthMixin, BaseView):
         count_of_required_hours_to_today = {}
 
         for user in users:
-            sftw = user.start_full_time_work or datetime.date(1970, 1, 1)
+            sftw = user.start_full_time_work
+            if sftw:
+                if sftw > month_end:
+                    start_work = datetime.date(today.year+10, 1, 1)
+                elif sftw < month_start:
+                    start_work = month_start
+                else:
+                    start_work = sftw
 
-            if sftw > month_end:
-                start_work = datetime.date(today.year+10, 1, 1)
-            elif sftw < month_start:
-                start_work = month_start
+                month_hours = h.get_working_days(start_work, month_end) * 8
+
+                today_ = today if today < month_end else month_end
+                hours_to_today = h.get_working_days(start_work, today_) * 8
+
+                count_of_required_month_hours[user.id] = month_hours
+                count_of_required_hours_to_today[user.id] = hours_to_today
             else:
-                start_work = sftw
-
-            count_of_required_month_hours[user.id] = h.get_working_days(start_work, month_end) * 8
-            count_of_required_hours_to_today[user.id] = h.get_working_days(start_work, today if today < month_end else month_end) * 8
+                count_of_required_month_hours[user.id] = 0
+                count_of_required_hours_to_today[user.id] = 0
 
         # move current user to the front of the list
         current_user_index = None
@@ -284,7 +294,7 @@ class HoursWorkedMixin(object):
         return result
 
 
-@view_config(route_name='report_worked_hours_monthly', permission='admin')
+@view_config(route_name='report_worked_hours_monthly', permission='can_see_users_times')
 class Monthly(HoursWorkedMixin, BaseView):
 
     def dispatch(self):

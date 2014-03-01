@@ -9,7 +9,7 @@ from intranet3.log import INFO_LOG
 
 LOG = INFO_LOG(__name__)
 
-@view_config(route_name='config_view', permission='admin')
+@view_config(route_name='config_view', permission='can_edit_config')
 class View(BaseView):
     def dispatch(self):
         subpage = self.request.GET.get('subpage', 'general')

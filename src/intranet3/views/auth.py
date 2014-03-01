@@ -56,7 +56,7 @@ def callback(request):
     freelancers = config.get_freelancers()
     clients_emails = Client.get_emails()
     if email.endswith('@%s' % request.registry.settings['COMPANY_DOMAIN']) or email in EXTRA_EMAILS:
-        group = 'user'
+        group = 'employee'
     elif email in freelancers:
         group = 'freelancer'
     elif email in clients_emails:
@@ -82,6 +82,7 @@ def callback(request):
             email=email,
             refresh_token=credentials.refresh_token or '',
             groups=[group],
+            roles=[],
         )
 
         session.add(user)

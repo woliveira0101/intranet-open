@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import base64
-import mimetypes
-import datetime
-import calendar
 
 from pyramid.view import view_config
 from pyramid.exceptions import Forbidden
@@ -14,71 +10,18 @@ from intranet3.utils.views import BaseView
 from intranet3.models import User
 from intranet3.forms.user import UserEditForm
 from intranet3.log import INFO_LOG
-from intranet3 import helpers as h
 from intranet3.api.preview import Preview
 
 
 LOG = INFO_LOG(__name__)
 
 
-@view_config(route_name='user_list', permission='freelancer')
+@view_config(route_name='user_list', permission='can_view_users')
 class List(BaseView):
     def get(self):
-        check_role = self.request.GET.get('role')
-        get_year =  self.request.GET.get('year')
-        get_month = self.request.GET.get('month')
-        get_stop_work = self.request.GET.get('stop')
-        get_quaters = self.request.GET.get('q')
-        is_get = True if check_role or get_month or get_stop_work or get_year else False
-        users=[]
-        if get_year:
-            year = int(get_year)
-            if get_month:
+        return {}
 
-                month = int(get_month)
-                day_of_week, days_in_month = calendar.monthrange(year, month)
-                start_date = datetime.date(year, month, 1)
-                stop_date = datetime.date(year, month, days_in_month)
-            elif get_quaters:
-                quater = int(get_quaters)
-                day_of_week, days_in_month = calendar.monthrange(year, quater*3)
-                start_date = datetime.date(year, ((quater-1)*3)+1, 1)
-                stop_date = datetime.date(year, quater*3, days_in_month)
-            else:
-                start_date = datetime.date(year, 1, 1)
-                stop_date = datetime.date(year, 12, 31)
-
-            if (not check_role or check_role == 'None') and not get_stop_work:
-                users = User.query.filter(User.is_not_client())\
-                                  .filter(User.start_work >= start_date)\
-                                  .filter(User.start_work <= stop_date)\
-                                  .order_by(User.name).all()
-
-            elif (not check_role or check_role == 'None') and get_stop_work:
-                users = User.query.filter(User.is_not_client())\
-                                  .filter(User.stop_work >= start_date)\
-                                  .filter(User.stop_work <= stop_date)\
-                                  .order_by(User.name).all()
-            elif check_role and get_stop_work:
-                users = User.query.filter(User.is_not_client())\
-                                  .filter(User.stop_work >= start_date)\
-                                  .filter(User.stop_work <= stop_date)\
-                                  .filter(User.roles.op('&&')('{%s}'%(check_role)))\
-                                  .order_by(User.name).all()
-            elif check_role and not get_stop_work:
-                users = User.query.filter(User.is_not_client())\
-                                  .filter(User.start_work >= start_date)\
-                                  .filter(User.start_work <= stop_date)\
-                                  .filter(User.roles.op('&&')('{%s}'%(check_role)))\
-                                  .order_by(User.name).all()
-
-        return dict(
-            users=users,
-            is_get=is_get
-        )
-
-
-@view_config(route_name='user_view')
+@view_config(route_name='user_view', permission='can_view_users')
 class View(BaseView):
     def get(self):
         user_id = self.request.GET.get('user_id')
@@ -86,18 +29,19 @@ class View(BaseView):
         return dict(user=user)
 
 
-@view_config(route_name='user_edit', permission='freelancer')
+@view_config(route_name='user_edit', permission='can_edit_own_profile')
 class Edit(BaseView):
 
     def dispatch(self):
         user_id = self.request.GET.get('user_id')
 
-        if user_id and self.request.has_perm('admin'):
+        if user_id and self.request.has_perm('can_edit_users'):
             user = User.query.get(user_id)
         elif user_id:
             raise Forbidden()
         else:
             user = self.request.user
+
         form = UserEditForm(self.request.POST, obj=user)
         if self.request.method == 'POST' and form.validate():
             user.availability_link = form.availability_link.data or None
@@ -111,20 +55,19 @@ class Edit(BaseView):
             user.description = form.description.data or None
             user.date_of_birth = form.date_of_birth.data or None
             user.roles = form.roles.data
-            if self.request.has_perm('admin'):
+            if self.request.has_perm('can_edit_users'):
                 user.is_active = form.is_active.data
-                groups = form.groups.data
-                if "freelancer" in groups:
-                    groups.remove('freelancer')
-                    user.freelancer = True
-                else:
-                    user.freelancer = False
-                user.groups = groups
+                user.start_work_experience = form.start_work_experience.data or None
                 user.start_full_time_work = form.start_full_time_work.data or None
                 user.stop_work = form.stop_work.data or None
-            if self.request.has_perm('admin'):
                 user.employment_contract = form.employment_contract.data
 
+            if self.request.has_perm('can_add_user_to_group'):
+                groups = form.groups.data
+
+                if 'coordinator' in user.groups:
+                    groups.append('coordinator')
+                user.groups = groups
 
             if form.avatar.data:
                 preview = Preview(self.request)
@@ -133,17 +76,14 @@ class Edit(BaseView):
 
             self.flash(self._(u"User data saved"))
             LOG(u"User data saved")
-            if user_id and self.request.has_perm('admin'):
+            if user_id and self.request.has_perm('can_edit_users'):
                 return HTTPFound(location=self.request.url_for('/user/edit', user_id=user_id))
             else:
                 return HTTPFound(location=self.request.url_for('/user/edit'))
-
-        if user.freelancer:
-            form.groups.data = user.groups + ['freelancer']
         return dict(id=user.id, user=user, form=form)
 
 
-@view_config(route_name='user_tooltip', permission='freelancer')
+@view_config(route_name='user_tooltip', permission='can_view_users')
 class Tooltip(BaseView):
     def get(self):
         user_id = self.request.GET.get('user_id')
@@ -158,7 +98,7 @@ def _avatar_path(user_id, settings, temp=False):
     return os.path.join(settings['AVATAR_PATH'], 'users', user_id)
 
 
-@view_config(route_name='user_avatar', permission='freelancer')
+@view_config(route_name='user_avatar', permission='can_view_users')
 class Avatar(BaseView):
     def _file_read(self, path):
         if os.path.exists(path):
