@@ -3,23 +3,16 @@ gevent.monkey.patch_all()
 import psycogreen.gevent
 psycogreen.gevent.patch_psycopg()
 
-import sys
 import os
-import ConfigParser
-import inspect
 
-import pyramid_jinja2
 from zope.interface import implementer
 from sqlalchemy import engine_from_config
 from pyramid.interfaces import IAuthenticationPolicy
-from pyramid import paster
 from pyramid.config import Configurator
 from pyramid_beaker import session_factory_from_settings
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from werkzeug.contrib.cache import MemcachedCache
-
-from intranet3.utils.redis_lib import Redis
 
 try:
     import uwsgi
@@ -35,15 +28,11 @@ class CustomAuthenticationPolicy(AuthTktAuthenticationPolicy):
             cron_key = request.registry.settings['CRON_SECRET_KEY']
             if request.headers.get('X-Intranet-Cron', 'false') == cron_key:
                 result = -1 # cron userid
-            task_key = request.registry.settings['TASK_SECRET_KEY']
-            if request.headers.get('X-Intranet-Task', 'false') == task_key:
-                result = -2 # cron userid
         return result
 
 
 config = None
 memcache = None
-redis = Redis(host='localhost', port=6379, db=0)
 
 
 def main(global_config, **settings):
@@ -53,7 +42,6 @@ def main(global_config, **settings):
     global config
     config = settings
     global memcache
-    global redis
     memcache = MemcachedCache([config['MEMCACHE_URI']])
 
     from intranet3.models import DBSession, Base, User
