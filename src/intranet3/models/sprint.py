@@ -4,6 +4,7 @@ import datetime
 from sqlalchemy.types import String, Integer, Date, DateTime, Text, Float
 from sqlalchemy import Column, ForeignKey, orm
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.schema import UniqueConstraint
 
 from intranet3.models import Base
 from intranet3.log import WARN_LOG, INFO_LOG, DEBUG_LOG
@@ -78,18 +79,19 @@ class Sprint(Base):
 class SprintBoard(Base):
     __tablename__ = 'sprint_board'
 
-    id = Column(Integer, primary_key=True, nullable=False, index=True)
-    board = Column(Text, nullable=False, default='')
-    name = Column(Text, unique=True, nullable=False, default='')
+    id = Column(Integer, primary_key=True, index=True)
+    board = Column(Text, nullable=False)
+    name = Column(Text, nullable=False)
 
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=True, index=True)
+    user_id = Column(Integer, ForeignKey('user.id'), index=True)
     user = orm.relationship('User')
+
+    __table_args__ = (UniqueConstraint('name', 'user_id', name='board_name_user_id_unique'), {})
 
     def to_dict(self):
         return dict(
             id=self.id,
             board=self.board,
             name=self.name,
-            user_id=self.user_id,
+            user=self.user.to_dict(),
         )
-

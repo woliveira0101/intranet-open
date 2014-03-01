@@ -56,16 +56,16 @@ App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
   };
 });
 
-App.controller('sprintBoardsCtrl', function($scope, $http, dialog, $dialog, $callerScope){
+App.controller('sprintBoardsCtrl', function($scope, $http, dialog, $dialog, $filter, $callerScope){
   $scope.selected_board = undefined;
+
   $http.get('/api/boards').success(function(data){
     $scope.boards = data.boards;
-    $scope.boards.reverse();
+    $scope.only_my = true;
     if($scope.boards.length > 0){
-      $scope.selected_board = $scope.boards[0];
+      $scope.selected_board = $scope.get_boards()[0];
     }
   });
-
 
   $scope.clone = function(){
     $callerScope.columns = angular.fromJson($scope.selected_board.board);
@@ -85,6 +85,24 @@ App.controller('sprintBoardsCtrl', function($scope, $http, dialog, $dialog, $cal
 
   $scope.close = function() {
     dialog.close();
+  };
+
+  $scope.get_boards = function(){
+    var boards = $scope.boards;
+    if($scope.only_my){
+      boards = _.filter(boards, function(b){
+        return b.user.id == $scope.G.user.id;
+      });
+    }
+    return boards
+  };
+
+  $scope.get_name = function(board){
+    if($scope.only_my || board.user.id == $scope.G.user.id){
+      return ''
+    } else {
+      return ' ( ' + board.user.name + ' )'
+    }
   };
 });
 

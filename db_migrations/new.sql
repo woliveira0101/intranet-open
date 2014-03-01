@@ -5,6 +5,6 @@ CREATE TABLE sprint_board (
     name TEXT NOT NULL, 
     user_id INTEGER, 
     PRIMARY KEY (id), 
-    UNIQUE (name), 
+    CONSTRAINT board_name_user_id_unique UNIQUE (name, user_id), 
     FOREIGN KEY(user_id) REFERENCES "user" (id)
 )

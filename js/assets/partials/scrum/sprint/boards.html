@@ -9,8 +9,11 @@
     <span ng-show="boards_error">Cannot fetch boards</span>
   </div>
   <div ng-show="boards.length > 0">
-    <select ng-disabled="boards.length == 0" ng-model="selected_board" ng-options="board.name for board in boards"></select>
+    <label class="checkbox">
+      <input type="checkbox" ng-model="only_my"> Show only my
+    </label>
+    <select ng-disabled="boards.length == 0" ng-model="selected_board" ng-options="board as board.name + get_name(board) for board in get_boards() | orderBy:'name'"></select>
     <a class="btn" ng-click="clone()" ng-show="selected_board.id">Clone to current sprint</a>
-    <a class="btn btn-danger" ng-show="selected_board.id !== undefined" ng-click="delete()">Delete selected board</a>
+    <a class="btn btn-danger" ng-show="selected_board.id !== undefined && selected_board.user.id == G.user.id" ng-click="delete()">Delete</a>
   </div>
 </div>

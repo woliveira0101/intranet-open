@@ -51,11 +51,18 @@ def callback(request):
 
     email = google_profile['email']
 
-    EXTRA_EMAILS = request.registry.settings.get('GOOGLE_EXTRA_EMAILS', '').split('\n')
+    EXTRA_EMAILS = request.registry.settings.get('GOOGLE_EXTRA_EMAILS', '')
+    EXTRA_EMAILS = EXTRA_EMAILS.split('\n')
     config = ApplicationConfig.get_current_config(allow_empty=True)
     freelancers = config.get_freelancers()
     clients_emails = Client.get_emails()
-    if email.endswith('@%s' % request.registry.settings['COMPANY_DOMAIN']) or email in EXTRA_EMAILS:
+
+    is_employee = (
+        email.endswith('@%s' % request.registry.settings['COMPANY_DOMAIN']) or
+        email in EXTRA_EMAILS
+    )
+
+    if is_employee:
         group = 'employee'
     elif email in freelancers:
         group = 'freelancer'

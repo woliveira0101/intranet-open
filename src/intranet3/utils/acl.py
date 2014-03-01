@@ -29,6 +29,8 @@ class Root(object):
         ('can_view_time_report',         (' ',          ' ',        ' ',           'A',            'A',        ' ',  'A',     )),
         ('can_view_time_client_report',  (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
         ('can_view_project_client_times',(' ',          ' ',        ' ',           'A',            ' ',        ' ',  'A',     )),
+        ('can_manage_sprint_boards',     (' ',          ' ',        ' ',           'A',            ' ',        ' ',  ' ',     )),
+
 
         # ADMIN ONLY:
         ('can_edit_config',              (' ',          ' ',        ' ',           ' ',            ' ',        ' ',  ' ',     )),

@@ -3,7 +3,9 @@
 import json
 import colander
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPBadRequest, HTTPOk, HTTPNotFound, Response
+from pyramid.httpexceptions import (
+    HTTPBadRequest, HTTPOk, HTTPNotFound, Response, HTTPForbidden
+)
 from sqlalchemy.exc import IntegrityError
 
 from intranet3 import models as m
@@ -28,11 +30,7 @@ class Boards(ApiView):
         )
 
     def post(self):
-        try:
-            json_board = self.request.json_body
-        except ValueError:
-            raise HTTPBadRequest('Expect json')
-
+        json_board = self.request.json_body
         board_schema = BoardSchema()
         try:
             board = board_schema.deserialize(json_board)
@@ -41,6 +39,7 @@ class Boards(ApiView):
             raise HTTPBadRequest(errors)
 
         board = m.SprintBoard(**board)
+        board.user_id = self.request.user.id
         self.session.add(board)
 
         try:
@@ -77,13 +76,19 @@ class Board(ApiView):
         for key, value in board.iteritem():
             setattr(board, key, value)
 
-        return HTTPOk("OK")
+        return HTTPOk('OK')
 
     def delete(self):
         board_id = self.request.matchdict.get('board_id')
         board = m.SprintBoard.query.get(board_id)
+
         if not board:
             raise HTTPNotFound()
+
+        can_delete = (board.user_id == self.request.user.id)
+
+        if not can_delete:
+            raise HTTPForbidden
 
         self.session.delete(board)
 
