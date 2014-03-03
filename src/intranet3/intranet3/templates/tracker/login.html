@@ -10,18 +10,20 @@
         <div class="span6">
             <form class="box" action="{{ request.url_for('/tracker/login', tracker_id=tracker.id) }}" method="post" accept-charset="utf-8">
                 {{ csrf_field }}
-                {{ form_field(form.login, _('Your login for given tracker')) }}
-                {{ form_field(form.password, _('Your password for given tracker')) }}
+                {% for field in form %}
+                    {{ form_field(field, field.description) }}
+                {% endfor %}
                 <div class="buttons">
                     <input class="btn btn-primary" type="submit" value="{% trans %}Save{% endtrans %}">
                 </div>
             </form>
         </div>
+
         <div class="span8">
-            {% if tracker.type == 'pivotaltracker'  %}
-                <pre>For Pivotal Tracker please provide email and Name separated by semicolon
-i.e. konrad.rotkiewicz@stxnext.pl;Konrad Rotkiewicz</pre>
+            {% if tracker.description  %}
+                <pre>{{ tracker.description }}</pre>
             {% endif %}
-        </div>
+         </div>
+
     </div>
 {% endblock %}

@@ -12,6 +12,7 @@
         {{ form_field(form.name, _('Tracker friendly name')) }}
         {{ form_field(form.url, _('Tracker location. If incorrect, bugs fetching will raise errors.')) }}
         {{ form_field(form.mailer, _('E-mail address the tracker will send notifications from.')) }}
+        {{ form_field(form.description, _('Tracker description')) }}
         <div class="buttons">
             <input class="btn btn-primary" type="submit" value="{% trans %}Add{% endtrans %}"/>
         </div>

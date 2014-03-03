@@ -410,7 +410,7 @@ class ClientHours(CronView):
         """)
         rows = [
         (month.strftime('%Y-%m-%d'), client, email, (u'%.2f' % time).replace('.', ','))
-        for month, email, client, time in entries
+        for month, email, client, time  in entries
         ]
         config_obj = ApplicationConfig.get_current_config()
         h.trier(

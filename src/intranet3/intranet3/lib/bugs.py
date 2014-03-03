@@ -12,16 +12,18 @@ LOG = INFO_LOG(__name__)
 WARN = WARN_LOG(__name__)
 ERROR = ERROR_LOG(__name__)
 
-MAX_TIMEOUT = 50 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
+MAX_TIMEOUT = 50  # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 
 SCRUM_BUG_CACHE_KEY = 'sprint-%s'
 SCRUM_BUG_CACHE_TIMEOUT = 3*60
+
 
 class Bugs(object):
 
     def __init__(self, request, user=None):
         """
-        If no user is provided,  we will fetch bugs using current user credentials
+        If no user is provided,  we will fetch bugs using current user
+        credentials
         """
         self.request = request
         self.user = user or request.user
@@ -30,18 +32,18 @@ class Bugs(object):
     def _get_bugs(self, fetcher_callback, full_mapping=True):
         fetchers = []
         creds_q = DBSession.query(Tracker, TrackerCredentials, User)\
-                           .filter(Tracker.id==TrackerCredentials.tracker_id) \
-                           .filter(User.id==TrackerCredentials.user_id)\
-                           .filter(TrackerCredentials.user_id==self.user.id).all()
+            .filter(Tracker.id == TrackerCredentials.tracker_id) \
+            .filter(User.id == TrackerCredentials.user_id)\
+            .filter(TrackerCredentials.user_id == self.user.id).all()
 
         for tracker, credentials, user in creds_q:
-            if full_mapping:
-                mapping = TrackerCredentials.get_logins_mapping(tracker)
-            else:
-                mapping = {credentials.login.lower(): self.user}
-            fetcher = get_fetcher(tracker, credentials, user, mapping)
+            fetcher = tracker.get_fetcher(
+                credentials,
+                self.user,
+                full_mapping=full_mapping,
+            )
             fetchers.append(fetcher)
-            fetcher_callback(fetcher) # initialize query
+            fetcher_callback(fetcher)  # initialize query
         bugs = []
 
         for fetcher in fetchers:
@@ -60,7 +62,6 @@ class Bugs(object):
                     'Could not fetch bugs from tracker %s' % fetcher.tracker.name,
                     klass='error',
                 )
-
 
         projects = {}
         for bug in bugs:
@@ -146,8 +147,9 @@ class Bugs(object):
 
         fetchers = []
         for project, tracker, creds, user in entries:
-            fetcher = get_fetcher(tracker, creds, user, tracker.logins_mapping)
-            fetcher.fetch_scrum(sprint.name, project.project_selector, project.component_selector)
+            fetcher = tracker.get_fetcher(creds, user, full_mapping=True)
+            fetcher.fetch_scrum(sprint.name, project.project_selector,
+                                project.component_selector)
             fetchers.append(fetcher)
             if tracker.type in ('bugzilla', 'rockzilla', 'igozilla'):
                 break

@@ -107,8 +107,9 @@ class BaseFetcher(object):
                  timeout=MAX_TIMEOUT):
         self._greenlet = None
         self.tracker = tracker
-        self.login = credentials.login
-        self.password = credentials.password
+        self.login = credentials['login']
+        self.password = credentials['password']
+        self.credentials = credentials
         self.user = user
         self.login_mapping = login_mapping
         self.error = None
@@ -154,6 +155,10 @@ class BaseFetcher(object):
         if not self._auth_data:
             self._auth_data = self.get_auth()
         self.set_auth(session, self._auth_data)
+
+    def clear_user_cache(self):
+        if self._memcached_key:
+            memcache.delete(self._memcached_key)
 
     def get_rpc(self):
         rpc = RPC()

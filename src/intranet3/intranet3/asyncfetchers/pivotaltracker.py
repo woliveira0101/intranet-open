@@ -44,17 +44,7 @@ class PivotalTrackerTokenFetcher(BaseFetcher):
             user,
             login_mapping,
         )
-        try:
-            email, login = credentials.login.split(';')
-        except Exception:
-            email, login = '', ''
-
-        self.email = email
-        self.login = login
-        self.login_mapping = dict([
-            (k.split(';')[1], v)
-            for k, v in login_mapping.iteritems() if ';' in k
-        ])
+        self.email = credentials['email']
 
     def get_auth(self):
         response = requests.get(
