@@ -20,6 +20,16 @@
 {% block tail_script %}
     <script>
     $(document).ready( function () {
+        function getAbsenceDescription(){
+            var $this = $(this);
+            return $this.attr('data-absent-title');
+        }
+        function getLateDescription(){
+            var $this = $(this);
+            return $this.attr('data-late-title');
+        }
+        var redTooltip = '<div class="tooltip tooltip-late"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>';
+        var blueTooltip = '<div class="tooltip tooltip-absence"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>';
         var data = {{ data|safe }};
         // generateTable function is in absences.js file
         generateTable(data);
@@ -37,20 +47,41 @@
                 container: 'body',
                 animation: false,
                 html: true,
-                template: '<div class="tooltip tooltip-absence"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+                template: blueTooltip,
+                title: getAbsenceDescription
             });
             $('td.late').tooltip({
                 container: 'body',
                 animation: false,
                 html: true,
-                template: '<div class="tooltip tooltip-late"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
-            });
-            $('td.late').tooltip('disable'); // Latenesses are hidden by default
+                template: redTooltip,
+                title: getLateDescription
+            });    
+            $('td.late').tooltip('disable');  // Latenesses are hidden by default
+            $('td.late.absent').tooltip('enable');
         });
-
         // Toggling latenesses!
         $('.absences-nav .agenda .late').on('click', function(){
+            $('td.late.absent').data('tooltip', false);
+            $('td.late.absent').tooltip(
+                $(this).is('.inactive') ?
+                {
+                    container: 'body',
+                    animation: false,
+                    html: true,
+                    template: redTooltip,
+                    title: getLateDescription
+                } :
+                {
+                    container: 'body',
+                    animation: false,
+                    html: true,
+                    template: blueTooltip,
+                    title: getAbsenceDescription
+                }
+            );
             $('td.late').tooltip($(this).is('.inactive') ? 'enable' : 'disable');
+            $('td.late.absent').tooltip('enable');
             $('.data .late').toggleClass('inactive');
             $(this).toggleClass('inactive');
         });
