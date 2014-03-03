@@ -1,3 +1,11 @@
+0.9.10 (03-03-2014)
+===========
+- locations and teams counter in employee view
+- change scrum master permissions
+- fix part time diff in report view
+- fix absence table rendering
+- move to buildout 2.0
+
 0.9.9 (20-02-2014)
 ===========
 - groups and roles counter in employee view
