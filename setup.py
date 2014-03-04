@@ -48,7 +48,7 @@ setup(
         'ordereddict==1.1',
         'python-memcached==1.47',
         'Twisted==11.0.0',
-        'pyOpenSSL',
+        'pyOpenSSL<=0.13',
         'twisted.scheduling==1.0',
         'python-dateutil==1.5',
         'xlwt<=0.7.4',
