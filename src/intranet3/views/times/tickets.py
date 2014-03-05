@@ -4,7 +4,14 @@ from pyramid.view import view_config
 from pyramid.renderers import render
 
 from intranet3.utils.views import BaseView
-from intranet3.models import User, TimeEntry, Tracker, Project, Client
+from intranet3.models import (
+    User,
+    TimeEntry,
+    Tracker,
+    Project,
+    Client,
+    DBSession,
+)
 from intranet3.forms.times import ProjectsTimeForm, TimeEntryForm
 from intranet3.log import INFO_LOG, WARN_LOG, ERROR_LOG, DEBUG_LOG, EXCEPTION_LOG
 from intranet3.lib.times import TimesReportMixin, HTMLRow, dump_entries_to_excel
@@ -27,7 +34,7 @@ class Excel(BaseView):
         if not form.validate():
             return render('time/tickets_report/projects_report.html', dict(form=form))
 
-        query = self.session.query
+        query = DBSession.query
         start_date, end_date = form.date_range.data
         projects = form.projects.data
         users = form.users.data

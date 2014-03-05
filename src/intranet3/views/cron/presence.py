@@ -6,7 +6,7 @@ from pyramid.response import Response
 from pyramid.renderers import render
 
 from intranet3 import config
-from intranet3.models import ApplicationConfig
+from intranet3.models import ApplicationConfig, DBSession
 from intranet3.utils.views import CronView
 from intranet3.log import INFO_LOG, EXCEPTION_LOG
 from intranet3.utils import mail
@@ -47,7 +47,7 @@ class Clean(AnnuallyReportMixin, CronView):
         today = datetime.datetime.now().date()
         date = today - datetime.timedelta(days=cleaning_time_presence)
         date = datetime.datetime.combine(date, day_end)
-        cleaned = self.session.execute("""
+        cleaned = DBSession.execute("""
             DELETE FROM presence_entry as p
             WHERE p.ts <= :date
             AND p.ts > (

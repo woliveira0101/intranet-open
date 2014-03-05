@@ -7,7 +7,7 @@ from pyramid.response import Response
 from intranet3.utils.views import CronView
 from intranet3.log import INFO_LOG, EXCEPTION_LOG
 from intranet3.helpers import SpreadsheetConnector
-from intranet3.models import ApplicationConfig, Holiday
+from intranet3.models import ApplicationConfig, Holiday, DBSession
 
 INFO = INFO_LOG(__name__)
 EXCEPTION = EXCEPTION_LOG(__name__)
@@ -26,7 +26,7 @@ class Sync(CronView):
 
         if dates_diff:
             holidays = [ Holiday(date=date) for date in dates_diff ]
-            self.session.add_all(holidays)
+            DBSession.add_all(holidays)
 
         INFO(u'%s Holidays added: %s' % (len(dates_diff), dates_diff))
         return Response('ok')

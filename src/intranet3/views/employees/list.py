@@ -8,7 +8,7 @@ from sqlalchemy import desc
 from intranet3.utils.idate import first_day_of_month, last_day_of_month, first_day_of_quarter, last_day_of_quarter
 from intranet3.utils.views import BaseView
 from intranet3 import models as m
-from intranet3.models import User, Leave
+from intranet3.models import User, Leave, DBSession
 from intranet3 import helpers as h
 from intranet3.helpers import groupby
 from intranet3.forms.employees import  FilterForm
@@ -130,7 +130,7 @@ class MandatedLeaveChange(BaseView):
                 leave_obj = leave_obj[0]
             leave_obj.number = mandated
             leave_obj.remarks = remarks
-            self.session.add(leave_obj)
+            DBSession.add(leave_obj)
         return dict(status='ok')
 
 
@@ -145,11 +145,11 @@ class Justify(BaseView):
         if name == 'late':
             late = m.Late.query.get(_id)
             late.justified = val
-            self.session.add(late)
+            DBSession.add(late)
         elif name == 'wrongtime':
             wrongtime = m.WrongTime.query.get(_id)
             wrongtime.justified = val
-            self.session.add(wrongtime)
+            DBSession.add(wrongtime)
         return Response('')
 
 
@@ -163,15 +163,15 @@ class Review(BaseView):
         if name == 'late':
             late = m.Late.query.get(_id)
             late.review = val
-            self.session.add(late)
+            DBSession.add(late)
         elif name == 'wrongtime':
             wrongtime = m.WrongTime.query.get(_id)
             wrongtime.review = val
-            self.session.add(wrongtime)
+            DBSession.add(wrongtime)
         elif name == 'absence':
             absence = m.Absence.query.get(_id)
             absence.review = val
-            self.session.add(absence)
+            DBSession.add(absence)
 
         return Response('')
 
@@ -184,15 +184,15 @@ class Delete(BaseView):
         if name == 'late':
             late = m.Late.query.get(_id)
             late.deleted = True
-            self.session.add(late)
+            DBSession.add(late)
         elif name == 'wrongtime':
             wrongtime = m.WrongTime.query.get(_id)
             wrongtime.deleted = True
-            self.session.add(wrongtime)
+            DBSession.add(wrongtime)
         elif name == 'absence':
             absence = m.Absence.query.get(_id)
             absence.deleted = True
-            self.session.add(absence)
+            DBSession.add(absence)
         return Response('')
 
 
@@ -244,12 +244,12 @@ class Pivot(ApplyArgsMixin, BaseView):
     def get(self):
         check_role = self.request.GET.get('role')
         if not check_role or check_role == 'None':
-            pivot_q = self.session.query(User.id, User.name, User.start_work, User.stop_work, User.roles)\
+            pivot_q = DBSession.query(User.id, User.name, User.start_work, User.stop_work, User.roles)\
                                 .filter(User.is_not_client())\
                                 .filter(User.is_active==True)\
                                 .order_by(User.name)
         else:
-            pivot_q = self.session.query(User.id, User.name, User.start_work, User.stop_work, User.roles)\
+            pivot_q = DBSession.query(User.id, User.name, User.start_work, User.stop_work, User.roles)\
                                 .filter(User.is_not_client())\
                                 .filter(User.is_active==True)\
                                 .filter(User.roles.op('&&')('{%s}'%(check_role)))\

@@ -18,12 +18,12 @@ class ApplicationConfig(Base):
     """ Global application configuration """
     # password used to enrypt all other sensitive information
     __tablename__ = 'application_config'
-    
+
     id = Column(Integer, primary_key=True)
-    
+
     date = Column(DateTime, default=datetime.datetime.now, nullable=False, index=True)
     office_ip = Column(String, nullable=False)
-    
+
     google_user_email = Column(String, nullable=False)
     google_user_password = Column(String, nullable=False)
     holidays_spreadsheet = Column(String, nullable=False)
@@ -46,14 +46,14 @@ class ApplicationConfig(Base):
         """
         @rtype: ApplicationConfig
         """
-        config = DBSession().query(cls).first()
+        config = DBSession.query(cls).first()
         if config is not None:
             return config
         elif allow_empty:
             return None
         else:
             raise ValueError(u"Application config not found")
-        
+
     def get_freelancers(self):
         return [value.strip() for value in self.freelancers.split(u'\n')] if self.freelancers else []
 

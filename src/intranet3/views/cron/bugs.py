@@ -9,6 +9,7 @@ from intranet3.log import INFO_LOG, DEBUG_LOG, EXCEPTION_LOG
 from intranet3.models import User, Project
 from intranet3.utils import mail
 from intranet3.utils.views import CronView
+from intranet3.models import DBSession
 
 
 LOG = INFO_LOG(__name__)
@@ -59,12 +60,12 @@ class OldBugsReport(CronView):
                 )
 
     def action(self):
-        coordinators = self.session.query(Project.coordinator_id, User.email) \
+        coordinators = DBSession.query(Project.coordinator_id, User.email) \
                                    .join(User) \
                                    .filter(Project.coordinator_id!=None) \
                                    .group_by(Project.coordinator_id, User) \
                                    .all()
-        manager = self.session.query(User) \
+        manager = DBSession.query(User) \
                               .filter(User.email == config['MANAGER_EMAIL']) \
                               .first()
         bugs = Bugs(self.request, manager).get_all()

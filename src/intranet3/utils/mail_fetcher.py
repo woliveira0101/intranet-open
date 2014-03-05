@@ -71,13 +71,11 @@ class TimeEntryMailExtractor(object):
     TRAC_AUTHOR_REGEXP = re.compile(r'^Changes \(by (.*)\)\:')
     TRAC_COMPONENT_REGEXP = re.compile(r'.*Component:\ *([^|]*)')
 
-    def __init__(self, trackers, logins_mappings, projects, selector_mappings,
-                session=None):
+    def __init__(self, trackers, logins_mappings, projects, selector_mappings):
         self.trackers = trackers
         self.logins_mappings = logins_mappings
         self.projects = projects
         self.selector_mappings = selector_mappings
-        self.session = session or DBSession()
 
     def handle_trac_email(self, msg, tracker):
         date = decode(msg['Date'])
@@ -316,18 +314,16 @@ class MailCheckerTask(object):
             selector_mappings,
         )
         # ok, we have all mails, lets create timeentries from them
-        session = DBSession()
         extractor = TimeEntryMailExtractor(
             trackers,
             logins_mappings,
             projects,
             logins_mappings,
-            session,
         )
 
         for msg in fetcher:
             timeentry = extractor.get(msg)
             if timeentry:
-                session.add(timeentry)
+                DBSession.add(timeentry)
         transaction.commit()
 

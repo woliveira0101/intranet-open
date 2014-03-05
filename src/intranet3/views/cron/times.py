@@ -18,7 +18,7 @@ from intranet3.utils import idate
 from intranet3.utils import gdocs
 from intranet3.utils.views import CronView
 from intranet3.views.report.wrongtime import AnnuallyReportMixin
-from intranet3.models import TimeEntry, Tracker, Project, Client, User, ApplicationConfig, Holiday
+from intranet3.models import TimeEntry, Tracker, Project, Client, User, ApplicationConfig, Holiday, DBSession
 from intranet3.utils import mail
 from intranet3.log import WARN_LOG, ERROR_LOG, DEBUG_LOG, INFO_LOG, EXCEPTION_LOG
 
@@ -55,7 +55,7 @@ class ExcelReport(CronView):
 
     def action(self):
         today = datetime.date.today()
-        query = self.session.query
+        query = DBSession.query
         uber_query = query(
             Client.name, Project.name, TimeEntry.ticket_id,
             User.email, TimeEntry.description, TimeEntry.date, TimeEntry.time
@@ -142,7 +142,7 @@ class TodayHours(CronView):
         return Response('ok')
 
     def _today_hours(self, date, projects, omit_users):
-        time_entries = self.session.query('uid', 'user', 'description', 'time',
+        time_entries = DBSession.query('uid', 'user', 'description', 'time',
             'project', 'client', 'ticket_id', 'tracker_id',
             'total_time').from_statement("""
                 SELECT
@@ -209,7 +209,7 @@ class TodayHours(CronView):
             output.append(u"")
             time_link = base_url + self.request.url_for(
                 '/times/list_user',
-                user_id=user_id, 
+                user_id=user_id,
                 date=date.strftime("%d.%m.%Y"),
             )
             output.append(u"\t<a href=\"%s\">%s</a> (%.2f h):" % (time_link, user_name, user_sum[user_id]))
@@ -258,7 +258,7 @@ class DailyHoursWithoutTicket(CronView):
         if not omit_users:
             # because u.id NOT IN (,) returns error
             omit_users = (987654321,)
-        time_entries = self.session.query('user', 'description', 'time', 'project', 'client').from_statement("""
+        time_entries = DBSession.query('user', 'description', 'time', 'project', 'client').from_statement("""
         SELECT
             u.name as "user", t.description as "description",
             t.time as "time", p.name as "project", c.name as "client"
@@ -322,7 +322,7 @@ class HoursForPreviousMonths(CronView):
 
     def _hours_for_previous_months(self, date):
         current_month_start = datetime.date(date.year, date.month, 1)
-        time_entries = self.session.query(
+        time_entries = DBSession.query(
             'user', 'client', 'project', 'time',
             'description', 'ticket_id', 'entry_date', 'entry_status').from_statement("""
         SELECT
@@ -383,7 +383,7 @@ class ClientHours(CronView):
 
     def _synchronize_client_hours(self):
         LOG(u"Client Hours synchronization starts")
-        entries = self.session.query('month', 'email', 'client', 'time').from_statement("""
+        entries = DBSession.query('month', 'email', 'client', 'time').from_statement("""
             SELECT
                 date_trunc('month', t.date) as "month",
                 u.email as "email",
@@ -479,7 +479,7 @@ class MissedHours(CronView):
         return data
 
     def _get_first_day_of_work(self):
-        entries = self.session.query('email', 'date').from_statement("""
+        entries = DBSession.query('email', 'date').from_statement("""
             SELECT
                 u.email as "email",
                 MIN(t.date) as "date"
@@ -526,7 +526,7 @@ class MissedHours(CronView):
         return users
 
     def _get_data(self):
-        entries = self.session.query('user_id', 'email', 'month', 'time').from_statement("""
+        entries = DBSession.query('user_id', 'email', 'month', 'time').from_statement("""
             SELECT
                 u.email as "email",
                 u.id as "user_id",

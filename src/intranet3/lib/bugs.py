@@ -135,11 +135,9 @@ class Bugs(object):
         return bugs
 
     def get_sprint(self, sprint):
-        query = self.request.db_session.query
-
         project_ids = sprint.bugs_project_ids
 
-        entries = query(Project, Tracker, TrackerCredentials, User) \
+        entries = DBSession.query(Project, Tracker, TrackerCredentials, User) \
                    .filter(Project.id.in_(project_ids)) \
                    .filter(Project.tracker_id==Tracker.id) \
                    .filter(TrackerCredentials.tracker_id==Project.tracker_id) \

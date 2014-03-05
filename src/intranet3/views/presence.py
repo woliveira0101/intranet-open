@@ -6,7 +6,7 @@ from sqlalchemy import func
 from pyramid.view import view_config
 
 from intranet3.utils.views import BaseView
-from intranet3.models import User, PresenceEntry, Late, Absence
+from intranet3.models import User, PresenceEntry, Late, Absence, DBSession
 from intranet3 import helpers as h
 from intranet3.utils import excuses
 
@@ -31,7 +31,7 @@ class List(BaseView):
 
         def get_entries(city):
             if city in ['wroclaw', 'poznan']:
-                return self.session.query(User.id, User.name, func.min(PresenceEntry.ts), func.max(PresenceEntry.ts))\
+                return DBSession.query(User.id, User.name, func.min(PresenceEntry.ts), func.max(PresenceEntry.ts))\
                               .filter(User.id == PresenceEntry.user_id)\
                               .filter((User.location == city) | (User.location == None))\
                               .filter(PresenceEntry.ts >= start_date)\
@@ -41,7 +41,7 @@ class List(BaseView):
 
         def get_lates(city):
             if city in ['wroclaw', 'poznan']:
-                return self.session.query(User.id, User.name, Late.late_start, Late.late_end)\
+                return DBSession.query(User.id, User.name, Late.late_start, Late.late_end)\
                             .filter(User.id == Late.user_id)\
                             .filter(User.location == city)\
                             .filter(Late.date == date)\
@@ -49,7 +49,7 @@ class List(BaseView):
 
         def get_absence(city):
             if city in ['wroclaw', 'poznan']:
-                return self.session.query(User.id, User.name)\
+                return DBSession.query(User.id, User.name)\
                             .filter(User.id == Absence.user_id)\
                             .filter(User.location == city)\
                             .filter(Absence.date_start <= date)\
@@ -91,7 +91,7 @@ class Full(BaseView):
 
         start_date = datetime.datetime.combine(date, day_start)
         end_date = datetime.datetime.combine(date, day_end)
-        entries = self.session.query(User, PresenceEntry)\
+        entries = DBSession.query(User, PresenceEntry)\
                               .filter(PresenceEntry.user_id==User.id)\
                               .filter(PresenceEntry.ts>=start_date)\
                               .filter(PresenceEntry.ts<=end_date)\

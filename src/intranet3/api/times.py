@@ -15,6 +15,7 @@ from intranet3.lib.times import user_can_modify_timeentry
 from intranet3.models import User, Project, TimeEntry, Tracker
 from intranet3.utils.views import ApiView
 from intranet3.views.times import GetTimeEntriesMixin
+from intranet3.models import DBSession
 
 from intranet3.schemas.times import AddEntrySchema, EditEntrySchema
 
@@ -102,7 +103,7 @@ class TimeCollection(GetTimeEntriesMixin, ApiView):
             timer_ts = datetime.datetime.now() if data.get('timer') else None,
             frozen = bool(data.get('start_timer'))
         )
-        self.session.add(time)
+        DBSession.add(time)
 
         return HTTPCreated('OK')
 
@@ -162,7 +163,7 @@ class Time(ApiView):
 
         if timeentry.project_id != data.get('project_id') and today > timeentry.date:
             timeentry.deleted = True
-            timeentry.modified_ts = datetime.datetime.now() 
+            timeentry.modified_ts = datetime.datetime.now()
 
             time = TimeEntry(
                 date = timeentry.date,
@@ -173,7 +174,7 @@ class Time(ApiView):
                 project_id =  data.get('project_id'),
                 timer_ts = datetime.datetime.now() if data.get('timer') else None,
             )
-            self.session.add(time)
+            DBSession.add(time)
         else:
             if timeentry.time != data.get('time') or \
                timeentry.project_id != data.get('project_id'):
@@ -190,7 +191,7 @@ class Time(ApiView):
         timeentry = self.v['timeentry']
 
         if timeentry.date >= datetime.date.today():
-            self.session.delete(timeentry)
+            DBSession.delete(timeentry)
         else:
             timeentry.deleted = True
             timeentry.modified_ts = datetime.datetime.now()

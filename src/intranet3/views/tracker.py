@@ -6,7 +6,7 @@ from sqlalchemy.orm.query import aliased
 
 from intranet3.forms.common import DeleteForm
 from intranet3.utils.views import BaseView
-from intranet3.models import Tracker, TrackerCredentials, Project
+from intranet3.models import Tracker, TrackerCredentials, Project, DBSession
 from intranet3.forms.tracker import (TrackerForm, TRACKER_TYPES, TrackerLoginForm,
                                      trackers_login_validators)
 from intranet3.log import INFO_LOG
@@ -19,7 +19,7 @@ class UserCredentialsMixin(object):
             TrackerCredentials,
             TrackerCredentials.query.filter(TrackerCredentials.user_id==self.request.user.id).subquery()
         )
-        query = self.session.query(
+        query = DBSession.query(
             Tracker,
             creds
         ).outerjoin((creds, Tracker.credentials))
@@ -76,7 +76,7 @@ class Add(BaseView):
                 url=form.url.data,
                 mailer=form.mailer.data
             )
-            self.session.add(tracker)
+            DBSession.add(tracker)
             self.flash(self._(u"New tracker added"))
             LOG(u"Tracker added")
             url = self.request.url_for('/tracker/list')
@@ -122,7 +122,7 @@ class Login(UserCredentialsMixin, BaseView):
                     login=form.login.data,
                     password=form.password.data,
                 )
-                self.session.add(credentials)
+                DBSession.add(credentials)
             else:
                 credentials.login=form.login.data
                 credentials.password=form.password.data
@@ -167,7 +167,7 @@ class Delete(BaseView):
         if self.request.method == 'POST' and form.validate():
             tracker.credentials.delete()
             tracker.projects.delete()
-            self.session.delete(tracker)
+            DBSession.delete(tracker)
             back_url = self.request.url_for('/tracker/list')
             return HTTPFound(location=back_url)
         return dict(
@@ -187,7 +187,7 @@ class DeleteLogin(BaseView):
         form = DeleteForm(self.request.POST)
         if self.request.method == 'POST' and form.validate():
             credentials = tracker.credentials.filter(TrackerCredentials.user_id==self.request.user.id).one()
-            self.session.delete(credentials)
+            DBSession.delete(credentials)
             back_url = self.request.url_for('/tracker/list')
             return HTTPFound(location=back_url)
         return dict(

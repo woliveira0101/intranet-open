@@ -6,17 +6,18 @@ from pyramid.httpexceptions import HTTPForbidden
 from pyramid.events import subscriber
 from pyramid.events import BeforeRender, ContextFound
 
+from intranet3.models import DBSession
+
 
 class PresenceTracking(object):
     def __init__(self, event):
         today = datetime.date.today()
-        session = event['request'].db_session
 
         user = event['request'].user
         self.arrival = None
         if not user:
             return
-        row = session.query('ts').from_statement("""
+        row = DBSession.query('ts').from_statement("""
             SELECT MIN(p.ts) as "ts"
             FROM presence_entry p
             WHERE DATE(p.ts) = :today
@@ -31,7 +32,7 @@ class PresenceTracking(object):
         since_morning_hours = float((now - arrival).seconds) / 3600
         self.present = since_morning_hours
         noted = 0.0
-        row = session.query('time').from_statement("""
+        row = DBSession.query('time').from_statement("""
             SELECT COALESCE(SUM(t.time), 0.0) as "time"
             FROM time_entry t
             WHERE t.date = :today

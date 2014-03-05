@@ -7,7 +7,7 @@ import logging
 from babel.core import Locale
 from pyramid.view import view_config
 
-from intranet3.models import User, Leave, Holiday, Absence, Late
+from intranet3.models import User, Leave, Holiday, Absence, Late, DBSession
 from intranet3.utils.views import BaseView
 from intranet3.utils import idate
 from intranet3 import helpers as h
@@ -45,7 +45,7 @@ class Absences(BaseView):
                           .all()
         holidays = [i.date.isoformat() for i in holidays]
 
-        absences = self.session.query(
+        absences = DBSession.query(
             Absence.user_id,
             Absence.date_start,
             Absence.date_end,
@@ -104,7 +104,7 @@ class Absences(BaseView):
         return absences_groupped, months
 
     def get_lates(self, start, end):
-        lates = self.session.query(Late.user_id, Late.date, Late.explanation)
+        lates = DBSession.query(Late.user_id, Late.date, Late.explanation)
         lates = lates.filter(Late.date>=start) \
                      .filter(Late.date<=end)
 
@@ -152,18 +152,18 @@ class Absences(BaseView):
                             .filter(User.location=='wroclaw') \
                             .order_by(User.is_freelancer(), User.name)
         users_w = users_w.all()
-        
+
         user_groups = [
             (u'Poznań', len(users_p)),
             (u'Wrocław', len(users_w)),
         ]
-        
+
         reverse = False
         if self.request.user.location == 'wroclaw':
             user_groups.insert(0, user_groups.pop())
             reverse = True
 
-        users_p.extend(users_w) 
+        users_p.extend(users_w)
 
         # Leaves
         leave_mandated = Leave.get_for_year(start.year)
@@ -177,15 +177,15 @@ class Absences(BaseView):
                       leave_used=leave_used[u.id],
                       location=u.location,
                      ) for u in users_p]
-        
-        
+
+
         employees, students = [], []
         for user in users:
             if user['leave_mandated'] > 0:
                 employees.append(user)
             else:
                 students.append(user)
-        
+
         users = employees + students
         # groupby location
         users = sorted(
@@ -193,7 +193,7 @@ class Absences(BaseView):
             key=lambda u: u['location'],
             reverse=reverse
         )
-        
+
         absences, absences_months = self.get_absences(start, end, users)
         lates = self.get_lates(start, end)
         absences_sum = (

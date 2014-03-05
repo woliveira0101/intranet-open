@@ -6,6 +6,7 @@ from sqlalchemy import func
 
 from intranet3.models import User, TimeEntry, Project
 from intranet3 import helpers as h
+from intranet3.models import DBSession
 from .board import Board
 
 
@@ -25,7 +26,6 @@ class SprintWrapper(object):
     def __init__(self, sprint, bugs, request):
         self.sprint = sprint
         self.request = request
-        self.session = request.db_session
         self.board = Board(sprint, bugs)
 
     def _date_to_js(self, date):
@@ -67,7 +67,7 @@ class SprintWrapper(object):
         )
 
     def get_worked_hours(self):
-        entries = self.session.query(User, func.sum(TimeEntry.time), TimeEntry.ticket_id)\
+        entries = DBSession.query(User, func.sum(TimeEntry.time), TimeEntry.ticket_id)\
                               .filter(TimeEntry.user_id==User.id)\
                               .filter(TimeEntry.project_id==self.sprint.project_id) \
                               .filter(TimeEntry.added_ts>=self.sprint.start)\
@@ -86,7 +86,7 @@ class SprintWrapper(object):
         )
 
     def get_tabs(self):
-        extra_tabs = self.session.query(Project)\
+        extra_tabs = DBSession.query(Project)\
                          .filter(Project.client_id == self.sprint.client_id)\
                          .first()\
                          .get_sprint_tabs
@@ -101,7 +101,7 @@ class SprintWrapper(object):
 
         users = []
         if self.sprint.team_id:
-            users = self.session.query(User)\
+            users = DBSession.query(User)\
                         .filter(User.id.in_(self.sprint.team.users))\
                         .filter(User.is_active==True)\
                         .order_by(User.name).all()

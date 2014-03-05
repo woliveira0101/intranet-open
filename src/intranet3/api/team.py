@@ -14,6 +14,7 @@ from intranet3.schemas.team import TeamAddSchema, TeamUpdateSchema
 from intranet3.utils.decorators import has_perm
 from intranet3 import helpers as h
 from intranet3.api.preview import Preview
+from intranet3.models import DBSession
 
 
 @view_config(route_name='api_teams', renderer='json', permission='can_view_teams')
@@ -21,7 +22,7 @@ class Teams(ApiView):
 
     def get(self):
         def get_worked_hours(startDate, endDate, projects_ids):
-            worked_hours = self.session.query(
+            worked_hours = DBSession.query(
                 TimeEntry.project_id,
                 func.sum(TimeEntry.time)
             )
@@ -45,10 +46,10 @@ class Teams(ApiView):
         tickets_last_month_start_date = tickets_last_month_end_date.replace(
                                                                     day=1)
 
-        teams = self.session.query(Team_m, TeamMember.user_id)\
+        teams = DBSession.query(Team_m, TeamMember.user_id)\
                             .outerjoin(TeamMember)
 
-        team_to_project = self.session.query(Team_m.id, Project, Client)\
+        team_to_project = DBSession.query(Team_m.id, Project, Client)\
                                       .filter(Sprint.team_id==Team_m.id)\
                                       .filter(Sprint.project_id==Project.id)\
                                       .filter(Project.client_id==Client.id)\
@@ -119,9 +120,9 @@ class Teams(ApiView):
             raise HTTPBadRequest(errors)
 
         team = Team_m(name=team_des['name'])
-        self.session.add(team)
+        DBSession.add(team)
         try:
-            self.session.flush()
+            DBSession.flush()
         except IntegrityError:
             raise HTTPBadRequest('Team exists')
 
@@ -166,7 +167,7 @@ class Team(ApiView):
 
         if 'users' in team_des:
             new_users = team_des['users']
-            old_users = self.session.query(TeamMember.user_id).filter(TeamMember.team_id==team.id).all()
+            old_users = DBSession.query(TeamMember.user_id).filter(TeamMember.team_id==team.id).all()
             users_delete = list(set(old_users) - set(new_users))
             users_add = list(set(new_users) - set(old_users))
 
@@ -176,7 +177,7 @@ class Team(ApiView):
                                 .delete(synchronize_session=False)
 
             if users_add:
-                self.session.add_all([TeamMember(user_id=u_id, team_id=team.id) for u_id in users_add])
+                DBSession.add_all([TeamMember(user_id=u_id, team_id=team.id) for u_id in users_add])
 
         if team_des.get('swap_with_preview'):
             preview = Preview(self.request)
@@ -193,7 +194,7 @@ class Team(ApiView):
             raise HTTPNotFound()
 
         TeamMember.query.filter(TeamMember.team_id==team.id).delete(synchronize_session=False)
-        self.session.delete(team)
+        DBSession.delete(team)
 
         return HTTPOk('OK')
 

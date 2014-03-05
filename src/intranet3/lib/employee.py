@@ -1,4 +1,5 @@
 from intranet3.models import Leave
+from intranet3.models import DBSession
 
 
 def user_leave(request, year, user=None):
@@ -8,7 +9,7 @@ def user_leave(request, year, user=None):
     leave = Leave.query.filter(Leave.user_id == user.id)\
                        .filter(Leave.year == year).first()
     leave = leave.number if leave else 0
-    used = request.db_session.query('days').from_statement("""
+    used = DBSession.query('days').from_statement("""
                 SELECT sum(t.time)/8 as days
                 FROM time_entry t
                 WHERE deleted = false AND

@@ -11,7 +11,7 @@ from intranet3.forms.employees import (
     AbsenceCreateForm
 )
 from intranet3.lib.employee import user_leave
-from intranet3.models import Late, WrongTime, Absence
+from intranet3.models import Late, WrongTime, Absence, DBSession
 from intranet3.log import INFO_LOG
 
 LOG = INFO_LOG(__name__)
@@ -35,7 +35,7 @@ class LateJustification(BaseView):
                 date=form.popup_date.data,
                 explanation=form.popup_explanation.data,
             )
-            self.session.add(late)
+            DBSession.add(late)
             LOG(u"Late added")
             return Response(self._(u'Explanation added') + CHANGE_STATUS % self._('Waits for verification'))
 
@@ -56,7 +56,7 @@ class WrongTimeJustification(BaseView):
                 date=form.popup_date.data,
                 explanation=form.popup_explanation.data,
             )
-            self.session.add(wrongtime)
+            DBSession.add(wrongtime)
             LOG(u"WrongTime added")
             response = '%s %s' % (self._(u'Explanation added'), CHANGE_STATUS % self._('Waits for verification'))
             return Response(response)
@@ -87,7 +87,7 @@ class CreateAbsence(BaseView):
                 type=type,
                 remarks=remarks,
             )
-            self.session.add(absence)
+            DBSession.add(absence)
             return Response(self._('Done') + RELOAD_PAGE)
 
         return dict(

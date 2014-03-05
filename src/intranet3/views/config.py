@@ -4,7 +4,7 @@ from pyramid.httpexceptions import HTTPFound, HTTPForbidden
 from intranet3.utils.views import BaseView
 
 from intranet3.forms import config as config_forms
-from intranet3.models import ApplicationConfig
+from intranet3.models import ApplicationConfig, DBSession
 from intranet3.log import INFO_LOG
 
 LOG = INFO_LOG(__name__)
@@ -22,7 +22,7 @@ class View(BaseView):
 
         if config_obj is not None:
             LOG(u"Found config object from %s" % (config_obj.date, ))
-            form = FormRef(self.request.POST, obj=config_obj) 
+            form = FormRef(self.request.POST, obj=config_obj)
         else:
             LOG(u"Config object not found")
             form = FormRef(self.request.POST)
@@ -51,10 +51,10 @@ class View(BaseView):
                 config_obj.hours_ticket_user_id = form.hours_ticket_user_id.data if form.hours_ticket_user_id.data else None
             elif subpage == "access":
                 config_obj.freelancers = form.freelancers.data
-  
-            self.session.add(config_obj)
+
+            DBSession.add(config_obj)
             config_obj.invalidate_office_ip()
-  
+
             LOG(u"Config object saved")
             self.flash(self._(u'Application Config saved'), klass='success')
             return HTTPFound(location=self.request.url_for('/config/view', subpage=subpage))

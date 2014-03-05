@@ -7,6 +7,7 @@ from intranet3.models import User
 from .request import RPC
 from .base import BaseFetcher, BasicAuthMixin, CSVParserMixin
 from .bug import BaseBugProducer, ToDictMixin, BaseScrumProducer
+from intranet3.models import DBSession
 
 
 class BlockedOrDependson(ToDictMixin):
@@ -119,8 +120,7 @@ class FetchBlockedAndDependsonMixin(object):
             id=ids,
             field=['blocked', 'dependson', 'bug_id']
         )
-        s = requests.Session()
-        self.set_auth(s)
+        self.set_auth(DBSession)
         result = s.request('GET', url, params=params, verify=False)
 
         return self.parse_ids(result.content)
@@ -132,8 +132,7 @@ class FetchBlockedAndDependsonMixin(object):
             id=ids,
             field=['bug_status', 'bug_id', 'short_desc']
         )
-        s = requests.Session()
-        self.set_auth(s)
+        self.set_auth(DBSession)
         result = s.request('GET', url, params=params, verify=False)
 
         return self.parse_statuses(result.content)

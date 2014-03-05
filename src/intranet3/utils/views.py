@@ -9,6 +9,7 @@ from netaddr import AddrFormatError, IPAddress, IPNetwork, IPRange
 
 from intranet3 import models
 from intranet3.log import INFO_LOG
+from intranet3.models import DBSession
 
 LOG = INFO_LOG(__name__)
 
@@ -18,7 +19,6 @@ class View(object):
         self.context = context
         self.request = request
         self.flash = lambda message, klass='': request.session.flash((klass, message))
-        self.session = request.db_session
         self.settings = self.request.registry.settings # shortcut
 
         tsf = TranslationStringFactory('intranet3')
@@ -75,7 +75,7 @@ class BaseView(View):
         for office_ip in office_ips:
             if _check_ip(current_ip, office_ip):
                 presence = models.PresenceEntry(url=self.request.url, user_id=self.request.user.id)
-                self.session.add(presence)
+                DBSession.add(presence)
                 LOG(u'Noticed presence of user %s (%s)' % (self.request.user.email, current_ip))
                 break
         else:

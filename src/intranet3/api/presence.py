@@ -2,7 +2,7 @@
 import datetime
 from pyramid.view import view_config
 
-from intranet3.models import User, Late, Absence
+from intranet3.models import User, Late, Absence, DBSession
 from intranet3.utils.views import ApiView
 from intranet3 import memcache
 
@@ -26,7 +26,7 @@ class PresenceApi(ApiView):
             current_data_late['blacklist'] = blacklist
             return current_data_late
 
-        late_query = self.session.query(
+        late_query = DBSession.query(
             User.id,
             User.name,
             Late.id,
@@ -40,7 +40,7 @@ class PresenceApi(ApiView):
                                .filter(Late.deleted == False)\
                                .order_by(User.name)
 
-        absences = self.session.query(
+        absences = DBSession.query(
             User.id,
             User.name,
             Absence.id,
