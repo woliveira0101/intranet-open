@@ -7,7 +7,7 @@ from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden, HTTPNotFound
 
-from intranet3.models import Project, Sprint
+from intranet3.models import Project, Sprint, DBSession
 from intranet3.utils.views import BaseView
 from intranet3.log import INFO_LOG, WARN_LOG, ERROR_LOG, DEBUG_LOG, EXCEPTION_LOG
 from intranet3.lib.times import TimesReportMixin, HTMLRow
@@ -120,7 +120,7 @@ class Sprints(BaseView):
         else:
             stats = None
 
-        all_sprints_for_velocity = self.session.query(
+        all_sprints_for_velocity = DBSession.query(
             Sprint.project_id,
             Sprint.worked_hours,
             Sprint.bugs_worked_hours,

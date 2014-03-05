@@ -9,7 +9,7 @@ from pyramid.httpexceptions import HTTPFound, HTTPBadRequest
 from pyramid.view import view_config
 
 from intranet3.utils.views import BaseView, MonthMixin
-from intranet3.models import User, Holiday
+from intranet3.models import User, Holiday, DBSession
 from intranet3.forms.times import HoursWorkedReportFormBase
 from intranet3.helpers import previous_month, next_month, dates_between
 from intranet3.utils import excuses
@@ -37,7 +37,7 @@ class Pivot(MonthMixin, BaseView):
     def get(self):
         month_start, month_end = self._get_month()
 
-        entries = self.session.query('user_id', 'date', 'time', 'late_count').from_statement("""
+        entries = DBSession.query('user_id', 'date', 'time', 'late_count').from_statement("""
         SELECT t.user_id as "user_id", t.date as "date", (
             SELECT COALESCE(SUM(h.time), 0.0) FROM
             time_entry h
@@ -273,7 +273,7 @@ class HoursWorkedMixin(object):
                          {sql_group}
                  ORDER BY {sql_order}""".format(sql_cols=sql_cols, sql_group=sql_group, sql_user=sql_user, sql_order=sql_order)
 
-        query = self.session.query(*rows).from_statement(sql).params(**params)
+        query = DBSession.query(*rows).from_statement(sql).params(**params)
         data = query.all()
 
         result = []

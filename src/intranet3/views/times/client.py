@@ -13,7 +13,7 @@ from intranet3 import config
 from intranet3.utils.views import BaseView
 from intranet3.forms.times import ClientTimeForm
 from intranet3.log import INFO_LOG
-from intranet3.models import Client, Project, TimeEntry
+from intranet3.models import Client, Project, TimeEntry, DBSession
 from intranet3 import helpers as h
 
 LOG = INFO_LOG(__name__)
@@ -46,7 +46,7 @@ class Report(BaseView):
         clients = form.clients.data
         groupby = form.groupby.data
 
-        q = self.session.query(Client.name, Project.name, func.sum(TimeEntry.time))\
+        q = DBSession.query(Client.name, Project.name, func.sum(TimeEntry.time))\
                             .filter(TimeEntry.project_id==Project.id)\
                             .filter(Project.client_id==Client.id)\
                             .filter(Client.id.in_(clients))\
@@ -58,7 +58,7 @@ class Report(BaseView):
         whole_sum = sum([row[2] for row in data])
         whole_sum_without_us = sum([row[2] for row in data if row[0] != config['COMPANY_NAME']])
 
-        q = self.session.query(func.sum(TimeEntry.time))\
+        q = DBSession.query(func.sum(TimeEntry.time))\
                             .filter(TimeEntry.project_id==Project.id)\
                             .filter(Project.client_id==Client.id)\
                             .filter(Client.id != 12)\
@@ -121,7 +121,7 @@ class PerClientPerEmployeeExcel(BaseView):
         return file_
 
     def post(self):
-        rows = self.session.query('cid', 'cname', 'uid', 'uemail', 'date', 'time').from_statement("""
+        rows = DBSession.query('cid', 'cname', 'uid', 'uemail', 'date', 'time').from_statement("""
         SELECT c.id as cid, c.name as cname, u.id as uid, u.email as uemail, date_trunc('month', t.date) as date, SUM(t.time) as time
         FROM time_entry t, project p, client c, "user" u
         WHERE t.project_id = p.id AND
@@ -187,7 +187,7 @@ class Pivot(BaseView):
             # if this is current year we calculate hours only to yesterday
             year_end = today-oneday
 
-        pivot_q = self.session.query('id', 'name', 'color', 'date', 'time').from_statement("""
+        pivot_q = DBSession.query('id', 'name', 'color', 'date', 'time').from_statement("""
         SELECT c.id as id, c.name as name, c.color as color, date_trunc('month', t.date) as date, SUM(t.time) as time
         FROM time_entry t, project p, client c
         WHERE t.project_id = p.id AND
@@ -203,7 +203,7 @@ class Pivot(BaseView):
             pivot.setdefault((p.id, p.name, p.color), [0]*12)[p.date.month-1] = int(round(p.time))
         pivot = sorted(pivot.iteritems(), key=lambda p: p[0][1])
 
-        stats_q = self.session.query('date', 'time').from_statement("""
+        stats_q = DBSession.query('date', 'time').from_statement("""
         SELECT date_trunc('month', t.date) as date, SUM(t.time) as time
         FROM time_entry t
         WHERE t.deleted = false

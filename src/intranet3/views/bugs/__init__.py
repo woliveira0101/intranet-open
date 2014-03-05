@@ -7,6 +7,7 @@ from intranet3.utils.views import BaseView
 from intranet3 import models as m
 from intranet3.lib.bugs import Bugs
 from intranet3 import helpers as h
+from intranet3.models import DBSession
 
 class FilterMixin(object):
     def _get_params(self):
@@ -24,7 +25,7 @@ class GroupedBugsMixin(object):
                                  .filter(m.User.is_active==True)
             people = people.all()
 
-            entries = self.session.query(m.Client, m.Project)\
+            entries = DBSession.query(m.Client, m.Project)\
                                   .filter(m.Client.id == m.Project.client_id)\
                                   .filter(m.Project.tracker_id == m.Tracker.id)\
                                   .order_by(m.Client.name, m.Project.name)
@@ -280,7 +281,7 @@ class OtherProjects(GroupedBugsMixin, FilterMixin, BaseView):
 class Everyones(FilterMixin, BaseView):
     def get(self):
         resolved, show_all_bugs, show_all_projects, sort_by_date = self._get_params()
-        projects = self.session.query(m.Client, m.Project).filter(m.Client.id==m.Project.client_id).order_by(m.Client.name, m.Project.name)
+        projects = DBSession.query(m.Client, m.Project).filter(m.Client.id==m.Project.client_id).order_by(m.Client.name, m.Project.name)
         return dict(projects=projects, resolved=resolved)
 
 
@@ -293,7 +294,7 @@ class EveryonesProject(FilterMixin, BaseView):
 
         resolved, show_all_bugs, show_all_projects, sort_by_date = self._get_params()
 
-        projects = self.session.query(m.Client, m.Project).filter(m.Client.id==m.Project.client_id).order_by(m.Client.name, m.Project.name)
+        projects = DBSession.query(m.Client, m.Project).filter(m.Client.id==m.Project.client_id).order_by(m.Client.name, m.Project.name)
         tracker = project.tracker
         bugs = Bugs(self.request).get_project(project, resolved)
         if bugs is not None:

@@ -10,6 +10,7 @@ from intranet3.utils import google_calendar as cal
 from intranet3.models import Late
 from intranet3.api.presence import MEMCACHED_NOTIFY_KEY
 from intranet3.forms.employees import LateApplicationForm
+from intranet3.models import DBSession
 
 hour9 = datetime.time(hour=9)
 
@@ -44,7 +45,7 @@ class LatenessApi(ApiView):
                 work_from_home=form.work_from_home.data,
             )
 
-            self.session.add(late)
+            DBSession.add(late)
             memcache.delete(MEMCACHED_NOTIFY_KEY % date)
 
             debug = self.request.registry.settings['DEBUG'] == 'True'

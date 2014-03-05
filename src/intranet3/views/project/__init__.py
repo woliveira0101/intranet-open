@@ -3,7 +3,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 from intranet3.utils.views import BaseView
-from intranet3.models import Client, Project
+from intranet3.models import Client, Project, DBSession
 from intranet3.log import INFO_LOG
 from intranet3.forms.project import ProjectForm
 from intranet3.forms.common import DeleteForm
@@ -50,8 +50,8 @@ class Add(BaseView):
                 backlog_url=form.backlog_url.data,
                 status = form.status.data,
             )
-            self.session.add(project)
-            self.session.flush()
+            DBSession.add(project)
+            DBSession.flush()
             self.flash(self._(u"Project added"))
             LOG(u"Project added")
             SelectorMapping.invalidate_for(tracker_id)
@@ -62,7 +62,7 @@ class Add(BaseView):
 class Edit(BaseView):
     def dispatch(self):
         project_id = self.request.GET.get('project_id')
-        project =  self.session.query(Project).filter(Project.id==project_id).one()
+        project =  DBSession.query(Project).filter(Project.id==project_id).one()
         form = ProjectForm(self.request.POST, obj=project)
         # hack, when user has no permision can_edit_projects (that means that he has only scrum perms)
         # we do not validate the form
@@ -105,7 +105,7 @@ class Delete(BaseView):
         form = DeleteForm(self.request.POST)
         back_url = self.request.url_for('/client/view', client_id=project.client_id)
         if self.request.method == 'POST' and form.validate():
-            self.session.delete(project)
+            DBSession.delete(project)
             SelectorMapping.invalidate_for(project.tracker_id)
             return HTTPFound(location=back_url)
         return dict(

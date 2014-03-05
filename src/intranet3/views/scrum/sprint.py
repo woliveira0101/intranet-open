@@ -9,7 +9,14 @@ from pyramid.response import Response
 from intranet3.utils.views import BaseView
 from intranet3.forms.scrum import SprintForm
 from intranet3.forms.common import DeleteForm
-from intranet3.models import Sprint, ApplicationConfig, Tracker, User, Project
+from intranet3.models import (
+    Sprint,
+    ApplicationConfig,
+    Tracker,
+    User,
+    Project,
+    DBSession,
+)
 from intranet3 import helpers as h
 
 from intranet3.log import INFO_LOG, ERROR_LOG
@@ -70,7 +77,7 @@ class List(BaseView):
             stats = None
 
 
-        all_sprints_for_velocity = self.session.query(
+        all_sprints_for_velocity = DBSession.query(
             Sprint.project_id,
             Sprint.worked_hours,
             Sprint.bugs_worked_hours,
@@ -131,7 +138,6 @@ class Field(ClientProtectionMixin, BaseView):
 class BaseSprintView(BaseView):
     def tmpl_ctx(self):
 
-        session = self.session
         sprint = self.v.get('sprint')
         if not sprint:
             sprint_id = self.request.GET.get('sprint_id')
@@ -139,7 +145,7 @@ class BaseSprintView(BaseView):
         project = Project.query.get(sprint.project_id)
 
 
-        sprints = self.session.query(
+        sprints = DBSession.query(
             Sprint.project_id,
             Sprint.worked_hours,
             Sprint.bugs_worked_hours,
@@ -151,11 +157,11 @@ class BaseSprintView(BaseView):
         self.v['project'] = project
         self.v['sprint'] = sprint
 
-        prev_sprint = session.query(Sprint)\
+        prev_sprint = DBSession.query(Sprint)\
                                  .filter(Sprint.project_id==sprint.project_id)\
                                  .filter(Sprint.start<sprint.start)\
                                  .order_by(Sprint.start.desc()).first()
-        next_sprint = session.query(Sprint) \
+        next_sprint = DBSession.query(Sprint) \
                                  .filter(Sprint.project_id==sprint.project_id) \
                                  .filter(Sprint.start>sprint.start) \
                                  .order_by(Sprint.start.asc()).first()
@@ -308,12 +314,11 @@ class Charts(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
 @view_config(route_name='scrum_sprint_retros', permission='can_view_sprints')
 class Retros(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
     def get(self):
-        session = self.session
         sprint = self.v['sprint']
         bugs = self._fetch_bugs(sprint)
         sw = SprintWrapper(sprint, bugs, self.request)
 
-        sprints = session.query(Sprint) \
+        sprints = DBSession.query(Sprint) \
                              .filter(Sprint.project_id==sprint.project_id) \
                              .order_by(Sprint.start.desc())
 
@@ -344,7 +349,7 @@ class Edit(BaseView):
             sprint.goal = form.goal.data
             sprint.board = form.board.data
             sprint.retrospective_note = form.retrospective_note.data
-            self.session.add(sprint)
+            DBSession.add(sprint)
             self.flash(self._(u"Sprint edited"))
             LOG(u"Sprint edited")
             url = self.request.url_for('/scrum/sprint/edit', sprint_id=sprint.id)
@@ -373,8 +378,8 @@ class Add(BaseView):
                 goal=form.goal.data,
                 retrospective_note = form.retrospective_note.data,
             )
-            self.session.add(sprint)
-            self.session.flush()
+            DBSession.add(sprint)
+            DBSession.flush()
             self.flash(self._(u"New sprint added"))
             LOG(u"Sprint added")
             url = self.request.url_for('/scrum/sprint/show', sprint_id=sprint.id)
@@ -392,7 +397,7 @@ class Delete(BaseView):
         sprint =  Sprint.query.get(sprint_id)
         form = DeleteForm(self.request.POST)
         if self.request.method == 'POST' and form.validate():
-            self.session.delete(sprint)
+            DBSession.delete(sprint)
             back_url = self.request.url_for('/scrum/sprint/list')
             return HTTPFound(location=back_url)
         return dict(

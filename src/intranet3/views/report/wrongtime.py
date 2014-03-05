@@ -7,7 +7,7 @@ from pyramid.httpexceptions import HTTPFound
 from intranet3.utils.views import BaseView, MonthMixin
 from intranet3.utils import excuses
 from intranet3.helpers import next_month, previous_month
-from intranet3.models import ApplicationConfig, User, Holiday
+from intranet3.models import ApplicationConfig, User, Holiday, DBSession
 from intranet3.log import INFO_LOG, DEBUG_LOG, EXCEPTION_LOG
 
 LOG = INFO_LOG(__name__)
@@ -29,7 +29,7 @@ class AnnuallyReportMixin(object):
         year_end = datetime.date(year, 12, 31)
         excuses_error = None
         config_obj = ApplicationConfig.get_current_config()
-        entries = self.session.query('user_id', 'date').from_statement("""
+        entries = DBSession.query('user_id', 'date').from_statement("""
         SELECT date_trunc('day', s.date) as date, s.user_id as user_id
         FROM time_entry s
         WHERE DATE(s.modified_ts) > s.date AND
@@ -96,7 +96,7 @@ class Monthly(MonthMixin, BaseView):
         month_start, month_end = self._get_month()
         user = User.query.filter(User.id==user_id).one()
 
-        query = self.session.query('date', 'incorrect_count').from_statement("""
+        query = DBSession.query('date', 'incorrect_count').from_statement("""
             SELECT  date, COUNT(date) as incorrect_count
             FROM time_entry s
             WHERE DATE(s.modified_ts) > s.date AND

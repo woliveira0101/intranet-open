@@ -6,11 +6,10 @@ EXCEPTION = EXCEPTION_LOG(__name__)
 WARN = WARN_LOG(__name__)
 DEBUG = DEBUG_LOG(__name__)
 
-def add_time(user_id, date, bug_id, project_id, hours, subject, session=None):
+def add_time(user_id, date, bug_id, project_id, hours, subject):
     # try finding existing entry for this bug
-    session = session or DBSession()
     bug_id = str(bug_id)
-    entry = session.query.filter(TimeEntry.user_id==user_id) \
+    entry = DBSession.query.filter(TimeEntry.user_id==user_id) \
                          .filter(TimeEntry.date==date.date()) \
                          .filter(TimeEntry.ticket_id==bug_id) \
                          .filter(TimeEntry.project_id==project_id).first()

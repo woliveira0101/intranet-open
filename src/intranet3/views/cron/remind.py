@@ -5,7 +5,7 @@ from pyramid.view import view_config
 from pyramid.response import Response
 
 from intranet3.utils.views import CronView
-from intranet3.models import User, Holiday
+from intranet3.models import User, Holiday, DBSession
 from intranet3.log import INFO_LOG, DEBUG_LOG, EXCEPTION_LOG
 from intranet3.utils import mail
 from intranet3.lib.bugs import Bugs
@@ -58,7 +58,7 @@ Twój intranet
         LOG(u"Starting missing hours reminder")
 
         today = datetime.date.today()
-        entries = self.session.query('email', 'name', 'time').from_statement("""
+        entries = DBSession.query('email', 'name', 'time').from_statement("""
         SELECT s.email, s.name, s.time FROM (
             SELECT u.email as "email", u.name as "name", (
                 SELECT COALESCE(SUM(t.time), 0)

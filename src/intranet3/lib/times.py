@@ -12,6 +12,7 @@ from intranet3.models import User, TimeEntry, Tracker, Project, Client
 from intranet3.log import INFO_LOG, WARN_LOG, ERROR_LOG, DEBUG_LOG, EXCEPTION_LOG
 from intranet3.helpers import previous_month
 from intranet3.forms.times import TimeEntryForm
+from intranet3.models import DBSession
 
 LOG = INFO_LOG(__name__)
 WARN = WARN_LOG(__name__)
@@ -89,8 +90,7 @@ class ProtectTimeEntriesMixin(object):
 
 class TimesReportMixin(object):
     def _prepare_uber_query_for_sprint(self, sprint, bugs, ticket_choice):
-        query = self.session.query
-        uber_query = query(
+        uber_query = DBSession.query(
             Client, Project, TimeEntry.ticket_id, User, Tracker,
             TimeEntry.description, TimeEntry.date, TimeEntry.time
         )
@@ -130,8 +130,7 @@ class TimesReportMixin(object):
         return uber_query
 
     def _prepare_uber_query(self, start_date, end_date, projects, users, ticket_choice, bug_id=None):
-        query = self.session.query
-        uber_query = query(
+        uber_query = DBSession.query(
             Client, Project, TimeEntry.ticket_id, User, Tracker,
             TimeEntry.description, TimeEntry.date, TimeEntry.time
         )

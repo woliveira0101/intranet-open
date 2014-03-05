@@ -15,6 +15,7 @@ from intranet3.schemas.sprint import BoardSchema
 from intranet3.views.scrum.sprint import FetchBugsMixin
 from intranet3.models import Sprint
 from intranet3.lib.scrum import SprintWrapper
+from intranet3.models import DBSession
 
 
 @view_config(route_name='api_boards', renderer='json', permission="can_manage_sprint_boards")
@@ -23,7 +24,7 @@ class Boards(ApiView):
     def get(self):
         boards = [
             board.to_dict()
-            for board in self.session.query(m.SprintBoard)
+            for board in DBSession.query(m.SprintBoard)
         ]
         return dict(
             boards=boards
@@ -40,10 +41,10 @@ class Boards(ApiView):
 
         board = m.SprintBoard(**board)
         board.user_id = self.request.user.id
-        self.session.add(board)
+        DBSession.add(board)
 
         try:
-            self.session.flush()
+            DBSession.flush()
         except IntegrityError:
             raise HTTPBadRequest('Board exists')
 
@@ -90,7 +91,7 @@ class Board(ApiView):
         if not can_delete:
             raise HTTPForbidden
 
-        self.session.delete(board)
+        DBSession.delete(board)
 
         return HTTPOk('OK')
 

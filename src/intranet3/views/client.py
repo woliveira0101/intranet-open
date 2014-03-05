@@ -3,7 +3,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 from intranet3.utils.views import BaseView
-from intranet3.models import Client, Project
+from intranet3.models import Client, Project, DBSession
 from intranet3.log import INFO_LOG, WARN_LOG
 from intranet3.forms.client import ClientForm, ClientAddForm
 from intranet3.forms.common import DeleteForm
@@ -42,7 +42,7 @@ class Map(BaseView):
     def get(self):
         active_projects_only = self.request.GET.get('active_projects_only', '1')
 
-        clients = self.session.query(Client, Project)\
+        clients = DBSession.query(Client, Project)\
                 .filter(Client.id==Project.client_id)
 
         if active_projects_only == '1':
@@ -80,8 +80,8 @@ class Add(BaseView):
                 wiki_url=form.wiki_url.data,
                 mailing_url=form.mailing_url.data
             )
-            self.session.add(client)
-            self.session.flush()
+            DBSession.add(client)
+            DBSession.flush()
             self.flash(self._(u"New client added"))
             LOG(u"Client added")
             return HTTPFound(location=self.request.url_for("/client/view", client_id=client.id))
@@ -97,7 +97,7 @@ class Delete(BaseView):
         back_url = self.request.url_for('/client/list')
         if self.request.method == 'POST' and form.validate():
             client.projects.delete()
-            self.session.delete(client)
+            DBSession.delete(client)
             return HTTPFound(location=back_url)
         return dict(
             type_name=u'client',
@@ -134,7 +134,7 @@ class Edit(BaseView):
             client.wiki_url = form.wiki_url.data
             client.mailing_url = form.mailing_url.data
 
-            self.session.add(client)
+            DBSession.add(client)
             self.flash(self._(u"Client saved"))
             LOG(u"Client saved")
             return HTTPFound(location=self.request.url_for("/client/view", client_id=client.id))

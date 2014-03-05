@@ -7,7 +7,14 @@ from pyramid.view import view_config
 from pyramid.renderers import render
 
 from intranet3.utils.views import BaseView
-from intranet3.models import User, TimeEntry, Tracker, TrackerCredentials, Project
+from intranet3.models import (
+    User,
+    TimeEntry,
+    Tracker,
+    TrackerCredentials,
+    Project,
+    DBSession,
+)
 from intranet3.helpers import previous_day, next_day, format_time
 from intranet3.utils.harvest import Harvest
 from intranet3.utils import excuses
@@ -29,7 +36,7 @@ class Today(BaseView):
 
 class GetTimeEntriesMixin(object):
     def _get_time_entries(self, date, user_id=None):
-        query = self.session.query(Tracker, TimeEntry)
+        query = DBSession.query(Tracker, TimeEntry)
         if user_id:
             query = query.filter(TimeEntry.user_id==user_id)
         else:
@@ -103,7 +110,7 @@ class ListBug(GetTimeEntriesMixin, BaseView):
         project = Project.query.get(project_id)
 
         tracker = project.tracker
-        entries = self.session.query(User, TimeEntry)\
+        entries = DBSession.query(User, TimeEntry)\
                 .filter(TimeEntry.user_id==User.id)\
                 .filter(TimeEntry.ticket_id==bug_id)\
                 .filter(TimeEntry.project_id==project.id)
@@ -145,7 +152,7 @@ class Add(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
         else:
             notes = desc
 
-        query = self.session.query
+        query = DBSession.query
         tracker = Tracker.query.filter(Tracker.type=='harvest').first()
         if not tracker:
             return
@@ -207,7 +214,7 @@ class Add(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
                         timer_ts = datetime.datetime.now() if form.timer.data and count == 1 else None,
                         frozen = bool(self.request.POST.get('start_timer')) and count == 1
                     )
-                    self.session.add(time)
+                    DBSession.add(time)
                     notifications_data.append((now, date, self.request.user, project, form.time.data / count, ticket_id, form.description.data))
             else:
                 time = TimeEntry(
@@ -220,7 +227,7 @@ class Add(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
                     timer_ts = datetime.datetime.now() if form.timer.data else None,
                     frozen = bool(self.request.POST.get('start_timer'))
                 )
-                self.session.add(time)
+                DBSession.add(time)
                 notifications_data.append((now, date, self.request.user, project, form.time.data, form.ticket_id.data, form.description.data))
 
             if form.add_to_harvest.data:
@@ -288,7 +295,7 @@ class Edit(ProtectTimeEntriesMixin, BaseView):
                     project_id = form.project_id.data if form.project_id.data else None,
                     timer_ts = datetime.datetime.now() if form.timer.data else None
                 )
-                self.session.add(time)
+                DBSession.add(time)
             else:
                 ticket_id = form.ticket_id.data
 
@@ -330,7 +337,7 @@ class Delete(ProtectTimeEntriesMixin, BaseView):
             # if time entry was added today or later,
             # it might be just removed from the database
             if timeentry.date >= datetime.date.today():
-                self.session.delete(timeentry)
+                DBSession.delete(timeentry)
             else:
                 # otherwise timeentry must stay in the DB
                 # to show as 'late' modification
@@ -399,7 +406,7 @@ class AjaxAdd(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
                 ticket_id = form.ticket_id.data,
                 project_id = project_id if project_id else None
             )
-            self.session.add(time)
+            DBSession.add(time)
             LOG(u'Ajax - Time entry added')
 
             entries = self._get_time_entries(date)

@@ -14,7 +14,7 @@ from intranet3.models import Absence, Holiday, TimeEntry
 from intranet3.api.presence import MEMCACHED_NOTIFY_KEY
 from intranet3.forms.employees import AbsentApplicationForm, ABSENCE_TYPES
 from intranet3.lib.employee import user_leave
-
+from intranet3.models import DBSession
 
 LEAVE_PROJECT_ID = 86
 L4_PROJECT_ID = 87
@@ -131,7 +131,7 @@ ${name}"""
                 remarks=remarks,
             )
 
-            self.session.add(absence)
+            DBSession.add(absence)
             memcache.delete(MEMCACHED_NOTIFY_KEY % date_start)
 
             if absence.type != 'inne':
@@ -154,7 +154,7 @@ ${name}"""
                             description=description,
                             project_id=project_id,
                         )
-                        self.session.add(timeentry)
+                        DBSession.add(timeentry)
                     date += oneday
 
                 self._send_email(

@@ -120,12 +120,11 @@ class UserChoices(object):
     def __init__(self, empty=False, inactive=False):
         self.empty = empty
         self.inactive = inactive
-        self.session = DBSession()
 
     def __iter__(self):
         if self.empty:
             yield '', u'-- None --'
-        query = self.session.query(User.id, User.name)\
+        query = DBSession.query(User.id, User.name)\
                             .filter(not_(User.is_client()))\
                             .filter(User.is_active==True)\
                             .order_by(User.name)
@@ -134,7 +133,7 @@ class UserChoices(object):
 
         if self.inactive:
             yield '', ' '*8
-            query = self.session.query(User.id, User.name)\
+            query = DBSession.query(User.id, User.name)\
                                 .filter(User.is_client())\
                                 .filter(User.is_active==False)\
                                 .order_by(User.name)

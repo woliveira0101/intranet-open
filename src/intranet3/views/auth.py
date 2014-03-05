@@ -6,7 +6,7 @@ from pyramid.httpexceptions import HTTPForbidden, HTTPFound
 
 from intranet3 import config
 from intranet3.ext.oauth2 import OAuth2WebServerFlow
-from intranet3.models import ApplicationConfig, User, Client
+from intranet3.models import ApplicationConfig, User, Client, DBSession
 from intranet3.log import DEBUG_LOG, INFO_LOG, WARN_LOG
 
 DEBUG = DEBUG_LOG(__name__)
@@ -48,7 +48,6 @@ def callback(request):
         raise HTTPForbidden
     data = requests.get(USER_INFO_URI % credentials.access_token, verify=False)
     google_profile = data.json()
-
     email = google_profile['email']
 
     EXTRA_EMAILS = request.registry.settings.get('GOOGLE_EXTRA_EMAILS', '')
@@ -72,15 +71,14 @@ def callback(request):
         WARN_LOG(u"Forbidden acccess for profile:\n%s\n client's emails:\n%s\nfreelancer's emails:\n%s" % (google_profile, clients_emails, freelancers))
         return HTTPForbidden()
 
-    session = request.db_session
-    user = session.query(User).filter(User.email==email).first()
+    user = DBSession.query(User).filter(User.email==email).first()
     if user is not None:
         if credentials.refresh_token:
             DEBUG(u'Adding refresh token %s for user %s' % (
                 credentials.refresh_token, user.name,
             ))
             user.refresh_token = credentials.refresh_token
-            session.add(user)
+            DBSession.add(user)
         DEBUG(u'Signing in existing user %s' % (user.name, ))
     else:
         LOG(u'Creating new user with name %s and email %s, group: %s' % (google_profile['name'], google_profile['email'], group))
@@ -92,8 +90,8 @@ def callback(request):
             roles=[],
         )
 
-        session.add(user)
-        session.flush()
+        DBSession.add(user)
+        DBSession.flush()
     headers = remember(request, user.id)
     DEBUG(u'User %s set' % user.name)
     if group == 'client':

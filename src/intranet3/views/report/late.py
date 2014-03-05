@@ -7,7 +7,7 @@ from pyramid.httpexceptions import HTTPFound
 from intranet3.utils.views import BaseView, MonthMixin
 from intranet3.utils import excuses
 from intranet3.helpers import next_month, previous_month
-from intranet3.models import User, ApplicationConfig, Holiday
+from intranet3.models import User, ApplicationConfig, Holiday, DBSession
 from intranet3.log import INFO_LOG, DEBUG_LOG, EXCEPTION_LOG
 
 LOG = INFO_LOG(__name__)
@@ -54,7 +54,7 @@ class AnnuallyReportMixin(object):
         year_end = datetime.date(year, 12, 31)
         excuses_error = None
         config_obj = ApplicationConfig.get_current_config()
-        query = self.session.query('uid', 'date', 'presence').from_statement("""
+        query = DBSession.query('uid', 'date', 'presence').from_statement("""
         SELECT p.user_id as "uid",
                date_trunc('day', p.ts) as "date",
                MIN(p.ts) as "presence"
@@ -121,7 +121,7 @@ class Monthly(MonthMixin, BaseView):
         month_start, month_end = self._get_month()
         user = User.query.filter(User.id==user_id).one()
 
-        query = self.session.query('date', 'presence', 'leave').from_statement("""
+        query = DBSession.query('date', 'presence', 'leave').from_statement("""
         SELECT date_trunc('day', p.ts) as "date",
                MIN(p.ts) as "presence",
                MAX(p.ts) as "leave"
