@@ -1,19 +1,30 @@
+import sys
+
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
 from intranet3.decorators import classproperty
 
-DBSession = scoped_session(sessionmaker(
+DBSession_ = scoped_session(sessionmaker(
     extension=ZopeTransactionExtension(), expire_on_commit=False
 ))
+
+
+class SessionWrapper(object):
+    def __getattribute__(self, attr):
+        return DBSession_.__getattribute__(attr)
+
+
+DBSession = SessionWrapper()
 
 
 class Base(object):
 
     @classproperty
     def query(cls):
-        return DBSession.query(cls)
+        return DBSession_.query(cls)
+
 
 Base = declarative_base(cls=Base)
 

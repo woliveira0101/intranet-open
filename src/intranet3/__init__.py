@@ -35,14 +35,19 @@ config = None
 memcache = None
 
 
+def init_memcache(config):
+    global memcache
+    memcache = MemcachedCache([config['MEMCACHE_URI']])
+
+
 def main(global_config, **settings):
     """
     Creates wsgi app
     """
     global config
     config = settings
-    global memcache
-    memcache = MemcachedCache([config['MEMCACHE_URI']])
+
+    init_memcache(config)
 
     from intranet3.models import DBSession, Base, User
     from intranet3.utils import request, acl

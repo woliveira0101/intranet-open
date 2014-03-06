@@ -8,7 +8,7 @@ from sqlalchemy import event, func
 from sqlalchemy.util.langhelpers import symbol
 
 from intranet3 import memcache
-from intranet3.models import Base, DBSession, User
+from intranet3.models import Base, DBSession_, User
 from intranet3.log import WARN_LOG, INFO_LOG, DEBUG_LOG
 
 
@@ -339,7 +339,7 @@ def remove_coordinator(session, user_id):
             user.groups = groups
 
 
-@event.listens_for(DBSession, 'before_flush')
+@event.listens_for(DBSession_, 'before_flush')
 def before_flush(session, *args):
     from intranet3.models import Client
     project_or_client = None
