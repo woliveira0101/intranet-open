@@ -42,6 +42,8 @@ return bug
         """
 
         namespace = {
+            'True': True,
+            'False': False,
             'array': lambda *args: list(args)
         }
         return namespace
