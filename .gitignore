@@ -33,3 +33,5 @@ js/tmp
 config.ini
 parser.out
 parsetab.py
+
+.coverage
