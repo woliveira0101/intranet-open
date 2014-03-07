@@ -15,7 +15,7 @@ class PresenceApi(ApiView):
     def get(self):
         date = self.request.GET.get('date')
         if date:
-            date = datetime.datetime.strptime(date, '%d.%m.%Y')
+            date = datetime.datetime.strptime(date, '%d.%m.%Y').date()
         else:
             date = datetime.date.today()
         current_data_late = memcache.get(

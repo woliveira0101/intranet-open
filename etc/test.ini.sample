@@ -13,7 +13,7 @@ pyramid.includes =
 	pyramid_tm
 
 pyramid.autoroute.root_module = intranet3.views
-sqlalchemy.url = postgresql://postgres:@localhost:5432/intranetdb_test
+sqlalchemy.url = postgresql://postgres:postgres@localhost:5432/intranet_test
 sqlalchemy.pool_size = 20
 sqlalchemy.pool_timeout = 60
 sqlalchemy.pool_recycle = 3600

@@ -18,7 +18,7 @@ from pyramid import (
 import intranet3
 
 ROOT_PATH = dirname(__file__)
-setting_file = join(ROOT_PATH, "../../../etc/", "test.ini")
+setting_file = join(ROOT_PATH, "../../../parts/etc/", "test.ini")
 
 # creating memcache before other modules are loaded :(
 settings = paster.get_appsettings(setting_file)
