@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from intranet3.tests import (
+from intranet3.testing import (
     IntranetWebTest,
     FactoryMixin,
 )

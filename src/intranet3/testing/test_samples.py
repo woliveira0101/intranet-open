@@ -5,7 +5,7 @@ transactions work as they should.
 Can be deleted in the future.
 '''
 
-from intranet3.tests import (
+from intranet3.testing import (
     IntranetTest,
     IntranetWebTest,
     FactoryMixin,

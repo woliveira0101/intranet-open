@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from intranet3.tests import (
+from intranet3.testing import (
     IntranetWebTest,
     FactoryMixin,
 )

@@ -2,7 +2,7 @@
 
 from pyramid import testing
 
-from intranet3.tests import (
+from intranet3.testing import (
     IntranetTest,
     FactoryMixin,
 )
