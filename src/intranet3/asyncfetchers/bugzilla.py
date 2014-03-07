@@ -96,7 +96,7 @@ class BugzillaFetcher(BasicAuthMixin, CSVParserMixin, BaseFetcher):
     """ Fetcher for Bugzilla bugs """
 
     redirect_support = True
-    SPRINT_REGEX = 's=%s(?!\S)'
+    SPRINT_REGEX = '[[:<:]]s=%s[[:>:]]'
 
     COLUMNS = ('bug_severity', 'assigned_to', 'version',
             'bug_status', 'resolution', 'product', 'op_sys', 'short_desc',

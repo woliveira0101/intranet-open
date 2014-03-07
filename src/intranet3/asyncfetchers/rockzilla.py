@@ -8,7 +8,6 @@ KEYINGREDIENT_TRACKER_ID = 10
 class RockzillaFetcher(IgozillaFetcher):
 
     delimiter=','
-    SPRINT_REGEX = 's=%s'
 
     def __init__(self, *args, **kwargs):
         super(RockzillaFetcher, self).__init__(*args, **kwargs)
