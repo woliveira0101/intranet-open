@@ -3,6 +3,10 @@ import copy
 import pyflwor
 from pyramid.decorator import reify
 
+from intranet3.utils import flash
+from intranet3.log import EXCEPTION_LOG
+
+EXCEPTION = EXCEPTION_LOG(__name__)
 
 class Section(object):
     TMPL = """
@@ -24,7 +28,19 @@ return bug
 
             try:
                 self.bugs = pyflwor.execute(query, namespace)
+            except SyntaxError as e:
+                flash("Syntax error in query: %s" % e)
+                self.bugs = []
+            except KeyError as e:
+                msg = "Unexpected token %s in query: '%s'" % (
+                    e,
+                    section['cond'],
+                )
+                flash(msg)
+                self.bugs = []
             except Exception:
+                err = "Problem with query %s, namespace %s" % (query, namespace)
+                EXCEPTION(err)
                 self.bugs = []
         else:
             # no condition == all bugs
@@ -44,6 +60,7 @@ return bug
         namespace = {
             'True': True,
             'False': False,
+            'None': None,
             'array': lambda *args: list(args)
         }
         return namespace
