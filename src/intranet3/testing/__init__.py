@@ -1,6 +1,7 @@
 from os.path import (
     dirname,
     join,
+    isfile,
 )
 import unittest
 
@@ -21,8 +22,11 @@ ROOT_PATH = dirname(__file__)
 setting_file = join(ROOT_PATH, "../../../parts/etc/", "test.ini")
 
 # creating memcache before other modules are loaded :(
-settings = paster.get_appsettings(setting_file)
-intranet3.init_memcache(settings)
+if isfile(setting_file):
+    settings = paster.get_appsettings(setting_file)
+    intranet3.init_memcache(settings)
+else:
+    settings = None
 
 from intranet3 import models as intranet_models
 from intranet3.testing import mocks
@@ -35,6 +39,8 @@ app = None
 
 def setup_module():
     global connection, app, engine
+    if settings is None:
+        raise Exception('Settings file not found %s' % setting_file)
 
     engine = engine_from_config(settings, prefix='sqlalchemy.')
 

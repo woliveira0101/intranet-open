@@ -124,11 +124,8 @@ def main(global_config, **settings):
     jinja2_env.globals.update(zip=zip)
 
     pyramid_config.include('pyramid_autoroute')
-    if 'venusian.ignore' in settings:
-        venusian_ingore = settings.get('venusian.ignore')
-    else:
-        venusian_ingore = None
-    pyramid_config.scan(ignore=venusian_ingore)
+
+    pyramid_config.scan()
 
     pyramid_config.add_settings({
         'TEMPLATE_DIR': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates'),

@@ -9,7 +9,7 @@ DEBUG = DEBUG_LOG(__name__)
 def add_time(user_id, date, bug_id, project_id, hours, subject):
     # try finding existing entry for this bug
     bug_id = str(bug_id)
-    entry = DBSession.query.filter(TimeEntry.user_id==user_id) \
+    entry = DBSession.query(TimeEntry).filter(TimeEntry.user_id==user_id) \
                          .filter(TimeEntry.date==date.date()) \
                          .filter(TimeEntry.ticket_id==bug_id) \
                          .filter(TimeEntry.project_id==project_id).first()
@@ -34,3 +34,5 @@ def add_time(user_id, date, bug_id, project_id, hours, subject):
             return entry
         else:
             LOG(u'Omission of an existing entry because it is frozen')
+
+    return entry

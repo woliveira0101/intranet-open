@@ -268,9 +268,11 @@ class MailFetcher(object):
         for msg in messages:
             yield msg
 
+        pop_conn.quit()
+
 class MailCheckerTask(object):
 
-    def run(self):
+    def __call__(self, *args, **kwargs):
         config = ApplicationConfig.get_current_config(allow_empty=True)
         if config is None:
             WARN(u'Application config not found, emails cannot be checked')
@@ -318,7 +320,7 @@ class MailCheckerTask(object):
             trackers,
             logins_mappings,
             projects,
-            logins_mappings,
+            selector_mappings,
         )
 
         for msg in fetcher:
