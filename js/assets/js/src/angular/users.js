@@ -141,7 +141,9 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
         _.each(user.groups, function(group) {
           groups_counter[group] += 1;
         });
-        location_counter[user.location[0]] += 1;
+        if (!_.contains(user.groups, "client")){
+          location_counter[user.location[0]] += 1;
+        }
       });
 
       $scope.locations = [
