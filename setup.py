@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import os
 
 name = "intranet3"
-version = "0.9.9"
+version = "0.9.10"
 
 
 def read(*rnames):
@@ -50,7 +50,7 @@ setup(
         'gdata==2.0.17',
         'ordereddict==1.1',
         'python-memcached==1.47',
-        'pyOpenSSL',
+        'pyOpenSSL<=0.13',
         'python-dateutil==1.5',
         'xlwt<=0.7.4',
         'pil==1.1.7',

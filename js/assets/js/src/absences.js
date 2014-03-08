@@ -141,7 +141,7 @@ function generateTable(data) {
                     }
                 }
                 $td.addClass('absent').attr({
-                    title: '<b>'+u.name+'</b> <i>('+u.leave_used+'/'+u.leave_mandated+'</i>)<br />'+attr[2]
+                    'data-absent-title': '<b>'+u.name+'</b> <i>('+u.leave_used+'/'+u.leave_mandated+'</i>)<br />'+attr[2]
                 });
                 var date = new Date(Date.parse(start)),
                     dateString = '';
@@ -157,7 +157,7 @@ function generateTable(data) {
         if(u.id in data.lates) { // Latenesses
             for(when in data.lates[u.id]) {
                 var why ='<b>'+u.name+'</b><br />'+data.lates[u.id][when];
-                row.find('.'+when).addClass('late inactive').attr('title', why);
+                row.find('.'+when).addClass('late inactive').attr('data-late-title', why);
             }
         }
         rows.push(row);

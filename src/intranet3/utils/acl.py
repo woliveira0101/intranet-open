@@ -25,7 +25,7 @@ class Root(object):
         ('hr_stuff',                     (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
         ('can_see_inactive_users',       (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
         ('can_edit_users',               (' ',          ' ',        ' ',           ' ',            ' ',        'A',  ' ',     )),
-        ('can_see_users_times',          (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
+        ('can_see_users_times',          (' ',          ' ',        ' ',           'A',            'A',        ' ',  ' ',     )),
         ('can_view_time_report',         (' ',          ' ',        ' ',           'A',            'A',        ' ',  'A',     )),
         ('can_view_time_client_report',  (' ',          ' ',        ' ',           ' ',            'A',        ' ',  ' ',     )),
         ('can_view_project_client_times',(' ',          ' ',        ' ',           'A',            ' ',        ' ',  'A',     )),

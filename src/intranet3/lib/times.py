@@ -38,7 +38,6 @@ def user_can_modify_timeentry(user, date_):
     today = datetime.date.today()
 
     diff = today - date
-
     if diff.days <= 0:
         # date in future or today
         return True
@@ -47,10 +46,10 @@ def user_can_modify_timeentry(user, date_):
         # the same month
         return True
 
-    if today.day == 1:
+    if today.day <= 3:
         prev_today = previous_month(today)
         if date.year == prev_today.year and date.month == prev_today.month:
-            # first of month, employee can change/add timeentry for previous month
+            # third day of month, employee can change/add timeentry for previous month
             return True
 
     return False

@@ -177,6 +177,7 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin,
     )
 
     COLUMNS_COOKIE = "%20".join(COLUMNS)
+    SPRINT_REGEX = '[[:<:]]s=%s[[:>:]]'
 
     def common_url_params(self):
         return dict(
