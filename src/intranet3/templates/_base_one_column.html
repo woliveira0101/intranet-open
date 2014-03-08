@@ -26,23 +26,17 @@
   <head>
     <script>
       var G = (function(){
-          var G = {};
           {% if request.user %}
-            G.user = {
-              id: {{ request.user.id }},
-              groups: {{ request.user.groups | tojson }},
-              has_perm: function(perm){
-                // yeah, I know this is wrong
-                // works for admin permissions only
+
+            var G = {{ request.globals | tojson }};
+            G.user.has_perm = function(perm){
                 var base = _.indexOf(this.perms, perm) >= 0;
                 var all = _.indexOf(this.perms, '__ALL__') >= 0;
                 return base || all;
-              },
-              perms: {{ request.user.all_perms | tojson }}
             };
-            G.ROLES = {{ request.user.ROLES | tojson }};
-            G.GROUPS = {{ request.user.GROUPS | tojson }};
+
           {% endif %}
+
           return G;
       })();
     </script>

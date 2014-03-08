@@ -86,6 +86,7 @@ def main(global_config, **settings):
     #pyramid_config.add_route('api_time_collection', '/api/times')
     #pyramid_config.add_route('api_time', '/api/times/{id:\d+}')
 
+    pyramid_config.add_route('api_globals', '/api/globals')
     pyramid_config.add_route('api_team', '/api/teams/{team_id:\d+}')
     pyramid_config.add_route('api_teams', '/api/teams')
 

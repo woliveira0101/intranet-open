@@ -247,6 +247,7 @@ class User(Base):
             'groups': self.groups,
             'roles': self.roles,
             'avatar_url': '/api/images/users/%s' % self.id,
+            'all_perms': self.all_perms
         })
         return result
 

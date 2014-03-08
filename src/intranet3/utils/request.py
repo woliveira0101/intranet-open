@@ -58,3 +58,11 @@ class Request(request.Request):
         url_parts = ['', ''] + url_parts[2:]
         result = urlparse.urlunparse(url_parts)
         return result
+
+    @reify
+    def globals(self):
+        return {
+            'user': self.user.to_dict(full=True),
+            'ROLES': self.user.ROLES,
+            'GRPUPS': self.user.GROUPS
+        }
