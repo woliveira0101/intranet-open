@@ -1,23 +1,22 @@
 from fabric.api import *
 
-GIT = 'https://github.com/tulustul/intranet.git'
-BRANCH = 'staging_instance'
+BRANCH = 'uwsgi'
+
+NODE_PATH = '/opt/nodejs-0.10.26/bin/'
 
 env.hosts = ['intranet_staging@tracs']
-env.password = 'intrastx'
 
 
 @task
 def deploy():
     with cd('intranet'):
+        with settings(warn_only=True):
+            run('./bin/uwsgi --stop ./var/intranet-staging.pid')
         run('git pull origin {}'.format(BRANCH))
         run('python bootstrap.py')
         run('./bin/buildout -vNc devel.cfg')
         with cd('js'):
-            run('grunt prod')
-        run('./bin/uwsgi uwsgi.ini')
-
-
-@task
-def create():
-    run('git clone {} -b staging_instance'.format(GIT))
+            run('{}npm install'.format(NODE_PATH))
+            run('{}node ./node_modules/.bin/bower install'.format(NODE_PATH))
+            run('{}node ./node_modules/.bin/grunt prod'.format(NODE_PATH))
+        run('./bin/uwsgi ./parts/etc/uwsgi_production.ini')
