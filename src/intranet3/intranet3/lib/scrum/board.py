@@ -1,6 +1,7 @@
 import copy
 
 import pyflwor
+from pyflwor.exc import PyflworSyntaxError
 from pyramid.decorator import reify
 
 from intranet3.utils import flash
@@ -28,8 +29,8 @@ return bug
 
             try:
                 self.bugs = pyflwor.execute(query, namespace)
-            except SyntaxError as e:
-                flash("Syntax error in query: %s" % e)
+            except PyflworSyntaxError as e:
+                flash("Syntax error in query: %s" % section['cond'])
                 self.bugs = []
             except KeyError as e:
                 msg = "Unexpected token %s in query: '%s'" % (
