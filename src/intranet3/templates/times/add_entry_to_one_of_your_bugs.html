@@ -13,7 +13,7 @@
         <tr class="to_sync">
             <td class="project-name">{{ bug.project.client.name }} / {{ bug.project.name }}</td>
             <td class="field_time"><input class="to_sync_1" name="time" value="" type="text" class="time_entry_time"/></td>
-            <td class="ticket">#{{ bug.id }}</td>
+            <td class="ticket"><a href="{{ bug.url }}">#{{ bug.id }}</a></td>
             <td><textarea class="to_sync_2" name="description" class="time_entry_description">{{ bug.desc }}</textarea></td>
             <td>
                 <form action="{{ request.url_for('/times/add', date=date.strftime('%d.%m.%Y')) }}" method="post" accept-charset="utf-8">
