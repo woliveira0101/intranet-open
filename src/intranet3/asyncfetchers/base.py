@@ -233,7 +233,6 @@ class BaseFetcher(object):
             raise TypeError(
                 'fetch_bugs_for_query takes ticket_ids or project_selector'
             )
-        raise NotImplementedError()
 
     def fetch_scrum(self, sprint_name, project_id, component_id=None):
         raise NotImplementedError()

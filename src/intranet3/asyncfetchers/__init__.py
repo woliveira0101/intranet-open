@@ -6,6 +6,7 @@ from .github import GithubFetcher
 from .trac import TracFetcher
 from .fake import FakeFetcher
 from .jira import JiraFetcher
+from .igozilla import IgozillaFetcher
 
 from .base import (
     FetchException,
@@ -23,6 +24,7 @@ FETCHERS = {
     'trac': TracFetcher,
     'harvest': FakeFetcher,
     'jira': JiraFetcher,
+    'igozilla': IgozillaFetcher,
 }
 
 
