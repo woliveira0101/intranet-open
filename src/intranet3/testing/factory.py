@@ -67,12 +67,24 @@ class FactoryMixin(object):
             type="bugzilla",
             name=name,
             url="http://%s.name" % name,
+            mailer='tracker_mailer@example.com',
             **kwargs
         )
         models.DBSession.add(tracker)
         models.DBSession.flush()
         self.tid += 1
         return tracker
+
+    def add_creds(self, user, tracker, login, password='passwordx'):
+        creds = models.TrackerCredentials(
+            tracker_id=tracker.id,
+            user_id=user.id,
+            login=login,
+            password=password,
+        )
+        models.DBSession.add(creds)
+        models.DBSession.flush()
+        return creds
 
     def create_project(
         self,

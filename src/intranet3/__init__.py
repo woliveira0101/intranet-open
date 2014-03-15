@@ -35,19 +35,21 @@ config = None
 memcache = None
 
 
-def init_memcache(config):
+def init_memcache(settings):
     global memcache
-    memcache = MemcachedCache([config['MEMCACHE_URI']])
+    memcache = MemcachedCache([settings['MEMCACHE_URI']])
+
+def init_config(settings):
+    global config
+    config = settings
 
 
 def main(global_config, **settings):
     """
     Creates wsgi app
     """
-    global config
-    config = settings
-
-    init_memcache(config)
+    init_config(settings)
+    init_memcache(settings)
 
     from intranet3.models import DBSession, Base, User
     from intranet3.utils import request, acl
@@ -67,7 +69,7 @@ def main(global_config, **settings):
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     session_factory = session_factory_from_settings(settings)
-    authn_policy = CustomAuthenticationPolicy(config['SESSION_KEY'], callback=groupfinder)
+    authn_policy = CustomAuthenticationPolicy(settings['SESSION_KEY'], callback=groupfinder)
     authz_policy = ACLAuthorizationPolicy()
     pyramid_config = Configurator(
         settings=settings,

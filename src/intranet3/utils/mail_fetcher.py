@@ -205,7 +205,7 @@ class TimeEntryMailExtractor(object):
 
         LOG(u"Will add entry for user %s project %s bug #%s hours %s title %s" % (
             user.name, project.name, bug_id, hours, subject
-            ))
+        ))
 
         return user.id, date, bug_id, project_id, hours, subject
 
@@ -244,13 +244,9 @@ class MailFetcher(object):
     HOST = 'pop.gmail.com'
     MAX_EMAILS = 100
 
-    def __init__(self, login, password, trackers, logins_mappings, projects, selector_mappings):
+    def __init__(self, login, password):
         self.login = login
         self.password = password
-        self.trackers = trackers
-        self.logins_mappings = logins_mappings
-        self.projects = projects
-        self.selector_mappings = selector_mappings
 
     def __iter__(self):
         pop_conn = poplib.POP3_SSL(self.HOST)
@@ -310,11 +306,8 @@ class MailCheckerTask(object):
         fetcher = MailFetcher(
             username,
             password,
-            trackers,
-            logins_mappings,
-            projects,
-            selector_mappings,
         )
+
         # ok, we have all mails, lets create timeentries from them
         extractor = TimeEntryMailExtractor(
             trackers,

@@ -25,6 +25,7 @@ setting_file = join(ROOT_PATH, "../../../parts/etc/", "test.ini")
 if isfile(setting_file):
     settings = paster.get_appsettings(setting_file)
     intranet3.init_memcache(settings)
+    intranet3.init_config(settings)
 else:
     settings = None
 
@@ -80,6 +81,15 @@ class IntranetTest(IntranetBaseTest):
 
         self.request = Request()
         self.request.user = intranet_models.User()
+        ac = intranet_models.ApplicationConfig(
+            office_ip='192.168.1.1',
+            google_user_email='google_user_email@example.com',
+            google_user_password='google_user_password',
+            holidays_spreadsheet='a',
+            hours_employee_project=102,
+        )
+        intranet_models.DBSession.add(ac)
+        intranet_models.DBSession.flush()
 
     def tearDown(self):
         super(IntranetTest, self).tearDown()
