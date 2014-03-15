@@ -10,8 +10,6 @@ def read(*rnames):
 
 dependency_links = [
     'http://github.com/krotkiewicz/pyramid_autoroute/tarball/master#egg=pyramid_autoroute',
-    'https://github.com/surfly/gevent/releases/download/1.0rc3/gevent-1.0rc3.tar.gz#egg=gevent',
-    'https://github.com/krotkiewicz/pyflwor/tarball/master#egg=pyflwor'
 ]
 
 setup(
@@ -26,8 +24,8 @@ setup(
     author_email='',
     url='',
     license='',
-    package_dir={'': 'src'},
-    packages=find_packages('src'),
+    package_dir={'': '.'},
+    packages=find_packages('.'),
     include_package_data=True,
     zip_safe=False,
     dependency_links=dependency_links,
@@ -73,7 +71,6 @@ setup(
         'psycogreen',
         'redis==2.8.0',
         'pyflwor',
-        'fabric',
     ],
     message_extractors = { 'src/intranet3': [
         ('**.py', 'python', None ),
@@ -82,8 +79,6 @@ setup(
     test_suite='intranet3.tests',
     entry_points="""\
     [console_scripts]
-    run = intranet3:run
-    twistd = intranet3.scripts.twistd:run
     script = intranet3.scripts:script
     [paste.app_factory]
     main = intranet3:main

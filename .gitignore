@@ -35,3 +35,7 @@ parser.out
 parsetab.py
 
 .coverage
+.mr.developer.cfg
+
+src/pyflwor
+
