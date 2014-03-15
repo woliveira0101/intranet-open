@@ -45,12 +45,15 @@ class SprintWrapper(object):
             if bug in self.board.completed_bugs:
                 for date in tseries.iterkeys():
                     if date < bug.changeddate.date():
-                        tseries[date] += bug.scrum.points
+                        tseries[date] += bug.scrum.points or 0
             else:
                 for date in tseries.iterkeys():
-                    tseries[date] += bug.scrum.points
+                    tseries[date] += bug.scrum.points or 0
 
-        tseries = [ (self._date_to_js(v[0]), v[1]) for v in sorted(tseries.iteritems(), key=lambda x: x[0]) ]
+        tseries = [
+            (self._date_to_js(v[0]), v[1])
+            for v in sorted(tseries.iteritems(), key=lambda x: x[0])
+        ]
         return tseries
 
     def _get_burndown_axis(self):
