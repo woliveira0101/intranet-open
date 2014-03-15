@@ -15,14 +15,28 @@ from .base import (
     FetcherBadDataError,
     FetchException,
 )
-from .bug import BaseBugProducer
+from .bug import BaseBugProducer, BaseScrumProducer
 from .request import RPC
 
 LOG = INFO_LOG(__name__)
 ERROR = ERROR_LOG(__name__)
 
+class UnfuddleScrumProcuder(BaseScrumProducer):
+    def parse_whiteboard(self, wb):
+        wb = wb.strip().replace('[', ' ').replace(']', ' ')
+        if wb:
+            return dict(i.split('=', 1) for i in wb.split() if '=' in i)
+        return {}
+
+    def get_points(self, bug, tracker, login_mapping, parsed_data):
+        wb = self.parse_whiteboard(parsed_data.get('whiteboard', ''))
+        points = wb.get('p')
+        if points and points.strip().isdigit():
+            return int(points.strip())
+
 
 class UnfuddleBugProducer(BaseBugProducer):
+    SCRUM_PRODUCER_CLASS = UnfuddleScrumProcuder
 
     def parse(self, tracker, login_mapping, raw_data):
         return raw_data
