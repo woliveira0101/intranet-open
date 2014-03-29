@@ -1,7 +1,7 @@
 import copy
 
 import pyflwor
-from pyflwor.exc import PyflworSyntaxError
+from pyflwor.exc import PyflworSyntaxError, PyFlworException
 from pyramid.decorator import reify
 
 from intranet3.utils import flash
@@ -39,7 +39,10 @@ return bug
                 )
                 flash(msg)
                 self.bugs = []
-            except Exception:
+            except PyFlworException as e:
+                flash(str(e))
+                self.bugs = []
+            except Exception as e:
                 err = "Problem with query %s, namespace %s" % (query, namespace)
                 EXCEPTION(err)
                 self.bugs = []
