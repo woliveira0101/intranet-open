@@ -17,19 +17,15 @@ from .base import (
 )
 from .bug import BaseBugProducer, BaseScrumProducer
 from .request import RPC
+from .utils import parse_whiteboard
 
 LOG = INFO_LOG(__name__)
 ERROR = ERROR_LOG(__name__)
 
 class UnfuddleScrumProcuder(BaseScrumProducer):
-    def parse_whiteboard(self, wb):
-        wb = wb.strip().replace('[', ' ').replace(']', ' ')
-        if wb:
-            return dict(i.split('=', 1) for i in wb.split() if '=' in i)
-        return {}
 
     def get_points(self, bug, tracker, login_mapping, parsed_data):
-        wb = self.parse_whiteboard(parsed_data.get('whiteboard', ''))
+        wb = parse_whiteboard(parsed_data.get('whiteboard', ''))
         points = wb.get('p')
         if points and points.strip().isdigit():
             return int(points.strip())

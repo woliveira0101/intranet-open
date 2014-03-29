@@ -10,13 +10,6 @@ from intranet3.models import DBSession
 from .board import Board
 
 
-def parse_whiteboard(wb):
-    wb = wb.strip().replace('[', ' ').replace(']', ' ')
-    if wb:
-        return dict(i.split('=', 1) for i in wb.split() if '=' in i)
-    return {}
-
-
 def move_blocked_to_the_end(bugs):
     """Move blocked bugs to the end of the list"""
     return bugs

@@ -7,6 +7,7 @@ from intranet3.models import User
 from .request import RPC
 from .base import BaseFetcher, BasicAuthMixin, CSVParserMixin
 from .bug import BaseBugProducer, ToDictMixin, BaseScrumProducer
+from .utils import parse_whiteboard
 
 
 class BlockedOrDependson(ToDictMixin):
@@ -21,14 +22,8 @@ class BlockedOrDependson(ToDictMixin):
 
 class BugzillaScrumProcuder(BaseScrumProducer):
 
-    def parse_whiteboard(self, wb):
-        wb = wb.strip().replace('[', ' ').replace(']', ' ')
-        if wb:
-            return dict(i.split('=', 1) for i in wb.split() if '=' in i)
-        return {}
-
     def get_points(self, bug, tracker, login_mapping, parsed_data):
-        wb = self.parse_whiteboard(parsed_data.get('whiteboard', ''))
+        wb = parse_whiteboard(parsed_data.get('whiteboard', ''))
         points = wb.get('p')
         if points and points.strip().isdigit():
             return int(points.strip())
@@ -74,6 +69,13 @@ class BugzillaBugProducer(BaseBugProducer):
 
     def get_url(self, tracker, login_mapping, parsed_data):
         return tracker.url + '/show_bug.cgi?id=%s' % parsed_data['id']
+
+    def get_labels(self, tracker, login_mapping, parsed_data):
+        wb = parse_whiteboard(parsed_data.get('whiteboard', ''))
+        labels = wb.get('l', '')
+        labels = labels.split(',')
+        labels = [l for l in labels if l]
+        return labels
 
 
 class FetchBlockedAndDependsonMixin(object):
