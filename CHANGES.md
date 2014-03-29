@@ -1,3 +1,7 @@
+1.0.0 (29-03-2014)
+- move to uwsgi + geven
+- fully customizable scrumboard
+
 0.9.10 (03-03-2014)
 ===========
 - locations and teams counter in employee view
