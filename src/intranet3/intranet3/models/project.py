@@ -139,8 +139,9 @@ class Project(Base):
         component_selector = self.component_selector if self.component_selector is not None and not self.component_selector.count(',') else None
         return self.tracker.get_new_bug_url(self.project_selector, component_selector)
 
-    def get_bug_list_url(self, bug_ids):
+    def get_bug_list_url(self, bugs):
         constructor = self.BUG_LIST_URL_CONTRUCTORS[self.tracker.type]
+        bug_ids = [bug.id for bug in bugs]
         return constructor(self.tracker.url, bug_ids, self.project_selector)
 
     @property

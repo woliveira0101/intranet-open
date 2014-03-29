@@ -46,7 +46,7 @@
     {% for section in column.sections %}
       <div class="frame_normal">
         {% if section.name %}
-        <div class="head_card"><span>{{ section.name }}</span></div>
+        <div class="head_card"><span><a href="{{ project.get_bug_list_url(section.bugs) }}">{{ section.name }}</a></span></div>
         {% endif %}
         {% for bug in section.bugs %}
           {{ yellow_card(bug) }}
@@ -64,7 +64,7 @@
             <tr>
                 {% for column in board.columns %}
                   <td {% if column.bugs | length == 0 %} class="empty_column" {% endif %}>
-                    <a href="#">{{ column.name }}</a>  <span class="badge badge-info">{{ column.points | int_or_float  }}</span>
+                    <a href="{{ project.get_bug_list_url(column.bugs) }}">{{ column.name }}</a>  <span class="badge badge-info">{{ column.points | int_or_float  }}</span>
                   </td>
                 {% endfor %}
             </tr>

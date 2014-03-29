@@ -67,6 +67,7 @@ return bug
             'None': None,
             'array': lambda *args: list(args)
         }
+        namespace.update(__builtins__)
         return namespace
 
     @reify

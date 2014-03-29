@@ -224,9 +224,6 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         return dict(
             board=sw.board,
             info=sw.get_info(),
-            bug_list_url=lambda bugs_list: sprint.project.get_bug_list_url(
-                [bug.id for bugs in bugs_list.values() for bug in bugs]
-            ),
             sprint_tabs=sw.get_tabs()
         )
 
