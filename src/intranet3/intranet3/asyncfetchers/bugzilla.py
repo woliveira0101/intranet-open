@@ -58,7 +58,7 @@ class BugzillaBugProducer(BaseBugProducer):
             resolution=d.get('resolution', ''),
             project_name=d['product'],
             component_name=d['component'],
-            deadline=d['deadline'],
+            deadline=d.get('deadline'),
             opendate=parse(d.get('opendate', '')),
             changeddate=parse(d.get('changeddate', '')),
             whiteboard=d['status_whiteboard'],
