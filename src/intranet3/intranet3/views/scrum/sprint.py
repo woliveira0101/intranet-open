@@ -349,7 +349,10 @@ class Edit(BaseView):
             DBSession.add(sprint)
             self.flash(self._(u"Sprint edited"))
             LOG(u"Sprint edited")
-            url = self.request.url_for('/scrum/sprint/edit', sprint_id=sprint.id)
+            if self.request.POST.get('save-and-go'):
+                url = self.request.url_for('/scrum/sprint/board', sprint_id=sprint.id)
+            else:
+                url = self.request.url_for('/scrum/sprint/edit', sprint_id=sprint.id)
             return HTTPFound(location=url)
         return dict(
             form=form,

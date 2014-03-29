@@ -27,7 +27,7 @@ var BOWER_CSS = [
   BOWER_COMPONENTS + 'bootstrap-timepicker/css/bootstrap-timepicker.min.css'
 ];
 
-var STATIC = '../src/intranet3/static/';
+var STATIC = '../src/intranet3/intranet3/static/';
 var PARTIALS_DEST = 'tmp/partials_tmp.js';
 var NGMINNED_APP = 'tmp/ngminned_app.js';
 
