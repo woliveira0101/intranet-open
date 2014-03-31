@@ -136,7 +136,7 @@ class FetchBlockedAndDependsonMixin(object):
         )
         s = requests.Session()
         self.set_auth(s)
-        result = s.request('GET', url, params=params, verify=False)
+        result = s.request('POST', url, data=params, verify=False)
 
         return self.parse_statuses(result.content)
 

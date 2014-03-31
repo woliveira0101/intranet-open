@@ -33,6 +33,7 @@ class CustomAuthenticationPolicy(AuthTktAuthenticationPolicy):
 
 config = None
 memcache = None
+is_production = False
 
 
 def init_memcache(settings):
@@ -48,6 +49,12 @@ def main(global_config, **settings):
     """
     Creates wsgi app
     """
+    global is_production
+    is_production = (
+        'DEBUG' not in settings or
+        settings.get('DEBUG', '').lower() == 'false'
+    )
+
     init_config(settings)
     init_memcache(settings)
 
@@ -132,11 +139,6 @@ def main(global_config, **settings):
     pyramid_config.add_settings({
         'TEMPLATE_DIR': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates'),
     })
-
-    is_production = (
-        'DEBUG' not in settings or
-        settings.get('DEBUG', '').lower() == 'false'
-    )
 
     if uwsgi and is_production:
         from intranet3.cron import run_cron_tasks

@@ -58,6 +58,7 @@ class FetcherMeta(type):
         """
         args = str(args)
         kwargs = str(kwargs)
+        login = login.encode('ascii', 'replace')
         return mcs.MEMCACHED_KEY.format(**locals()).replace(' ', '')
 
     @classmethod

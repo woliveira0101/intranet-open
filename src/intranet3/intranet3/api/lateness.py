@@ -4,7 +4,7 @@ import datetime
 from pyramid.view import view_config
 from webob.multidict import MultiDict
 
-from intranet3 import memcache
+from intranet3 import memcache, is_production
 from intranet3.utils.views import ApiView
 from intranet3.utils import google_calendar as cal
 from intranet3.models import Late
@@ -48,8 +48,7 @@ class LatenessApi(ApiView):
             DBSession.add(late)
             memcache.delete(MEMCACHED_NOTIFY_KEY % date)
 
-            debug = self.request.registry.settings['DEBUG'] == 'True'
-            if in_future and not debug:
+            if in_future and is_production:
                 event_id = self._add_event(date, explanation)
 
             return dict(

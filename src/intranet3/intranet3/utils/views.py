@@ -71,7 +71,7 @@ class BaseView(View):
         office_ips = models.ApplicationConfig.get_office_ip()
         if not office_ips: # not yet configured
             return
-        current_ip = self.request.remote_addr
+        current_ip = self.request.headers.get('X-Forwarded-For', '127.0.0.1')
         for office_ip in office_ips:
             if _check_ip(current_ip, office_ip):
                 presence = models.PresenceEntry(url=self.request.url, user_id=self.request.user.id)

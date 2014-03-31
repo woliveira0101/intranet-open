@@ -217,7 +217,7 @@ class ProjectsTimeForm(ProjectTimeForm):
 class ClientChoices(object):
 
     def __iter__(self):
-        query = DBSession().query(Client.id, Client.name).order_by(Client.name)
+        query = DBSession.query(Client.id, Client.name).order_by(Client.name)
         for client_id, client_name in query:
             yield str(client_id), client_name
 
