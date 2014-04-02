@@ -214,7 +214,12 @@ class Bugs(object):
         query = DBSession.query('ticket_id', 'project_id', 'time').from_statement(sql).params(**params)
 
         for bug_id, project_id, time in query:
-            bugs[(bug_id, project_id)].time = time
+            bug = bugs[(bug_id, project_id)]
+            bug.time = time
+            points = bug.scrum.points or 0.0
+            velocity = ((points / time) * 8.0) if time else 0.0
+            bug.scrum.velocity = velocity
+
 
         if sprint:
             params['sprint_start'] = sprint.start

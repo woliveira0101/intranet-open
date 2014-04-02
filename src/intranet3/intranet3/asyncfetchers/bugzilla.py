@@ -20,7 +20,7 @@ class BlockedOrDependson(ToDictMixin):
         self.owner = User(name='unknown')
 
 
-class BugzillaScrumProcuder(BaseScrumProducer):
+class BugzillaScrumProducer(BaseScrumProducer):
 
     def get_points(self, bug, tracker, login_mapping, parsed_data):
         wb = parse_whiteboard(parsed_data.get('whiteboard', ''))
@@ -31,7 +31,7 @@ class BugzillaScrumProcuder(BaseScrumProducer):
 
 class BugzillaBugProducer(BaseBugProducer):
 
-    SCRUM_PRODUCER_CLASS = BugzillaScrumProcuder
+    SCRUM_PRODUCER_CLASS = BugzillaScrumProducer
 
     def parse(self, tracker, login_mapping, raw_data):
         d = raw_data
