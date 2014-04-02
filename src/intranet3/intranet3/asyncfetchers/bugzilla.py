@@ -5,7 +5,7 @@ from xml.etree import ElementTree as ET
 from intranet3 import helpers as h
 from intranet3.models import User
 from .request import RPC
-from .base import BaseFetcher, BasicAuthMixin, CSVParserMixin
+from .base import BaseFetcher, BasicAuthMixin, CSVParserMixin, FetcherBadDataError
 from .bug import BaseBugProducer, ToDictMixin, BaseScrumProducer
 from .utils import parse_whiteboard
 
@@ -210,6 +210,12 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin,
             emailtype1='regexp',
             email1='(' + '|'.join(self.login_mapping.keys()) + ')'
         )
+
+    def check_if_failed(self, response):
+        code = response.status_code
+        if code == 401:
+            raise FetcherBadDataError('Wrong credentials for %s' % self.tracker.name)
+        return super(BugzillaFetcher, self).check_if_failed(response)
 
     def add_data(self, session):
         from requests.cookies import create_cookie

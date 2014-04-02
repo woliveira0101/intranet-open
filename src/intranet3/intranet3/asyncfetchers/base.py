@@ -188,7 +188,7 @@ class BaseFetcher(object):
             raise FetchException(reason)
 
     def get_result(self):
-        if self._greenlet:
+        if self._greenlet is not None:
             self._greenlet.join(self.MAX_TIMEOUT)
 
             if not self._greenlet.ready():
