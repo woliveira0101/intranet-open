@@ -201,6 +201,12 @@ class TimeEntryMailExtractor(object):
         # selector_mapping given explicitly to avoid cache lookups
         mapping = self.selector_mappings[tracker.id]
         project_id = mapping.match(bug_id, product, component)
+        if project_id is None:
+            DEBUG(u'Project not found for product %s, component %s' % (
+                product,
+                component,
+            ))
+            return
         project = self.projects[project_id]
 
         LOG(u"Will add entry for user %s project %s bug #%s hours %s title %s" % (
