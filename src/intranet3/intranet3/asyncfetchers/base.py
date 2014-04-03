@@ -183,6 +183,8 @@ class BaseFetcher(object):
 
     def check_if_failed(self, response):
         code = response.status_code
+        if code == 401:
+            raise FetcherBadDataError('Wrong credentials for %s' % self.tracker.name)
         if code < 200 or code > 299:
             reason = u'Received response %s' % code
             raise FetchException(reason)

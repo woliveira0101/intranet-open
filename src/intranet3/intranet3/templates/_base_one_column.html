@@ -30,8 +30,8 @@
 
             var G = {{ request.globals | tojson }};
             G.user.has_perm = function(perm){
-                var base = _.indexOf(this.perms, perm) >= 0;
-                var all = _.indexOf(this.perms, '__ALL__') >= 0;
+                var base = _.indexOf(this.all_perms, perm) >= 0;
+                var all = _.indexOf(this.all_perms, '__ALL__') >= 0;
                 return base || all;
             };
 

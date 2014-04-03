@@ -211,12 +211,6 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin,
             email1='(' + '|'.join(self.login_mapping.keys()) + ')'
         )
 
-    def check_if_failed(self, response):
-        code = response.status_code
-        if code == 401:
-            raise FetcherBadDataError('Wrong credentials for %s' % self.tracker.name)
-        return super(BugzillaFetcher, self).check_if_failed(response)
-
     def add_data(self, session):
         from requests.cookies import create_cookie
         session.cookies.set_cookie(
