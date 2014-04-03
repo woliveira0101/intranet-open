@@ -85,13 +85,9 @@ class UserEditForm(wtf.Form):
     )
     irc = wtf.TextField(_(u"IRC"), validators=[validators.Optional()])
 
-    groups = wtf.SelectMultipleField(_(u'Groups'), validators=[], choices=((
-        ('freelancer', 'freelancer'),
-        ('employee', 'employee'),
-        ('admin', 'admin'),
-        ('scrum master', 'scrum master'),
-        ('hr', 'hr'),
-        ('business', 'business'),
-        ('client', 'client'),
-    )))
+    groups = wtf.SelectMultipleField(
+        _(u'Groups'),
+        validators=[],
+        choices=zip(User.GROUPS, User.GROUPS),
+    )
 

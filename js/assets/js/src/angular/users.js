@@ -162,13 +162,13 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
         var counter = roles_counter[role[0]];
         return {id: role[0], name: role[1], counter: counter};
       });
-      $scope.roles = $filter('orderBy')($scope.roles, 'name')
+      $scope.roles = $filter('orderBy')($scope.roles, 'name');
 
       $scope.groups = _.map($scope.G.GROUPS, function(group){
         var counter = groups_counter[group];
         return {id: group, name: group, counter: counter};
       });
-      $scope.groups = $filter('orderBy')($scope.groups, 'name')
+      $scope.groups = $filter('orderBy')($scope.groups, 'name');
     });
 
     $scope.filtered_users = function() {

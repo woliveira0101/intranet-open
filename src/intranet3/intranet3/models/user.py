@@ -40,9 +40,11 @@ class User(Base):
         ('TESTER', 'Tester'),
         ('TECH LEAD', 'Tech Lead'),
     ]
+
     GROUPS = [
         'employee',
         'admin',
+        'sysop',
         'client',
         'scrum master',
         'cron',
