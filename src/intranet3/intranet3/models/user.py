@@ -228,7 +228,6 @@ class User(Base):
             'img': self.avatar_url
         }
         if full:
-            groups = self.groups
             location = self.LOCATIONS[self.location]
             result.update({
             'email': self.email,

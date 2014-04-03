@@ -27,7 +27,7 @@
                             <div class="board-section" ng-repeat="section in column.sections">
                                 <a class="board-remove" ng-show="column.sections.length > 1" ng-click="remove_section(section, column.sections)"><i class="icon-remove"></i></a>
                                 <span class="field"><input class="unsubmittable" type="text" ng-model="section.name" placeholder="Section name"></span>
-                                <span class="field"><textarea class="unsubmittable" ng-model="section.cond" placeholder="Query"></textarea></span>
+                                <span class="field"><textarea msd-elastic class="unsubmittable" ng-model="section.cond" placeholder="Query"></textarea></span>
                             </div>
                             <a class="btn btn-small" ng-click="add_section(column)">Add section</a>
                         </div>
