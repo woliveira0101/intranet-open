@@ -61,7 +61,7 @@ class UserEditForm(wtf.Form):
     )
     location = wtf.SelectField(
         _(u"Office location"),
-        choices=[('', u'--None--')] + [(k, v[0]) for k, v in User.LOCATIONS.items()]
+        choices=[(k, v[0]) for k, v in User.LOCATIONS.items()],
     )
     start_work_experience = wtf.DateField(
         _(u"Start work experience"),
