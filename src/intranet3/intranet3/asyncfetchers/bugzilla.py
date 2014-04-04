@@ -211,6 +211,13 @@ class BugzillaFetcher(FetchBlockedAndDependsonMixin,
             email1='(' + '|'.join(self.login_mapping.keys()) + ')'
         )
 
+    def check_if_failed(self, response):
+        #ugly hack, I know
+        if response.content.startswith("<!DOCTYPE html PUBLIC"):
+            msg = 'Wrong credentials for tracker %s' % self.tracker.name
+            raise FetcherBadDataError(msg)
+        super(BugzillaFetcher, self).check_if_failed(response)
+
     def add_data(self, session):
         from requests.cookies import create_cookie
         session.cookies.set_cookie(

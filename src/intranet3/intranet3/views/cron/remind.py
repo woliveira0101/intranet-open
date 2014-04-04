@@ -126,7 +126,7 @@ class ResolvedBugs(CronView):
             LOG(u"Skipping resolved bugs reminder, because it's a holiday")
             return Response(u"Won't remind")
         LOG(u"Starting resolved bugs reminder")
-        for user in User.query.all():
+        for user in User.query.filter(User.is_active==True):
             self._remind_resolved_bugs_user(user)
         LOG(u"Ending resolved bugs reminder")
         return Response(u'Reminded everybody')
