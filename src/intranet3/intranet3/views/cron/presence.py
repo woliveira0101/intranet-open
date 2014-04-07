@@ -46,19 +46,26 @@ class Clean(AnnuallyReportMixin, CronView):
 
         today = datetime.datetime.now().date()
         date = today - datetime.timedelta(days=cleaning_time_presence)
-        date = datetime.datetime.combine(date, day_end)
+        end_date = datetime.datetime.combine(date, day_end)
+        start_date = end_date - datetime.timedelta(
+            days=cleaning_time_presence*3,
+        )
         cleaned = DBSession.execute("""
+            WITH minq as
+            (
+                SELECT MIN(p1.id) FROM presence_entry as p1
+                WHERE p1.ts >= :start_date AND p1.ts <= :end_date
+                GROUP BY p1.user_id, date_trunc('day', p1.ts)
+            ),
+            maxq as
+            (
+                SELECT MAX(p2.id) FROM presence_entry as p2
+                WHERE p2.ts >= :start_date AND p2.ts <= :end_date
+                GROUP BY p2.user_id, date_trunc('day', p2.ts)
+            )
             DELETE FROM presence_entry as p
-            WHERE p.ts <= :date
-            AND p.ts > (
-                SELECT MIN(a.ts) FROM presence_entry a
-                WHERE date_trunc('day', a.ts) = date_trunc('day', p.ts)
-                AND a.user_id = p.user_id
-            ) AND p.ts < (
-                SELECT MAX(b.ts) FROM presence_entry b
-                WHERE date_trunc('day', b.ts) = date_trunc('day', p.ts)
-                AND b.user_id = p.user_id
-            );
-        """, params= {'date': date}).rowcount
+            WHERE p.ts >= :start_date AND p.ts <= :end_date
+            AND p.id NOT IN (SELECT * FROM minq) AND p.id NOT IN (SELECT * FROM maxq);
+        """, params= {'start_date': start_date, 'end_date': end_date}).rowcount
         LOG(u"Cleaned %s entries" % (cleaned, ))
         return Response(self._(u"Cleaned ${num} entries", num=cleaned))
