@@ -9,7 +9,7 @@ from wtforms.widgets import HTMLString, html_params
 from pyramid.i18n import TranslationStringFactory
 
 import utils
-from intranet3.models import DBSession, Client, User
+from intranet3.models import DBSession, Client, User, Project, Tracker
 from intranet3.forms.project import ProjectChoices
 from intranet3 import helpers as h
 from intranet3.forms.utils import DataValidator
@@ -22,17 +22,26 @@ class TicketIdValidator(object):
     NonRequired, Integer or ^[mM]\d+$ for meetings (setted by javascript)
     """
 
-    def validate(self, data):
+    def validate(self, data, form):
         if not data:
             return
         if data.isdigit() and int(data) > 0:
             return
         if re.search('^[M]\d$', data):
             return
-        raise validators.ValidationError(_(u'Ticket id must be integer number'))
+        project_id = form.project_id.data
+        if project_id:
+            tracker = DBSession.query(Tracker)\
+                               .filter(Project.id==project_id)\
+                               .filter(Tracker.id==Project.tracker_id).one()
+            if tracker.type == 'jira':
+                return
+
+        msg = _(u'Ticket id must be integer number for this tracker')
+        raise validators.ValidationError(msg)
 
     def __call__(self, form, field):
-        self.validate(field.data)
+        self.validate(field.data, form)
 
 
 class TicketIdListValidator(TicketIdValidator):
@@ -44,7 +53,7 @@ class TicketIdListValidator(TicketIdValidator):
         data = field.data
         if isinstance(data, list):
             for id in data:
-                self.validate(id)
+                self.validate(id, form)
 
 
 class NonRequiredStringListField(wtf.StringField):

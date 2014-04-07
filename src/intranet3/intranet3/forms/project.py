@@ -101,7 +101,6 @@ class ScrumProjectChoices(ProjectChoices):
             query = query.filter(Project.active==True)
         query = query.order_by(Client.name, Project.name)
         query = self.a_filter(query).distinct()
-        query = query.filter(Project.tracker_id.in_([1,10,12,13,9,18,19]))
         return query
 
     def __iter__(self):

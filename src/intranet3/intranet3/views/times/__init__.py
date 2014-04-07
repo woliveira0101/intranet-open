@@ -197,7 +197,6 @@ class Add(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
             )
 
         if form.validate():
-            notifications_data = []
             now = datetime.datetime.now()
             project_id = form.project_id.data
             project = Project.query.get(project_id) if project_id else None
@@ -215,7 +214,6 @@ class Add(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
                         frozen = bool(self.request.POST.get('start_timer')) and count == 1
                     )
                     DBSession.add(time)
-                    notifications_data.append((now, date, self.request.user, project, form.time.data / count, ticket_id, form.description.data))
             else:
                 time = TimeEntry(
                     date = date,
@@ -228,7 +226,6 @@ class Add(ProtectTimeEntriesMixin, GetTimeEntriesMixin, BaseView):
                     frozen = bool(self.request.POST.get('start_timer'))
                 )
                 DBSession.add(time)
-                notifications_data.append((now, date, self.request.user, project, form.time.data, form.ticket_id.data, form.description.data))
 
             if form.add_to_harvest.data:
                 self._add_to_harvest(form)

@@ -40,8 +40,7 @@ class JiraBugProducer(BaseBugProducer):
         priority = fields['priority']['name']
 
         return dict(
-            key=d['key'],
-            id=d['id'],
+            id=d['key'],
             desc=fields['summary'],
             reporter=fields['reporter']['name'],
             owner=assignee['name'] if assignee else '',
@@ -86,7 +85,7 @@ class JiraBugProducer(BaseBugProducer):
         return [self._parse_link(link, tracker) for link in links]
 
     def get_url(self, tracker, login_mapping, parsed_data):
-        key = parsed_data['key']
+        key = parsed_data['id']
         return self.tracker.url + '/browse/{}'.format(key)
 
     def get_status(self, tracker, login_mapping, parsed_data):
@@ -157,6 +156,7 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
         ticket_ids=None,
         project_id=None,
         label=None,
+        sprint_name=None,
     ):
         query = JiraQueryBuilder(self.get_fields_list())
 
@@ -164,7 +164,7 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
             if resolved:
                 query.in_('status', ['resolved', 'closed'])
             else:
-                query.in_('status', ['open', 'reopened', 'in progress'])
+                query.in_('status', ['open', 'reopened', 'development', 'code review', 'test', 'ready for backlog'])
 
         if assignee:
             query.eq('assignee', assignee)
@@ -173,7 +173,7 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
             query.eq('project', project_id)
 
         if component_id:
-            query.in_('component', component_id)
+            query.eq('component', component_id)
 
         if version:
             query.in_('affectedVersion', version)
@@ -181,8 +181,8 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
         if ticket_ids:
             query.in_('id', ticket_ids)
 
-        if label:
-            query.eq('labels', label)
+        if sprint_name:
+            query.eq('sprint', sprint_name)
 
         return query.get_url(self.tracker.url)
 
@@ -220,7 +220,7 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
 
     def fetch_scrum(self, sprint_name, project_id, component_id=None):
         url = self.query(
-            label=sprint_name,
+            sprint_name=sprint_name,
             project_id=project_id,
             component_id=component_id,
         )
