@@ -1,7 +1,8 @@
-import gevent
 from requests.auth import HTTPBasicAuth
 
 import requests
+
+from .greenlet import Greenlet
 
 
 class RPC(object):
@@ -19,7 +20,7 @@ class RPC(object):
         self.s.auth = HTTPBasicAuth(login, password)
 
     def start(self):
-        self._greenlet = gevent.spawn(
+        self._greenlet = Greenlet.spawn(
             self.s.request,
             self.method,
             self.url,
@@ -30,5 +31,6 @@ class RPC(object):
 
     def get_result(self):
         self._greenlet.join()
+        self._greenlet.reraise_exc()
 
         return self._greenlet.value

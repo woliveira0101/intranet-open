@@ -8,7 +8,9 @@ from requests.auth import HTTPBasicAuth
 from intranet3 import memcache
 from intranet3.helpers import decoded_dict
 from intranet3.log import DEBUG_LOG, ERROR_LOG
+
 from .request import RPC
+from .greenlet import Greenlet
 
 DEBUG = DEBUG_LOG(__name__)
 ERROR = ERROR_LOG(__name__)
@@ -84,7 +86,7 @@ class FetcherMeta(type):
                 # start greenlet
                 DEBUG(u"Bugs not in cache for key %s" % self._memcached_key)
                 self.before_fetch()
-                self._greenlet = gevent.Greenlet.spawn(f, *args, **kwargs)
+                self._greenlet = Greenlet.spawn(f, *args, **kwargs)
         return func
 
     def __new__(mcs, name, bases, attrs):
@@ -196,8 +198,7 @@ class BaseFetcher(object):
             if not self._greenlet.ready():
                 raise FetcherTimeout()
 
-            if not self._greenlet.successful():
-                raise self._greenlet.exception
+            self._greenlet.reraise_exc()
 
         bug_producer = self.BUG_PRODUCER_CLASS(
             self.tracker,
