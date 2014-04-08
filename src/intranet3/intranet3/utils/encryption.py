@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from base64 import b64encode, b64decode
 from itertools import cycle, izip
 
@@ -22,4 +23,5 @@ def encrypt(value):
 def decrypt(value):
     decoded = b64decode(value)
     result = _decrypt(decoded)
+    result = result.decode('utf-8')
     return result

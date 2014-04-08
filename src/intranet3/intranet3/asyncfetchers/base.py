@@ -3,7 +3,7 @@ import functools
 import csv
 
 import gevent
-from requests.auth import HTTPBasicAuth
+from requests.auth import HTTPBasicAuth, _basic_auth_str
 
 from intranet3 import memcache
 from intranet3.helpers import decoded_dict
@@ -245,7 +245,16 @@ class BaseFetcher(object):
 class BasicAuthMixin(object):
 
     def set_auth(self, session, data=None):
+        self._check_latin1_encoding()
         session.auth = HTTPBasicAuth(self.login, self.password)
+
+    def _check_latin1_encoding(self):
+        try:
+            _basic_auth_str(self.login, self.password)
+        except (UnicodeEncodeError, UnicodeDecodeError) as e:
+            msg = "Your login or password contains latin1 character(s) that " \
+                  "are not allowed in BasicAuth used by %s" % self.tracker.name
+            raise FetcherBadDataError(msg)
 
 
 class CSVParserMixin(object):
