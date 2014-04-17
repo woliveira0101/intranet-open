@@ -39,6 +39,7 @@ class User(Base):
         ('QA LEAD', 'QA Lead'),
         ('TESTER', 'Tester'),
         ('TECH LEAD', 'Tech Lead'),
+        ('BUSINESS RESEARCHER', 'Business Researcher'),
     ]
 
     GROUPS = [
