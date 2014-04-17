@@ -2,6 +2,8 @@ import gevent.monkey
 gevent.monkey.patch_all()
 import psycogreen.gevent
 psycogreen.gevent.patch_psycopg()
+import wtforms_json
+wtforms_json.init()
 
 import os
 

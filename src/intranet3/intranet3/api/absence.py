@@ -2,7 +2,6 @@
 import datetime
 
 from pyramid.view import view_config
-from webob.multidict import MultiDict
 
 from intranet3 import memcache
 from intranet3 import config
@@ -105,7 +104,7 @@ ${name}"""
 
     def post(self):
         absence = self.request.json.get('absence')
-        form = AbsentApplicationForm(MultiDict(**absence), request=self.request)
+        form = AbsentApplicationForm.from_json(absence, request=self.request)
         if form.validate():
             response = {
                 u'request': False,

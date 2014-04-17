@@ -2,7 +2,6 @@
 import datetime
 
 from pyramid.view import view_config
-from webob.multidict import MultiDict
 
 from intranet3 import memcache, is_production
 from intranet3.utils.views import ApiView
@@ -30,7 +29,7 @@ class LatenessApi(ApiView):
 
     def post(self):
         lateness = self.request.json.get('lateness')
-        form = LateApplicationForm(MultiDict(**lateness), user=self.request.user)
+        form = LateApplicationForm.from_json(lateness, user=self.request.user)
         if form.validate():
             date = form.popup_date.data
             explanation = form.popup_explanation.data
