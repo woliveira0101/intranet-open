@@ -1,3 +1,4 @@
+import os
 from os.path import (
     dirname,
     join,
@@ -18,12 +19,11 @@ from pyramid import (
 
 import intranet3
 
-ROOT_PATH = dirname(__file__)
-setting_file = join(ROOT_PATH, "../../../parts/etc/", "test.ini")
+settings_file = os.environ['TEST_SETTINGS_PATH']
 
 # creating memcache before other modules are loaded :(
-if isfile(setting_file):
-    settings = paster.get_appsettings(setting_file)
+if isfile(settings_file):
+    settings = paster.get_appsettings(settings_file)
     intranet3.init_memcache(settings)
     intranet3.init_config(settings)
 else:
@@ -41,7 +41,7 @@ app = None
 def setup_module():
     global connection, app, engine
     if settings is None:
-        raise Exception('Settings file not found %s' % setting_file)
+        raise Exception('Settings file not found %s' % settings_file)
 
     engine = engine_from_config(settings, prefix='sqlalchemy.')
 
@@ -51,7 +51,7 @@ def setup_module():
     intranet_models.DBSession.configure(bind=engine)
     intranet_models.Base.metadata.create_all(engine)
 
-    app = TestApp(paster.get_app(setting_file))
+    app = TestApp(paster.get_app(settings_file))
 
 
 def teardown_module():
