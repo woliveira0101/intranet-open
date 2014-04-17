@@ -18,6 +18,10 @@ day_start = datetime.time(0, 0, 0)
 day_end = datetime.time(23, 59, 59)
 hour_9 = datetime.time(9, 0, 0)
 
+
+class JSONBooleanField(wtf.BooleanField):
+    false_values = ('false', '', False, 0, '0')
+
 class BaseForm(wtf.Form):
     popup_date = wtf.DateField(_(u'Date'), validators=[validators.Required()], format='%d/%m/%Y')
     popup_explanation = wtf.TextAreaField(_(u'Explanation'), validators=[validators.Required()])
@@ -54,7 +58,7 @@ class LateApplicationForm(BaseForm):
 
     late_start = TimeField(_(u'From'))
     late_end = TimeField(_(u'To'))
-    work_from_home = wtf.BooleanField(_(u'Work From Home'), default=False)
+    work_from_home = JSONBooleanField(_(u'Work From Home'), default=False)
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
