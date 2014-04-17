@@ -101,7 +101,7 @@ class BaseFetcher(object):
     __metaclass__ = FetcherMeta
     BUG_PRODUCER_CLASS = None
     get_converter = None
-    CACHE_TIMEOUT = 3 * 60 * 10  # 3 minutes
+    CACHE_TIMEOUT = 3 * 60  # 3 minutes
     SPRINT_REGEX = 's=%s(?!\S)'
     MAX_TIMEOUT = 30  # DON'T WAIT LONGER THAN DEFINED TIMEOUT
 
@@ -180,8 +180,11 @@ class BaseFetcher(object):
             self._parsed_data.extend(self.parse(response.text))
 
         self._parsed_data = self.after_parsing(self._parsed_data)
-        memcache.set(self._memcached_key, self._parsed_data,
-                     self.CACHE_TIMEOUT)
+        memcache.set(
+            self._memcached_key,
+            self._parsed_data,
+            self.CACHE_TIMEOUT,
+        )
 
     def check_if_failed(self, response):
         code = response.status_code

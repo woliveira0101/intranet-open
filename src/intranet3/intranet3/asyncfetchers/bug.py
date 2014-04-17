@@ -160,11 +160,17 @@ class BaseBugProducer(object):
     #
 
     def get_priority_number(self, tracker, login_mapping, parsed_data):
-        priority = parsed_data.get('priority', 'unknown')
+        priority = 'unknown'
+
+        if parsed_data.get('priority'):
+            priority = parsed_data['priority']
+
         return PRIORITIES.get(priority.lower(), 5)
 
     def get_severity_number(self, tracker, login_mapping, parsed_data):
-        severity = parsed_data.get('severity', 'unknown')
+        severity = 'unknown'
+        if parsed_data.get('severity'):
+            severity = parsed_data['severity']
         return PRIORITIES.get(severity.lower(), 5)
 
     def parse(self, tracker, login_mapping, raw_data):

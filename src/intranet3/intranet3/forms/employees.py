@@ -54,7 +54,7 @@ class LateApplicationForm(BaseForm):
 
     late_start = TimeField(_(u'From'))
     late_end = TimeField(_(u'To'))
-    work_from_home = wtf.BooleanField(_(u'Work From Home'))
+    work_from_home = wtf.BooleanField(_(u'Work From Home'), default=False)
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')

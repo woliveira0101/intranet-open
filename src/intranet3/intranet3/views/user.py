@@ -42,6 +42,9 @@ class Edit(BaseView):
         else:
             user = self.request.user
 
+        if not user:
+            raise HTTPNotFound()
+
         form = UserEditForm(self.request.POST, obj=user)
         if self.request.method == 'POST' and form.validate():
             user.availability_link = form.availability_link.data or None

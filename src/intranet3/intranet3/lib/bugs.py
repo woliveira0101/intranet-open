@@ -12,10 +12,6 @@ LOG = INFO_LOG(__name__)
 WARN = WARN_LOG(__name__)
 ERROR = ERROR_LOG(__name__)
 
-MAX_TIMEOUT = 50 # DON'T WAIT LONGER THAN DEFINED TIMEOUT
-
-SCRUM_BUG_CACHE_KEY = 'sprint-%s'
-SCRUM_BUG_CACHE_TIMEOUT = 3*60
 
 class Bugs(object):
 
@@ -197,11 +193,17 @@ class Bugs(object):
         conditions = []
         params = {}
         i = 1
+
+        for bug in orig_bugs:
+            bug.time = 0.0
+            bug.sprint_time = 0.0
+
         for bug_id, project_id in bugs:
             conditions.append(where_condition % (i, i))
             params['bug_id_%s' % i] = bug_id
             params['project_id_%s' % i] = project_id
             i += 1
+
         if not conditions:
             return orig_bugs # short circuit to avoid useless (and incorrect) SQL query
         condition = ' OR '.join(conditions)
