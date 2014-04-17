@@ -19,10 +19,10 @@ from pyramid import (
 
 import intranet3
 
-settings_file = os.environ['TEST_SETTINGS_PATH']
+settings_file = os.environ.get('TEST_SETTINGS_PATH')
 
 # creating memcache before other modules are loaded :(
-if isfile(settings_file):
+if settings_file and isfile(settings_file):
     settings = paster.get_appsettings(settings_file)
     intranet3.init_memcache(settings)
     intranet3.init_config(settings)
