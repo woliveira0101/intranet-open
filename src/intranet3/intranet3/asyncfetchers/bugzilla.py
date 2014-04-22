@@ -116,27 +116,27 @@ class FetchBlockedAndDependsonMixin(object):
 
     def get_ids(self, ids):
         url = '%s/show_bug.cgi' % self.tracker.url
-        params = dict(
+        data = dict(
             ctype='xml',
             id=ids,
             field=['blocked', 'dependson', 'bug_id']
         )
         s = requests.Session()
         self.set_auth(s)
-        result = s.request('GET', url, params=params, verify=False)
+        result = s.request('POST', url, data=data, verify=False)
 
         return self.parse_ids(result.content)
 
     def get_statuses(self, ids):
         url = '%s/show_bug.cgi' % self.tracker.url
-        params = dict(
+        data = dict(
             ctype='xml',
             id=ids,
             field=['bug_status', 'bug_id', 'short_desc']
         )
         s = requests.Session()
         self.set_auth(s)
-        result = s.request('POST', url, data=params, verify=False)
+        result = s.request('POST', url, data=data, verify=False)
 
         return self.parse_statuses(result.content)
 
