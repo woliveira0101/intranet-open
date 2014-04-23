@@ -76,19 +76,6 @@ class List(BaseView):
         else:
             stats = None
 
-
-        all_sprints_for_velocity = DBSession.query(
-            Sprint.project_id,
-            Sprint.worked_hours,
-            Sprint.bugs_worked_hours,
-            Sprint.achieved_points
-        ).all()
-
-        for sprint in sprints:
-            associated_sprints = [s for s in all_sprints_for_velocity
-                                 if s[0]==sprint.project_id]
-            sprint.calculate_velocities(associated_sprints)
-
         return dict(
             sprints=sprints,
             form=form,
@@ -135,6 +122,7 @@ class Field(ClientProtectionMixin, BaseView):
         result = '<h2 class="content-header">%s</h2>%s' % (header, result)
         return Response(result)
 
+
 class BaseSprintView(BaseView):
     def tmpl_ctx(self):
 
@@ -144,27 +132,21 @@ class BaseSprintView(BaseView):
             sprint = Sprint.query.get(sprint_id)
         project = Project.query.get(sprint.project_id)
 
-
-        sprints = DBSession.query(
-            Sprint.project_id,
-            Sprint.worked_hours,
-            Sprint.bugs_worked_hours,
-            Sprint.achieved_points
-        ).filter(Sprint.project_id==sprint.project_id).all()
-
-        sprint.calculate_velocities(sprints)
+        sprint.calculate_velocities()
 
         self.v['project'] = project
         self.v['sprint'] = sprint
 
         prev_sprint = DBSession.query(Sprint)\
-                                 .filter(Sprint.project_id==sprint.project_id)\
-                                 .filter(Sprint.start<sprint.start)\
-                                 .order_by(Sprint.start.desc()).first()
+            .filter(Sprint.project_id == sprint.project_id)\
+            .filter(Sprint.start < sprint.start)\
+            .order_by(Sprint.start.desc()).first()
+
         next_sprint = DBSession.query(Sprint) \
-                                 .filter(Sprint.project_id==sprint.project_id) \
-                                 .filter(Sprint.start>sprint.start) \
-                                 .order_by(Sprint.start.asc()).first()
+            .filter(Sprint.project_id == sprint.project_id) \
+            .filter(Sprint.start > sprint.start) \
+            .order_by(Sprint.start.asc()).first()
+
         return dict(
             project=project,
             sprint=sprint,
@@ -181,15 +163,13 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         bugs = sorted(bugs, cmp=h.sorting_by_priority)
         tracker = Tracker.query.get(sprint.project.tracker_id)
 
-        #mean_velocity = self.get_mean_task_velocity()
-        for bug in bugs:
-            bug.danger = False
-            #TODO:
-            #bug.danger = bugAdapter.is_closed() \
-            #            and (bugAdapter.velocity <= (0.7 * mean_velocity) \
-            #            or bugAdapter.velocity >= (1.3 * mean_velocity))
-
         sw = SprintWrapper(sprint, bugs, self.request)
+
+        for bug in bugs:
+            bug.danger = sw.board.is_completed(bug) and (
+                bug.scrum.velocity <= (0.7 * sprint.story_velocity)
+                or bug.scrum.velocity >= (1.3 * sprint.story_velocity)
+            )
 
         return dict(
             tracker=tracker,
@@ -201,17 +181,6 @@ class Show(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
 
     def _sprint_daterange(self, st, end):
         return '%s - %s' % (st.strftime('%d-%m-%Y'), end.strftime('%d-%m-%Y'))
-
-    def get_mean_task_velocity(self):
-        #sprints = Sprint.query.filter(Sprint.end >= datetime.date.today())
-        #bugs = []
-        #for sprint in sprints:
-        #    bugs += self._fetch_bugs(sprint)
-        #    bugs = [BugUglyAdapter(b) for b in bugs]
-        #if len(bugs):
-        #    return sum([b.velocity for b in bugs if b.is_closed()]) / len(bugs)
-        #else:
-        return 0.0
 
 
 @view_config(route_name='scrum_sprint_board', permission='can_view_sprints')

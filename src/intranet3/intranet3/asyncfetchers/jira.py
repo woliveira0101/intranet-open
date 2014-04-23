@@ -37,7 +37,7 @@ class JiraBugProducer(BaseBugProducer):
         fields = d['fields']
 
         assignee = fields['assignee']
-        priority = None
+        priority = ''
         if fields.get('priority'):
             priority = fields['priority']['name']
 
