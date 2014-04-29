@@ -64,5 +64,6 @@ class Request(request.Request):
         return {
             'user': self.user.to_dict(full=True),
             'ROLES': self.user.ROLES,
-            'GROUPS': self.user.GROUPS
+            'GROUPS': self.user.GROUPS,
+            'LOCATIONS': self.user.LOCATIONS
         }

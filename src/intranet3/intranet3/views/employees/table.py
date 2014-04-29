@@ -142,28 +142,15 @@ class Absences(BaseView):
                           .all()
 
         # Users
-        users_p = User.query.filter(User.is_not_client()) \
-                            .filter(User.is_active==True) \
-                            .filter(User.location=='poznan') \
-                            .order_by(User.is_freelancer(), User.name)
-        users_p = users_p.all()
-        users_w = User.query.filter(User.is_not_client()) \
-                            .filter(User.is_active==True) \
-                            .filter(User.location=='wroclaw') \
-                            .order_by(User.is_freelancer(), User.name)
-        users_w = users_w.all()
-
-        user_groups = [
-            (u'Poznań', len(users_p)),
-            (u'Wrocław', len(users_w)),
-        ]
-
-        reverse = False
-        if self.request.user.location == 'wroclaw':
-            user_groups.insert(0, user_groups.pop())
-            reverse = True
-
-        users_p.extend(users_w)
+        users = []
+        user_groups = []
+        for name, (fullname, shortcut) in self.request.user.get_locations():
+            usersq = User.query.filter(User.is_not_client()) \
+                               .filter(User.is_active==True) \
+                               .filter(User.location==name) \
+                               .order_by(User.is_freelancer(), User.name).all()
+            users.extend(usersq)
+            user_groups.append((fullname, len(usersq)))
 
         # Leaves
         leave_mandated = Leave.get_for_year(start.year)
@@ -171,12 +158,12 @@ class Absences(BaseView):
 
         # Transform users to dictionary, group by city and order by leave days
         users = [dict(
-                      id=str(u.id),
-                      name=u.name,
-                      leave_mandated=leave_mandated[u.id][0],
-                      leave_used=leave_used[u.id],
-                      location=u.location,
-                     ) for u in users_p]
+            id=str(u.id),
+            name=u.name,
+            leave_mandated=leave_mandated[u.id][0],
+            leave_used=leave_used[u.id],
+            location=u.location,
+        ) for u in users]
 
 
         employees, students = [], []
@@ -191,7 +178,6 @@ class Absences(BaseView):
         users = sorted(
             users,
             key=lambda u: u['location'],
-            reverse=reverse
         )
 
         absences, absences_months = self.get_absences(start, end, users)

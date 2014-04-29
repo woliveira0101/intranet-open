@@ -576,79 +576,90 @@ table.bugs-list tbody tr.other-projects td {
       }
   }
 
-.presence {
+.presence-table {
+  .row {
+    display: table;
+    overflow-x: auto;
+    white-space: nowrap;
+    [class*="span"] {
+      display: table-cell;
+      float: none;
+      padding-left: 20px;
+    }
+  }
+  .presence {
     border: 0px;
     caption {
-        margin-bottom: 1px;
+      margin-bottom: 1px;
     }
     td {
-        border: 0px;
-        border-bottom: 1px solid #999 !important;
+      border: 0px;
+      border-bottom: 1px solid #999 !important;
     }
     .late td {
-        color: #000;
-        background-color: #F55 !important;
+      color: #000;
+      background-color: #F55 !important;
     }
     .late-light td {
-        background-color: #f3d5d3 !important;
-    }
-    th {
-        background: #D8BDA8 !important;
+      background-color: #f3d5d3 !important;
     }
     .current_user td {
-        border-bottom: 1px solid #EED3D7;
-        background: #ddd !important;
-        font-weight: bold;
+      border-bottom: 1px solid #EED3D7;
+      background: #ddd !important;
+      font-weight: bold;
     }
     .current_user.late {
-        td {
-            &:last-child {
-                border-right: 1px solid #B94A48;
-            }
+      td {
+        &:last-child {
+          border-right: 1px solid #B94A48;
         }
-        .name {
-            display: inline-block;
-            line-height: 20px;
-        }
+      }
+      .name {
+        display: inline-block;
+        line-height: 20px;
+      }
     }
     .current_user {
-        .justification-info {
-            position: relative;
-            top: 1px;
-            float: right;
-            display: inline;
-        }
+      .justification-info {
+        position: relative;
+        top: 1px;
+        float: right;
+        display: inline;
+      }
     }
     .work-from-home-record:hover td {
-        background: #BAA175 !important;
+      background: #BAA175 !important;
     }
     .work-from-home-record:nth-of-type(even) td {
-        background-color: #EBFFC2;
+      background-color: #EBFFC2;
     }
     .work-from-home-record:nth-of-type(odd) td {
-        background-color: #F7FFE5;
+      background-color: #F7FFE5;
     }
 
     .late-record:hover td {
-        background: #BAA175 !important;
+      background: #BAA175 !important;
     }
     .late-record:nth-of-type(even) td {
-        background-color: #FFFC9E;
+      background-color: #FFFC9E;
     }
     .late-record:nth-of-type(odd) td {
-        background-color: #FFFED4;
+      background-color: #FFFED4;
     }
 
     .absence-record:hover td {
-        background: #C2C08C !important;
+      background: #C2C08C !important;
     }
     .absence-record:nth-of-type(even) td {
-        background-color: #FFF6E8;
+      background-color: #FFF6E8;
     }
     .absence-record:nth-of-type(odd) td {
-        background-color: #FFE8C2;
+      background-color: #FFE8C2;
     }
+  }
+
 }
+
 
 #latesTodayWrapper {
     color: #000;
@@ -2029,7 +2040,6 @@ table td.city-vertical {
         text-transform: uppercase;
         font-weight: bold;
         width: 1em;
-        margin: 5em auto 0 auto;
     }
 }
 

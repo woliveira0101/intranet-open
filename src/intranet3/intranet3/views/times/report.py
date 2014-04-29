@@ -56,35 +56,43 @@ class Pivot(MonthMixin, BaseView):
           AND t.date <= :month_end
         GROUP BY t.user_id, t.date;
         """).params(month_start=month_start, month_end=month_end)
+
         if not self.request.has_perm('can_see_users_times'):
             users = [self.request.user] # TODO do we need to constrain entries also?
-            locations= {
+            locations = {
                 self.request.user.location: ('', 1)
             }
         else:
-            users_w = User.query.filter(User.is_not_client()) \
-                                .filter(User.is_active==True) \
-                                .filter(User.location=='wroclaw') \
-                                .order_by(User.is_freelancer(), User.name)
-            users_w = users_w.all()
+            location_names = self.request.user.get_locations()
 
-            users_p = User.query.filter(User.is_not_client()) \
-                                .filter(User.is_active==True) \
-                                .filter(User.location=='poznan') \
-                                .order_by(User.is_freelancer(), User.name)
-            users_p = users_p.all()
+            users = {}
+            for name, (fullname, shortcut) in location_names:
+                usersq = User.query.filter(User.is_not_client()) \
+                                   .filter(User.is_active==True) \
+                                   .filter(User.location==name) \
+                                   .order_by(User.is_freelancer(), User.name)
+                users[name] = usersq.all()
 
             locations = {
-                'wroclaw': [u'Wrocław', len(users_w)],
-                'poznan': [u'Poznań', len(users_p)],
+                name: [User.LOCATIONS[name][0], len(users)]
+                for name, users in users.iteritems()
             }
+
             locations[self.request.user.location][1] -= 1
-            if self.request.user.location == 'wroclaw':
-                users = users_w
-                users.extend(users_p)
-            else:
-                users = users_p
-                users.extend(users_w)
+
+            ordered_users = []
+            for name, (fullname, shortcut) in location_names:
+                ordered_users.extend(users[name])
+
+            users = ordered_users
+
+        # move current user to the front of the list
+        current_user_index = None
+        for i, user in enumerate(users):
+            if user.id == self.request.user.id:
+                current_user_index = i
+
+        users.insert(0, users.pop(current_user_index))
 
         today = datetime.date.today()
         grouped = defaultdict(lambda: defaultdict(lambda: 0.0))
@@ -122,14 +130,6 @@ class Pivot(MonthMixin, BaseView):
             else:
                 count_of_required_month_hours[user.id] = 0
                 count_of_required_hours_to_today[user.id] = 0
-
-        # move current user to the front of the list
-        current_user_index = None
-        for i, user in enumerate(users):
-            if user.id == self.request.user.id:
-                current_user_index = i
-
-        users.insert(0, users.pop(current_user_index))
 
         return dict(
             entries=grouped, users=users, sums=sums, late=late, excuses=excuses.wrongtime(),

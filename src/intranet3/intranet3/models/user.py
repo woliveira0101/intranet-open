@@ -24,7 +24,11 @@ GOOGLE_ACCESS_TOKEN_MEMCACHE_KEY = 'google-access-token-userid-%s'
 
 class User(Base):
     __tablename__ = 'user'
-    LOCATIONS = {'poznan': (u'Poznań', 'P'), 'wroclaw': (u'Wrocław', 'W')}
+    LOCATIONS = {
+        'poznan': (u'Poznań', 'POZ'),
+        'wroclaw': (u'Wrocław', 'WRO'),
+        'pila': (u'Piła', 'PIL')
+    }
     ROLES = [
         ('ADMIN', 'Admin'),
         ('ACCOUNTANT', 'Accountant'),
@@ -221,6 +225,21 @@ class User(Base):
     @classmethod
     def is_not_freelancer(cls):
         return not_(cls.is_freelancer())
+
+    def get_locations(self):
+        """
+        Returns sorted locations with the user's location at the first place
+        """
+        locations = self.LOCATIONS.keys()
+        my_location_index = locations.index(self.location)
+        my_location = locations.pop(my_location_index)
+
+        locations.sort()
+        locations.insert(0, my_location)
+        locations_names = [
+            (name, self.LOCATIONS[name]) for name in locations
+        ]
+        return locations_names
 
     def to_dict(self, full=False):
         result =  {

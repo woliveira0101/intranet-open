@@ -1,3 +1,6 @@
+new (xx-xx-xxxx)
+- multiple locations
+
 1.0.0 (29-03-2014)
 - move to uwsgi + geven
 - fully customizable scrumboard

@@ -29,3 +29,8 @@ UPDATE sprint as this_sprint SET story_velocity_mean = (
     SELECT avg(story_velocity) from sprint
     WHERE project_id = this_sprint.project_id
 );
+
+----------------------------------------------------------------------
+
+ALTER TABLE "user" ALTER COLUMN location TYPE VARCHAR;
+ALTER TABLE "user" ALTER COLUMN location SET DEFAULT 'poznan';

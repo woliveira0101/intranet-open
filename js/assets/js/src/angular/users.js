@@ -129,7 +129,7 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
       var groups_counter =  _.object(_.map($scope.G.GROUPS, function(group) {
         return [group, 0];
       }));
-      var location_counter = {'wroclaw': 0, 'poznan': 0};
+      var location_counter = _.object(_.map(_.keys(G.LOCATIONS), function(name){return [name, 0]}));
 
       _.each($scope.users, function(user) {
         if (user.is_active == false) {
@@ -145,19 +145,14 @@ App.controller('usersCtrl', function($scope, $http, $dialog, $timeout, $filter, 
           location_counter[user.location[0]] += 1;
         }
       });
-
-      $scope.locations = [
-        {
-            id:'poznan',
-            name:'Poznań',
-            counter: location_counter['poznan']
-        },
-        {
-            id:'wroclaw',
-            name:'Wrocław',
-            counter: location_counter['wroclaw']
+      $scope.locations = _.map(_.keys(G.LOCATIONS), function(name){
+        return {
+          id: name,
+          name: G.LOCATIONS[name][0],
+          counter: location_counter[name]
         }
-      ];
+      });
+
       $scope.roles = _.map($scope.G.ROLES, function(role) {
         var counter = roles_counter[role[0]];
         return {id: role[0], name: role[1], counter: counter};

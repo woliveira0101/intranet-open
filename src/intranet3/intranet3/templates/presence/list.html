@@ -33,10 +33,10 @@
                 </a>
               </h4>
         </div>
-        <div id="collapsePresent" class="panel-collapse collapse in">
-            <div class="row-fluid">
-                {% for place in city %}
-                <div class="span5">
+        <div id="collapsePresent" class="panel-collapse collapse in presence-table">
+            <div class="row">
+                {% for place in locations %}
+                <div class="span6">
                     <table class="table table-bordered presence" id="presence_P">
                         <caption><span class="badge">{{ place.name }}</span></caption>
                         <thead>
@@ -85,10 +85,10 @@
                 </a>
               </h4>
         </div>
-        <div id="collapseLateAbsence" class="panel-collapse collapse">
-            <div class="row-fluid">
-                {% for place in city %}
-                <div class="span5">
+        <div id="collapseLateAbsence" class="panel-collapse collapse presence-table">
+            <div class="row">
+                {% for place in locations %}
+                <div class="span6">
                     <table class="table table-bordered presence" id="presence_W">
                         <caption><span class="badge">{{ place.name }}</span></caption>
                         <thead>

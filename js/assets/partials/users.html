@@ -64,7 +64,7 @@
             </thead>
             <tbody>
                 <tr ng-repeat="user in get_users() | orderBy:predicate:reverse">
-                    <td class="email"><img src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" /></td>
+                    <td class="email"><img ng-src="{{user.avatar_url}}" alt="{{user.name}} [{{user.email}}]" /></td>
                     <td class="name">
                         <div><a ng-href="/user/view?user_id={{ user.id }}">{{user.name}}</a> ( {{user.location[2] }} )</div>
                     </td>
@@ -79,7 +79,7 @@
                         <div ng-repeat="role in user.roles">{{ to_pretty_role(role) }}</div>
                     </td>
                   <td>
-                    <div ng-repeat="group in user.groups">{{ group }}</div>
+                    <div ng-repeat="group in user.groups track by $index">{{ group }}</div>
                   </td>
                     <td>
                         <div ng-repeat="team in user.teams">{{ team.name }}</div>
