@@ -88,10 +88,10 @@
                             <li><span>{% trans %}Total hours{% endtrans %}</span>{{ sprint.worked_hours | round | int }}</li>
                             <li>
                                 <span>{% trans %}Velocity per day{% endtrans %}</span>
-                                <span title="This sprint velocity - user stories only (8 * anchieved points / user stories worked hours)">{{ '%.2f' % sprint.user_stories_velocity }}</span>
-                                <span title="Average velocity of all sprints - user stories only (8 * sum of anchieved points / sum of user stories worked hours)">({{ '%.2f' % sprint.mean_bugs_velocity }})</span> /
+                                <span title="This sprint velocity - user stories only (8 * anchieved points / user stories worked hours)">{{ '%.2f' % sprint.story_velocity }}</span>
+                                <span title="Average velocity of all sprints - user stories only (8 * sum of anchieved points / sum of user stories worked hours)">({{ '%.2f' % sprint.story_velocity_mean }})</span> /
                                 <span title="This sprint velocity - all time entries (8 * anchieved points / worked hours)">{{ '%.2f' % sprint.velocity }}</span>
-                                <span title="Average velocity of all sprints - all time entries (8 * sum of anchieved points / sum of worked hours)">({{ '%.2f' % sprint.mean_velocity }})</span>
+                                <span title="Average velocity of all sprints - all time entries (8 * sum of anchieved points / sum of worked hours)">({{ '%.2f' % sprint.velocity_mean }})</span>
                             </li>
                         </ul>
                     </div>

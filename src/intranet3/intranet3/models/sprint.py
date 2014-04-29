@@ -6,12 +6,16 @@ from sqlalchemy import Column, ForeignKey, orm
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.schema import UniqueConstraint
 
-from intranet3.models import Base
+from intranet3.models import (
+    Base,
+    DBSession,
+)
 from intranet3.log import WARN_LOG, INFO_LOG, DEBUG_LOG
 
 LOG = INFO_LOG(__name__)
 DEBUG = DEBUG_LOG(__name__)
 WARN = WARN_LOG(__name__)
+
 
 class Sprint(Base):
     __tablename__ = 'sprint'
@@ -37,6 +41,11 @@ class Sprint(Base):
     retrospective_note = Column(Text, nullable=False, default='')
     board = Column(Text, nullable=False, default='')
 
+    velocity = Column(Float, nullable=False, default=0.0)
+    velocity_mean = Column(Float, nullable=False, default=0.0)
+    story_velocity = Column(Float, nullable=False, default=0.0)
+    story_velocity_mean = Column(Float, nullable=False, default=0.0)
+
     team_id = Column(Integer, ForeignKey('teams.id'), nullable=True, index=True)
     team = orm.relationship('Team')
 
@@ -56,24 +65,32 @@ class Sprint(Base):
             }
         ]
 
-    @property
-    def velocity(self):
-        return (self.achieved_points / self.worked_hours * 8.0) if self.worked_hours else 0.0
+    def calculate_velocities(self):
+        self.velocity = \
+            8.0 * self.achieved_points / self.worked_hours \
+            if self.worked_hours else 0.0
 
-    @property
-    def user_stories_velocity(self):
-        return (self.achieved_points / self.bugs_worked_hours * 8.0) if self.bugs_worked_hours else 0.0
+        self.story_velocity = \
+            8.0 * self.achieved_points / self.bugs_worked_hours \
+            if self.bugs_worked_hours else 0.0
 
-    def calculate_velocities(self, associated_sprints):
-        worked_hours_sum = sum([s[1] for s in associated_sprints])
-        bugs_worked_hours_sum = sum([s[2] for s in associated_sprints])
-        anchieved_points_sum = sum([s[3] for s in associated_sprints])
+        sprint_velocities = DBSession.query(
+            Sprint.velocity,
+            Sprint.story_velocity,
+        ).filter(Sprint.project_id == self.project_id) \
+            .filter(Sprint.id != self.id) \
+            .all()
 
-        self.mean_velocity = 8.0 * anchieved_points_sum / worked_hours_sum \
-            if worked_hours_sum else 0.0
+        sprint_velocities.append((self.velocity, self.story_velocity))
 
-        self.mean_bugs_velocity = 8.0 * anchieved_points_sum / bugs_worked_hours_sum \
-            if bugs_worked_hours_sum else 0.0
+        velocities, story_velocities = zip(*sprint_velocities)
+
+        self.velocity_mean = float(sum(velocities)) / len(velocities)
+
+        self.story_velocity_mean = \
+            float(sum(story_velocities)) / len(story_velocities)
+
+        DBSession.add(self)
 
 
 class SprintBoard(Base):
