@@ -1,6 +1,8 @@
 import json
+import urllib2
 
 from dateutil.parser import parse as dateparse
+from requests.auth import HTTPBasicAuth
 
 from intranet3.asyncfetchers.base import (
     BaseFetcher,
@@ -10,14 +12,20 @@ from intranet3.asyncfetchers.base import (
 )
 from intranet3.asyncfetchers.bug import (
     BaseBugProducer,
+    BaseScrumProducer,
     ToDictMixin,
 )
 from intranet3.asyncfetchers.request import RPC
 from intranet3.log import ERROR_LOG, INFO_LOG
 from intranet3.models import User
+from intranet3 import memcache
 
 LOG = INFO_LOG(__name__)
 ERROR = ERROR_LOG(__name__)
+
+STORY_POINTS_KEY = 'tracker:{}:story_points_field_id'  # % tracker.id
+
+story_points_fields = {}  # tracker.id -> field_name
 
 
 class BlockedOrDependson(ToDictMixin):
@@ -25,12 +33,19 @@ class BlockedOrDependson(ToDictMixin):
         self.id = bug_id
         self.status = status
         self.desc = description
-        self.resolved = self.status in ('Closed', 'Resolved')
+        self.resolved = self.status in JiraFetcher.RESOLVED_STATUSES
         self.url = tracker.url + '/browse/{}'.format(key)
         self.owner = User(name='unknown')
 
 
+class JiraScrumProducer(BaseScrumProducer):
+    def get_points(self, bug, tracker, login_mapping, parsed_data):
+        return parsed_data['storypoints']
+
+
 class JiraBugProducer(BaseBugProducer):
+    SCRUM_PRODUCER_CLASS = JiraScrumProducer
+
     def parse(self, tracker, login_mapping, raw_data):
         d = raw_data
 
@@ -56,9 +71,13 @@ class JiraBugProducer(BaseBugProducer):
             opendate=self._parse_date(fields['created']),
             changeddate=self._parse_date(fields['updated']),
             labels=fields['labels'],
+            storypoints=self._get_story_points(fields, tracker),
             dependson=self._get_depends_on(fields, tracker),
             blocked=self._get_blocked(fields, tracker),
         )
+
+    def _get_story_points(self, fields, tracker):
+        return fields.get(story_points_fields[tracker.id])
 
     def _get_component_name(self, fields):
         return ', '.join([c['name'] for c in fields['components']])
@@ -128,11 +147,42 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
     Issues statuses must follow jira classic workflow scheme
     """
 
+    UNRESOLVED_STATUSES = ('OPEN', 'DEVELOPMENT', 'CODE REVIEW')
+    RESOLVED_STATUSES = ('TESTING', 'PO SIGN OFF', 'DONE')
+
     BUG_PRODUCER_CLASS = JiraBugProducer
+
+    STORY_POINTS_FIELD_NAME = 'Story Points'
 
     FIELDS = ['summary', 'reporter', 'assignee', 'priority', 'status',
               'resolution', 'project', 'components', 'duedate', 'created',
               'updated', 'labels', 'subtasks', 'issuelinks']
+
+    def __init__(self, tracker, *args, **kwargs):
+        super(JiraFetcher, self).__init__(tracker, *args, **kwargs)
+        story_points_fields[self.tracker.id] = self.get_story_points_field_id()
+
+    def query_story_points_field_id(self):
+        request = urllib2.Request(
+            '{}/rest/api/2/field'.format(self.tracker.url)
+        )
+        HTTPBasicAuth(self.login, self.password)(request)
+
+        response = urllib2.urlopen(request)
+
+        fields = json.loads(response.read())
+        for field in fields:
+            if field['name'] == self.STORY_POINTS_FIELD_NAME:
+                return field['id']
+        return ''
+
+    def get_story_points_field_id(self):
+        story_points_key = STORY_POINTS_KEY.format(self.tracker.id)
+        story_points_field_id = memcache.get(story_points_key)
+        if story_points_field_id is None:
+            story_points_field_id = self.query_story_points_field_id()
+            memcache.set(story_points_key, story_points_field_id)
+        return story_points_field_id
 
     def fetch(self, url):
         return RPC(url=url)
@@ -147,7 +197,11 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
         super(JiraFetcher, self).check_if_failed(response)
 
     def get_fields_list(self):
-        return ','.join(self.FIELDS)
+        fields = list(self.FIELDS)
+        story_points_field = story_points_fields[self.tracker.id]
+        if story_points_field:
+            fields.append(story_points_field)
+        return ','.join(fields)
 
     def query(
         self,
@@ -164,9 +218,9 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
 
         if resolved is not None:
             if resolved:
-                query.in_('status', ['resolved', 'closed'])
+                query.in_('status', self.RESOLVED_STATUSES)
             else:
-                query.in_('status', ['open', 'reopened', 'development', 'code review', 'test', 'ready for backlog'])
+                query.in_('status', self.UNRESOLVED_STATUSES)
 
         if assignee:
             query.eq('assignee', assignee)
