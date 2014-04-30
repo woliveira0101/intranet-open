@@ -43,11 +43,7 @@
             <tr>
             <td class="lp">{{counter}}</td>
             <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client[0].id) }}">{{ client[0].name }}</a></td>
-            <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client[0].id) }}">(No projects)</a></td>
-            <td>-</td>
-            <td><a title="Edit client" href="{{ request.url_for('/client/view', client_id=client[0].id) }}">(No projects)</a></td>
-            <td>-</td>
-            <td>-</td>
+            <td colspan="5">(No projects)</td>
             </tr>
         {% endfor %}
         {% endfor %}

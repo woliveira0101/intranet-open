@@ -43,7 +43,7 @@ class Map(BaseView):
         active_projects_only = self.request.GET.get('active_projects_only', '1')
 
         clients = DBSession.query(Client, Project)\
-                .filter(Client.id==Project.client_id)
+                .outerjoin(Project, Client.id==Project.client_id)
 
         if active_projects_only == '1':
             clients = clients.filter(Project.active==True)
