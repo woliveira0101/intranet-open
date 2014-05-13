@@ -1,5 +1,6 @@
-new (xx-xx-xxxx)
+1.0.1 (13-05-2014)
 - multiple locations
+- minor fixes
 
 1.0.0 (29-03-2014)
 - move to uwsgi + geven
