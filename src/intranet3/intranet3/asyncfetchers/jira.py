@@ -148,7 +148,7 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
     """
 
     UNRESOLVED_STATUSES = ('OPEN', 'DEVELOPMENT', 'CODE REVIEW')
-    RESOLVED_STATUSES = ('TESTING', 'PO SIGN OFF', 'DONE')
+    RESOLVED_STATUSES = ('TESTING', 'PO SIGN OFF')
 
     BUG_PRODUCER_CLASS = JiraBugProducer
 
