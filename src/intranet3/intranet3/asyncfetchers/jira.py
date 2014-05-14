@@ -25,7 +25,6 @@ ERROR = ERROR_LOG(__name__)
 
 STORY_POINTS_KEY = 'tracker:{}:story_points_field_id'  # % tracker.id
 
-story_points_fields = {}  # tracker.id -> field_name
 
 
 class BlockedOrDependson(ToDictMixin):
@@ -77,7 +76,8 @@ class JiraBugProducer(BaseBugProducer):
         )
 
     def _get_story_points(self, fields, tracker):
-        return fields.get(story_points_fields[tracker.id])
+        story_points_fields = self.extra_data['story_points_fields']
+        return fields.get(story_points_fields)
 
     def _get_component_name(self, fields):
         return ', '.join([c['name'] for c in fields['components']])
@@ -158,19 +158,18 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
               'resolution', 'project', 'components', 'duedate', 'created',
               'updated', 'labels', 'subtasks', 'issuelinks']
 
-    def __init__(self, tracker, *args, **kwargs):
-        super(JiraFetcher, self).__init__(tracker, *args, **kwargs)
-        story_points_fields[self.tracker.id] = self.get_story_points_field_id()
+    def __init__(self, *args, **kwargs):
+        super(JiraFetcher, self).__init__(*args, **kwargs)
+        self.story_points_fields = None
 
     def query_story_points_field_id(self):
-        request = urllib2.Request(
-            '{}/rest/api/2/field'.format(self.tracker.url)
-        )
-        HTTPBasicAuth(self.login, self.password)(request)
+        rpc = self.get_rpc()
+        rpc.url = '{}/rest/api/2/field'.format(self.tracker.url)
+        rpc.start()
+        response = rpc.get_result()
+        self.check_if_failed(response)
+        fields = response.json()
 
-        response = urllib2.urlopen(request)
-
-        fields = json.loads(response.read())
         for field in fields:
             if field['name'] == self.STORY_POINTS_FIELD_NAME:
                 return field['id']
@@ -183,6 +182,12 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
             story_points_field_id = self.query_story_points_field_id()
             memcache.set(story_points_key, story_points_field_id)
         return story_points_field_id
+
+    def before_fetch(self):
+        self.story_points_fields = self.get_story_points_field_id()
+        # add reference to _extra_data so it will be avaliable
+        # in JiraBugProducer
+        self._extra_data['story_points_fields'] = self.story_points_fields
 
     def fetch(self, url):
         return RPC(url=url)
@@ -198,7 +203,7 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
 
     def get_fields_list(self):
         fields = list(self.FIELDS)
-        story_points_field = story_points_fields[self.tracker.id]
+        story_points_field = self.story_points_fields
         if story_points_field:
             fields.append(story_points_field)
         return ','.join(fields)

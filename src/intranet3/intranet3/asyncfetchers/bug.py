@@ -78,9 +78,10 @@ class Bug(ToDictMixin):
 class BaseScrumProducer(object):
     SCRUM_CLASS = Scrum
 
-    def __init__(self, tracker, login_mapping):
+    def __init__(self, tracker, login_mapping, extra_data):
         self.tracker = tracker
         self.login_mapping = login_mapping
+        self.extra_data = extra_data
 
     def __call__(self, bug, parsed_data):
 
@@ -108,10 +109,15 @@ class BaseBugProducer(object):
     BUG_CLASS = Bug
     SCRUM_PRODUCER_CLASS = BaseScrumProducer
 
-    def __init__(self, tracker, login_mapping):
+    def __init__(self, tracker, login_mapping, extra_data):
         self.tracker = tracker
         self.login_mapping = login_mapping
-        self.scrum_producer = self.SCRUM_PRODUCER_CLASS(tracker, login_mapping)
+        self.extra_data = extra_data
+        self.scrum_producer = self.SCRUM_PRODUCER_CLASS(
+            tracker,
+            login_mapping,
+            extra_data,
+        )
 
     def __call__(self, raw_data):
         parsed_data = self.parse(self.tracker, self.login_mapping, raw_data)

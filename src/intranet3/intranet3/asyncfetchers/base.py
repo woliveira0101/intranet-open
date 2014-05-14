@@ -85,8 +85,10 @@ class FetcherMeta(type):
             else:
                 # start greenlet
                 DEBUG(u"Bugs not in cache for key %s" % self._memcached_key)
-                self.before_fetch()
-                self._greenlet = Greenlet.spawn(f, *args, **kwargs)
+                self._greenlet = Greenlet.spawn(self.before_fetch)
+                self._greenlet.join(self.MAX_TIMEOUT)
+                if self._greenlet.successful():
+                    self._greenlet = Greenlet.spawn(f, *args, **kwargs)
         return func
 
     def __new__(mcs, name, bases, attrs):
@@ -127,6 +129,7 @@ class BaseFetcher(object):
         self.fetch_error = None
 
         self._auth_data = None
+        self._extra_data = {} # will be passed to self.BUG_PRODUCER_CLASS
 
     def get_auth(self):
         """ Perform action to get authentication (like token or cookies) """
@@ -205,7 +208,8 @@ class BaseFetcher(object):
 
         bug_producer = self.BUG_PRODUCER_CLASS(
             self.tracker,
-            self.login_mapping
+            self.login_mapping,
+            self._extra_data,
         )
         bugs = {}
         for bug_desc in self._parsed_data:
