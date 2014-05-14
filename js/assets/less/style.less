@@ -576,7 +576,6 @@ table.bugs-list tbody tr.other-projects td {
       }
   }
 
-.presence-table {
   .row {
     display: table;
     overflow-x: auto;
@@ -587,78 +586,78 @@ table.bugs-list tbody tr.other-projects td {
       padding-left: 20px;
     }
   }
-  .presence {
+
+.presence {
+  border: 0px;
+  caption {
+    margin-bottom: 1px;
+  }
+  td {
     border: 0px;
-    caption {
-      margin-bottom: 1px;
-    }
+    border-bottom: 1px solid #999 !important;
+  }
+  .late td {
+    color: #000;
+    background-color: #F55 !important;
+  }
+  .late-light td {
+    background-color: #f3d5d3 !important;
+  }
+  .current_user td {
+    border-bottom: 1px solid #EED3D7;
+    background: #ddd !important;
+    font-weight: bold;
+  }
+  .current_user.late {
     td {
-      border: 0px;
-      border-bottom: 1px solid #999 !important;
-    }
-    .late td {
-      color: #000;
-      background-color: #F55 !important;
-    }
-    .late-light td {
-      background-color: #f3d5d3 !important;
-    }
-    .current_user td {
-      border-bottom: 1px solid #EED3D7;
-      background: #ddd !important;
-      font-weight: bold;
-    }
-    .current_user.late {
-      td {
-        &:last-child {
-          border-right: 1px solid #B94A48;
-        }
-      }
-      .name {
-        display: inline-block;
-        line-height: 20px;
+      &:last-child {
+        border-right: 1px solid #B94A48;
       }
     }
-    .current_user {
-      .justification-info {
-        position: relative;
-        top: 1px;
-        float: right;
-        display: inline;
-      }
-    }
-    .work-from-home-record:hover td {
-      background: #BAA175 !important;
-    }
-    .work-from-home-record:nth-of-type(even) td {
-      background-color: #EBFFC2;
-    }
-    .work-from-home-record:nth-of-type(odd) td {
-      background-color: #F7FFE5;
-    }
-
-    .late-record:hover td {
-      background: #BAA175 !important;
-    }
-    .late-record:nth-of-type(even) td {
-      background-color: #FFFC9E;
-    }
-    .late-record:nth-of-type(odd) td {
-      background-color: #FFFED4;
-    }
-
-    .absence-record:hover td {
-      background: #C2C08C !important;
-    }
-    .absence-record:nth-of-type(even) td {
-      background-color: #FFF6E8;
-    }
-    .absence-record:nth-of-type(odd) td {
-      background-color: #FFE8C2;
+    .name {
+      display: inline-block;
+      line-height: 20px;
     }
   }
+  .current_user {
+    .justification-info {
+      position: relative;
+      top: 1px;
+      float: right;
+      display: inline;
+    }
+  }
+  .work-from-home-record:hover td {
+    background: #BAA175 !important;
+  }
+  .work-from-home-record:nth-of-type(even) td {
+    background-color: #EBFFC2;
+  }
+  .work-from-home-record:nth-of-type(odd) td {
+    background-color: #F7FFE5;
+  }
 
+  .late-record:hover td {
+    background: #BAA175 !important;
+  }
+  .late-record:nth-of-type(even) td {
+    background-color: #FFFC9E;
+  }
+  .late-record:nth-of-type(odd) td {
+    background-color: #FFFED4;
+  }
+
+  .absence-record:hover td {
+    background: #C2C08C !important;
+  }
+  .absence-record:nth-of-type(even) td {
+    background-color: #FFF6E8;
+  }
+  .absence-record:nth-of-type(odd) td {
+    background-color: #FFE8C2;
+  }
 }
+
 
 
 #latesTodayWrapper {

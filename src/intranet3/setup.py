@@ -37,7 +37,7 @@ setup(
         'pyramid_tm',
         'pyramid_debugtoolbar',
         'pyramid_beaker',
-        'pyramid_jinja2',
+        'pyramid_jinja2<=1.10',
         'pyramid_autoroute',
         'pyramid_exclog',
         'zope.sqlalchemy',
