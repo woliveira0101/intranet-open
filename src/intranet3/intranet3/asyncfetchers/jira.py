@@ -76,7 +76,7 @@ class JiraBugProducer(BaseBugProducer):
         )
 
     def _get_story_points(self, fields, tracker):
-        story_points_fields = self.extra_data['story_points_fields']
+        story_points_fields = self.extra_data.get('story_points_fields')
         return fields.get(story_points_fields)
 
     def _get_component_name(self, fields):
@@ -203,9 +203,8 @@ class JiraFetcher(BasicAuthMixin, BaseFetcher):
 
     def get_fields_list(self):
         fields = list(self.FIELDS)
-        story_points_field = self.story_points_fields
-        if story_points_field:
-            fields.append(story_points_field)
+        if self.story_points_fields:
+            fields.append(self.story_points_fields)
         return ','.join(fields)
 
     def query(
