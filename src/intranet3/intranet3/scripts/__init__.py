@@ -70,18 +70,32 @@ def make_admin(config_path):
 
 
 def migrate(config_path):
-    from intranet3.models import DBSession, User
-    import datetime
-    session = DBSession()
+    from intranet3.models import DBSession, Sprint, SprintBoard
+    import json
 
-    users = session.query(User)
+    def migrate_object(obj):
+        board_json = obj.board
 
-    for user in users:
-        try:
-            if user.start_full_time_work > datetime.date.today():
-                user.start_full_time_work = None
-        except TypeError:
-            continue
+        if not board_json:
+            return
+
+        board = json.loads(board_json)
+
+        if not isinstance(board, list):
+            return
+
+        board = {
+            "board": board,
+            "colors": [],
+        }
+
+        obj.board = json.dumps(board)
+
+    for sprint_board in DBSession.query(SprintBoard):
+        migrate_object(sprint_board)
+
+    for sprint in DBSession.query(Sprint):
+        migrate_object(sprint)
 
     transaction.commit()
 

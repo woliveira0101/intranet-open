@@ -2,7 +2,7 @@
 
 {% block head_script %}
   <script>
-    var board = {{ (form.board.data or "undefined") | safe }};
+    var board_full_data = {{ (form.board.data or "undefined") | safe }};
     var sprint_id = '{{ sprint and sprint.id or ''}}';
   </script>
 {% endblock head_script %}

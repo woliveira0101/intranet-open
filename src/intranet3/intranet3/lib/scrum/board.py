@@ -9,6 +9,7 @@ from intranet3.log import EXCEPTION_LOG
 
 EXCEPTION = EXCEPTION_LOG(__name__)
 
+
 class Section(object):
     TMPL = """
 for bug in <bugs>
@@ -19,7 +20,7 @@ return bug
     def __init__(self, section, bugs):
         self.name = section['name']
 
-        namespace = self._create_base_namespace()
+        namespace = Board.create_base_namespace()
         namespace['bugs'] = bugs
 
         condition = section['cond'].strip()
@@ -54,31 +55,15 @@ return bug
         for bug in self.bugs:
             bugs.remove(bug)
 
-    @staticmethod
-    def _create_base_namespace():
-        """
-            Creates base namespace for pyflwor compiler.
-            It adds function like array that creates array.
-        """
-
-        namespace = {
-            'True': True,
-            'False': False,
-            'None': None,
-            'array': lambda *args: list(args)
-        }
-        namespace.update(__builtins__)
-        return namespace
-
     @reify
     def points(self):
-        return sum(bug.scrum.points for bug in self.bugs if bug.scrum.points)
+        return sum(
+            bug.scrum.points for bug in self.bugs if bug.scrum.points
+        )
 
 
 class Column(object):
-
     def __init__(self, column, bugs):
-
         self.name = column['name']
 
         self.sections = [
@@ -98,6 +83,12 @@ class Column(object):
 
 
 class Board(object):
+    TMPL_COLORS = """
+for bug in <bugs>
+where %s
+return bug
+"""
+
     def __init__(self, sprint, bugs):
 
         # we have to copy bugs, because each section is removing their bugs
@@ -112,10 +103,27 @@ class Board(object):
 
         self.columns = [
             Column(column, bugs)
-            for column in reversed(self._board_schema)
+            for column in reversed(self._board_schema['board'])
         ]
 
         self.columns = list(reversed(self.columns))
+
+        namespace = self.create_base_namespace()
+
+        for color in self._board_schema['colors']:
+            namespace['bugs'] = self.bugs
+
+            query_colors = self.TMPL_COLORS % color['cond'].strip()
+
+            try:
+                colored_bug = pyflwor.execute(query_colors, namespace)
+            except PyFlworException as e:
+                flash(str(e))
+                colored_bug = []
+
+            for cbug in colored_bug:
+                cbug.scrum.color = color['color']
+                self.bugs.remove(cbug)
 
     def _resolve_blocked_and_dependson(self, bugs):
         """
@@ -164,3 +172,19 @@ class Board(object):
 
     def is_completed(self, bug):
         return bug in self.completed_bugs
+
+    @staticmethod
+    def create_base_namespace():
+        """
+            Creates base namespace for pyflwor compiler.
+            It adds function like array that creates array.
+        """
+
+        namespace = {
+            'True': True,
+            'False': False,
+            'None': None,
+            'array': lambda *args: list(args)
+        }
+        namespace.update(__builtins__)
+        return namespace
