@@ -12,6 +12,6 @@ def additional_message(request):
 +++++++++++++++++++++++++++++++++++
 """
     return msg.format(
-        user=request.user.email,
+        user=request.user and request.user.email,
         request_env=pprint.pformat(request.environ),
     )
