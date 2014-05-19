@@ -14,7 +14,7 @@ App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
     $scope.colors = board_full_data['colors'];
   } else {
     $scope.colors = [
-      {color: '#FFFFFF', cond: ''}
+      {color: '#FFFFFF', cond: '', name: 'Color name'}
     ];
   }
 

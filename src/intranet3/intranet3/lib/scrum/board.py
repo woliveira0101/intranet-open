@@ -89,24 +89,16 @@ where %s
 return bug
 """
 
-    def __init__(self, sprint, bugs):
-
+    def __init__(self, sprint, real_bugs, allowed_colors=None):
         # we have to copy bugs, because each section is removing their bugs
         # from the list
 
-        self._resolve_blocked_and_dependson(bugs)
-        self.bugs = bugs[:]
-        bugs = bugs[:]
+        self._resolve_blocked_and_dependson(real_bugs)
+        self.bugs = real_bugs[:]
+        bugs = real_bugs[:]
 
         self._sprint = sprint
         self._board_schema = sprint.get_board()
-
-        self.columns = [
-            Column(column, bugs)
-            for column in reversed(self._board_schema['board'])
-        ]
-
-        self.columns = list(reversed(self.columns))
 
         namespace = self.create_base_namespace()
 
@@ -124,6 +116,18 @@ return bug
             for cbug in colored_bug:
                 cbug.scrum.color = color['color']
                 self.bugs.remove(cbug)
+
+        if allowed_colors:
+            bugs = [
+                bug for bug in bugs if bug.scrum.color in allowed_colors
+            ]
+
+        self.columns = [
+            Column(column, bugs)
+            for column in reversed(self._board_schema['board'])
+        ]
+
+        self.columns = list(reversed(self.columns))
 
     def _resolve_blocked_and_dependson(self, bugs):
         """

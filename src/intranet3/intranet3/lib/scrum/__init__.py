@@ -16,10 +16,10 @@ def move_blocked_to_the_end(bugs):
 
 
 class SprintWrapper(object):
-    def __init__(self, sprint, bugs, request):
+    def __init__(self, sprint, bugs, request, allowed_colors=None):
         self.sprint = sprint
         self.request = request
-        self.board = Board(sprint, bugs)
+        self.board = Board(sprint, bugs, allowed_colors)
 
     def _date_to_js(self, date):
         """Return unix epoc timestamp in miliseconds (in UTC)"""
