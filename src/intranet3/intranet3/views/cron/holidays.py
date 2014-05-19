@@ -19,7 +19,7 @@ class Sync(CronView):
         config_obj = ApplicationConfig.get_current_config()
         client = SpreadsheetConnector(config_obj.google_user_email, config_obj.google_user_password)
         worksheet = client.get_worksheet(config_obj.holidays_spreadsheet, 6)
-        data = worksheet.FindRecords('')
+        data = worksheet.GetRecords(1, 99999)  # Magic Constant
         dates_new = set([ datetime.datetime.strptime(d.content['data'], '%Y-%m-%d').date() for d in data ])
         dates_old = set(Holiday.all(cache=False))
         dates_diff = dates_new.difference(dates_old)
