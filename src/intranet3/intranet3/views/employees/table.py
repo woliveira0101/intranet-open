@@ -165,19 +165,14 @@ class Absences(BaseView):
             location=u.location,
         ) for u in users]
 
-
-        employees, students = [], []
-        for user in users:
-            if user['leave_mandated'] > 0:
-                employees.append(user)
-            else:
-                students.append(user)
-
-        users = employees + students
-        # groupby location
         users = sorted(
             users,
             key=lambda u: u['location'],
+        )
+
+        user_groups = sorted(
+            user_groups,
+            key=lambda u: u,
         )
 
         absences, absences_months = self.get_absences(start, end, users)
