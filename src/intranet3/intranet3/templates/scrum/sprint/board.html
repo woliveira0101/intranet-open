@@ -8,7 +8,7 @@
         {% if bug.dependson %}
         <div class="container_card_blocked">
         {% endif %}
-            <div class="yellow_card {% if bug.dependson %}blocked{% endif %}">
+            <div class="yellow_card {% if bug.dependson %}blocked{% endif %}" {% if bug.scrum.color %} style="background-color: {{ bug.scrum.color }};" {% endif %}>
                 <div class="number_ticket"><a target="_blank" href="{{ bug.url }}">{{ bug.id }}</a></div>
                 {% if bug.blocked %}
                     <i data-original-title="{% for bug in bug.blocked %}{{ bug.id }}{% if not loop.last %},{% endif %}{% endfor %}" class="icon-exclamation-sign icon-red"></i>

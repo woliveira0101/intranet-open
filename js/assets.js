@@ -16,7 +16,8 @@ var BOWER_JS = [
   BOWER_COMPONENTS + 'spectrum/spectrum.js',
   BOWER_COMPONENTS + 'bootstrap-select/bootstrap-select.js',
   BOWER_COMPONENTS + 'bootstrap-timepicker/js/bootstrap-timepicker.min.js',
-  BOWER_COMPONENTS + 'angular-elastic/elastic.js'
+  BOWER_COMPONENTS + 'angular-elastic/elastic.js',
+  BOWER_COMPONENTS + 'angular-spectrum-colorpicker/dist/angular-spectrum-colorpicker.js'
 ];
 
 var BOWER_CSS = [

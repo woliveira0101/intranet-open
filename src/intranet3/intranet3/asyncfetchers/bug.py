@@ -35,6 +35,7 @@ class Scrum(ToDictMixin):
     def __init__(self):
         self.points = None
         self.velocity = 0.0
+        self.color = None
 
 
 class Bug(ToDictMixin):

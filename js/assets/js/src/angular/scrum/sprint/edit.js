@@ -3,14 +3,28 @@ var App = angular.module('intranet');
 
 App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
   $scope.sprintId = sprint_id;
-  if(board){
-    $scope.columns = board;
+
+  if(board_full_data && board_full_data['board'].length){
+    $scope.columns = board_full_data['board'];
   } else {
     $scope.columns = [{name: '', sections: [{name: '', cond: ''}]}];
   }
 
+  if (board_full_data && board_full_data['colors'].length) {
+    $scope.colors = board_full_data['colors'];
+  } else {
+    $scope.colors = [
+      {color: '#FFFFFF', cond: ''}
+    ];
+  }
+
   $scope.columns_json = function(){
-    return angular.toJson($scope.columns);
+    var boards = {
+      'board': $scope.columns,
+      'colors': $scope.colors
+    }
+
+    return angular.toJson(boards);
   };
 
   $scope.save = function(){
@@ -54,6 +68,16 @@ App.controller('sprintEditCtrl', function($scope, $http, $dialog) {
     d.open('scrum/sprint/boards.html', 'sprintBoardsCtrl');
 
   };
+
+  $scope.add_color = function () {
+    $scope.colors.push({color: '#FFFFFF', cond: ''})
+  };
+
+  $scope.remove_color = function (color) {
+    var index = $scope.colors.indexOf(color);
+    $scope.colors.splice(index, 1);
+  };
+
 });
 
 App.controller('sprintBoardsCtrl', function($scope, $http, dialog, $dialog, $filter, $callerScope){

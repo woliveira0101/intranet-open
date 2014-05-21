@@ -1,0 +1,28 @@
+<div id="sprint-editor-color">
+    <a class="add-column btn add-column" ng-click="add_color()">Add color</a>
+
+    <div id="task_board_color_container">
+        <table class="table table-bordered task_board">
+            <thead>
+            <tr>
+                <th>Color</th>
+                <th>Query</th>
+                <th>Delete</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="color in colors">
+                <td>
+                    <spectrum-colorpicker ng-model="color.color"></spectrum-colorpicker>
+                </td>
+                <td>
+                    <textarea msd-elastic class="unsubmittable" ng-model="color.cond" placeholder="Query"></textarea>
+                </td>
+                <td>
+                    <a ng-click="remove_color(color)"><i class="icon-remove"></i></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
