@@ -1,5 +1,12 @@
 {% extends "templates/scrum/sprint/_base_sprint.html" %}
 
+{% block head_script %}
+  <script>
+    var filter_colors = {{ filter_colors|safe }};
+    var sprint_id = {{ sprint_id }};
+  </script>
+{% endblock head_script %}
+
 {% set page = 'board' %}
 
 {% macro yellow_card(bug) -%}
@@ -58,7 +65,10 @@
 
 {% block body %}
 <div class="btn go_normalscreen active" style="display: none">Fullscreen</div>
-<div id="task_board_container">
+<div id="task_board_container" ng-controller="sprintBoardCtrl">
+
+    <select id="board_filter_color" ng-change="filter(selected_color)" ng-model="selected_color" ng-options="color.name for color in filter_colors"></select>
+
     <table class="table table-bordered task_board">
         <thead>
             <tr>

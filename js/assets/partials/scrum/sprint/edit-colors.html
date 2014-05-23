@@ -5,6 +5,7 @@
         <table class="table table-bordered task_board">
             <thead>
             <tr>
+                <th>Name</th>
                 <th>Color</th>
                 <th>Query</th>
                 <th>Delete</th>
@@ -13,10 +14,13 @@
             <tbody>
             <tr ng-repeat="color in colors">
                 <td>
-                    <spectrum-colorpicker ng-model="color.color"></spectrum-colorpicker>
+                    <input type="text" ng-model="color.name" required>
                 </td>
                 <td>
-                    <textarea msd-elastic class="unsubmittable" ng-model="color.cond" placeholder="Query"></textarea>
+                    <spectrum-colorpicker ng-model="color.color" required></spectrum-colorpicker>
+                </td>
+                <td>
+                    <textarea msd-elastic class="unsubmittable" ng-model="color.cond" placeholder="Query" required></textarea>
                 </td>
                 <td>
                     <a ng-click="remove_color(color)"><i class="icon-remove"></i></a>

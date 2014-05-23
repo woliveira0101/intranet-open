@@ -189,11 +189,26 @@ class Board(ClientProtectionMixin, FetchBugsMixin, BaseSprintView):
         sprint = self.v['sprint']
         bugs = self._fetch_bugs(sprint)
 
-        sw = SprintWrapper(sprint, bugs, self.request)
+        allowed_colors = None
+        if 'color' in self.request.GET:
+            color = '#{}'.format(self.request.GET['color'])
+            allowed_colors = [color]
+
+        sw = SprintWrapper(sprint, bugs, self.request, allowed_colors)
+
+        board_schema = sprint.get_board()
+
+        filter_colors = [
+            {"color": "", "name": "All"},
+        ]
+        filter_colors.extend(board_schema['colors'])
+
         return dict(
             board=sw.board,
             info=sw.get_info(),
-            sprint_tabs=sw.get_tabs()
+            sprint_tabs=sw.get_tabs(),
+            filter_colors=json.dumps(filter_colors),
+            sprint_id=sprint.id,
         )
 
 
